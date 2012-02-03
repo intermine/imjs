@@ -66,12 +66,48 @@ asyncTest('results', 1, function() {
     var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}, limit: 10};
     this.s.query(older_emps, function(q) {
         q.records(function(rs) {
-            _(rs).each(function(r) {console.log(r)});
-            ok(true);
+            var names = _(rs).pluck("name")
+            var expected =  [
+                "EmployeeB3",
+                "Jennifer Taylor-Clarke",
+                "Keith Bishop",
+                "Trudy",
+                "Rachel",
+                "Carol",
+                "Brenda",
+                "Nathan",
+                "Gareth Keenan",
+                "Malcolm"
+            ];
+            same(names, expected);
             start();
         });
     });
 });
+
+asyncTest('paging', 1, function() {
+    var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}, limit: 10};
+    this.s.query(older_emps, function(q) {
+        q.next().records(function(rs) {
+            var names = _(rs).pluck("name")
+            var expected =  [
+                "Tatjana Berkel",
+                "Jennifer Schirrmann",
+                "Herr Fritsche",
+                "Lars Lehnhoff",
+                "Josef M\u00FCller",
+                "Nyota N'ynagasongwa",
+                "Herr Grahms",
+                "Frank Montenbruck",
+                "Andreas Hermann",
+                "Jochen Sch\u00FCler"
+            ];
+            same(names, expected);
+            start();
+        });
+    });
+});
+
 
 asyncTest('findById', 4, function() {
     var davidQ = {select: ["id"], from: "Employee", where: {name: "David Brent"}};

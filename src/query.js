@@ -136,6 +136,34 @@ _.extend(intermine, (function() {
             }
         };
 
+        this._clone = function() {
+            if (Object.clone) {
+                return Object.clone(this);
+            } else if (Object.create) {
+                return Object.create(this);
+            } else {
+                return jQuery.extend(true, {}, this);
+            }
+        };
+
+        this.next = function() {
+            var clone = this._clone();
+            if (this.maxRows) {
+                clone.start = this.start + this.maxRows;
+            }
+            return clone;
+        };
+
+        this.previous = function() {
+            var clone = this._clone();
+            if (this.maxRows) {
+                clone.start = this.start - this.maxRows;
+            } else {
+                clone.start = 0;
+            }
+            return clone;
+        };
+
         this.orderBy = function(sort_orders) {
             var that = this;
             var adjuster = _(adjustPath).bind(this);

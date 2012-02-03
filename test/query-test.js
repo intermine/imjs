@@ -211,12 +211,12 @@ test('toXML()', function() {
             from: "Employee", 
             joins: ["department.manager", "department.company"],
             where: {
-                "department.manager": {isa: "CEO"},
+                "department.manager": {"isa": "CEO"},
                 "name": "David*",
                 "end": "is not null",
-                "age": {gt: 50},
+                "age": {"gt": 50},
                 "department.name": ["Sales", "Accounting"],
-                "department": {in: "GoodDepartments"}
+                "department": {"in": "GoodDepartments"}
             },
             model: {name: "testmodel"}
         }).toXML(),
