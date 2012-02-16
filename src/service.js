@@ -20,7 +20,17 @@ _.extend(intermine, (function() {
         var SUMMARYFIELDS_PATH = "summaryfields";
         var QUERY_RESULTS_PATH = "query/results";
 
-        this.makeRequest = _.bind(function(path, data, cb) {
+        var LIST_OPERATION_PATHS = {
+            merge: "lists/union",
+            intersect: "lists/intersect",
+            diff: "lists/diff"
+        };
+
+        /**
+         * Performs a get request for data against a url. 
+         * This method makes use of jsonp where available.
+         */
+        this.makeRequest = function(path, data, cb, method) {
             var url = this.root + path;
             data = data || {};
             if (this.token) {
@@ -30,11 +40,26 @@ _.extend(intermine, (function() {
                 if (jQuery.support.cors) {
                     data.format = "json";
                 } else {
+                    method = false; // Can't
                     data.format = "jsonp";
                 }
             }
-            jQuery.getJSON(url, data, cb);
-        }, this);
+            if (method) {
+                if (method === "DELETE") {
+                    // grumble grumble struts grumble grumble...
+                    url += "?" + jQuery.param(data);
+                }
+                return jQuery.ajax({
+                    data: data,
+                    dataType: "json",
+                    success: cb,
+                    url: url,
+                    type: method
+                });
+            } else {
+                return jQuery.getJSON(url, data, cb);
+            }
+        };
 
         this.count = function(q, cont) {
             var req = {
@@ -55,7 +80,7 @@ _.extend(intermine, (function() {
         };
 
         this.records = function(q, page, cb) {
-            // Allow calling as rows(q, cb)
+            // Allow calling as records(q, cb)
             if (_(cb).isUndefined() && _(page).isFunction()) {
                 cb = page;
                 page = {};
@@ -91,9 +116,12 @@ _.extend(intermine, (function() {
             this.root = root;
             this.token = properties.token
 
+            _.bindAll(this, "fetchVersion", "rows", "records", "fetchTemplates", "fetchLists", "count", "makeRequest",
+                "fetchModel", "fetchSummaryFields", "combineLists", "merge", "intersect", "diff");
+
         }, this);
 
-        this.fetchVersion = _.bind(function(cb) {
+        this.fetchVersion = function(cb) {
             if (typeof this.version === "undefined") {
                 this.makeRequest(VERSION_PATH, null, _.bind(function(data) {
                     this.version = data.version;
@@ -102,21 +130,45 @@ _.extend(intermine, (function() {
             } else {
                 cb(this.version);
             }
-        }, this);
+        };
 
-        this.fetchTemplates = _.bind(function(cb) {
+        this.fetchTemplates = function(cb) {
             this.makeRequest(TEMPLATES_PATH, null, function(data) {
                 cb(data.templates);
             });
-        }, this);
+        };
 
-        this.fetchLists = _.bind(function(cb) {
-            this.makeRequest(LISTS_PATH, null, _(function(data) {
-                cb(_(data.lists).map(function (l) {return new intermine.List(l, this)}));
-            }).bind(this));
-        }, this);
+        this.fetchLists = function(cb) {
+            var self = this;
+            this.makeRequest(LISTS_PATH, null, function(data) {
+                cb(_(data.lists).map(function (l) {return new intermine.List(l, self)}));
+            });
+        };
 
-        this.fetchModel = _.bind(function(cb) {
+        this.combineLists = function(operation) {
+            var self = this;
+            return function(options, cb) {
+                var path = LIST_OPERATION_PATHS[operation];
+                var params = {
+                    name: options.name,
+                    tags: options.tags.join(';'),
+                    lists: options.lists.join(";"),
+                    description: options.description
+                };
+                self.makeRequest(path, params, function(data) {
+                    var name = data.listName;
+                    self.fetchLists(function(ls) {
+                        cb(_(ls).find(function(l) {return l.name === name}));
+                    });
+                });
+            };
+        };
+
+        this.merge = this.combineLists("merge");
+        this.intersect = this.combineLists("intersect");
+        this.diff = this.combineLists("diff");
+
+        this.fetchModel = function(cb) {
             if (MODELS[this.root]) {
                 this.model = MODELS[this.root];
             }
@@ -133,7 +185,7 @@ _.extend(intermine, (function() {
                     cb(this.model);
                 }, this));
             }
-        }, this);
+        };
 
         this.fetchSummaryFields = function(cb) {
             if (SUMMARY_FIELDS[this.root]) {

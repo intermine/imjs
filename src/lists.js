@@ -12,10 +12,35 @@ _.extend(intermine, (function() {
         this.service = service;
         this.dateCreated = this.dateCreated ? new Date(this.dateCreated) : null;
 
-        this.folders = __(this.tags).filter(function(t) {return t.substr(0, t.indexOf(":")) === '__folder__'})
-                                    .map(function(t) {return t.substr(t.indexOf(":") + 1) })
-                                    .value();
+        var isFolder = function(t) {
+            return t.substr(0, t.indexOf(":")) === '__folder__';
+        };
+        var getFolderName = function(t) {
+            return t.substr(t.indexOf(":") + 1);
+        };
 
+        this.folders = __(this.tags).filter(isFolder)
+                                    .map(getFolderName)
+                                    .value();
+        
+        this.hasTag = function(t) {
+            return _(this.tags).include(t);
+        };
+
+        this.delete = function(cb) {
+            cb = cb || function() {};
+            return this.service.makeRequest("lists", 
+                {name: this.name}, cb, "DELETE");
+        };
+
+        this.contents = function(cb) {
+            cb = cb || function() {};
+            query = {select: ["*"], from: this.type, where: {}};
+            query.where[this.type] = {IN: this.name};
+            this.service.query(query, function(q) {
+                q.records(cb);
+            });
+        };
     };
 
     return {"List": List};
