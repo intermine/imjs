@@ -1,38 +1,62 @@
 module("Service Tests", {
     setup: function() {
-        this.s = new intermine.Service({root: "localhost/intermine-test", token: "test-user-token"});
+        this.s = new intermine.Service({root: "squirrel.flymine.org/intermine-test", token: "test-user-token"});
     }
 });
 
 test('root property', function() {
     expect(2);
-    equals(this.s.root, "http://localhost/intermine-test/service/", "The root parameter is set correctly");
+    equals(this.s.root, "http://squirrel.flymine.org/intermine-test/service/", "The root parameter is set correctly");
     equals(new intermine.Service({root: "http://www.flymine.org/query/service/"}).root, 
         "http://www.flymine.org/query/service/", "Appropriately complete URLs are not altered");
 });
 
-asyncTest('fetching', function() {
-    expect(4);
+asyncTest('version', 1, function() {
     this.s.fetchVersion(function(v) {
         console.log(v);
         ok(v > 0, "Can fetch version");
         start();
     });
+});
+
+asyncTest('model', 1, function() {
     this.s.fetchModel(function(m) {
         console.log(m);
         ok(_.size(m.classes) > 0, "Can fetch model");
         start();
     });
+});
+
+asyncTest('get templates', 1, function() {
     this.s.fetchTemplates(function(ts) { 
         ok(_.size(ts) > 0, "Can fetch templates");
         start();
     });
+});
+
+asyncTest('get lists', 1, function() {
     this.s.fetchLists(function(ls) { 
         console.log(ls);
         ok(_.size(ls) > 0, "Can fetch lists");
         start();
     });
 });
+
+asyncTest("summary fields", 1, function() {
+    this.s.fetchSummaryFields(function(sfs) {
+        var expected = [
+          "Employee.name",
+          "Employee.department.name",
+          "Employee.department.manager.name",
+          "Employee.department.company.name",
+          "Employee.fullTime",
+          "Employee.address.address"
+        ];
+        same(sfs.Employee, expected, "Has the right summary fields");
+        start();
+    });
+});
+
 
 asyncTest('xml expansion', 1, function() {
     var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}};
@@ -126,5 +150,50 @@ asyncTest('findById', 4, function() {
     });
 });
 
+var succeed = function() {ok(true)};
+var fail = function() {ok(false)};
 
+asyncTest('union', 3, function() {
+    var ls = ["My-Favourite-Employees", "Umlaut holders"];
+    var new_name = "created_in_js-union";
+    var tags = ["js"];
+    var then = new Date();
+    this.s.merge({name: new_name, lists: ls, tags: tags}, function(l) {
+        ok(l.size === 6, "It has the right size");
+        ok(l.hasTag("js"), "Is correctly tagged");
+        l.delete().then(succeed, fail).always(start);
+    });
+});
+             
+asyncTest('intersect', 3, function() {
+    var ls = [
+        "My-Favourite-Employees", 
+        "some favs-some unknowns-some umlauts"
+    ];
+    var new_name = "created_in_js-intersect";
+    var tags = ["js"];
+    this.s.intersect({name: new_name, lists: ls, tags: tags}, function(l) {
+        ok(l.size === 2, "It has the right size");
+        ok(l.hasTag("js"), "Is correctly tagged");
+        l.delete().then(succeed, fail).always(start);
+    });
+});
+
+asyncTest('diff', 4, function() {
+    var ls = [
+        "The great unknowns",
+        "some favs-some unknowns-some umlauts"
+    ];
+    var new_name = "created_in_js-diff";
+    var tags = ["js"];
+    this.s.diff({name: new_name, lists: ls, tags: tags}, function(l) {
+        ok(l.size === 4, "It has the right size");
+        ok(l.hasTag("js"), "Is correctly tagged");
+        l.contents(function(xs) {
+            ok(_(xs).any(function(x) {return x.name === "Brenda"}), 
+                "contains Brenda");
+            l.delete().then(succeed, fail).always(start);
+        });
+    });
+});
 
