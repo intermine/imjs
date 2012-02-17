@@ -66,7 +66,7 @@ _.extend(intermine, (function() {
                 query: q.toXML(),
                 format: jQuery.support.cors ? "jsoncount" : "jsonpcount",
             };
-            this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
+            return this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
                 cont(data.count);
             });
         };
@@ -85,9 +85,10 @@ _.extend(intermine, (function() {
                 cb = page;
                 page = {};
             }
+            cb = cb || function() {};
             page = page || {};
             var req = _(page).extend({query: q.toXML(), format: jQuery.support.cors ? "jsonobjects" : "jsonpobjects"});
-            this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
+            return this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
                 cb(data.results);
             });
         };

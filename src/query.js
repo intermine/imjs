@@ -54,6 +54,7 @@ _.extend(intermine, (function() {
                 constraintLogic: "",
                 sortOrder: []
             });
+            _.bindAll(this, "select");
             this.service = service || {};
             this.model = properties.model || {};
             this.summaryFields = properties.summaryFields || {};
@@ -111,6 +112,26 @@ _.extend(intermine, (function() {
                 throw "This query has no service. It cannot request a count";
             }
         };
+
+        this.summarise = function(path, limit, cont) {
+            if (_.isFunction(limit) && !cont) {
+                cont = limit;
+                limit = null;
+            };
+            cont = cont || function() {};
+            path = adjustPath.call(this, path);
+            var toRun = _.clone(this);
+            if (!_(toRun.views).include(path)) {
+                toRun.select(path);
+            }
+            var req = {query: toRun.toXML(), format: "jsonrows", summaryPath: path};
+            if (limit) {
+                req.size = limit;
+            }
+            return this.service.makeRequest("query/results", req, function(data) {cont(data.results)});
+        };
+
+        this.summarize = this.summarise;
 
         this.records = function(cb) {
             if (this.service.records) {

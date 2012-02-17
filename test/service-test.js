@@ -197,3 +197,15 @@ asyncTest('diff', 4, function() {
     });
 });
 
+asyncTest("summarise", 1, function() {
+    var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}};
+    this.s.query(older_emps, function(q) {
+        q.summarise("department.company.name", function(items) {
+            console.log(items);
+            equals(_(items).size(), 6);
+            start();
+        });
+    });
+});
+
+

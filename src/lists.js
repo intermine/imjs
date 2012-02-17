@@ -35,7 +35,7 @@ _.extend(intermine, (function() {
 
         this.contents = function(cb) {
             cb = cb || function() {};
-            query = {select: ["*"], from: this.type, where: {}};
+            var query = {select: ["*"], from: this.type, where: {}};
             query.where[this.type] = {IN: this.name};
             this.service.query(query, function(q) {
                 q.records(cb);
