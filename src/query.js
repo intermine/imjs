@@ -54,7 +54,6 @@ _.extend(intermine, (function() {
                 constraintLogic: "",
                 sortOrder: []
             });
-            _.bindAll(this, "select");
             this.service = service || {};
             this.model = properties.model || {};
             this.summaryFields = properties.summaryFields || {};
@@ -113,6 +112,24 @@ _.extend(intermine, (function() {
             }
         };
 
+        this.saveAsList = function(options, cb) {
+            var toRun  = _.clone(this);
+            toRun.select(["id"]);
+            var req = _.clone(options);
+            req.listName = req.listName || req.name;
+            req.query = toRun.toXML();
+            if (options.tags) {
+                req.tags = options.tags.join(';');
+            }
+            var service = this.service;
+            return service.makeRequest("query/tolist", req, function(data) {
+                var name = data.listName;
+                service.fetchLists(function(ls) {
+                    cb(_(ls).find(function(l) {return l.name === name}));
+                });
+            });
+        };
+
         this.summarise = function(path, limit, cont) {
             if (_.isFunction(limit) && !cont) {
                 cont = limit;
@@ -122,13 +139,13 @@ _.extend(intermine, (function() {
             path = adjustPath.call(this, path);
             var toRun = _.clone(this);
             if (!_(toRun.views).include(path)) {
-                toRun.select(path);
+                toRun.views.push(path);
             }
             var req = {query: toRun.toXML(), format: "jsonrows", summaryPath: path};
             if (limit) {
                 req.size = limit;
             }
-            return this.service.makeRequest("query/results", req, function(data) {cont(data.results)});
+            return this.service.makeRequest("query/results", req, function(data) {cont(data.results, data.uniqueValues)});
         };
 
         this.summarize = this.summarise;

@@ -208,4 +208,20 @@ asyncTest("summarise", 1, function() {
     });
 });
 
+asyncTest("query to list", 4, function() {
+    var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}};
+    this.s.query(older_emps, function(q) {
+        q.saveAsList({name: "list-from-js-query", tags: ["foo", "bar", "js"]}, function(l) {
+            equals(l.size, 46, "It has the right size");
+            ok(l.hasTag("js"), "Is correctly tagged: " + l.tags);
+            l.contents(function(xs) {
+                ok(_(xs).any(function(x) {return x.name === "Carol"}), 
+                    "contains Carol");
+                l.delete().then(succeed, fail).always(start);
+            });
+        });
+    });
+});
+
+
 

@@ -117,8 +117,9 @@ _.extend(intermine, (function() {
             this.root = root;
             this.token = properties.token
 
-            _.bindAll(this, "fetchVersion", "rows", "records", "fetchTemplates", "fetchLists", "count", "makeRequest",
-                "fetchModel", "fetchSummaryFields", "combineLists", "merge", "intersect", "diff");
+            _.bindAll(this, "fetchVersion", "rows", "records", "fetchTemplates", "fetchLists", 
+                "count", "makeRequest", "fetchModel", "fetchSummaryFields", "combineLists", 
+                "merge", "intersect", "diff", "query");
 
         }, this);
 
@@ -170,36 +171,38 @@ _.extend(intermine, (function() {
         this.diff = this.combineLists("diff");
 
         this.fetchModel = function(cb) {
-            if (MODELS[this.root]) {
-                this.model = MODELS[this.root];
+            var self = this;
+            if (MODELS[self.root]) {
+                self.model = MODELS[self.root];
             }
-            if (this.model) {
-                cb(this.model);
+            if (self.model) {
+                cb(self.model);
             } else {
-                this.makeRequest(MODEL_PATH, null, _.bind(function(data) {
+                this.makeRequest(MODEL_PATH, null, function(data) {
                     if (intermine.Model) {
-                        this.model = new intermine.Model(data.model);
+                        self.model = new intermine.Model(data.model);
                     } else {
-                        this.model = data.model;
+                        self.model = data.model;
                     }
-                    MODELS[this.root] = this.model;
-                    cb(this.model);
-                }, this));
+                    MODELS[self.root] = self.model;
+                    cb(self.model);
+                });
             }
         };
 
         this.fetchSummaryFields = function(cb) {
-            if (SUMMARY_FIELDS[this.root]) {
-                this.summaryFields = SUMMARY_FIELDS[this.root];
+            var self = this;
+            if (SUMMARY_FIELDS[self.root]) {
+                self.summaryFields = SUMMARY_FIELDS[self.root];
             }
-            if (this.summaryFields) {
-                cb(this.summaryFields);
+            if (self.summaryFields) {
+                cb(self.summaryFields);
             } else {
-                this.makeRequest(SUMMARYFIELDS_PATH, null, _.bind(function(data) {
-                    this.summaryFields = data.classes;
-                    SUMMARY_FIELDS[this.root] = data.classes;
-                    cb(this.summaryFields);
-                }, this));
+                self.makeRequest(SUMMARYFIELDS_PATH, null, function(data) {
+                    self.summaryFields = data.classes;
+                    SUMMARY_FIELDS[self.root] = data.classes;
+                    cb(self.summaryFields);
+                });
             }
         };
 
