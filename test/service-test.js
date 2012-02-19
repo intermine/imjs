@@ -151,7 +151,7 @@ asyncTest('findById', 4, function() {
 });
 
 var succeed = function() {ok(true)};
-var fail = function() {ok(false)};
+var fail = function(err, msg) {console.log(arguments); ok(false, err + " " + msg)};
 
 asyncTest('union', 3, function() {
     var ls = ["My-Favourite-Employees", "Umlaut holders"];
@@ -208,6 +208,12 @@ asyncTest("summarise", 1, function() {
     });
 });
 
+asyncTest("who-am-i", 1, function() {
+    this.s.whoami(function(u) {
+        equals(u.username, "intermine-test-user", "Can retrieve the user name");
+    }).fail(fail).always(start);
+});
+
 asyncTest("query to list", 4, function() {
     var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}};
     this.s.query(older_emps, function(q) {
@@ -215,6 +221,7 @@ asyncTest("query to list", 4, function() {
             equals(l.size, 46, "It has the right size");
             ok(l.hasTag("js"), "Is correctly tagged: " + l.tags);
             l.contents(function(xs) {
+                console.log("Contents", xs);
                 ok(_(xs).any(function(x) {return x.name === "Carol"}), 
                     "contains Carol");
                 l.delete().then(succeed, fail).always(start);
@@ -222,6 +229,7 @@ asyncTest("query to list", 4, function() {
         });
     });
 });
+
 
 
 
