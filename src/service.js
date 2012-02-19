@@ -33,6 +33,7 @@ _.extend(intermine, (function() {
         this.makeRequest = function(path, data, cb, method) {
             var url = this.root + path;
             data = data || {};
+            cb = cb || function() {};
             if (this.token) {
                 data.token = this.token;
             }
@@ -79,6 +80,22 @@ _.extend(intermine, (function() {
             });
         };
 
+        this.whoami = function(cb) {
+            cb = cb || function() {};
+            var self = this;
+            var promise = jQuery.Deferred();
+            self.fetchVersion(function(v) {
+                if (v < 9) {
+                    var msg = "The who-am-i service requires version 9, this is only version " + v;
+                    promise.reject("not available", msg);
+                } else {
+                    self.makeRequest("user/whoami", null, function(resp) {cb(resp.user)})
+                        .then(promise.resolve, promise.reject);
+                }
+            });
+            return promise;
+        };
+
         this.records = function(q, page, cb) {
             // Allow calling as records(q, cb)
             if (_(cb).isUndefined() && _(page).isFunction()) {
@@ -119,7 +136,7 @@ _.extend(intermine, (function() {
 
             _.bindAll(this, "fetchVersion", "rows", "records", "fetchTemplates", "fetchLists", 
                 "count", "makeRequest", "fetchModel", "fetchSummaryFields", "combineLists", 
-                "merge", "intersect", "diff", "query");
+                "merge", "intersect", "diff", "query", "whoami");
 
         }, this);
 
