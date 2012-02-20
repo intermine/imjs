@@ -230,6 +230,21 @@ asyncTest("query to list", 4, function() {
     });
 });
 
+asyncTest("quick-search", 4, function() {
+    var self = this;
+    self.s.search(function(rs, fs) {
+        ok(rs.length >= 100, "Has a suitably large number of results");
+        equals(fs.Category.Bank, 5, "Has a category facet");
+        self.s.search("david", function(rs) {
+            equals(rs.length, 2, "Has the right number of results");
+        }).fail(fail).always(function() {
+            self.s.search({facets: {Category: "Manager"}, size: 10}, function(rs) {
+                equals(rs.length, 10, "Can limit results, and use options objects");
+            }).fail(fail).always(start);
+        });
+    });
+});
+
 
 
 

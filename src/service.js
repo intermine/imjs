@@ -19,6 +19,7 @@ _.extend(intermine, (function() {
         var MODEL_PATH = "model";
         var SUMMARYFIELDS_PATH = "summaryfields";
         var QUERY_RESULTS_PATH = "query/results";
+        var QUICKSEARCH_PATH = "search";
 
         var LIST_OPERATION_PATHS = {
             merge: "lists/union",
@@ -60,6 +61,28 @@ _.extend(intermine, (function() {
             } else {
                 return jQuery.getJSON(url, data, cb);
             }
+        };
+
+        this.search = function(options, cb) {
+            if (_(options).isString()) {
+                options = {term: options};
+            }
+            if (!cb && _(options).isFunction()) {
+                cb = options;
+                options = {};
+            }
+            options = options || {};
+            cb      = cb      || function() {};
+            _.defaults(options, {term: "", facets: {}});
+            var req = {q: options.term, start: options.start, size: options.size};
+            if (options.facets) {
+                _(options.facets).each(function(v, k) {
+                    req["facet_" + k] = v;
+                });
+            }
+            return this.makeRequest(QUICKSEARCH_PATH, req, function(data) {
+                cb(data.results, data.facets);
+            }, "POST");
         };
 
         this.count = function(q, cont) {
