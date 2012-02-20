@@ -16,6 +16,8 @@ _.extend(intermine, (function() {
             "=" : "=",
             "==": "=",
             "eq": "=",
+            "!=": "!=",
+            "ne": "!=",
             ">" : ">",
             "gt" : ">",
             ">=": ">=",
@@ -25,6 +27,7 @@ _.extend(intermine, (function() {
             "<=": "<=",
             "le": "<=",
             "contains": "CONTAINS",
+            "like": "LIKE", 
             "lookup": "LOOKUP",
             "IS NULL": "IS NULL",
             "is null": "IS NULL",
@@ -114,6 +117,7 @@ _.extend(intermine, (function() {
 
         this.saveAsList = function(options, cb) {
             var toRun  = _.clone(this);
+            cb = cb || function() {};
             toRun.select(["id"]);
             var req = _.clone(options);
             req.listName = req.listName || req.name;
@@ -127,7 +131,7 @@ _.extend(intermine, (function() {
                 service.fetchLists(function(ls) {
                     cb(_(ls).find(function(l) {return l.name === name}));
                 });
-            });
+            }, "POST");
         };
 
         this.summarise = function(path, limit, cont) {
