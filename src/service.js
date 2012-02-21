@@ -20,6 +20,8 @@ _.extend(intermine, (function() {
         var SUMMARYFIELDS_PATH = "summaryfields";
         var QUERY_RESULTS_PATH = "query/results";
         var QUICKSEARCH_PATH = "search";
+        var WIDGETS_PATH = "widgets";
+        var ENRICHMENT_PATH = "list/enrichment";
 
         var LIST_OPERATION_PATHS = {
             merge: "lists/union",
@@ -61,6 +63,19 @@ _.extend(intermine, (function() {
             } else {
                 return jQuery.getJSON(url, data, cb);
             }
+        };
+
+        this.widgets = function(cb) {
+            cb = cb || _.identity;
+            return this.makeRequest(WIDGETS_PATH, null, function(data) {
+                cb(data.widgets);
+            });
+        };
+
+        this.enrichment = function(req, cb) {
+            cb = cb || _.identity;
+            _.defaults(req, {maxp: 0.05});
+            return this.makeRequest(ENRICHMENT_PATH, req, function(data) {cb(data.results)});
         };
 
         this.search = function(options, cb) {
@@ -164,14 +179,18 @@ _.extend(intermine, (function() {
         }, this);
 
         this.fetchVersion = function(cb) {
+            var self = this;
+            var promise = jQuery.Deferred();
             if (typeof this.version === "undefined") {
-                this.makeRequest(VERSION_PATH, null, _.bind(function(data) {
+                this.makeRequest(VERSION_PATH, null, function(data) {
                     this.version = data.version;
                     cb(this.version);
-                }, this));
+                }).fail(promise.reject);
             } else {
                 cb(this.version);
+                promise.resolve(this.version);
             }
+            return promise;
         };
 
         this.fetchTemplates = function(cb) {

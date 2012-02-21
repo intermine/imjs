@@ -27,6 +27,28 @@ _.extend(intermine, (function() {
             }).bind(this), cd);
         };
 
+        var _subclass_map = {};
+
+        /**
+         * Return the subclasses of a given class. The subclasses of a class
+         * includes the class itself, and is thus equivalent to 
+         * 'isAssignableTo' in java.
+         */
+        this.getSubclassesOf = function(cls) {
+            var self = this;
+            if (cls in _subclass_map) {
+                return _subclass_map[cls];
+            }
+            var ret = [cls];
+            _(this.classes).each(function(c) {
+                if (_(c.extends).include(cls)) {
+                    ret = ret.concat(self.getSubclassesOf(c.name));
+                }
+            });
+            _subclass_map[cls] = ret;
+            return ret;
+        };
+
         /**
         * Get the full ancestry of a particular class.
         *

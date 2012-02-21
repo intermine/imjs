@@ -37,9 +37,14 @@ _.extend(intermine, (function() {
             cb = cb || function() {};
             var query = {select: ["*"], from: this.type, where: {}};
             query.where[this.type] = {IN: this.name};
-            this.service.query(query, function(q) {
+            return this.service.query(query, function(q) {
                 q.records(cb);
             });
+        };
+
+        this.enrichment = function(data, cb) {
+            data.list = this.name;
+            return this.service.enrichment(data, cb);
         };
     };
 
