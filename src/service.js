@@ -22,6 +22,7 @@ _.extend(intermine, (function() {
         var QUICKSEARCH_PATH = "search";
         var WIDGETS_PATH = "widgets";
         var ENRICHMENT_PATH = "list/enrichment";
+        var WITH_OBJ_PATH = "listswithobject";
 
         var LIST_OPERATION_PATHS = {
             merge: "lists/union",
@@ -263,6 +264,11 @@ _.extend(intermine, (function() {
                     cb(self.summaryFields);
                 });
             }
+        };
+
+        this.fetchListsContaining = function(opts, cb) {
+            cb = cb || function() {};
+            return this.makeRequest(WITH_OBJ_PATH, opts, function(data) {cb(data.lists)});
         };
 
         this.query = function(options, cb) {

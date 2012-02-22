@@ -245,6 +245,12 @@ asyncTest("quick-search", 4, function() {
     });
 });
 
+asyncTest("lists with object", 1, function() {
+    this.s.fetchListsContaining({publicId: "Brenda", type: "Employee"}, function(ls) {
+        ok(ls.length > 1, "Has a suitable number of lists");
+    }).fail(fail).always(start);
+});
+
 
 
 
