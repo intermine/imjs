@@ -266,6 +266,20 @@ _.extend(intermine, (function() {
             }
         };
 
+        /**
+         * Fetch lists containing an item.
+         *
+         * @param options Options should contain: 
+         *  - either:
+         *    * id: The internal id of the object in question
+         *  - or: 
+         *    * publicId: An identifier
+         *    * type: The type of object (eg. "Gene")
+         *    * extraValue: (optional) A domain to help resolve the object (eg an organism for a gene).
+         *
+         *  @param cb function of the type: [List] -> ()
+         *  @return A promise
+         */
         this.fetchListsContaining = function(opts, cb) {
             cb = cb || function() {};
             return this.makeRequest(WITH_OBJ_PATH, opts, function(data) {cb(data.lists)});
