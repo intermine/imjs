@@ -87,7 +87,7 @@ asyncTest('rows', 1, function() {
 });
 
 asyncTest('results', 1, function() {
-    var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}, limit: 10};
+    var older_emps = {select: ["name"], from: "Employee", where: {age: {gt: 50}}, limit: 10};
     this.s.query(older_emps, function(q) {
         q.records(function(rs) {
             var names = _(rs).pluck("name")
@@ -110,7 +110,7 @@ asyncTest('results', 1, function() {
 });
 
 asyncTest('paging', 1, function() {
-    var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}, limit: 10};
+    var older_emps = {select: ["name"], from: "Employee", where: {age: {gt: 50}}, limit: 10};
     this.s.query(older_emps, function(q) {
         q.next().records(function(rs) {
             var names = _(rs).pluck("name")
@@ -127,8 +127,7 @@ asyncTest('paging', 1, function() {
                 "Jochen Sch\u00FCler"
             ];
             same(names, expected);
-            start();
-        });
+        }).fail(fail).always(start);
     });
 });
 
