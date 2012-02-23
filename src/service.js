@@ -30,6 +30,19 @@ _.extend(intermine, (function() {
             diff: "lists/diff"
         };
 
+        var getResulteriser = function(cb) { return function(data) {
+            cb = cb || function() {};
+            cb(data.results, data);
+        }};
+
+        var getFormat = function(def) {
+            var format = def || "json";
+            if (!jQuery.support.cors) {
+                format = format.replace("json", "jsonp");
+            }
+            return format;
+        };
+
         /**
          * Performs a get request for data against a url. 
          * This method makes use of jsonp where available.
@@ -41,14 +54,12 @@ _.extend(intermine, (function() {
             if (this.token) {
                 data.token = this.token;
             }
-            if (!data.format) {
-                if (jQuery.support.cors) {
-                    data.format = "json";
-                } else {
-                    method = false; // Can't
-                    data.format = "jsonp";
-                }
+            data.format = getFormat(data.format);
+            if (!jQuery.support.cors) {
+                data.method = method;
+                method = false; 
             }
+
             if (method) {
                 if (method === "DELETE") {
                     // grumble grumble struts grumble grumble...
@@ -141,12 +152,9 @@ _.extend(intermine, (function() {
                 cb = page;
                 page = {};
             }
-            cb = cb || function() {};
             page = page || {};
             var req = _(page).extend({query: q.toXML(), format: jQuery.support.cors ? "jsonobjects" : "jsonpobjects"});
-            return this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
-                cb(data.results);
-            });
+            return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb));
         };
 
         this.rows = function(q, page, cb) {
@@ -157,9 +165,7 @@ _.extend(intermine, (function() {
             }
             page = page || {};
             var req = _(page).extend({query: q.toXML()});
-            this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
-                cb(data.results);
-            });
+            return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb));
         };
 
         var constructor = _.bind(function(properties) {
