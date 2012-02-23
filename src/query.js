@@ -63,7 +63,7 @@ _.extend(intermine, (function() {
             this.root = properties.root || properties.from;
             this.select(properties.views || properties.select || []);
             this.addConstraints(properties.constraints || properties.where || []);
-            this.addJoins(properties.joins || []);
+            this.addJoins(properties.joins || properties.join || []);
             this.constraintLogic = properties.constraintLogic || this.constraintLogic;
             this.orderBy(properties.sortOrder || properties.orderBy || []);
             this.maxRows = properties.size || properties.limit;
@@ -116,7 +116,7 @@ _.extend(intermine, (function() {
         };
 
         this.saveAsList = function(options, cb) {
-            var toRun  = _.clone(this);
+            var toRun  = this.clone();
             cb = cb || function() {};
             toRun.select(["id"]);
             var req = _.clone(options);
@@ -141,7 +141,7 @@ _.extend(intermine, (function() {
             };
             cont = cont || function() {};
             path = adjustPath.call(this, path);
-            var toRun = _.clone(this);
+            var toRun = this.clone();
             if (!_(toRun.views).include(path)) {
                 toRun.views.push(path);
             }
@@ -154,42 +154,30 @@ _.extend(intermine, (function() {
 
         this.summarize = this.summarise;
 
-        this.records = function(cb) {
-            if (this.service.records) {
-                var page = {start: this.start};
-                if (this.maxRows) {
-                    page.size = this.maxRows;
+        this._get_data_fetcher = function(serv_fn) { 
+            return function(page, cb) {
+                var self = this;
+                cb = cb || page;
+                page = (_(page).isFunction() || !page) ? {} : page;
+                if (self.service[serv_fn]) {
+                    _.defaults(page, {start: self.start, size: self.maxRows});
+                    return self.service[serv_fn](self, page, cb);
+                } else {
+                    throw "This query has no service. It cannot request results";
                 }
-                this.service.records(this, page, cb);
-            } else {
-                throw "This query has no service. It cannot request results";
-            }
+            };
         };
 
-        this.rows = function(cb) {
-            if (this.service.rows) {
-                var page = {start: this.start};
-                if (this.maxRows) {
-                    page.size = this.maxRows;
-                }
-                this.service.rows(this, page, cb);
-            } else {
-                throw "This query has no service. It cannot request rows";
-            }
-        };
+        this.records = this._get_data_fetcher("records");
+        this.rows = this._get_data_fetcher("rows");
 
-        this._clone = function() {
-            if (Object.clone) {
-                return Object.clone(this);
-            } else if (Object.create) {
-                return Object.create(this);
-            } else {
-                return jQuery.extend(true, {}, this);
-            }
+        this.clone = function() {
+            // Not the fastest, but it does make isolated clones.
+            return jQuery.extend(true, {}, this);
         };
 
         this.next = function() {
-            var clone = this._clone();
+            var clone = this.clone();
             if (this.maxRows) {
                 clone.start = this.start + this.maxRows;
             }
@@ -197,7 +185,7 @@ _.extend(intermine, (function() {
         };
 
         this.previous = function() {
-            var clone = this._clone();
+            var clone = this.clone();
             if (this.maxRows) {
                 clone.start = this.start - this.maxRows;
             } else {
@@ -312,24 +300,12 @@ _.extend(intermine, (function() {
             return this;
         };
 
-        this.toXML = function() {
-            var xml = "<query ";
-            xml += 'model="' + this.model.name + '"';
-            xml += ' ';
-            xml += 'view="' + this.views.join(" ") + '"';
-            if (this.sortOrder.length) {
-                xml += ' sortOrder="' + _(this.sortOrder)
-                                            .map(function(x) {return x.path + " " + x.direction})
-                                            .join(" ");
-                xml += '"';
-            }
-            if (this.constraintLogic) {
-                xml += ' constraintLogic="' + this.constraintLogic + '"';
-            }
-            xml += ">";
-            _(this.joins).each(function(j) {
-                xml += '<join path="' + j.path + '" style="' + j.style + '"/>';
-            });
+        this.getSorting = function() {
+            return _(this.sortOrder).map(function(x) {return x.path + " " + x.direction}).join(" ");
+        };
+
+        this.getConstraintXML = function() {
+            var xml = "";
             __(this.constraints).filter(function(c) {return c.type != null}).each(function(c) {
                 xml += '<constraint path="' + c.path + '" type="' + c.type + '"/>';
             });
@@ -346,6 +322,25 @@ _.extend(intermine, (function() {
                     xml += '/>';
                 }
             });
+            return xml;
+        };
+
+        this.toXML = function() {
+            var xml = "<query ";
+            xml += 'model="' + this.model.name + '"';
+            xml += ' ';
+            xml += 'view="' + this.views.join(" ") + '"';
+            if (this.sortOrder.length) {
+                xml += ' sortOrder="' + this.getSorting() + '"';
+            }
+            if (this.constraintLogic) {
+                xml += ' constraintLogic="' + this.constraintLogic + '"';
+            }
+            xml += ">";
+            _(this.joins).each(function(j) {
+                xml += '<join path="' + j.path + '" style="' + j.style + '"/>';
+            });
+            xml += this.getConstraintXML();
             xml += '</query>';
 
             return xml;
