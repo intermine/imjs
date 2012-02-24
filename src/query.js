@@ -218,6 +218,7 @@ _.extend(intermine, (function() {
 
         this.records = this._get_data_fetcher("records");
         this.rows = this._get_data_fetcher("rows");
+        this.table = this._get_data_fetcher("table");
 
         this.clone = function() {
             // Not the fastest, but it does make isolated clones.

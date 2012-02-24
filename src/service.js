@@ -146,6 +146,15 @@ _.extend(intermine, (function() {
             return promise;
         };
 
+        this.table = function(q, page, cb) {
+            page = page || {};
+            var req = _(page).extend({
+                query: q.toXML(), 
+                format: jQuery.support.cors ? "jsondatatable" : "jsonpdatatable"
+            });
+            return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb));
+        };
+
         this.records = function(q, page, cb) {
             // Allow calling as records(q, cb)
             if (_(cb).isUndefined() && _(page).isFunction()) {
