@@ -118,11 +118,19 @@ _.extend(intermine, (function() {
             this.start = properties.start || properties.offset || 0;
         }, this);
 
+
+        this.addToSelect = function(views) {
+            var self = this;
+            __(views).map(_(adjustPath).bind(this))
+                     .map(_(expandStar).bind(this))
+                     .flatten()
+                     .each(function(p) { self.views.push(p) });
+            return this;
+        };
+
         this.select = function(views) {
-            this.views = __(views).map(_(adjustPath).bind(this))
-                                  .map(_(expandStar).bind(this))
-                                  .flatten()
-                                  .value();
+            this.views = [];
+            this.addToSelect(views);
             return this;
         };
 
