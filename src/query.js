@@ -41,6 +41,54 @@ _.extend(intermine, (function() {
             "NOT IN": "NOT IN"
         };
 
+        /**
+         * Allow others to listed to events on this query.
+         *
+         * Straight copy of Backbone events.
+         */
+        this.on = function(events, callback, context) {
+            var ev;
+            events = events.split(/\s+/);
+            var calls = this._callbacks || (this._callbacks = {});
+            while (ev = events.shift()) {
+                var list = calls[ev] || (calls[ev] = {});
+                var tail = list.tail || (list.tail = list.next = {});
+                tail.callback = callback;
+                tail.context = context;
+                list.tail = tail.next = {};
+            }
+
+            return this;
+        }
+        
+        this.bind = this.on;
+
+        // Trigger an event, firing all bound callbacks. Callbacks are passed the
+        // same arguments as `trigger` is, apart from the event name.
+        // Listening for `"all"` passes the true event name as the first argument.
+        this.trigger = function(events) {
+            var event, node, calls, tail, args, all, rest;
+            if (!(calls = this._callbacks)) return this;
+            all = calls['all'];
+            (events = events.split(/\s+/)).push(null);
+            // Save references to the current heads & tails.
+            while (event = events.shift()) {
+                if (all) events.push({next: all.next, tail: all.tail, event: event});
+                if (!(node = calls[event])) continue;
+                events.push({next: node.next, tail: node.tail});
+            }
+            // Traverse each list, stopping when the saved tail is reached.
+            rest = slice.call(arguments, 1);
+            while (node = events.pop()) {
+                tail = node.tail;
+                args = node.event ? [node.event].concat(rest) : rest;
+                while ((node = node.next) !== tail) {
+                node.callback.apply(node.context || this, args);
+                }
+            }
+            return this;
+        };
+
         var get_canonical_op = function(orig) {
             var canonical = _(orig).isString() ? OP_DICT[orig.toLowerCase()] : null;
             if (canonical == null) {
@@ -194,21 +242,31 @@ _.extend(intermine, (function() {
             return clone;
         };
 
-        this.orderBy = function(sort_orders) {
-            var that = this;
+        /**
+         * @triggers a "add:sortorder" event.
+         */
+        this.addSortOrder = function(so) {
             var adjuster = _(adjustPath).bind(this);
-            _(sort_orders).each(function(so) {
-                if (_.isString(so)) {
-                    so = {path: so, direction: "ASC"};
-                } else if (! so.path) {
-                    var k = _.keys(so)[0];
-                    var v = _.values(so)[0];
-                    so = {path: k, direction: v};
-                }
-                so.path = adjuster(so.path);
-                so.direction = so.direction.toUpperCase();
-                that.sortOrder.push(so);
-            });
+            if (_.isString(so)) {
+                so = {path: so, direction: "ASC"};
+            } else if (! so.path) {
+                var k = _.keys(so)[0];
+                var v = _.values(so)[0];
+                so = {path: k, direction: v};
+            }
+            so.path = adjuster(so.path);
+            so.direction = so.direction.toUpperCase();
+            this.sortOrder.push(so);
+            this.trigger("add:sortorder", so);
+        };
+
+        /**
+         * @triggers a "set:sortorder" event.
+         */
+        this.orderBy = function(sort_orders) {
+            this.sortOrder = [];
+            _(sort_orders).each(_(this.addSortOrder).bind(this));
+            this.trigger("set:sortorder", this.sortOrder);
             return this;
         };
 
@@ -263,6 +321,9 @@ _.extend(intermine, (function() {
             return this;
         };
 
+        /**
+         * Triggers an "add:constraint" event.
+         */
         this.addConstraint = function(constraint) {
             var that = this;
             if (_.isArray(constraint)) {
@@ -297,6 +358,7 @@ _.extend(intermine, (function() {
                 }
             }
             this.constraints.push(constraint);
+            this.trigger("add:constraint", constraint);
             return this;
         };
 
