@@ -121,6 +121,7 @@ _.extend(intermine, (function() {
 
         this.addToSelect = function(views) {
             var self = this;
+            views = _(views).isString() ? [views] : views || [];
             __(views).map(_(adjustPath).bind(this))
                      .map(_(expandStar).bind(this))
                      .flatten()
