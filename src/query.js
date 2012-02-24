@@ -427,7 +427,8 @@ _.extend(intermine, (function() {
 
     Query.TERNARY_OPS = ["LOOKUP"];
     Query.LOOP_OPS = ["=", "!="];
-    Query.REFERENCE_OPS = _.union(Query.TERNARY_OPS, Query.LOOP_OPS);
+    Query.LIST_OPS = ["IN", "NOT IN"];
+    Query.REFERENCE_OPS = _.union(Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS);
 
     return {"Query": Query};
 })());
