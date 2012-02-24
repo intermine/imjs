@@ -419,5 +419,15 @@ _.extend(intermine, (function() {
 
         constructor(properties || {}, service);
     };
+
+    Query.ATTRIBUTE_VALUE_OPS = ["=", "!=", ">", ">=", "<", "<=", "CONTAINS"];
+    Query.MULTIVALUE_OPS = ["ONE OF", "NONE OF"];
+    Query.NULL_OPS = ["IS NULL", "IS NOT NULL"];
+    Query.ATTRIBUTE_OPS = _.union(Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS);
+
+    Query.TERNARY_OPS = ["LOOKUP"];
+    Query.LOOP_OPS = ["=", "!="];
+    Query.REFERENCE_OPS = _.union(Query.TERNARY_OPS, Query.LOOP_OPS);
+
     return {"Query": Query};
 })());
