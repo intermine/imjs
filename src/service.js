@@ -247,11 +247,13 @@ _.extend(intermine, (function() {
 
         this.fetchModel = function(cb) {
             var self = this;
+            var promise = jQuery.Deferred();
             if (MODELS[self.root]) {
                 self.model = MODELS[self.root];
             }
             if (self.model) {
                 cb(self.model);
+                promise.resolve(self.model);
             } else {
                 this.makeRequest(MODEL_PATH, null, function(data) {
                     if (intermine.Model) {
@@ -261,8 +263,10 @@ _.extend(intermine, (function() {
                     }
                     MODELS[self.root] = self.model;
                     cb(self.model);
-                });
+                    promise.resolve(self.model);
+                }).fail(promise.reject);
             }
+            return promise;
         };
 
         this.fetchSummaryFields = function(cb) {
