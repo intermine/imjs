@@ -27,7 +27,7 @@ _.extend(intermine, (function() {
             return _(this.tags).include(t);
         };
 
-        this.delete = function(cb) {
+        this.del = function(cb) {
             cb = cb || function() {};
             return this.service.makeRequest("lists", 
                 {name: this.name}, cb, "DELETE");
