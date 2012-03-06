@@ -15,16 +15,65 @@ _.extend(intermine, (function() {
         * the class the last part resolves to. If the last part is an attribute, this
         * function returns "undefined".
         *
-        * @path The path to resolve.
+        * @param path The path to resolve.
         * @return A class descriptor object, or undefined.
         */
         this.getCdForPath = function(path) {
             var parts = path.split(".");
             var cd = this.classes[parts.shift()];
             return _(parts).reduce(_(function (memo, fieldName) {
-                var allFields = _({}).extend(memo.attributes, memo.references, memo.collections);
-                return this.classes[allFields[fieldName]["referencedType"]];
+                var fields = _({}).extend(
+                    memo.attributes, memo.references, memo.collections);
+                return this.classes[fields[fieldName].referencedType];
             }).bind(this), cd);
+        };
+
+        // TODO: write unit tests.
+        /**
+         * Get the type of an attribute path. If the path represents a class or a reference, 
+         * the class itself is returned, otherwise the name of the attribute type is returned, 
+         * minus any "java.lang." prefix.
+         *
+         * @param path The path to get the type of
+         * @return A class-descriptor, or an attribute type name.
+         */
+        this.getType = function(path) {
+            var cd = this.getCdForPath(path);
+            if (cd) {
+                return cd;
+            }
+            var parent = path.replace(/\.[^\.]+$/, "");
+            var fieldName = path.replace(/.*\./, "");
+            cd = this.getCdForPath(parent);
+            if (!cd || !cd.attributes[fieldName]) {
+                throw "Invalid path: " + path;
+            }
+            return cd.attributes[fieldName].type.replace(/java.lang./, "");
+        };
+
+        // TODO: write unit tests.
+        /**
+         * Determine if there are any collections mentioned in the given path. 
+         * eg: 
+         *   Department.employees.name -> true
+         *   Department.company.name -> false
+         *
+         * @param path {String} The path to examine.
+         * @return {Boolean} Whether or not there is any collection in the path.
+         */
+        this.hasCollection = function(path) {
+            var paths = []
+               ,parts = path.split(".")
+               ,bit, parent, cd;
+            while (bit = parts.pop()) {
+                parent = parts.join(".");
+                if ((parent) && (cd = this.getCdForPath(parent))) {
+                    if (cd.collections[bit]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         };
 
         var _subclass_map = {};
@@ -41,7 +90,7 @@ _.extend(intermine, (function() {
             }
             var ret = [cls];
             _(this.classes).each(function(c) {
-                if (_(c.extends).include(cls)) {
+                if (_(c["extends"]).include(cls)) {
                     ret = ret.concat(self.getSubclassesOf(c.name));
                 }
             });
@@ -96,6 +145,8 @@ _.extend(intermine, (function() {
             return _.reduce(classes, _(this.findCommonTypeOf).bind(this), classes.pop());
         };
     };
+    Model.NUMERIC_TYPES = ["int", "Integer", "double", "Double", "float", "Float"];
+    Model.BOOLEAN_TYPES = ["boolean", "Boolean"];
     return {"Model": Model};
 })());
 
