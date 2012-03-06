@@ -4,8 +4,12 @@ if (typeof intermine == "undefined") {
 if (typeof __ == "undefined") {
     __ = function(x) {return _(x).chain()};
 }
+if (typeof console == "undefined") {
+    console = {log: function() {}}
+}
 
 _.extend(intermine, (function() {
+    var log = _(console.log).bind(console);
     var Query = function(properties, service) {
         
         var adjustPath, constructor;
@@ -78,7 +82,7 @@ _.extend(intermine, (function() {
                 events.push({next: node.next, tail: node.tail});
             }
             // Traverse each list, stopping when the saved tail is reached.
-            rest = slice.call(arguments, 1);
+            rest = Array.prototype.slice.call(arguments, 1);
             while (node = events.pop()) {
                 tail = node.tail;
                 args = node.event ? [node.event].concat(rest) : rest;
@@ -101,7 +105,7 @@ _.extend(intermine, (function() {
             _.defaults(this, {
                 constraints: [], 
                 views: [], 
-                joins: [], 
+                joins: {}, 
                 constraintLogic: "",
                 sortOrder: []
             });
@@ -118,20 +122,63 @@ _.extend(intermine, (function() {
             this.start = properties.start || properties.offset || 0;
         }, this);
 
+        this.removeFromSelect = function(unwanted) {
+            unwanted = _(unwanted).isString() ? [unwanted] : unwanted || [];
+            unwanted = __(unwanted).map(_(adjustPath).bind(this))
+                                   .map(_(expandStar).bind(this))
+                                   .flatten()
+                                   .value();
 
-        this.addToSelect = function(views) {
-            var self = this;
-            views = _(views).isString() ? [views] : views || [];
-            __(views).map(_(adjustPath).bind(this))
-                     .map(_(expandStar).bind(this))
-                     .flatten()
-                     .each(function(p) { self.views.push(p) });
+            this.views = _(this.views).difference(unwanted);
+            this.trigger("remove:view", unwanted);
             return this;
         };
 
+        this.removeConstraint = function(con) {
+            var reduced = []
+                , orig = this.constraints;
+            if (typeof con == 'string') {
+                // If we have a code, remove the constraint with that code.
+                reduced = _(orig).reject(function(c) {
+                    return c.code === con;
+                });
+            } else {
+                // Perform object comparison.
+                reduced = _(orig).reject(function(c) {
+                    return con.path === c.path
+                           && con.op === c.op
+                           && con.value === c.value
+                           && con.extraValue === c.extraValue
+                           && con.type === c.type
+                           && (con.values ? con.values.join("%%%") : "") === (c.values ? c.values("%%%") : "");
+                });
+            }
+            if (reduced.length != orig.length - 1) {
+                throw "Did not remove a single constraint. orig=" 
+                    + orig + ", reduced=" + reduced + ", argument=" + con;
+            }
+            this.constraints = reduced;
+            this.trigger("change:constraints");
+            this.trigger("removed:constraints", _.difference(orig, reduced));
+            return this;
+        };
+
+        this.addToSelect = _(function(views) {
+            var self = this;
+            views = _(views).isString() ? [views] : views || [];
+            var toAdd  = __(views).map(_(adjustPath).bind(this))
+                     .map(_(expandStar).bind(this))
+                     .flatten()
+                     .value();
+
+            _(toAdd).each(function(p) { self.views.push(p) });
+            this.trigger("add:view", toAdd);
+            return this;
+        }).bind(this);
+
         this.select = function(views) {
             this.views = [];
-            this.addToSelect(views);
+            _(views).each(this.addToSelect);
             return this;
         };
 
@@ -142,15 +189,75 @@ _.extend(intermine, (function() {
             return path;
         };
 
+        var possiblePaths = {};
+
+        var getAllFields = function(table) {
+            var attrs = _(table.attributes).values();
+            var refs = _(table.references).values();
+            var cols = _(table.collections).values();
+            return _.union(attrs, refs, cols);
+        };
+
+        var _getPaths = function(root, model, cd, depth) {
+            var ret = [root];
+            if (depth > 0) {
+                return ret.concat(__(getAllFields(cd))
+                    .map(function(r) {return root + "." + r.name})
+                    .map(function(p) { 
+                        var cls = model.getCdForPath(p);
+                        if (cls) {
+                            return _getPaths(p, model, cls, depth - 1);
+                        } else {
+                            return p;
+                        }
+                    }).flatten().value());
+            } 
+            return ret;
+        };
+
+        /**
+         * Get a list of valid paths for this query, given
+         * the model and the query's starting root class.
+         * The lists generated are cached.
+         *
+         * @param depth The number of levels of fields to traverse.
+         *              The minimum value is 1, and the default is 3.
+         *
+         * @return A list of paths
+         */
+        this.getPossiblePaths = function(depth) {
+            depth = depth || 3;
+            if (!possiblePaths[depth]) {
+                var cd = this.service.model.getCdForPath(this.root);
+                possiblePaths[depth] = 
+                    _getPaths(this.root, this.service.model, cd, depth);
+            }
+            return possiblePaths[depth];
+        };
+
+        this.getType = function(path) {
+            var adjusted = adjustPath.call(this, path);
+            return this.service.model.getType(adjusted);
+        };
+
+        this.canHaveMultipleValues = function(path) {
+            var adjusted = adjustPath.call(this, path);
+            return this.service.model.hasCollection(adjusted);
+        };
+
+        var decapitate = function(x) {return x.substr(x.indexOf("."))};
         var expandStar = function(path) {
+            var self = this;
             if (/\*$/.test(path)) {
                 var pathStem = path.substr(0, path.lastIndexOf("."));
-                var expand = function(x) {return pathStem + x};
+                var expand   = function(x) {return pathStem + x};
                 var cd = this.model.getCdForPath(pathStem);
                 if (/\.\*$/.test(path)) {
                     if (cd && this.summaryFields[cd.name]) {
-                        var decapitate = function(x) {return x.substr(x.indexOf("."))};
-                        return _(this.summaryFields[cd.name]).map(_.compose(expand, decapitate))
+                        return __(this.summaryFields[cd.name])
+                                .reject(this.hasView)
+                                .map(_.compose(expand, decapitate))
+                                .value();
                     }
                 } 
                 if (/\.\*\*$/.test(path)) {
@@ -163,6 +270,23 @@ _.extend(intermine, (function() {
             }
             return path;
         }
+
+        /**
+         * Return true if this path
+         * is declared to be an outer join.
+         *
+         * @param p The path to enquire about.
+         * @return Whether this path is declared to be on an outer join.
+         */
+        this.isOuterJoin = function(p) {
+            var expanded = adjustPath.call(this, p);
+            return this.joins[expanded] === "OUTER";
+        };
+
+
+        this.hasView = function(v) {
+            return this.views && _(this.views).include(v);
+        };
 
         this.count = function(cont) {
             if (this.service.count) {
@@ -294,11 +418,22 @@ _.extend(intermine, (function() {
             if (!_(JOIN_STYLES).include(join.style)) {
                 throw "Invalid join style: " + join.style;
             }
-            this.joins.push(join);
+            this.joins[join.path] = join.style;
+            return this;
+        };
+
+        this.setJoinStyle = function(path, style) {
+            style = style || "OUTER";
+            path = adjustPath.call(this, path);
+            if (this.joins[path] !== style) {
+                this.joins[path] = style;
+                this.trigger("change:joins", {path: path, style: style});
+            }
             return this;
         };
 
         this.addConstraints = function(constraints) {
+            this.__silent__ = true;
             if (_.isArray(constraints)) {
                 _(constraints).each(_(this.addConstraint).bind(this));
             } else {
@@ -328,6 +463,9 @@ _.extend(intermine, (function() {
                     that.addConstraint(constraint);
                 });
             }
+            this.__silent__ = false;
+            this.trigger("add:constraint");
+            this.trigger("change:constraints");
             return this;
         };
 
@@ -337,7 +475,7 @@ _.extend(intermine, (function() {
         this.addConstraint = function(constraint) {
             var that = this;
             if (_.isArray(constraint)) {
-                var conArgs = constraint;
+                var conArgs = constraint.slice();
                 var constraint = {path: conArgs.shift()};
                 if (conArgs.length == 1) {
                     if (_(NULL_OPS).include(conArgs[0].toUpperCase())) {
@@ -368,7 +506,10 @@ _.extend(intermine, (function() {
                 }
             }
             this.constraints.push(constraint);
-            this.trigger("add:constraint", constraint);
+            if (!this.__silent__) {
+                this.trigger("add:constraint", constraint);
+                this.trigger("change:constraints");
+            }
             return this;
         };
 
@@ -409,8 +550,8 @@ _.extend(intermine, (function() {
                 xml += ' constraintLogic="' + this.constraintLogic + '"';
             }
             xml += ">";
-            _(this.joins).each(function(j) {
-                xml += '<join path="' + j.path + '" style="' + j.style + '"/>';
+            _(this.joins).each(function(style, j_path) {
+                xml += '<join path="' + j_path + '" style="' + style + '"/>';
             });
             xml += this.getConstraintXML();
             xml += '</query>';
