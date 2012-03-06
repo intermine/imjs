@@ -160,7 +160,7 @@ asyncTest('union', 3, function() {
     this.s.merge({name: new_name, lists: ls, tags: tags}, function(l) {
         ok(l.size === 6, "It has the right size");
         ok(l.hasTag("js"), "Is correctly tagged");
-        l.delete().then(succeed, fail).always(start);
+        l.del().then(succeed, fail).always(start);
     });
 });
              
@@ -174,7 +174,7 @@ asyncTest('intersect', 3, function() {
     this.s.intersect({name: new_name, lists: ls, tags: tags}, function(l) {
         ok(l.size === 2, "It has the right size");
         ok(l.hasTag("js"), "Is correctly tagged");
-        l.delete().then(succeed, fail).always(start);
+        l.del().then(succeed, fail).always(start);
     });
 });
 
@@ -191,7 +191,7 @@ asyncTest('diff', 4, function() {
         l.contents(function(xs) {
             ok(_(xs).any(function(x) {return x.name === "Brenda"}), 
                 "contains Brenda");
-            l.delete().then(succeed, fail).always(start);
+            l.del().then(succeed, fail).always(start);
         });
     });
 });
@@ -223,7 +223,7 @@ asyncTest("query to list", 4, function() {
                 console.log("Contents", xs);
                 ok(_(xs).any(function(x) {return x.name === "Carol"}), 
                     "contains Carol");
-                l.delete().then(succeed, fail).always(start);
+                l.del().then(succeed, fail).always(start);
             });
         });
     });

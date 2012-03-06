@@ -101,24 +101,24 @@ test('constraints in constructor', function() {
     );
 });
 test("joins in constructor", function() {
-    same(new intermine.Query().joins, [], "No joins by default");
+    same(new intermine.Query().joins, {}, "No joins by default");
     same(
         new intermine.Query({root: "Employee", joins: [
             {path: "department", style: "OUTER"},
             {path: "department.company", style: "OUTER"}
         ]}).joins,
-        [
-            {path: "Employee.department", style: "OUTER"},
-            {path: "Employee.department.company", style: "OUTER"}
-        ],
+        {
+            "Employee.department": "OUTER",
+            "Employee.department.company": "OUTER"
+        },
         "The joins are set properly"
     );
     same(
         new intermine.Query({root: "Employee", joins: ["department", "department.company"]}).joins,
-        [
-            {path: "Employee.department", style: "OUTER"},
-            {path: "Employee.department.company", style: "OUTER"}
-        ],
+        {
+            "Employee.department": "OUTER",
+            "Employee.department.company": "OUTER"
+        },
         "The joins are set properly"
     );
 });
