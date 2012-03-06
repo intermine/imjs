@@ -163,7 +163,7 @@ _.extend(intermine, (function() {
             return this;
         };
 
-        this.addToSelect = _(function(views) {
+        this.addToSelect = function(views) {
             var self = this;
             views = _(views).isString() ? [views] : views || [];
             var toAdd  = __(views).map(_(adjustPath).bind(this))
@@ -174,11 +174,11 @@ _.extend(intermine, (function() {
             _(toAdd).each(function(p) { self.views.push(p) });
             this.trigger("add:view", toAdd);
             return this;
-        }).bind(this);
+        };
 
         this.select = function(views) {
             this.views = [];
-            _(views).each(this.addToSelect);
+            _(views).each(_(this.addToSelect).bind(this));
             return this;
         };
 
