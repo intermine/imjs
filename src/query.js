@@ -150,7 +150,7 @@ _.extend(intermine, (function() {
                            && con.value === c.value
                            && con.extraValue === c.extraValue
                            && con.type === c.type
-                           && (con.values ? con.values.join("%%%") : "") === (c.values ? c.values("%%%") : "");
+                           && (con.values ? con.values.join("%%%") : "") === (c.values ? c.values.join("%%%") : "");
                 });
             }
             if (reduced.length != orig.length - 1) {
