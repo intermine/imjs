@@ -150,7 +150,11 @@ asyncTest('findById', 4, function() {
 });
 
 var succeed = function() {ok(true)};
-var fail = function(err, msg) {console.log(arguments); ok(false, err + " " + msg)};
+var fail = function(err, msg) {
+    console.log("FAILURE", arguments); 
+    ok(false, err + " " + msg); 
+    return Array.prototype.slice.call(arguments);
+};
 
 asyncTest('union', 3, function() {
     var ls = ["My-Favourite-Employees", "Umlaut holders"];
@@ -229,6 +233,33 @@ asyncTest("query to list", 4, function() {
     });
 });
 
+asyncTest("append to list from query", 4, function() {
+    var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}};
+    var younger_emps = {select: ["*"], from: "Employee", where: {age: {le: 50}}};
+    var all_emps = {select: ["id"], from: "Employee"};
+    var self = this;
+    var tripleFail = _.compose(fail, fail, fail, fail);
+    var proceed = _.compose(tripleFail, start);
+    self.s.query(all_emps, function(all) {
+        all.count(function(count) {
+            self.s.query(older_emps, function(olders_q) {
+                olders_q.saveAsList({name: "temp-olders", tags: ["from-js"]}, function(olders_l) {
+                    var startSize = olders_l.size;
+                    self.s.query(younger_emps, function(younger_q) {
+                        younger_q.appendToList(olders_l, function(updated_olders) {
+                            ok(startSize < count, "Started out with less than all (all being " + count + ")");
+                            equals(count, updated_olders.size, "Now we have them all");
+                            equals(updated_olders.size, olders_l.size, "The input list was updated");
+                            updated_olders.del().then(succeed, fail).always(start);
+                        }).fail(tripleFail);
+                    }).fail(proceed);
+                }).fail(proceed);
+            }).fail(proceed);
+        }).fail(proceed);
+    }).fail(proceed);
+});
+
+                            
 asyncTest("quick-search", 4, function() {
     var self = this;
     self.s.search(function(rs, fs) {
