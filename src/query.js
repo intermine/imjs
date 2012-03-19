@@ -301,15 +301,47 @@ _.extend(intermine, (function() {
 
         this.count = function(cont) {
             if (this.service.count) {
-                this.service.count(this, cont);
+                return this.service.count(this, cont);
             } else {
                 throw "This query has no service. It cannot request a count";
             }
         };
 
+        var getListResponseHandler = function(service, cb) { return function(data) {
+            cb = cb || function() {};
+            var name = data.listName;
+            return service.fetchLists(function(ls) {
+                cb(_(ls).find(function(l) {return l.name === name}));
+            });
+        }};
+
+        // TODO: unit tests
+        this.appendToList = function(target, cb) {
+            var name = (target && target.name) ? target.name : "" + target;
+            var toRun  = this.clone();
+            if (toRun.views.length != 1 || !toRun.views[0].match(/\.id$/)) {
+                toRun.select(["id"]);
+            }
+            var req = {
+                "listName": name,
+                "query": toRun.toXML()
+            };
+            var wrappedCb;
+            if (target && target.name) {
+                wrappedCb = function(list) {
+                    target.size = list.size;
+                    cb(list);
+                };
+            } else {
+                wrappedCb = cb;
+            }
+
+            return service.makeRequest("query/append/tolist", 
+                    req, getListResponseHandler(this.service, wrappedCb), "POST");
+        };
+
         this.saveAsList = function(options, cb) {
             var toRun  = this.clone();
-            cb = cb || function() {};
             toRun.select(["id"]);
             var req = _.clone(options);
             req.listName = req.listName || req.name;
@@ -318,12 +350,7 @@ _.extend(intermine, (function() {
                 req.tags = options.tags.join(';');
             }
             var service = this.service;
-            return service.makeRequest("query/tolist", req, function(data) {
-                var name = data.listName;
-                service.fetchLists(function(ls) {
-                    cb(_(ls).find(function(l) {return l.name === name}));
-                });
-            }, "POST");
+            return service.makeRequest("query/tolist", req, getListResponseHandler(this.service, cb), "POST");
         };
 
         this.summarise = function(path, limit, cont) {
