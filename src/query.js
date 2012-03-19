@@ -173,6 +173,7 @@ _.extend(intermine, (function() {
 
             _(toAdd).each(function(p) { self.views.push(p) });
             this.trigger("add:view", toAdd);
+            this.trigger("change:views", toAdd);
             return this;
         };
 
@@ -183,6 +184,7 @@ _.extend(intermine, (function() {
         };
 
         var adjustPath = function(path) {
+            path = (path && path.name) ? path.name : "" + path;
             if (path.indexOf(this.root) != 0) {
                 path = this.root + "." + path;
             }
@@ -235,9 +237,18 @@ _.extend(intermine, (function() {
             return possiblePaths[depth];
         };
 
-        this.getType = function(path) {
+        this.getPathInfo = function(path) {
             var adjusted = adjustPath.call(this, path);
-            return this.service.model.getType(adjusted);
+            return this.service.model.getPathInfo(adjusted, this.getSubclasses());
+        };
+
+        this.getSubclasses = function() {
+            return _(this.constraints)
+                    .reduce(function(a, c) {c.type && (a[c.path] = c.type); return a}, {})
+        };
+
+        this.getType = function(path) {
+            return this.getPathInfo(path).getType();
         };
 
         this.canHaveMultipleValues = function(path) {
@@ -557,6 +568,100 @@ _.extend(intermine, (function() {
             xml += '</query>';
 
             return xml;
+        };
+
+        this.fetchCode = function(lang, cb) {
+            cb = cb || function() {};
+            var req = {
+                query: this.toXML(),
+                lang: lang,
+                format: "json"
+            };
+            return this.service.makeRequest("query/code", req, function(data) {
+                cb(data.code);
+            });
+        };
+
+        var BIO_FORMATS = ["gff3", "fasta", "bed"];
+
+        this.getExportURI = function(format) {
+            format = format || "tab";
+            if (_(BIO_FORMATS).include(format)) {
+                var meth = "get" + format.toUpperCase() + "URI";
+                return this[meth]();
+            }
+            var req = {
+                query: this.toXML(),
+                format: format
+            };
+            if (this.service && this.service.token) {
+                req.token = this.service.token;
+            }
+            return this.service.root + "query/results?" + $.param(req);
+        };
+
+        var cls = this;
+
+        _(BIO_FORMATS).each(function(f) {
+            var reqMeth = "_" + f + "_req";
+            var getMeth = "get" + f.toUpperCase();
+            var uriMeth = getMeth + "URI";
+            cls[getMeth] = function(cb) {
+                var req = this[reqMeth]();
+                cb = cb || function() {};
+                return this.service.makeRequest("query/results/" + f, req, cb, "POST");
+            };
+
+            cls[uriMeth] = function() {
+                var req = this[reqMeth]();
+                if (this.service.token) {
+                    req.token = this.service.token;
+                }
+                return this.service.root + "query/results/" + f + "?" + $.param(req);
+            };
+        });
+
+        this._fasta_req = function() {
+            var self = this;
+            var toRun = this.clone();
+            var currentViews = toRun.views;
+            var newView = _(currentViews).chain()
+                            .map(function(v) {return self.getPathInfo(v).getParent()})
+                            .filter(function(p) {return p.isa("SequenceFeature") || p.isa("Protein") })
+                            .map(function(p) {return p.append("primaryIdentifier").toPathString()})
+                            .value();
+            toRun.views = [newView.shift()];
+            var req = {query: toRun.toXML()};
+            return req;
+        };
+
+        this._gff3_req = function() {
+            var self = this;
+            var toRun = this.clone();
+            var currentViews = toRun.views;
+            var newView = _(currentViews).chain()
+                            .map(function(v) {return self.getPathInfo(v).getParent()})
+                            .uniq(function(p) {return p.toPathString()})
+                            .filter(function(p) {return p.isa("SequenceFeature") })
+                            .map(function(p) {return p.append("primaryIdentifier").toPathString()})
+                            .value();
+            toRun.views = newView;
+            var req = {query: toRun.toXML()};
+            return req;
+        };
+
+        this._bed_req = this._gff3_req;
+
+        this.getCodeURI = function(lang) {
+            var req = {
+                query: this.toXML(),
+                lang: lang,
+                format: "text"
+            };
+            if (this.service && this.service.token) {
+                req.token = this.service.token;
+            }
+            return this.service.root + "query/code?" + $.param(req);
         };
 
         constructor(properties || {}, service);
