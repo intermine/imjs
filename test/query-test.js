@@ -286,4 +286,18 @@ test('toXML()', function() {
     );
 });
 
+var succeed = function() {ok(true)};
+var fail = function(err, msg) {
+    console.log("FAILURE", arguments); 
+    ok(false, err + " " + msg); 
+    return Array.prototype.slice.call(arguments);
+};
+
+asyncTest('clone does not grab all events', 1, function() {
+    var q = new intermine.Query({}, "SERVICE");
+    q.on("test:event", _.compose(start, succeed));
+    var c = q.clone();
+    c.on("test:event", _.compose(start, fail));
+    q.trigger("test:event");
+});
 

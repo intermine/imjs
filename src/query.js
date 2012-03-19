@@ -391,9 +391,13 @@ _.extend(intermine, (function() {
         this.rows = this._get_data_fetcher("rows");
         this.table = this._get_data_fetcher("table");
 
-        this.clone = function() {
+        this.clone = function(cloneEvents) {
             // Not the fastest, but it does make isolated clones.
-            return jQuery.extend(true, {}, this);
+            var clone = jQuery.extend(true, {}, this);
+            if (!cloneEvents) {
+                clone._callbacks = {};
+            }
+            return clone;
         };
 
         this.next = function() {
