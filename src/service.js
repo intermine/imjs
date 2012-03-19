@@ -10,6 +10,7 @@ _.extend(intermine, (function() {
 
     var MODELS = {};
     var SUMMARY_FIELDS = {};
+    var slice = Array.prototype.slice;
 
     var Service = function(properties) {
         var DEFAULT_PROTOCOL = "http://";
@@ -117,9 +118,12 @@ _.extend(intermine, (function() {
                 query: q.toXML(),
                 format: jQuery.support.cors ? "jsoncount" : "jsonpcount",
             };
-            return this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
+            var promise = jQuery.Deferred();
+            this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
                 cont(data.count);
-            });
+                promise.resolve(data.count);
+            }).fail(promise.reject);
+            return promise;
         };
 
         this.findById = function(table, objId, cb) {
@@ -210,21 +214,29 @@ _.extend(intermine, (function() {
         };
 
         this.fetchTemplates = function(cb) {
+            var promise = jQuery.Deferred();
             this.makeRequest(TEMPLATES_PATH, null, function(data) {
                 cb(data.templates);
-            });
+                promise.resolve(data.templates);
+            }).fail(promise.reject);
+            return promise;
         };
 
         this.fetchLists = function(cb) {
             var self = this;
+            var promise = jQuery.Deferred();
             this.makeRequest(LISTS_PATH, null, function(data) {
-                cb(_(data.lists).map(function (l) {return new intermine.List(l, self)}));
-            });
+                var lists = _(data.lists).map(function (l) {return new intermine.List(l, self)});
+                cb(lists);
+                promise.resolve(lists);
+            }).fail(promise.reject);
+            return promise;
         };
 
         this.combineLists = function(operation) {
             var self = this;
             return function(options, cb) {
+                var promise = jQuery.Deferred();
                 var path = LIST_OPERATION_PATHS[operation];
                 var params = {
                     name: options.name,
@@ -235,9 +247,12 @@ _.extend(intermine, (function() {
                 self.makeRequest(path, params, function(data) {
                     var name = data.listName;
                     self.fetchLists(function(ls) {
-                        cb(_(ls).find(function(l) {return l.name === name}));
-                    });
-                });
+                        var l = _(ls).find(function(l) {return l.name === name});
+                        cb(l);
+                        promise.resolve(l);
+                    }).fail(promise.reject);
+                }).fail(promise.reject);
+                return promise;
             };
         };
 
@@ -271,18 +286,22 @@ _.extend(intermine, (function() {
 
         this.fetchSummaryFields = function(cb) {
             var self = this;
+            var promise = jQuery.Deferred();
             if (SUMMARY_FIELDS[self.root]) {
                 self.summaryFields = SUMMARY_FIELDS[self.root];
             }
             if (self.summaryFields) {
                 cb(self.summaryFields);
+                promise.resolve(self.summaryFields);
             } else {
                 self.makeRequest(SUMMARYFIELDS_PATH, null, function(data) {
                     self.summaryFields = data.classes;
                     SUMMARY_FIELDS[self.root] = data.classes;
                     cb(self.summaryFields);
+                    promise.resolve(self.summaryFields);
                 });
             }
+            return promise;
         };
 
         /**
@@ -304,14 +323,19 @@ _.extend(intermine, (function() {
             return this.makeRequest(WITH_OBJ_PATH, opts, function(data) {cb(data.lists)});
         };
 
+
         this.query = function(options, cb) {
             var service = this;
+            var promise = jQuery.Deferred();
             service.fetchModel(function(m) {
                 service.fetchSummaryFields(function(sfs) {
                     _.defaults(options, {model: m, summaryFields: sfs});
-                    cb(new intermine.Query(options, service));
-                });
-            });
+                    var q = new intermine.Query(options, service);
+                    cb(q);
+                    promise.resolve(q);
+                }).fail(promise.reject);
+            }).fail(promise.reject);
+            return promise;
         };
 
         constructor(properties || {});
