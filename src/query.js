@@ -168,10 +168,9 @@ _.extend(intermine, (function() {
             views = _(views).isString() ? [views] : views || [];
             var toAdd  = __(views).map(_(adjustPath).bind(this))
                      .map(_(expandStar).bind(this))
-                     .flatten()
                      .value();
 
-            _(toAdd).each(function(p) { self.views.push(p) });
+            _.chain([toAdd]).flatten().each(function(p) { self.views.push(p) });
             this.trigger("add:view", toAdd);
             this.trigger("change:views", toAdd);
             return this;
@@ -184,8 +183,11 @@ _.extend(intermine, (function() {
         };
 
         var adjustPath = function(path) {
+            // Allow descriptors to be passed in.
             path = (path && path.name) ? path.name : "" + path;
-            if (path.indexOf(this.root) != 0) {
+            if (!this.root) {
+                this.root = path.split(".")[0];
+            } else if (path.indexOf(this.root) != 0) {
                 path = this.root + "." + path;
             }
             return path;
@@ -230,7 +232,7 @@ _.extend(intermine, (function() {
         this.getPossiblePaths = function(depth) {
             depth = depth || 3;
             if (!possiblePaths[depth]) {
-                var cd = this.service.model.getCdForPath(this.root);
+                var cd = this.service.model.classes[this.root]; //getCdForPath(this.root);
                 possiblePaths[depth] = 
                     _getPaths(this.root, this.service.model, cd, depth);
             }
