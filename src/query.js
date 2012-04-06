@@ -124,13 +124,17 @@ _.extend(intermine, (function() {
 
         this.removeFromSelect = function(unwanted) {
             unwanted = _(unwanted).isString() ? [unwanted] : unwanted || [];
-            unwanted = __(unwanted).map(_(adjustPath).bind(this))
-                                   .map(_(expandStar).bind(this))
-                                   .flatten()
-                                   .value();
+            var mapFn = _.compose.apply(this, _.map([expandStar, adjustPath], function (f) {
+                return _(f).bind(this)
+            }));
+            unwanted = _.flatten([_(unwanted).map(mapFn)]);
+            console.log(unwanted);
+            
+            this.sortOrder = _(this.sortOrder).filter(function(so) {return !_(unwanted).include(so.path);});
 
             this.views = _(this.views).difference(unwanted);
             this.trigger("remove:view", unwanted);
+            this.trigger("change:views", this.views);
             return this;
         };
 
@@ -168,10 +172,9 @@ _.extend(intermine, (function() {
             views = _(views).isString() ? [views] : views || [];
             var toAdd  = __(views).map(_(adjustPath).bind(this))
                      .map(_(expandStar).bind(this))
-                     .flatten()
                      .value();
 
-            _(toAdd).each(function(p) { self.views.push(p) });
+            _.chain([toAdd]).flatten().each(function(p) { self.views.push(p) });
             this.trigger("add:view", toAdd);
             this.trigger("change:views", toAdd);
             return this;
@@ -184,8 +187,11 @@ _.extend(intermine, (function() {
         };
 
         var adjustPath = function(path) {
+            // Allow descriptors to be passed in.
             path = (path && path.name) ? path.name : "" + path;
-            if (path.indexOf(this.root) != 0) {
+            if (!this.root) {
+                this.root = path.split(".")[0];
+            } else if (path.indexOf(this.root) != 0) {
                 path = this.root + "." + path;
             }
             return path;
@@ -200,21 +206,22 @@ _.extend(intermine, (function() {
             return _.union(attrs, refs, cols);
         };
 
-        var _getPaths = function(root, model, cd, depth) {
+        // TODO: unit tests
+        this._getPaths = function(root, cd, depth) {
+            var that = this;
             var ret = [root];
-            if (depth > 0) {
-                return ret.concat(__(getAllFields(cd))
-                    .map(function(r) {return root + "." + r.name})
-                    .map(function(p) { 
-                        var cls = model.getCdForPath(p);
-                        if (cls) {
-                            return _getPaths(p, model, cls, depth - 1);
-                        } else {
-                            return p;
-                        }
-                    }).flatten().value());
+            var others = [];
+            if (cd && depth > 0) {
+                with (_) {
+                    others = flatten(map(cd.fields, function(r) {
+                        var p = root + "." + r.name;
+                        var pi = that.getPathInfo(p);
+                        var cls = pi.getEndClass();
+                        return that._getPaths(p, cls, depth - 1);
+                    }));
+                }
             } 
-            return ret;
+            return ret.concat(others);
         };
 
         /**
@@ -230,9 +237,8 @@ _.extend(intermine, (function() {
         this.getPossiblePaths = function(depth) {
             depth = depth || 3;
             if (!possiblePaths[depth]) {
-                var cd = this.service.model.getCdForPath(this.root);
-                possiblePaths[depth] = 
-                    _getPaths(this.root, this.service.model, cd, depth);
+                var cd = this.service.model.classes[this.root];
+                possiblePaths[depth] = _.flatten(this._getPaths(this.root, cd, depth)); 
             }
             return possiblePaths[depth];
         };
@@ -628,7 +634,7 @@ _.extend(intermine, (function() {
             if (this.service && this.service.token) {
                 req.token = this.service.token;
             }
-            return this.service.root + "query/results?" + $.param(req);
+            return this.service.root + "query/results?" + jQuery.param(req);
         };
 
         var cls = this;
@@ -648,7 +654,7 @@ _.extend(intermine, (function() {
                 if (this.service.token) {
                     req.token = this.service.token;
                 }
-                return this.service.root + "query/results/" + f + "?" + $.param(req);
+                return this.service.root + "query/results/" + f + "?" + jQuery.param(req);
             };
         });
 
@@ -692,7 +698,7 @@ _.extend(intermine, (function() {
             if (this.service && this.service.token) {
                 req.token = this.service.token;
             }
-            return this.service.root + "query/code?" + $.param(req);
+            return this.service.root + "query/code?" + jQuery.param(req);
         };
 
         constructor(properties || {}, service);
