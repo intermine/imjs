@@ -23,6 +23,12 @@ test('views in constructor', function() {
         ["Gene.symbol", "Gene.length"],
         "The views are set correctly"
     );
+
+    same(
+        new intermine.Query({select: ["Gene.symbol", "Gene.length"]}).views,
+        ["Gene.symbol", "Gene.length"],
+        "The views are set correctly"
+    );
 });
 test('constraints in constructor', function() {
     same(
