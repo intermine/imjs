@@ -55,10 +55,14 @@ _.extend(intermine, (function() {
             if (this.token) {
                 data.token = this.token;
             }
+            var dataType = "json";
             data.format = getFormat(data.format);
             if (!jQuery.support.cors) {
                 data.method = method;
                 method = false; 
+                url += "?callback=?";
+                dataType = "jsonp";
+                console.log("No CORS support: going for jsonp");
             }
 
             if (method) {
@@ -154,7 +158,7 @@ _.extend(intermine, (function() {
             page = page || {};
             var req = _(page).extend({
                 query: q.toXML(), 
-                format: jQuery.support.cors ? "jsondatatable" : "jsonpdatatable"
+                format: "jsondatatable"
             });
             return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb));
         };
