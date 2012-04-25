@@ -10,6 +10,7 @@ if (typeof console == "undefined") {
 
 _.extend(intermine, (function() {
     var log = _(console.log).bind(console);
+
     var Query = function(properties, service) {
         
         var adjustPath, constructor;
@@ -262,6 +263,29 @@ _.extend(intermine, (function() {
             return this.service.model.hasCollection(adjusted);
         };
 
+        this.getViewNodes = function() {
+            var self = this;
+            var toParentNode = function(v) {return self.getPathInfo(v).getParent()};
+            var toPathString = function(node) {return node.toPathString();};
+            return _.uniq(_.map(self.views, toParentNode), false, toPathString);
+        };
+
+        this.getQueryNodes = function() {
+            var self = this;
+            var viewNodes = self.getViewNodes();
+            var constrainedNodes = _.map(self.constraints, function(c) {
+                var pi  = self.getPathInfo(c.path);
+                if (pi.isAttribute()) {
+                    return pi.getParent();
+                } else {
+                    return pi;
+                }
+            });
+            return _.uniq(viewNodes.concat(constrainedNodes), false, function(node) {
+                return node.toPathString();
+            });
+        };
+
         var decapitate = function(x) {return x.substr(x.indexOf("."))};
         var expandStar = function(path) {
             var self = this;
@@ -424,22 +448,72 @@ _.extend(intermine, (function() {
             return clone;
         };
 
+        this.getSortDirection = function(path) {
+            path = adjustPath.call(this, path);
+            var i = 0, l = this.sortOrder.length;
+            for (i = 0; i < l; i++) {
+                if (this.sortOrder[i].path === path) {
+                    return this.sortOrder[i].direction;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * @return true if the path given is on an outerjoined group.
+         */
+        this.isOuterJoined = function(path) {
+            path = adjustPath.call(this, path);
+            var outer = "OUTER";
+            return _.any(this.joins, function(d, p) {return d === outer && path.indexOf(p) === 0;});
+        };
+
+        var parseSortOrder = function(input, adjuster) {
+            var so = input;
+            with (_) {
+                if (isString(input)) {
+                    so = {path: input, direction: "ASC"};
+                } else if (! input.path) {
+                    var k = keys(input)[0];
+                    var v = values(input)[0];
+                    so = {path: k, direction: v};
+                } 
+            }
+            so.path = adjuster(so.path);
+            so.direction = so.direction.toUpperCase();
+            return so;
+        };
+
+        /**
+         * Either add a sort order element to the end of the sortOrder, if no
+         * direction is defined for that path, or if there is already a direction set for this
+         * path then that direction is updated with the supplied one.
+         */
+        this.addOrSetSortOrder = function(so) {
+            var adjuster = _(adjustPath).bind(this);
+            var so = parseSortOrder(so, adjuster);
+            var currentDirection = this.getSortDirection(so.path);
+            if (currentDirection == null) {
+                this.addSortOrder(so);
+            } else if (currentDirection != so.direction) {
+                _(this.sortOrder).each(function(oe) {
+                    if (oe.path === so.path) {
+                        oe.direction = so.direction;
+                    }
+                });
+                this.trigger("change:sortorder", this.sortOrder);
+            }
+        };
+
         /**
          * @triggers a "add:sortorder" event.
          */
         this.addSortOrder = function(so) {
             var adjuster = _(adjustPath).bind(this);
-            if (_.isString(so)) {
-                so = {path: so, direction: "ASC"};
-            } else if (! so.path) {
-                var k = _.keys(so)[0];
-                var v = _.values(so)[0];
-                so = {path: k, direction: v};
-            }
-            so.path = adjuster(so.path);
-            so.direction = so.direction.toUpperCase();
+            var so = parseSortOrder(so, adjuster);
             this.sortOrder.push(so);
             this.trigger("add:sortorder", so);
+            this.trigger("change:sortorder", this.sortOrder);
         };
 
         /**
