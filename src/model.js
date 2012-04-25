@@ -57,6 +57,20 @@ _.extend(intermine, (function() {
         }
     };
 
+    PathInfo.prototype.getChildNodes = function() {
+        var cls, flds, childNodes, i, l;
+        childNodes = [];
+        var self = this;
+        if (!this.isAttribute()) {
+            cls = this.getEndClass();
+            flds = cls.fields;
+            _.each(flds, function(fld, name) {
+                childNodes.push(self.append(fld));
+            });
+        } 
+        return childNodes;
+    };
+
     PathInfo.prototype.toPathString = function() {
         var str = this.root.name;
         return _(this.descriptors).reduce(function(a, b) {return a + "." + b.name}, this.root.name);
