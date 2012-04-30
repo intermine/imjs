@@ -160,7 +160,7 @@ _.extend(intermine, (function() {
                 query: q.toXML(), 
                 format: "jsondatatable"
             });
-            return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb));
+            return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb), "POST");
         };
 
         this.records = function(q, page, cb) {
