@@ -372,7 +372,9 @@ _.extend(intermine, (function() {
 
         this.saveAsList = function(options, cb) {
             var toRun  = this.clone();
-            toRun.select(["id"]);
+            if (toRun.views.length != 1 || toRun.views[0] == null || !toRun.views[0].match(/\.id$/)) {
+                toRun.select(["id"]);
+            }
             var req = _.clone(options);
             req.listName = req.listName || req.name;
             req.query = toRun.toXML();
