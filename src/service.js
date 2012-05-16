@@ -120,7 +120,7 @@ _.extend(intermine, (function() {
         this.count = function(q, cont) {
             var req = {
                 query: q.toXML(),
-                format: jQuery.support.cors ? "jsoncount" : "jsonpcount",
+                format: jQuery.support.cors ? "jsoncount" : "jsonpcount"
             };
             var promise = jQuery.Deferred();
             this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {

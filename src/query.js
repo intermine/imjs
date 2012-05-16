@@ -9,7 +9,6 @@ if (typeof console == "undefined") {
 }
 
 _.extend(intermine, (function() {
-    var log = _(console.log).bind(console);
 
     var Query = function(properties, service) {
         
@@ -129,7 +128,6 @@ _.extend(intermine, (function() {
                 return _(f).bind(this)
             }));
             unwanted = _.flatten([_(unwanted).map(mapFn)]);
-            console.log(unwanted);
             
             this.sortOrder = _(this.sortOrder).filter(function(so) {return !_(unwanted).include(so.path);});
 

@@ -122,7 +122,7 @@ _.extend(intermine, (function() {
     };
 
     Table.prototype = {
-        constructor: Table,
+        constructor: Table
     };
 
     var Model = function(model) {
