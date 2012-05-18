@@ -179,6 +179,7 @@ _.extend(intermine, (function() {
                 cd = self.classes[subclasses[keyPath]];
                 fields = _({}).extend(cd.attributes, cd.references, cd.collections);
             }
+            keyPath += "." + fieldName;
             var fd = fields[fieldName];
             cd = fd.referencedType ? self.classes[fd.referencedType] : null;
             return fd;

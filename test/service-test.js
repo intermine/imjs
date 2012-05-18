@@ -1,12 +1,12 @@
 module("Service Tests", {
     setup: function() {
-        this.s = new intermine.Service({root: "squirrel.flymine.org/intermine-test", token: "test-user-token"});
+        this.s = new intermine.Service({root: "squirrel/intermine-test", token: "test-user-token"});
     }
 });
 
 test('root property', function() {
     expect(2);
-    equals(this.s.root, "http://squirrel.flymine.org/intermine-test/service/", "The root parameter is set correctly");
+    equals(this.s.root, "http://squirrel/intermine-test/service/", "The root parameter is set correctly");
     equals(new intermine.Service({root: "http://www.flymine.org/query/service/"}).root, 
         "http://www.flymine.org/query/service/", "Appropriately complete URLs are not altered");
 });
@@ -264,6 +264,7 @@ asyncTest("quick-search", 4, function() {
     var self = this;
     self.s.search(function(rs, fs) {
         ok(rs.length >= 100, "Has a suitably large number of results");
+        //console.log(rs, fs);
         equals(fs.Category.Bank, 5, "Has a category facet");
         self.s.search("david", function(rs) {
             equals(rs.length, 2, "Has the right number of results");
@@ -278,6 +279,24 @@ asyncTest("quick-search", 4, function() {
 asyncTest("lists with object", 1, function() {
     this.s.fetchListsContaining({publicId: "Brenda", type: "Employee"}, function(ls) {
         ok(ls.length > 1, "Has a suitable number of lists");
+    }).fail(fail).always(start);
+});
+
+asyncTest("path info parsing", 4, function() {
+    this.s.fetchModel( function( m ) {
+        var path, pi;
+        path = "Employee.age";
+        pi   = m.getPathInfo(path);
+        equals(pi.getType(), "int");
+        path = "Department.employees.name";
+        pi   = m.getPathInfo(path);
+        equals(pi.getType(), "String");
+        path = "Department.employees.seniority";
+        pi   = m.getPathInfo(path, {"Department.employees": "Manager"});
+        equals(pi.getType(), "Integer");
+        path = "Department.employees.company.vatNumber";
+        pi   = m.getPathInfo(path, {"Department.employees": "CEO"});
+        equals(pi.getType(), "int");
     }).fail(fail).always(start);
 });
 
