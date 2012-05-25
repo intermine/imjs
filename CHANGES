@@ -1,0 +1,6 @@
+0.0.1: Fri May 25 17:00:00 BST 2012
+       Inital release
+0.0.2: Fri May 25 18:12:17 BST 2012
+       Typo in package.
+       Change in package structure.
+       Main specified for better require.
