@@ -1,8 +1,8 @@
 {
     "name": "imjs",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "description": "Client library for communication with InterMine web-services",
-    "main": "service",
+    "main": "lib/service",
     "keywords": [
         "javascript",
         "webservice",
@@ -21,7 +21,8 @@
     },
     "dependencies": {
         "underscore": "1.3.3",
-        "jquery-deferred": "0.2.0"
+        "jquery-deferred": "0.2.0",
+        "clone": "stable"
     },
     "engines": {
         "node": ">= 0.4.0"
