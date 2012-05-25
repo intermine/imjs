@@ -417,6 +417,11 @@
     };
 
     exports.Service = Service;
+    if (IS_NODE) {
+        exports.Model = Model;
+        exports.Query = Query;
+        exports.List = List;
+    }
 }).call(this);
 
         
