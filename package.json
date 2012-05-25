@@ -27,7 +27,6 @@
         "node": ">= 0.4.0"
     },
     "directories": {
-        "src": "src",
         "tests": "test"
     }
 }
