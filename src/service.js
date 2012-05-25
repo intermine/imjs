@@ -1,35 +1,64 @@
-if (typeof intermine == "undefined") {
-    intermine = {};
-}
+(function(globals) {
+    exports = exports || globals;
+    if (globals && typeof exports.intermine == 'undefined') {
+        exports.intermine = {};
+        exports = intermine;
+    }
 
-if (typeof __ == "undefined") {
-    __ = function(x) {return _(x).chain()};
-}
+    var IS_NODE  = true;
+    if (globals && globals.jQuery) {
+        IS_NODE = false;
+    }
 
-_.extend(intermine, (function() {
+    var Model;
+    var Query;
+    var List;
+    if (IS_NODE) {
+        var _        = require('underscore')._;
+        var Deferred = require('jquery-deferred').Deferred;
+        var http     = require('http');
+        var URL      = require('url');
+        var qs       = require('querystring');
+        Model        = require('./model').Model;
+        Query        = require('./query').Query;
+        List         = require('./lists').List;
+    }
+
+    var __ = function(x) {return _(x).chain()};
+
+    var to_query_string = IS_NODE ? qs.stringify : jQuery.param;
 
     var MODELS = {};
     var SUMMARY_FIELDS = {};
     var slice = Array.prototype.slice;
+    var DEFAULT_PROTOCOL = "http://";
+    var VERSION_PATH = "version";
+    var TEMPLATES_PATH = "templates";
+    var LISTS_PATH = "lists";
+    var MODEL_PATH = "model";
+    var SUMMARYFIELDS_PATH = "summaryfields";
+    var QUERY_RESULTS_PATH = "query/results";
+    var QUICKSEARCH_PATH = "search";
+    var WIDGETS_PATH = "widgets";
+    var ENRICHMENT_PATH = "list/enrichment";
+    var WITH_OBJ_PATH = "listswithobject";
+    var LIST_OPERATION_PATHS = {
+        merge: "lists/union",
+        intersect: "lists/intersect",
+        diff: "lists/diff"
+    };
 
     var Service = function(properties) {
-        var DEFAULT_PROTOCOL = "http://";
-        var VERSION_PATH = "version";
-        var TEMPLATES_PATH = "templates";
-        var LISTS_PATH = "lists";
-        var MODEL_PATH = "model";
-        var SUMMARYFIELDS_PATH = "summaryfields";
-        var QUERY_RESULTS_PATH = "query/results";
-        var QUICKSEARCH_PATH = "search";
-        var WIDGETS_PATH = "widgets";
-        var ENRICHMENT_PATH = "list/enrichment";
-        var WITH_OBJ_PATH = "listswithobject";
 
-        var LIST_OPERATION_PATHS = {
-            merge: "lists/union",
-            intersect: "lists/intersect",
-            diff: "lists/diff"
-        };
+        if (typeof Model === 'undefined' && intermine) {
+            Model = intermine.Model;
+        }
+        if (typeof Query === 'undefined' && intermine) {
+            Query = intermine.Query;
+        }
+        if (typeof Query === 'undefined' && intermine) {
+            List = intermine.List;
+        }
 
         var getResulteriser = function(cb) { return function(data) {
             cb = cb || function() {};
@@ -38,18 +67,20 @@ _.extend(intermine, (function() {
 
         var getFormat = function(def) {
             var format = def || "json";
-            if (!jQuery.support.cors) {
+            if (!(IS_NODE || jQuery.support.cors)) {
                 format = format.replace("json", "jsonp");
             }
             return format;
         };
 
         /**
-         * Performs a get request for data against a url. 
-         * This method makes use of jsonp where available.
-         */
+        * Performs a get request for data against a url. 
+        * This method makes use of jsonp where available.
+        */
         this.makeRequest = function(path, data, cb, method) {
-            var url = this.root + path;
+            var url   = this.root + path;
+            var reqFn = IS_NODE ? this._nodeReq : jQuery.ajax;
+            var reqO  = IS_NODE ? this          : jQuery;
             data = data || {};
             cb = cb || function() {};
             if (this.token) {
@@ -57,20 +88,23 @@ _.extend(intermine, (function() {
             }
             var dataType = "json";
             data.format = getFormat(data.format);
-            if (!jQuery.support.cors) {
+
+            if (!(IS_NODE || jQuery.support.cors)) {
                 data.method = method;
                 method = false; 
                 url += "?callback=?";
                 dataType = "jsonp";
                 console.log("No CORS support: going for jsonp");
+            } else if (IS_NODE && !method) {
+                method = "GET";
             }
 
             if (method) {
                 if (method === "DELETE") {
                     // grumble grumble struts grumble grumble...
-                    url += "?" + jQuery.param(data);
+                    url += "?" + to_query_string(data);
                 }
-                return jQuery.ajax({
+                return reqFn.call(reqO, {
                     data: data,
                     dataType: "json",
                     success: cb,
@@ -80,6 +114,43 @@ _.extend(intermine, (function() {
             } else {
                 return jQuery.getJSON(url, data, cb);
             }
+        };
+
+        this._nodeReq = function(opts) {
+            var ret = new Deferred();
+            ret.done(opts.success);
+            var url = URL.parse(opts.url, true);
+            console.log(url);
+            url.method = opts.type;
+            url.port = url.port || 80;
+            if (url.method === 'GET' && _(opts.data).size()) {
+                url.path += "?" + to_query_string(opts.data);
+            }
+            var req = http.request(url, function(res) {
+                res.setEncoding('utf8');
+                var body = "";
+                res.on('data', function(chunk) {
+                    body += chunk;
+                });
+                res.on('end', function() {
+                    var parsed = JSON.parse(body);
+                    if (parsed.error) {
+                        ret.fail(parsed.error);
+                    } else {
+                        ret.resolve(parsed);
+                    }
+                });
+            });
+
+            req.on('error', function(e) {
+                ret.fail(e);
+            });
+
+            if (url.method === 'POST') {
+                req.write(to_query_string(opts.data) + '\n');
+            }
+            req.end();
+            return ret;
         };
 
         this.widgets = function(cb) {
@@ -120,9 +191,9 @@ _.extend(intermine, (function() {
         this.count = function(q, cont) {
             var req = {
                 query: q.toXML(),
-                format: jQuery.support.cors ? "jsoncount" : "jsonpcount"
+                format: (IS_NODE || jQuery.support.cors) ? "jsoncount" : "jsonpcount"
             };
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             this.makeRequest(QUERY_RESULTS_PATH, req, function(data) {
                 cont(data.count);
                 promise.resolve(data.count);
@@ -141,7 +212,7 @@ _.extend(intermine, (function() {
         this.whoami = function(cb) {
             cb = cb || function() {};
             var self = this;
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             self.fetchVersion(function(v) {
                 if (v < 9) {
                     var msg = "The who-am-i service requires version 9, this is only version " + v;
@@ -170,7 +241,7 @@ _.extend(intermine, (function() {
                 page = {};
             }
             page = page || {};
-            var req = _(page).extend({query: q.toXML(), format: jQuery.support.cors ? "jsonobjects" : "jsonpobjects"});
+            var req = _(page).extend({query: q.toXML(), format: (IS_NODE || jQuery.support.cors) ? "jsonobjects" : "jsonpobjects"});
             return this.makeRequest(QUERY_RESULTS_PATH, req, getResulteriser(cb));
         };
 
@@ -204,7 +275,7 @@ _.extend(intermine, (function() {
 
         this.fetchVersion = function(cb) {
             var self = this;
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             if (typeof this.version === "undefined") {
                 this.makeRequest(VERSION_PATH, null, function(data) {
                     this.version = data.version;
@@ -218,7 +289,7 @@ _.extend(intermine, (function() {
         };
 
         this.fetchTemplates = function(cb) {
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             this.makeRequest(TEMPLATES_PATH, null, function(data) {
                 cb(data.templates);
                 promise.resolve(data.templates);
@@ -228,9 +299,9 @@ _.extend(intermine, (function() {
 
         this.fetchLists = function(cb) {
             var self = this;
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             this.makeRequest(LISTS_PATH, null, function(data) {
-                var lists = _(data.lists).map(function (l) {return new intermine.List(l, self)});
+                var lists = _(data.lists).map(function (l) {return new List(l, self)});
                 cb(lists);
                 promise.resolve(lists);
             }).fail(promise.reject);
@@ -240,7 +311,7 @@ _.extend(intermine, (function() {
         this.combineLists = function(operation) {
             var self = this;
             return function(options, cb) {
-                var promise = jQuery.Deferred();
+                var promise = Deferred();
                 var path = LIST_OPERATION_PATHS[operation];
                 var params = {
                     name: options.name,
@@ -266,7 +337,7 @@ _.extend(intermine, (function() {
 
         this.fetchModel = function(cb) {
             var self = this;
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             if (MODELS[self.root]) {
                 self.model = MODELS[self.root];
             }
@@ -275,8 +346,8 @@ _.extend(intermine, (function() {
                 promise.resolve(self.model);
             } else {
                 this.makeRequest(MODEL_PATH, null, function(data) {
-                    if (intermine.Model) {
-                        self.model = new intermine.Model(data.model);
+                    if (Model) {
+                        self.model = new Model(data.model);
                     } else {
                         self.model = data.model;
                     }
@@ -290,7 +361,7 @@ _.extend(intermine, (function() {
 
         this.fetchSummaryFields = function(cb) {
             var self = this;
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             if (SUMMARY_FIELDS[self.root]) {
                 self.summaryFields = SUMMARY_FIELDS[self.root];
             }
@@ -309,19 +380,19 @@ _.extend(intermine, (function() {
         };
 
         /**
-         * Fetch lists containing an item.
-         *
-         * @param options Options should contain: 
-         *  - either:
-         *    * id: The internal id of the object in question
-         *  - or: 
-         *    * publicId: An identifier
-         *    * type: The type of object (eg. "Gene")
-         *    * extraValue: (optional) A domain to help resolve the object (eg an organism for a gene).
-         *
-         *  @param cb function of the type: [List] -> ()
-         *  @return A promise
-         */
+        * Fetch lists containing an item.
+        *
+        * @param options Options should contain: 
+        *  - either:
+        *    * id: The internal id of the object in question
+        *  - or: 
+        *    * publicId: An identifier
+        *    * type: The type of object (eg. "Gene")
+        *    * extraValue: (optional) A domain to help resolve the object (eg an organism for a gene).
+        *
+        *  @param cb function of the type: [List] -> ()
+        *  @return A promise
+        */
         this.fetchListsContaining = function(opts, cb) {
             cb = cb || function() {};
             return this.makeRequest(WITH_OBJ_PATH, opts, function(data) {cb(data.lists)});
@@ -330,11 +401,11 @@ _.extend(intermine, (function() {
 
         this.query = function(options, cb) {
             var service = this;
-            var promise = jQuery.Deferred();
+            var promise = Deferred();
             service.fetchModel(function(m) {
                 service.fetchSummaryFields(function(sfs) {
                     _.defaults(options, {model: m, summaryFields: sfs});
-                    var q = new intermine.Query(options, service);
+                    var q = new Query(options, service);
                     cb(q);
                     promise.resolve(q);
                 }).fail(promise.reject);
@@ -345,7 +416,7 @@ _.extend(intermine, (function() {
         constructor(properties || {});
     };
 
-    return {"Service": Service};
-})());
+    exports.Service = Service;
+}).call(this);
 
         

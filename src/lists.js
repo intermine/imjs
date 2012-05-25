@@ -1,11 +1,19 @@
-if (typeof intermine == "undefined") {
-    intermine = {};
-}
-if (typeof __ == "undefined") {
-    __ = function(x) {return _(x).chain()};
-}
+(function(globals) {
+    exports = exports || globals;
+    if (globals && typeof exports.intermine == 'undefined') {
+        exports.intermine = {};
+        exports = intermine;
+    }
 
-_.extend(intermine, (function() {
+    var IS_NODE  = true;
+    if (globals && globals.jQuery) {
+        IS_NODE = false;
+    }
+
+    if (IS_NODE) {
+        var _ = require('underscore')._;
+    }
+
     var List = function(properties, service) {
 
         _(this).extend(properties);
@@ -48,6 +56,6 @@ _.extend(intermine, (function() {
         };
     };
 
-    return {"List": List};
-})());
+    exports.List = List;
+}).call(this);
         

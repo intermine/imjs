@@ -1,14 +1,31 @@
-if (typeof intermine == "undefined") {
-    intermine = {};
-}
-if (typeof __ == "undefined") {
-    __ = function(x) {return _(x).chain()};
-}
-if (typeof console == "undefined") {
-    console = {log: function() {}}
-}
+(function(globals) {
+    exports = exports || globals;
+    if (globals && typeof exports.intermine == 'undefined') {
+        exports.intermine = {};
+        exports = intermine;
+    }
 
-_.extend(intermine, (function() {
+    var IS_NODE  = true;
+    if (globals && globals.jQuery) {
+        IS_NODE = false;
+    }
+
+    var clone;
+    var toQueryString;
+    if (IS_NODE) {
+        var _ = require('underscore')._;
+        clone = require('clone');
+        toQueryString = require('querystring').stringify;
+    } else {
+        clone = function(o) {return jQuery.extend(true, {}, o);};
+        toQueryString = function(req) { return jQuery.param(req); };
+    }
+
+    __ = function(x) {return _(x).chain()};
+
+    if (typeof console == 'undefined') {
+        console = {log: function() {}}
+    }
 
     var Query = function(properties, service) {
         
@@ -423,11 +440,11 @@ _.extend(intermine, (function() {
 
         this.clone = function(cloneEvents) {
             // Not the fastest, but it does make isolated clones.
-            var clone = jQuery.extend(true, {}, this);
+            var cloned =clone(this);
             if (!cloneEvents) {
-                clone._callbacks = {};
+                cloned._callbacks = {};
             }
-            return clone;
+            return cloned;
         };
 
         this.next = function() {
@@ -708,7 +725,7 @@ _.extend(intermine, (function() {
             if (this.service && this.service.token) {
                 req.token = this.service.token;
             }
-            return this.service.root + "query/results?" + jQuery.param(req);
+            return this.service.root + "query/results?" + toQueryString(req);
         };
 
         var cls = this;
@@ -728,7 +745,7 @@ _.extend(intermine, (function() {
                 if (this.service.token) {
                     req.token = this.service.token;
                 }
-                return this.service.root + "query/results/" + f + "?" + jQuery.param(req);
+                return this.service.root + "query/results/" + f + "?" + toQueryString(req);
             };
         });
 
@@ -772,7 +789,7 @@ _.extend(intermine, (function() {
             if (this.service && this.service.token) {
                 req.token = this.service.token;
             }
-            return this.service.root + "query/code?" + jQuery.param(req);
+            return this.service.root + "query/code?" + toQueryString(req);
         };
 
         constructor(properties || {}, service);
@@ -788,5 +805,5 @@ _.extend(intermine, (function() {
     Query.LIST_OPS = ["IN", "NOT IN"];
     Query.REFERENCE_OPS = _.union(Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS);
 
-    return {"Query": Query};
-})());
+    exports.Query = Query;
+}).call(this);

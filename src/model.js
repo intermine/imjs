@@ -1,12 +1,19 @@
-if (typeof intermine == "undefined") {
-    intermine = {};
-}
+(function(globals) {
+    exports = exports || globals;
+    if (globals && typeof exports.intermine == "undefined") {
+        exports.intermine = {};
+        exports = intermine;
+    }
 
-if (typeof __ == "undefined") {
+    var IS_NODE = true;
+    if (globals && globals._) {
+        IS_NODE = false;
+    }
+    if (IS_NODE) {
+        var _        = require('underscore')._;
+    }
+
     __ = function(x) {return _(x).chain()};
-}
-
-_.extend(intermine, (function() {
 
     var PathInfo = function(info) {
         _(this).extend(info);
@@ -288,6 +295,6 @@ _.extend(intermine, (function() {
     Model.INTEGRAL_TYPES = ["int", "Integer"]
     Model.BOOLEAN_TYPES = ["boolean", "Boolean"];
 
-    return {"Model": Model};
-})());
+    exports.Model = Model;
+}).call(this);
 
