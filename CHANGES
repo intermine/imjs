@@ -4,3 +4,5 @@
        Typo in package.
        Change in package structure.
        Main specified for better require.
+0.0.5: Sat May 26 04:56:09 BST 2012
+       Added rowByRow and recordByRecord iteration.
