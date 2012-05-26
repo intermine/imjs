@@ -22,7 +22,8 @@
     "dependencies": {
         "underscore": "1.3.3",
         "jquery-deferred": "0.2.0",
-        "clone": "stable"
+        "clone": "stable",
+        "buffered-response": "latest"
     },
     "engines": {
         "node": ">= 0.4.0"
