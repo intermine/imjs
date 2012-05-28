@@ -9,7 +9,8 @@ SYNOPSIS
 ```javascript
   var IM = require('imjs');
   var flymine = new IM.Service({root: 'www.flymine.org/query'});
-  flymine.query({from: 'Gene', select: ['*'], where: {symbol: 'eve'}}, function(q) {
+  var query = {from: 'Gene', select: ['*'], where: {symbol: 'eve'}};
+  flymine.query(query, function(q) {
     q.rows(rows) {
         console.log(rows);
     });
