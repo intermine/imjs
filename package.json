@@ -30,5 +30,8 @@
     },
     "directories": {
         "tests": "test"
+    },
+    "scripts": {
+        "concat": "cat lib/*.js > imjs.js"
     }
 }
