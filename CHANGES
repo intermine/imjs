@@ -6,3 +6,5 @@
        Main specified for better require.
 0.0.5: Sat May 26 04:56:09 BST 2012
        Added rowByRow and recordByRecord iteration.
+0.0.7: Thu May 31 15:02:39 BST 2012
+       Support for both node and browser.
