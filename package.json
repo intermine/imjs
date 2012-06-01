@@ -32,6 +32,6 @@
         "tests": "test"
     },
     "scripts": {
-        "concat": "cat lib/*.js > imjs.js"
+        "concat": "cat lib/*.js > build/im.js"
     }
 }
