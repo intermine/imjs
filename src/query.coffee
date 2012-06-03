@@ -1,22 +1,23 @@
+root = exports ? this
 if typeof exports is 'undefined'
     IS_NODE = false
-    exports = this
-    _ = exports._
+    _ = root._
     clone = (o) -> jQuery.extend true, {}, o
     toQueryString = (req) -> jQuery.param(req)
-    if exports.intermine is 'undefined'
-        exports.intermine = {}
-    exports = exports.intermine
-    if typeof console is 'undefined'
-        console = log: ->
+    if typeof root.console is 'undefined'
+        root.console = log: ->
+    if root.intermine is 'undefined'
+        root.intermine = {}
+    root = root.intermine
 else
     IS_NODE = true
     _ = require('underscore')._
     clone = require('clone')
     toQueryString = require('querystring').stringify
+    {fold, take} = require('./shiv')
 
 get_canonical_op = (orig) ->
-    canonical = _.isString(orig) ? OP_DICT[orig.toLowerCase()] : null
+    canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
     unless canonical
         throw "Illegal constraint operator: #{ orig }"
     canonical
@@ -30,7 +31,14 @@ getListResponseHandler = (service, cb) -> (data) ->
 
 class Query
     @JOIN_STYLES = ['INNER', 'OUTER']
+    @BIO_FORMATS = ['gff3', 'fasta', 'bed']
     @NULL_OPS = ['IS NULL', 'IS NOT NULL']
+    @ATTRIBUTE_VALUE_OPS = ["=", "!=", ">", ">=", "<", "<=", "CONTAINS"]
+    @MULTIVALUE_OPS = ['ONE OF', 'NONE OF']
+    @TERNARY_OPS = ['LOOKUP']
+    @LOOP_OPS = ['=', '!=']
+    @LIST_OPS = ['IN', 'NOT IN']
+
     @OP_DICT =
         "=" : "="
         "==": "="
@@ -85,19 +93,20 @@ class Query
 
         while node = events.pop()
             tail = node.tail
-            args = node.event ? [node.event].concat(rest) : rest
+            args = if node.event then [node.event].concat(rest) else rest
             while ((node = node.next) isnt tail)
                 node.callback.apply(node.context || this, args)
 
         this
 
-    initialize: (properties, service) ->
+    constructor: (properties, service) ->
         _.defaults @,
             constraints: []
             views: []
             joins: []
             constraintLogic: ""
             sortOrder: ""
+        properties ?= {}
     
         @service = service ? {}
         @model = properties.model ? {}
@@ -114,7 +123,7 @@ class Query
         @constraintLogic = properties.constraintLogic if properties.constraintLogic?
 
     removeFromSelect: (unwanted) ->
-        unwanted = _.isString() ? [unwanted] : unwanted || []
+        unwanted = if _.isString() then [unwanted] else (unwanted || [])
         mapFn = _.compose(@expandStar, @adjustPath)
         unwanted = _.flatten (mapFn uw for uw in unwanted)
         @sortOrder = (so for so in @sortOrder when (not _.include(unwanted, so.path)))
@@ -124,13 +133,13 @@ class Query
 
     removeConstraint: (con) ->
         orig = @constraints
-        iscon = if typeof con is 'string'
-            (c) -> c.code is con
+        iscon = if (typeof con is 'string')
+            ((c) -> c.code is con)
         else
-            (c) ->
-                ( (c.path is con.path) and (c.op is con.op) and (c.value is con.value)
-                  and (c.extraValue is con.extraValue) and (con.type is c.type)
-                  and (c.values?.join('%%') is con.values?.join('%%')) )
+            ((c) -> (c.path is con.path) and
+                (c.op is con.op) and (c.value is con.value) and
+                (c.extraValue is con.extraValue) and (con.type is c.type) and
+                (c.values?.join('%%') is con.values?.join('%%')))
 
         reduced = (c for c in orig when (not iscon c))
 
@@ -142,7 +151,7 @@ class Query
         @trigger 'removed:constraints', _.difference(orig, reduced)
 
     addToSelect: (views) ->
-        views = _.isString(views) ? [views] : views || []
+        views = if _.isString(views) then [views] else ( views || [] )
         toAdd = _.map views, _.compose(@expandStar, @adjustPath)
         @views.push(p) for p in _.flatten([toAdd])
         @trigger 'add:view change:views', toAdd
@@ -151,6 +160,14 @@ class Query
         @views = []
         @addToSelect(v) for v in views
         @
+
+    adjustPath: (path) =>
+        path = if (path && path.name) then path.name else "" + path
+        if @root?
+            path = @root + "." + path unless path.match "^" + @root
+        else
+            @root = path.split('.')[0]
+        path
 
     # necessary now?
     _getAllFields: (table) ->
@@ -180,6 +197,9 @@ class Query
     getPathInfo: (path) ->
         @service.model.getPathInfo(@adjustPath(path), @getSubclasses())
 
+    getSubclasses: () ->
+        fold(@constraints)({}) (a, c) -> a[c.path] = c.type if c.type?; a
+
     getType: (path) ->
         @getPathInfo(path).getType()
 
@@ -205,7 +225,7 @@ class Query
             if /\.\*$/.test(path)
                 if cd and @summaryFields[cd.name]
                     fn = _.compose expand, decapitate
-                    return (n for n, f of @summaryFields[cd.name] when (not @hasView(n)))
+                    return (fn n for n in @summaryFields[cd.name] when (not @hasView(n)))
             if /\.\*\*$/.test(path)
                 fn = _.compose(expand, (a) -> '.' + a.name)
                 return _.uniq(_.union(@expandStar(pathStem + '.*'), _.map(cd.attributes, fn)))
@@ -224,14 +244,14 @@ class Query
 
     # TODO: unit tests
     appendToList: (target, cb) ->
-        name = (target && target.name) target.name : '' + target
+        name = if (target && target.name) then target.name else '' + target
         toRun = @clone()
         if toRun.views.length isnt 1 || !toRun.views[0].match(/\.id$/)
             toRun.select(['id'])
         req =
             listName: name
             query: toRun.toXML()
-        cb = (target && target.name) then ((list) -> target.size = list.size; cb(list)) else cb
+        cb = if (target && target.name) then ((list) -> target.size = list.size; cb(list)) else cb
 
         return @service.makeRequest('query/append/tolist',
             req, getListResponseHandler(@service, cb), 'POST')
@@ -347,15 +367,174 @@ class Query
         @joins[join.path] = join.style
         @trigger 'set:join', join.path, join.style
         
+    setJoinStyle: (path, style = 'OUTER') ->
+        path = @adjustPath(path)
+        style = style.toUpperCase()
+        if @joins[path] isnt style
+            @joins[path] = style
+            @trigger 'change:joins', path: path, style: style
+        this
 
+    addConstraints: (constraints) ->
+        @__silent__ = true
+        if _.isArray(constraints)
+            @addConstraint(c) for c in constraints
+        else
+            for path, con of constraints then do (path, con) =>
+                constraint = {path}
+                if _.isArray(con)
+                    constraint.op = 'ONE OF'
+                    constraint.values = con
+                else if _.isString(con) or _.isNumber(con)
+                    if con.toUpperCase?() in Query::NULL_OPS
+                        constraint.op = con
+                    else
+                        constraint.op = '='
+                        constraint.value = con
+                else
+                    keys = (k for k, x of con)
+                    if 'isa' in keys
+                        constraint.type = con.isa
+                    else
+                        if 'extraValue' in keys
+                            constraint.extraValue = con.extraValue
+                        for k, v of con when (k isnt 'extraValue')
+                            constraint.op = k
+                            constraint.value = v
+                @addConstraint(constraint)
 
+        @__silent__ = false
+        @trigger 'add:constraint'
+        @trigger 'change:constraints'
 
+    addConstraint: (constraint) ->
+        if _.isArray(constraint)
+            conArgs = constraint.slice()
+            constraint = path: conArgs.shift()
+            if conArgs.length is 1
+                a0 = conArgs[0]
+                if a0.toUpperCase?() in Query::NULL_OPS
+                    constraint.op = a0
+                else
+                    constraint.type = a0
+            else if conArgs.length >= 2
+                constraint.op = conArgs[0]
+                v = conArgs[1]
+                if _.isArray(v)
+                    constraint.values = v
+                else
+                    constraint.value = v
+                if conArgs.length == 3
+                    constraint.extraValue = conArgs[2]
+        constraint.path = @adjustPath(constraint.path)
+        unless constraint.type?
+            try
+                constraint.op = get_canonical_op(constraint.op)
+            catch error
+                throw new Error("Illegal operator: #{ constraint.op }")
+        @constraints.push constraint
+        unless @__silent__
+            @trigger 'add:constraint', constraint
+            @trigger 'change:constraints'
+        this
 
+    getSorting: () ->
+        fold(@sortOrder)("") (a, soe) -> a + "#{soe.path} #{soe.direction}"
 
+    getConstraintXML: () ->
+        f = (c) -> c.type?
+        g = (c) -> not f c
+        typeConsFirst = @constraints.filter(f).concat @constraints.filter(g)
+        fold(typeConsFirst)('') (a, c) ->
+            if c.values?
+                a + """<constraint path="#{c.path}" op="#{_.escape c.op}">
+                  #{fold(c.values)('') (a, v) -> a + "<value>#{_.escape v}</value>" }
+                </constraint>"""
+            else
+                a + """<constraint #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') }/>"""
 
+    getJoinXML: () ->
+        strs = for p, s of @joins when (@isRelevant(p) and s is 'OUTER')
+            "<join path=\"#{ p }\" style=\"OUTER\"/>"
+        strs.join ''
 
+    toXML: () ->
+        attrs =
+            model: @model.name
+            view: @views.join(' ')
+            sortOrder: @getSorting()
+            constraintLogic: @constraintLogic
+        """
+        <query #{(k + '="' + v + '"' for k, v of attrs when v).join(' ')} >
+          #{ @getJoinXML() }
+          #{ @getConstraintXML() }
+        </query>
+        """
 
-_get_data_fetcher: (server_fn) -> (page, cb) ->
+    isRelevant: (p) ->
+        pi = @getPathInfo p
+        pstr = pi.toPathString()
+        _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
+            p.indexOf(pstr) is 0
+
+    fetchCode: (lang, cb) ->
+        cb ?= ->
+        req =
+            query: @toXML()
+            lang: lang
+            format: 'json'
+        @service.makeRequest('query/code', req, (data) -> cb(data.code))
+
+    getCodeURI: (lang) ->
+        req =
+            query: @toXML()
+            lang: lang
+            format: 'text'
+        if @service?.token?
+            req.token = @service.token
+        "#{@service.root}query/code?#{ toQueryString req }"
+
+    getExportURI: (format = 'tab') ->
+        if format in Query::BIO_FORMATS
+            return @["get#{format.toUpperCase()}URI"]()
+        req =
+            query: @toXML()
+            format: format
+        if @service?.token? # hard to tell if necessary. Include it.
+            req.token = @service.token
+        "#{ @service.root }query/results?#{ toQueryString req }"
+
+    __bio_req: (types, n) ->
+        toRun = @clone()
+        olds = toRun.views
+        toRun.views = take(n) (olds.map((v) => @getPathInfo(v).getParent())
+            .filter((p) -> _.any types (t) -> p.isa(t))
+            .map((p) -> p.append('primaryIdentifier').toPathString()))
+
+        query: toRun.toXML()
+
+    _fasta_req: () -> @__bio_req ["SequenceFeature", 'Protein'], 1
+    _gff3_req: () -> @__bio_req ['SequenceFeature']
+    _bed_req: Query::_gff3_req
+
+Query.ATTRIBUTE_OPS = _.union Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS
+Query.REFERENCE_OPS = _.union Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS
+
+for f in Query.BIO_FORMATS then do (f) ->
+    reqMeth = "_#{ f }_req"
+    getMeth = "get#{ f.toUpperCase() }"
+    uriMeth = getMeth + "URI"
+    Query.prototype[getMeth] = (cb) ->
+        req = @[reqMeth]()
+        cb ?= ->
+        @service.makeRequest('query/results/' + f, req, cb, 'POST')
+    Query.prototype[uriMeth] = (cb) ->
+        req = @[reqMeth]()
+        if @service?.token? # hard to tell if necessary. Include it.
+            req.token = @service.token
+        "#{ @service.root }query/results/#{ f }?#{ toQueryString req }"
+
+_get_data_fetcher = (server_fn) -> (page, cb) ->
     cb ?= page
     page = if (_.isFunction(page) or not page) then {} else page
     if @service[server_fn]
@@ -364,31 +543,7 @@ _get_data_fetcher: (server_fn) -> (page, cb) ->
     else
         throw "This query has no service attached. It cannot request results"
 
-Query::rowByRow = _get_data_fetcher('rowByRow')
-Query::recordByRecord = _get_data_fetcher('recordByRecord')
-Query::records = _get_data_fetcher('records')
-Query::rows = _get_data_fetcher('rows')
-Query::table = _get_data_fetcher('table')
+for mth in ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table']
+    Query.prototype[mth] = _get_data_fetcher mth
 
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-    
-
-
+root.Query = Query
