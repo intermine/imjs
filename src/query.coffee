@@ -14,7 +14,7 @@ else
     _ = require('underscore')._
     clone = require('clone')
     toQueryString = require('querystring').stringify
-    {fold, take} = require('./shiv')
+    {partition, fold, take, concatMap, id} = require('./shiv')
 
 get_canonical_op = (orig) ->
     canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
@@ -28,6 +28,16 @@ getListResponseHandler = (service, cb) -> (data) ->
     cb ?= ->
     name = data.listName
     @service.fetchLists (ls) -> cb(_.find(ls, (l) -> l.name is name))
+
+# Constraint XML machinery
+conValStr = (v) -> "<value>#{_.escape v}</value>"
+simpleConStr = (c) -> """<constraint 
+    #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') }
+    />"""
+multiConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}">
+        #{fold('', (a, v) -> a + conValStr v) c.values}
+    </constraint>"""
+conStr = (c) -> if c.values? then multiConStr(c) else simpleConStr(c)
 
 class Query
     @JOIN_STYLES = ['INNER', 'OUTER']
@@ -195,10 +205,10 @@ class Query
         @_possiblePaths[depth] ?= _.flatten(@_getPaths(@root, cd, depth))
 
     getPathInfo: (path) ->
-        @service.model.getPathInfo(@adjustPath(path), @getSubclasses())
+        @service.model?.getPathInfo(@adjustPath(path), @getSubclasses())
 
     getSubclasses: () ->
-        fold(@constraints)({}) (a, c) -> a[c.path] = c.type if c.type?; a
+        fold({}, ((a, c) -> a[c.path] = c.type if c.type?;a)) @constraints
 
     getType: (path) ->
         @getPathInfo(path).getType()
@@ -355,7 +365,10 @@ class Query
         @trigger 'set:sortorder', @sortOrder
 
     addJoins: (joins) ->
-        @addJoin(j) for j in joins
+        if _.isArray(joins)
+            @addJoin(j) for j in joins
+        else
+            (@addJoin {path: k, style: v}) for k, v of joins
 
     addJoin: (join) ->
         if _.isString(join)
@@ -382,11 +395,13 @@ class Query
         else
             for path, con of constraints then do (path, con) =>
                 constraint = {path}
-                if _.isArray(con)
+                if con is null
+                    constraint.op = 'IS NULL'
+                else if _.isArray(con)
                     constraint.op = 'ONE OF'
                     constraint.values = con
                 else if _.isString(con) or _.isNumber(con)
-                    if con.toUpperCase?() in Query::NULL_OPS
+                    if con.toUpperCase?() in Query.NULL_OPS
                         constraint.op = con
                     else
                         constraint.op = '='
@@ -413,7 +428,7 @@ class Query
             constraint = path: conArgs.shift()
             if conArgs.length is 1
                 a0 = conArgs[0]
-                if a0.toUpperCase?() in Query::NULL_OPS
+                if a0.toUpperCase?() in Query.NULL_OPS
                     constraint.op = a0
                 else
                     constraint.type = a0
@@ -439,19 +454,10 @@ class Query
         this
 
     getSorting: () ->
-        fold(@sortOrder)("") (a, soe) -> a + "#{soe.path} #{soe.direction}"
+        @sortOrder.map((oe) -> "#{oe.path} #{oe.direction}").join(' ')
 
     getConstraintXML: () ->
-        f = (c) -> c.type?
-        g = (c) -> not f c
-        typeConsFirst = @constraints.filter(f).concat @constraints.filter(g)
-        fold(typeConsFirst)('') (a, c) ->
-            if c.values?
-                a + """<constraint path="#{c.path}" op="#{_.escape c.op}">
-                  #{fold(c.values)('') (a, v) -> a + "<value>#{_.escape v}</value>" }
-                </constraint>"""
-            else
-                a + """<constraint #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') }/>"""
+        concatMap(conStr) concatMap(id) partition((c) -> c.type?) @constraints
 
     getJoinXML: () ->
         strs = for p, s of @joins when (@isRelevant(p) and s is 'OUTER')
@@ -473,9 +479,12 @@ class Query
 
     isRelevant: (p) ->
         pi = @getPathInfo p
-        pstr = pi.toPathString()
-        _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
-            p.indexOf(pstr) is 0
+        if pi
+            pstr = pi.toPathString()
+            _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
+                p.indexOf(pstr) is 0
+        else
+            true # No model available - for testing return true.
 
     fetchCode: (lang, cb) ->
         cb ?= ->
