@@ -1,4 +1,6 @@
-Query = require('../../src/query').Query
+{Query} = require '../../src/query'
+{omap, fold}  = require '../../src/shiv'
+{decap, lc} = require './lib/util'
 
 exports["test Query#new"] = (beforeExit, assert) ->
     n = 0
@@ -16,22 +18,5 @@ exports['test Query.root'] = (beforeExit, assert) ->
     assert.equal 'Gene', q.root
     q = new Query from: 'Gene'
     assert.equal 'Gene', q.root
-
-exports['test Query.views'] = (beforeExit, assert) ->
-    q = new Query root: 'Gene', views: ['Gene.symbol', 'Gene.length']
-    assert.deepEqual q.views, ['Gene.symbol', 'Gene.length']
-    q = new Query from: 'Gene', select: ['Gene.symbol', 'Gene.length']
-    assert.deepEqual q.views, ['Gene.symbol', 'Gene.length']
-    q = new Query from: 'Gene', select: ['symbol', 'length']
-    assert.deepEqual q.views, ['Gene.symbol', 'Gene.length']
-    q = new Query select: ['Gene.symbol', 'Gene.length']
-    assert.deepEqual q.views, ['Gene.symbol', 'Gene.length']
-
-
-
-
-
-
-
 
 
