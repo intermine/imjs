@@ -550,7 +550,7 @@ _get_data_fetcher = (server_fn) -> (page, cb) ->
         _.defaults page, {start: @start, size: @maxRows}
         @service[server_fn](@, page, cb)
     else
-        throw "This query has no service attached. It cannot request results"
+        throw new Error("Could not find #{ server_fn } at this service. Sorry.")
 
 for mth in ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table']
     Query.prototype[mth] = _get_data_fetcher mth
