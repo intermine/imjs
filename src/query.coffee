@@ -6,7 +6,9 @@ if typeof exports is 'undefined'
     _CLONE = (o) -> jQuery.extend true, {}, o
     toQueryString = (req) -> jQuery.param(req)
     if typeof root.console is 'undefined'
-        root.console = log: ->
+        root.console =
+            log: ->
+            error: ->
     if root.intermine is 'undefined'
         root.intermine = {}
     root = root.intermine
@@ -28,13 +30,13 @@ decapitate = (x) -> x.substr(x.indexOf('.'))
 getListResponseHandler = (service, cb) -> (data) ->
     cb ?= ->
     name = data.listName
-    service.fetchLists (ls) -> cb(_.find(ls, (l) -> l.name is name))
+    service.fetchLists (ls) ->
+        theList = _.find ls, (l) -> l.name is name
+        cb(theList)
 
 # Constraint XML machinery
 conValStr = (v) -> "<value>#{_.escape v}</value>"
-simpleConStr = (c) -> """<constraint 
-    #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') }
-    />"""
+simpleConStr = (c) -> "<constraint #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') } />"
 multiConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}">
         #{fold('', (a, v) -> a + conValStr v) c.values}
     </constraint>"""
@@ -251,7 +253,7 @@ class Query
         if @service.count
             @service.count(@, cont)
         else
-            throw "This query has no service attached. It cannot request a count"
+            throw new Error("This query has no service with count functionality attached.")
 
     # TODO: unit tests
     appendToList: (target, cb) ->
@@ -262,10 +264,10 @@ class Query
         req =
             listName: name
             query: toRun.toXML()
-        cb = if (target && target.name) then ((list) -> target.size = list.size; cb(list)) else cb
+        wrapped = if (target && target.name) then ((list) -> target.size = list.size; cb(list)) else cb
 
         return @service.makeRequest('query/append/tolist',
-            req, getListResponseHandler(@service, cb), 'POST')
+            req, getListResponseHandler(@service, wrapped), 'POST')
 
     saveAsList: (options, cb) ->
         toRun = @clone()
@@ -458,7 +460,10 @@ class Query
         @sortOrder.map((oe) -> "#{oe.path} #{oe.direction}").join(' ')
 
     getConstraintXML: () ->
-        concatMap(conStr) concatMap(id) partition((c) -> c.type?) @constraints
+        if @constraints.length
+            concatMap(conStr) concatMap(id) partition((c) -> c.type?) @constraints
+        else
+            ''
 
     getJoinXML: () ->
         strs = for p, s of @joins when (@isRelevant(p) and s is 'OUTER')
@@ -471,12 +476,8 @@ class Query
             view: @views.join(' ')
             sortOrder: @getSorting()
             constraintLogic: @constraintLogic
-        """
-        <query #{(k + '="' + v + '"' for k, v of attrs when v).join(' ')} >
-          #{ @getJoinXML() }
-          #{ @getConstraintXML() }
-        </query>
-        """
+        headAttrs = (k + '="' + v + '"' for k, v of attrs when v).join(' ')
+        "<query #{headAttrs} >#{ @getJoinXML() }#{ @getConstraintXML() }</query>"
 
     isRelevant: (p) ->
         pi = @getPathInfo p
