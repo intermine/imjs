@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Client library for communication with InterMine web-services",
   "main": "lib/service",
   "keywords": [
@@ -32,7 +32,9 @@
     "tests": "test"
   },
   "scripts": {
-    "concat": "cat lib/*.js > build/im.js",
+    "pretest": "coffee -c -o lib src/*.coffee",
+    "prepublish": "coffee -c -o lib src/*.coffee",
+    "build-for-browser": "coffee -c -o lib src/*.coffee; cat lib/shiv.js lib/model.js lib/service.js lib/query.js lib/lists.js > build/im.js",
     "test": "expresso test/node/*.coffee"
   },
   "devDependencies": {
