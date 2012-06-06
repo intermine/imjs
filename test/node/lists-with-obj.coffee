@@ -2,5 +2,6 @@
 
 exports['can find lists containing an item'] = asyncTest 2, (beforeExit, assert) ->
     @service.fetchListsContaining publicId: 'Brenda', type: 'Employee', (ls) =>
-        @runTest () -> assert.eql 2, ls.length, "ls.length is #{ ls.length }, not 2"
+        # Depending on the order of execution, Brenda will be in either 2 or 3 lists...
+        @runTest () -> assert.includes [2, 3], ls.length, "ls.length is #{ ls.length }"
         @runTest () -> assert.includes (ls.map (l) -> l.name), 'The great unknowns'
