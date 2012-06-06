@@ -11,8 +11,12 @@ exports.testCase = (setup, teardown) -> (f) -> (beforeExit, assert) ->
 exports.asyncTestCase = (setup, teardown) -> (n, f) -> exports.testCase(setup, teardown) (beforeExit, assert) ->
     done = 0
     @runTest = (toRun) ->
-        toRun()
-        done++
+        try
+            toRun()
+            done++
+        catch err # At multiple layers of depth, these got surpressed.
+            console.error err
+            throw err
     beforeExit () -> assert.equal n, done, "Expected #{ n } tests: ran #{ done }"
     f.call(@, beforeExit, assert)
 
