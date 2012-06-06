@@ -11,7 +11,12 @@ unless Array::reduce?
         ret = (f ret, x) for x in xs
         ret
 
-exports.fold = (init, f) -> (xs) ->
+root = exports ? this
+unless exports?
+    root._func_shiv = {}
+    root = root._func_shiv
+
+root.fold = (init, f) -> (xs) ->
     if xs.reduce? # arrays
         xs.reduce f, init
     else # objects
@@ -20,20 +25,20 @@ exports.fold = (init, f) -> (xs) ->
            ret = if ret? then f(ret, k, v) else {k: v}
         ret
 
-exports.take = (n) -> (xs) -> exports.fold(xs)([]) (a, x) ->
+root.take = (n) -> (xs) -> exports.fold(xs)([]) (a, x) ->
     if (n? and a.length >= n) then a else a.concat [x]
 
 # Until I can find a nicer name for this...
 # Basically a mapping over an object, taking a
 # function of the form (oldk, oldv) -> [newk, newv]
-exports.omap = (f) -> (o) ->
+root.omap = (f) -> (o) ->
     domap = exports.fold {}, (a, k, v) ->
         [kk, vv] = f k, v
         a[kk] = vv
         a
     domap o
 
-exports.partition = (f) -> (xs) ->
+root.partition = (f) -> (xs) ->
     trues = []
     falses = []
     for x in xs
@@ -43,7 +48,7 @@ exports.partition = (f) -> (xs) ->
             falses.push x
     [trues, falses]
 
-exports.concatMap = (f) -> (xs) ->
+root.concatMap = (f) -> (xs) ->
     ret = undefined
     for x in xs
         fx = f x
@@ -58,5 +63,5 @@ exports.concatMap = (f) -> (xs) ->
             ret
     ret
 
-exports.id = (x) -> x
+root.id = (x) -> x
 
