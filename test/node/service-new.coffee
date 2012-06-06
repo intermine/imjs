@@ -1,13 +1,5 @@
 {Service} = require '../../lib/service'
-{testCase, asyncTestCase} = require './lib/util'
-
-setup = () ->
-    s = new Service root: 'squirrel/intermine-test', token: 'test-user-token'
-    {service: s}
-
-test = testCase setup
-
-asyncTest = asyncTestCase setup
+{test, asyncTest} = require './lib/service-setup'
 
 exports['test service root property'] = test (beforeExit, assert) ->
     assert.equal 'http://squirrel/intermine-test/service/', @service.root
