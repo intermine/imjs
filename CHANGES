@@ -8,3 +8,6 @@
        Added rowByRow and recordByRecord iteration.
 0.0.7: Thu May 31 15:02:39 BST 2012
        Support for both node and browser.
+0.0.8: Wed Jun  6 17:32:59 BST 2012
+       Made sure we only serialise relevant joins.
+       Also, first phase of coffee-script rewrite, and node test suite.
