@@ -37,9 +37,7 @@ getListResponseHandler = (service, cb) -> (data) ->
 # Constraint XML machinery
 conValStr = (v) -> "<value>#{_.escape v}</value>"
 simpleConStr = (c) -> "<constraint #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') } />"
-multiConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}">
-        #{fold('', (a, v) -> a + conValStr v) c.values}
-    </constraint>"""
+multiConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}">#{concatMap(conValStr) c.values}</constraint>"""
 conStr = (c) -> if c.values? then multiConStr(c) else simpleConStr(c)
 
 class Query
@@ -116,7 +114,7 @@ class Query
         _.defaults @,
             constraints: []
             views: []
-            joins: []
+            joins: {}
             constraintLogic: ""
             sortOrder: ""
         properties ?= {}
