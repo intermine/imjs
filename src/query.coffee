@@ -2,7 +2,8 @@ root = exports ? this
 if typeof exports is 'undefined'
     IS_NODE = false
     _ = root._
-    clone = (o) -> jQuery.extend true, {}, o
+    {partition, fold, take, concatMap, id} = root._func_shiv
+    _CLONE = (o) -> jQuery.extend true, {}, o
     toQueryString = (req) -> jQuery.param(req)
     if typeof root.console is 'undefined'
         root.console = log: ->
@@ -12,7 +13,7 @@ if typeof exports is 'undefined'
 else
     IS_NODE = true
     _ = require('underscore')._
-    clone = require('clone')
+    _CLONE = require('clone')
     toQueryString = require('querystring').stringify
     {partition, fold, take, concatMap, id} = require('./shiv')
 
@@ -27,7 +28,7 @@ decapitate = (x) -> x.substr(x.indexOf('.'))
 getListResponseHandler = (service, cb) -> (data) ->
     cb ?= ->
     name = data.listName
-    @service.fetchLists (ls) -> cb(_.find(ls, (l) -> l.name is name))
+    service.fetchLists (ls) -> cb(_.find(ls, (l) -> l.name is name))
 
 # Constraint XML machinery
 conValStr = (v) -> "<value>#{_.escape v}</value>"
@@ -302,7 +303,7 @@ class Query
             (data) -> cont(data.results, data.uniqueValues, data.filteredCount))
 
     clone: (cloneEvents) ->
-        cloned = clone(@)
+        cloned = _CLONE(@)
         unless cloneEvents
             cloned._callbacks = {}
         return cloned
