@@ -63,5 +63,11 @@ root.concatMap = (f) -> (xs) ->
             ret
     ret
 
+root.AND = (a, b) -> a and b
+
+root.OR = (a, b) -> a or b
+
+root.NOT = (x) -> not x
+
 root.id = (x) -> x
 
