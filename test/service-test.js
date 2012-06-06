@@ -61,7 +61,7 @@ asyncTest("summary fields", 1, function() {
 asyncTest('xml expansion', 1, function() {
     var older_emps = {select: ["*"], from: "Employee", where: {age: {gt: 50}}};
     this.s.query(older_emps, function(q) {
-        var expected =  "<query model=\"testmodel\" view=\"Employee.name Employee.department.name Employee.department.manager.name Employee.department.company.name Employee.fullTime Employee.address.address\"><constraint path=\"Employee.age\" op=\"&gt;\" value=\"50\"/></query>";
+        var expected =  "<query model=\"testmodel\" view=\"Employee.name Employee.department.name Employee.department.manager.name Employee.department.company.name Employee.fullTime Employee.address.address\" ><constraint path=\"Employee.age\" op=\"&gt;\" value=\"50\" /></query>";
         equals(q.toXML(), expected, "XML is correct"); 
         start();
     });

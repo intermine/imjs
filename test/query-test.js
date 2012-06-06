@@ -107,7 +107,10 @@ test('constraints in constructor', function() {
     );
 });
 test("joins in constructor", function() {
-    same(new intermine.Query().joins, {}, "No joins by default");
+    var q;
+    q = new intermine.Query();
+    console.log("JOINS", q.joins);
+    same(q.joins, {}, "No joins by default");
     same(
         new intermine.Query({root: "Employee", joins: [
             {path: "department", style: "OUTER"},
@@ -226,18 +229,18 @@ test('toXML()', function() {
             },
             model: {name: "testmodel"}
         }).toXML(),
-        '<query model="testmodel" view="Employee.name Employee.age Employee.department.name">'
+        '<query model="testmodel" view="Employee.name Employee.age Employee.department.name" >'
          + '<join path="Employee.department.manager" style="OUTER"/>'
          + '<join path="Employee.department.company" style="OUTER"/>'
-         + '<constraint path="Employee.department.manager" type="CEO"/>'
-         + '<constraint path="Employee.name" op="=" value="David*"/>'
-         + '<constraint path="Employee.end" op="IS NOT NULL"/>'
-         + '<constraint path="Employee.age" op="&gt;" value="50"/>'
+         + '<constraint path="Employee.department.manager" type="CEO" />'
+         + '<constraint path="Employee.name" op="=" value="David*" />'
+         + '<constraint path="Employee.end" op="IS NOT NULL" />'
+         + '<constraint path="Employee.age" op="&gt;" value="50" />'
          + '<constraint path="Employee.department.name" op="ONE OF">'
          +   '<value>Sales</value>'
          +   '<value>Accounting</value>'
          + '</constraint>'
-         + '<constraint path="Employee.department" op="IN" value="GoodDepartments"/>'
+         + '<constraint path="Employee.department" op="IN" value="GoodDepartments" />'
          + '</query>',
         "Can serialise to XML"
     );
@@ -257,13 +260,13 @@ test('toXML()', function() {
             model: {name: "testmodel"}
         }).toXML(),
         '<query model="testmodel" view="Employee.name Employee.age Employee.department.name" '
-         + 'sortOrder="Employee.age ASC Employee.name ASC">'
+         + 'sortOrder="Employee.age ASC Employee.name ASC" >'
          + '<join path="Employee.department.manager" style="OUTER"/>'
          + '<join path="Employee.department.company" style="OUTER"/>'
-         + '<constraint path="Employee.department.manager" type="CEO"/>'
-         + '<constraint path="Employee.name" op="=" value="David*"/>'
-         + '<constraint path="Employee.end" op="IS NOT NULL"/>'
-         + '<constraint path="Employee.age" op="&gt;" value="50"/>'
+         + '<constraint path="Employee.department.manager" type="CEO" />'
+         + '<constraint path="Employee.name" op="=" value="David*" />'
+         + '<constraint path="Employee.end" op="IS NOT NULL" />'
+         + '<constraint path="Employee.age" op="&gt;" value="50" />'
          + '<constraint path="Employee.department.name" op="ONE OF">'
          +   '<value>Sales</value>'
          +   '<value>Accounting</value>'
@@ -281,8 +284,8 @@ test('toXML()', function() {
             },
             model: {name: "testmodel"}
         }).toXML(),
-        '<query model="testmodel" view="Employee.name Employee.age Employee.department.name">'
-         + '<constraint path="Employee.name" op="CONTAINS" value="&lt;"/>'
+        '<query model="testmodel" view="Employee.name Employee.age Employee.department.name" >'
+         + '<constraint path="Employee.name" op="CONTAINS" value="&lt;" />'
          + '<constraint path="Employee.department.name" op="ONE OF">'
          +   '<value>R &amp; D</value>'
          +   '<value>&gt;</value>'
