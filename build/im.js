@@ -68,13 +68,11 @@
 
   root.take = function(n) {
     return function(xs) {
-      return exports.fold(xs)([])(function(a, x) {
-        if ((n != null) && a.length >= n) {
-          return a;
-        } else {
-          return a.concat([x]);
-        }
-      });
+      if (n != null) {
+        return xs.slice(0, (n - 1) + 1 || 9e9);
+      } else {
+        return xs;
+      }
     };
   };
 
@@ -647,20 +645,29 @@
                  ret.then(opts.success);
                  res.on('data', function(chunk) {contentBuffer += chunk});
                  res.on('end', function() {
-                     var parsed;
-                     try {
-                         parsed = JSON.parse(contentBuffer);
-                         if (parsed.error) {
-                             var error = new Error("When running " + JSON.stringify(opts.data) + ": " + parsed.error);
-                             ret.reject(error, parsed.status);
+                     if (opts.data.format.match(/json/)) {
+                        var parsed;
+                        try {
+                            parsed = JSON.parse(contentBuffer);
+                            if (parsed.error) {
+                                var error = new Error("When running " + JSON.stringify(opts.data) + ": " + parsed.error);
+                                ret.reject(error, parsed.status);
+                            } else {
+                                ret.resolve(parsed);
+                            }
+                        } catch(e) {
+                            ret.reject(new Error(e), contentBuffer);
+                        }
+                     } else {
+                         var e;
+                         if (e = contentBuffer.match(/\[Error\] (\d+)(.*)/m)) {
+                             ret.reject(new Error(e[2], e[1]));
                          } else {
-                             ret.resolve(parsed);
+                             ret.resolve(contentBuffer);
                          }
-                     } catch(e) {
-                         ret.reject(new Error(e), contentBuffer);
                      }
                  });
-            }};
+            }}
 
             this.doReq = function(opts, resultByResult) {
                 var ret = new Deferred().fail(opts.error);
@@ -1925,7 +1932,7 @@
       if (format == null) {
         format = 'tab';
       }
-      if (__indexOf.call(Query.prototype.BIO_FORMATS, format) >= 0) {
+      if (__indexOf.call(Query.BIO_FORMATS, format) >= 0) {
         return this["get" + (format.toUpperCase()) + "URI"]();
       }
       req = {
@@ -1946,14 +1953,15 @@
       toRun.views = take(n)(olds.map(function(v) {
         return _this.getPathInfo(v).getParent();
       }).filter(function(p) {
-        return _.any(types(function(t) {
+        return _.any(types, function(t) {
           return p.isa(t);
-        }));
+        });
       }).map(function(p) {
         return p.append('primaryIdentifier').toPathString();
       }));
       return {
-        query: toRun.toXML()
+        query: toRun.toXML(),
+        format: 'text'
       };
     };
 
