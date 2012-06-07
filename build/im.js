@@ -1163,6 +1163,8 @@
       "is not null": "IS NOT NULL",
       "ONE OF": "ONE OF",
       "one of": "ONE OF",
+      "NONE OF": "ONE OF",
+      "none of": "ONE OF",
       "in": "IN",
       "not in": "IN",
       "IN": "IN",
