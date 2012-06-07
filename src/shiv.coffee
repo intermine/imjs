@@ -25,8 +25,7 @@ root.fold = (init, f) -> (xs) ->
            ret = if ret? then f(ret, k, v) else {k: v}
         ret
 
-root.take = (n) -> (xs) -> exports.fold(xs)([]) (a, x) ->
-    if (n? and a.length >= n) then a else a.concat [x]
+root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
 
 # Until I can find a nicer name for this...
 # Basically a mapping over an object, taking a
