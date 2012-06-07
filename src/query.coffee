@@ -1,3 +1,13 @@
+# This module supplies the **Query** class for the **im.js**
+# web-service client.
+#
+# Queries are representations of requests for data to a web-service.
+# They abstract the path-query object interface which is exposed
+# by the InterMine API.
+#
+# This library is designed to be compatible with both node.js
+# and browsers.
+
 root = exports ? this
 if typeof exports is 'undefined'
     IS_NODE = false
@@ -73,6 +83,8 @@ class Query
         "is not null": "IS NOT NULL"
         "ONE OF": "ONE OF"
         "one of": "ONE OF"
+        "NONE OF": "ONE OF"
+        "none of": "ONE OF"
         "in": "IN"
         "not in": "IN"
         "IN": "IN"
