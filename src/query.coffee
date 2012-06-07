@@ -516,7 +516,7 @@ class Query
         "#{@service.root}query/code?#{ toQueryString req }"
 
     getExportURI: (format = 'tab') ->
-        if format in Query::BIO_FORMATS
+        if format in Query.BIO_FORMATS
             return @["get#{format.toUpperCase()}URI"]()
         req =
             query: @toXML()
@@ -529,10 +529,10 @@ class Query
         toRun = @clone()
         olds = toRun.views
         toRun.views = take(n) (olds.map((v) => @getPathInfo(v).getParent())
-            .filter((p) -> _.any types (t) -> p.isa(t))
+            .filter((p) -> _.any types, (t) -> p.isa(t))
             .map((p) -> p.append('primaryIdentifier').toPathString()))
 
-        query: toRun.toXML()
+        query: toRun.toXML(), format: 'text'
 
     _fasta_req: () -> @__bio_req ["SequenceFeature", 'Protein'], 1
     _gff3_req: () -> @__bio_req ['SequenceFeature']
