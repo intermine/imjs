@@ -21,3 +21,29 @@ exports['path to string'] = asyncTest 4, (beforeExit, assert) ->
         @runTest () -> assert.eql path, m.getPathInfo(path).toPathString()
         @runTest () -> assert.eql path, "" + m.getPathInfo(path)
         @runTest () -> assert.equal path, "" + m.getPathInfo(path)
+
+exports['path to string'] = asyncTest 16, (beforeExit, assert) ->
+    attr = 'Company.departments.employees.address.address'
+    ref = 'Company.departments.employees.address'
+    coll = 'Company.departments.employees'
+    root = 'Company'
+    @service.fetchModel (m) =>
+        @runTest () -> assert.ok m.getPathInfo(attr).isAttribute()
+        @runTest () -> assert.ok !m.getPathInfo(attr).isReference()
+        @runTest () -> assert.ok !m.getPathInfo(attr).isCollection()
+        @runTest () -> assert.ok !m.getPathInfo(attr).isClass()
+
+        @runTest () -> assert.ok !m.getPathInfo(ref).isAttribute()
+        @runTest () -> assert.ok m.getPathInfo(ref).isReference()
+        @runTest () -> assert.ok !m.getPathInfo(ref).isCollection()
+        @runTest () -> assert.ok m.getPathInfo(ref).isClass()
+
+        @runTest () -> assert.ok !m.getPathInfo(coll).isAttribute()
+        @runTest () -> assert.ok m.getPathInfo(coll).isReference()
+        @runTest () -> assert.ok m.getPathInfo(coll).isCollection()
+        @runTest () -> assert.ok m.getPathInfo(coll).isClass()
+
+        @runTest () -> assert.ok !m.getPathInfo(root).isAttribute()
+        @runTest () -> assert.ok !m.getPathInfo(root).isReference()
+        @runTest () -> assert.ok !m.getPathInfo(root).isCollection()
+        @runTest () -> assert.ok m.getPathInfo(root).isClass()
