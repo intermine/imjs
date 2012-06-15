@@ -11,3 +11,7 @@
 0.0.8: Wed Jun  6 17:32:59 BST 2012
        Made sure we only serialise relevant joins.
        Also, first phase of coffee-script rewrite, and node test suite.
+0.1.0: Fri Jun 15 18:16:42 BST 2012
+       Test suite expansion.
+       More path functions.
+       Support for tableRows.
