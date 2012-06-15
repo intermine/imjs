@@ -13,3 +13,11 @@ exports['path with reference'] = piTypeTest 'Department.employees.name', 'String
 exports['path with subclassing'] = piTypeTest 'Department.employees.seniority', 'Integer', {'Department.employees': 'Manager'}
     
 exports['long subclassed path'] = piTypeTest 'Department.employees.company.vatNumber', 'int', {'Department.employees': 'CEO'}
+
+exports['path to string'] = asyncTest 4, (beforeExit, assert) ->
+    path = 'Company.departments.employees.address.address'
+    @service.fetchModel (m) =>
+        @runTest () -> assert.eql path, m.getPathInfo(path).toString()
+        @runTest () -> assert.eql path, m.getPathInfo(path).toPathString()
+        @runTest () -> assert.eql path, "" + m.getPathInfo(path)
+        @runTest () -> assert.equal path, "" + m.getPathInfo(path)
