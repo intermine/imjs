@@ -15,3 +15,5 @@
        Test suite expansion.
        More path functions.
        Support for tableRows.
+0.1.1: Mon Jun 25 16:14:43 BST 2012
+       Fix for view removal bug.
