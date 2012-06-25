@@ -146,11 +146,11 @@ class Query
         @constraintLogic = properties.constraintLogic if properties.constraintLogic?
 
     removeFromSelect: (unwanted) ->
-        unwanted = if _.isString() then [unwanted] else (unwanted || [])
+        unwanted = if _.isString(unwanted) then [unwanted] else (unwanted || [])
         mapFn = _.compose(@expandStar, @adjustPath)
         unwanted = _.flatten (mapFn uw for uw in unwanted)
-        @sortOrder = (so for so in @sortOrder when (not _.include(unwanted, so.path)))
-        @views = _.difference(@views, unwanted)
+        @sortOrder = (so for so in @sortOrder when not (so.path in unwanted))
+        @views = (v for v in @views when not (v in unwanted))
         @trigger('remove:view', unwanted)
         @trigger('change:views', @views)
 

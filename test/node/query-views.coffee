@@ -23,3 +23,12 @@ exports['test headless views:select'] = (beforeExit, assert) ->
 exports['test no root views:select'] = (beforeExit, assert) ->
     q = new Query select: expected
     assert.deepEqual q.views, expected
+
+exports['test remove views'] = (beforeExit, assert) ->
+    q = new Query select: expected
+    q.removeFromSelect 'Gene.symbol'
+    assert.deepEqual q.views, ['Gene.length']
+
+    q = new Query from: "Gene", select: ["symbol", "name", "length", "primaryIdentifier"]
+    q.removeFromSelect ['symbol', "length"]
+    assert.deepEqual q.views, ['Gene.name', 'Gene.primaryIdentifier']
