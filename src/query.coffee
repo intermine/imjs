@@ -177,11 +177,11 @@ class Query
         views = if _.isString(views) then [views] else ( views || [] )
         toAdd = _.map views, _.compose(@expandStar, @adjustPath)
         @views.push(p) for p in _.flatten([toAdd])
-        @trigger 'add:view change:views', toAdd
+        @trigger('add:view change:views', toAdd)
     
     select: (views) ->
         @views = []
-        @addToSelect(v) for v in views
+        @addToSelect views
         @
 
     adjustPath: (path) =>
