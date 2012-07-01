@@ -130,6 +130,7 @@ class Query
             constraintLogic: ""
             sortOrder: ""
         properties ?= {}
+        @displayNames = properties.aliases ? {}
     
         @service = service ? {}
         @model = properties.model ? {}
@@ -218,7 +219,10 @@ class Query
         @_possiblePaths[depth] ?= _.flatten(@_getPaths(@root, cd, depth))
 
     getPathInfo: (path) ->
-        @service.model?.getPathInfo(@adjustPath(path), @getSubclasses())
+        adjusted = @adjustPath path
+        pi = @service.model?.getPathInfo(adjusted, @getSubclasses())
+        pi.displayName = @displayNames[adjusted] if (adjusted of @displayNames)
+        return pi
 
     getSubclasses: () ->
         fold({}, ((a, c) -> a[c.path] = c.type if c.type?;a)) @constraints
