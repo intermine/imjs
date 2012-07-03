@@ -191,7 +191,7 @@
         if (this.isRoot()) {
             throw "Root paths do not have a parent";
         }
-        var data = _.extend({}, this, {descriptors: _(this.descriptors).initial()});
+        var data = _.extend({}, this, {descriptors: _(this.descriptors).initial(), displayName: null});
         return new PathInfo(data);
     };
 
@@ -200,7 +200,7 @@
         if (_(attr).isString()) {
             attr = type.fields[attr];
         }
-        var data = _.extend({}, this, {descriptors: this.descriptors.concat([attr])});
+        var data = _.extend({}, this, {descriptors: this.descriptors.concat([attr]), displayName: null});
         return new PathInfo(data);
     };
 
