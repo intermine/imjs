@@ -118,7 +118,8 @@ class Query
             tail = node.tail
             args = if node.event then [node.event].concat(rest) else rest
             while ((node = node.next) isnt tail)
-                node.callback.apply(node.context || this, args)
+                # Experiencing error on undefined callbacks. TODO
+                node.callback?.apply(node.context || this, args)
 
         this
 
