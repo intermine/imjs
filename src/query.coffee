@@ -234,8 +234,7 @@ class Query
         toParentNode = (v) => @getPathInfo(v).getParent()
         _.uniq(_.map(@views, toParentNode), false, (n) -> n.toPathString())
 
-    canHaveMultipleValues: (path) ->
-        @service.model.hasCollection(@adjustPath(path))
+    canHaveMultipleValues: (path) -> @getPathInfo(path).containsCollection()
 
     getQueryNodes: () ->
         viewNodes = @getViewNodes()
