@@ -118,8 +118,7 @@ class Query
             tail = node.tail
             args = if node.event then [node.event].concat(rest) else rest
             while ((node = node.next) isnt tail)
-                # Experiencing error on undefined callbacks. TODO
-                node.callback?.apply(node.context || this, args)
+                node.callback.apply(node.context || this, args)
 
         this
 
@@ -320,7 +319,9 @@ class Query
 
     clone: (cloneEvents) ->
         cloned = _CLONE(@)
-        unless cloneEvents
+        if cloneEvents
+            cloned._callbacks = @._callbacks
+        else
             cloned._callbacks = {}
         return cloned
 
