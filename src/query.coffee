@@ -54,7 +54,7 @@ class Query
     @JOIN_STYLES = ['INNER', 'OUTER']
     @BIO_FORMATS = ['gff3', 'fasta', 'bed']
     @NULL_OPS = ['IS NULL', 'IS NOT NULL']
-    @ATTRIBUTE_VALUE_OPS = ["=", "!=", ">", ">=", "<", "<=", "CONTAINS"]
+    @ATTRIBUTE_VALUE_OPS = ["=", "!=", ">", ">=", "<", "<=", "CONTAINS", "LIKE", "NOT LIKE"]
     @MULTIVALUE_OPS = ['ONE OF', 'NONE OF']
     @TERNARY_OPS = ['LOOKUP']
     @LOOP_OPS = ['=', '!=']
@@ -75,7 +75,11 @@ class Query
         "<=": "<="
         "le": "<="
         "contains": "CONTAINS"
+        "CONTAINS": "CONTAINS"
         "like": "LIKE"
+        "LIKE": "LIKE"
+        "not like": "NOT LIKE"
+        "NOT LIKE": "NOT LIKE"
         "lookup": "LOOKUP"
         "IS NULL": "IS NULL"
         "is null": "IS NULL"
