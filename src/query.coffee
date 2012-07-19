@@ -159,7 +159,7 @@ class Query
         @trigger('remove:view', unwanted)
         @trigger('change:views', @views)
 
-    removeConstraint: (con) ->
+    removeConstraint: (con, silent = false) ->
         orig = @constraints
         iscon = if (typeof con is 'string')
             ((c) -> c.code is con)
@@ -175,8 +175,9 @@ class Query
             throw "Did not remove a single constraint. original = #{ orig }, reduced = #{ reduced }"
 
         @constraints = reduced
-        @trigger 'change:constraints'
-        @trigger 'removed:constraints', _.difference(orig, reduced)
+        unless silent
+            @trigger 'change:constraints'
+            @trigger 'removed:constraints', _.difference(orig, reduced)
 
     addToSelect: (views) ->
         views = if _.isString(views) then [views] else ( views || [] )
