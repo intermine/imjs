@@ -14,6 +14,13 @@ exports['path with subclassing'] = piTypeTest 'Department.employees.seniority', 
     
 exports['long subclassed path'] = piTypeTest 'Department.employees.company.vatNumber', 'int', {'Department.employees': 'CEO'}
 
+parentTest = (path, expType, subclasses) -> piTest (assert, m) -> () ->
+    assert.eql expType, m.getPathInfo(path, subclasses).getParent().getType().name
+
+exports['type of parent'] = parentTest "Department.employees.name", "Employee", {}
+exports['type of subclassed parent'] =
+    parentTest "Department.employees.name", "Manager", {"Department.employees": "Manager"}
+
 exports['path to string'] = asyncTest 4, (beforeExit, assert) ->
     path = 'Company.departments.employees.address.address'
     @service.fetchModel (m) =>
