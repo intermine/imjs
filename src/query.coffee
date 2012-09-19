@@ -48,7 +48,13 @@ getListResponseHandler = (service, cb) -> (data) ->
 conValStr = (v) -> "<value>#{_.escape v}</value>"
 simpleConStr = (c) -> "<constraint #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') } />"
 multiConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}">#{concatMap(conValStr) c.values}</constraint>"""
-conStr = (c) -> if c.values? then multiConStr(c) else simpleConStr(c)
+idConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}" code="#{c.code}" ids="#{c.ids.join(',')}"/>"""
+conStr = (c) -> if c.values?
+        multiConStr(c)
+    else if c.ids?
+        idConStr(c)
+    else
+        simpleConStr(c)
 
 class Query
     @JOIN_STYLES = ['INNER', 'OUTER']
@@ -93,6 +99,10 @@ class Query
         "not in": "IN"
         "IN": "IN"
         "NOT IN": "NOT IN"
+        "WITHIN": "WITHIN"
+        "within": "WITHIN"
+        "OVERLAPS": "OVERLAPS"
+        "overlaps": "OVERLAPS"
 
     on: (events, callback, context) ->
         events = events.split /\s+/
