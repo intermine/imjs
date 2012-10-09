@@ -103,6 +103,8 @@ class Query
         "within": "WITHIN"
         "OVERLAPS": "OVERLAPS"
         "overlaps": "OVERLAPS"
+        "ISA": "ISA"
+        "isa": "ISA"
 
     on: (events, callback, context) ->
         events = events.split /\s+/
@@ -442,13 +444,20 @@ class Query
                 else
                     keys = (k for k, x of con)
                     if 'isa' in keys
-                        constraint.type = con.isa
+                        if _.isArray(con.isa)
+                            constraint.op = k
+                            constraint.values = con.isa
+                        else
+                            constraint.type = con.isa
                     else
                         if 'extraValue' in keys
                             constraint.extraValue = con.extraValue
                         for k, v of con when (k isnt 'extraValue')
                             constraint.op = k
-                            constraint.value = v
+                            if _.isArray(v)
+                                constraint.values = v
+                            else
+                                constraint.value = v
                 @addConstraint(constraint)
 
         @__silent__ = false

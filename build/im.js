@@ -178,13 +178,14 @@
     };
 
     PathInfo.prototype.getEndClass = function() {
+        var endClassName, endClass = null;
         if (this.isRoot()) {
-            return this.root;
+            endClass = this.root;
+        } else if (this.isClass()) {
+            endClassName = this.subclasses[this.toString()] || this.end.referencedType;
+            endClass = this.model.classes[endClassName];
         }
-        if (this.isClass()) {
-            return this.model.classes[this.end.referencedType];
-        }
-        return null;
+        return endClass;
     };
 
     PathInfo.prototype.getParent = function() {
@@ -1281,7 +1282,9 @@
       "WITHIN": "WITHIN",
       "within": "WITHIN",
       "OVERLAPS": "OVERLAPS",
-      "overlaps": "OVERLAPS"
+      "overlaps": "OVERLAPS",
+      "ISA": "ISA",
+      "isa": "ISA"
     };
 
     Query.prototype.on = function(events, callback, context) {
@@ -1887,7 +1890,12 @@
               return _results;
             })();
             if (__indexOf.call(keys, 'isa') >= 0) {
-              constraint.type = con.isa;
+              if (_.isArray(con.isa)) {
+                constraint.op = k;
+                constraint.values = con.isa;
+              } else {
+                constraint.type = con.isa;
+              }
             } else {
               if (__indexOf.call(keys, 'extraValue') >= 0) {
                 constraint.extraValue = con.extraValue;
@@ -1898,7 +1906,11 @@
                   continue;
                 }
                 constraint.op = k;
-                constraint.value = v;
+                if (_.isArray(v)) {
+                  constraint.values = v;
+                } else {
+                  constraint.value = v;
+                }
               }
             }
           }
@@ -2169,6 +2181,7 @@
 (function(exports, IS_NODE) {
 
     var _;
+    var TAGS_PATH = "list/tags";
     if (IS_NODE) {
         _ = require('underscore')._;
     } else {
@@ -2179,24 +2192,24 @@
         exports = intermine;
     }
 
+    var isFolder = function(t) {
+        return t.substr(0, t.indexOf(":")) === '__folder__';
+    };
+    var getFolderName = function(t) {
+        return t.substr(t.indexOf(":") + 1);
+    };
+
     var List = function(properties, service) {
 
         _(this).extend(properties);
         this.service = service;
         this.dateCreated = this.dateCreated ? new Date(this.dateCreated) : null;
 
-        var isFolder = function(t) {
-            return t.substr(0, t.indexOf(":")) === '__folder__';
-        };
-        var getFolderName = function(t) {
-            return t.substr(t.indexOf(":") + 1);
-        };
-
         this.folders = _(this.tags).chain()
                                    .filter(isFolder)
                                    .map(getFolderName)
                                    .value();
-        
+
         /**
          * Does this list have a given tag?
          *
