@@ -1,3 +1,4 @@
 node_modules
 lib/shiv.js
 lib/query.js
+lib/user.js
