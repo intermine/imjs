@@ -17,6 +17,7 @@ exports.asyncTestCase = (setup, teardown) -> (n, f) -> exports.testCase(setup, t
         catch err # At multiple layers of depth, these got surpressed.
             console.error err
             throw err
+    @testCB = (toRun) => () => @runTest(toRun) # Shortcut for passing tests into deferred pipes
     beforeExit () -> assert.equal n, done, "Expected #{ n } tests: ran #{ done }"
     f.call(@, beforeExit, assert)
 

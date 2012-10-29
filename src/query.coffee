@@ -46,13 +46,20 @@ getListResponseHandler = (service, cb) -> (data) ->
 
 # Constraint XML machinery
 conValStr = (v) -> "<value>#{_.escape v}</value>"
-simpleConStr = (c) -> "<constraint #{ (k + '="' + _.escape(v) + '"' for k, v of c).join(' ') } />"
-multiConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}">#{concatMap(conValStr) c.values}</constraint>"""
-idConStr = (c) -> """<constraint path="#{c.path}" op="#{_.escape c.op}" code="#{c.code}" ids="#{c.ids.join(',')}"/>"""
+conAttrs = (c, names) -> ("""#{k}="#{_.escape(v)}" """ for k, v of c when (k in names)).join('')
+noValueConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'op', 'code']) }/>"""
+typeConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'type']) }/>"""
+simpleConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'op', 'code', 'value', 'extraValue']) }/>"""
+multiConStr = (c)  -> """<constraint #{ conAttrs(c, ['path', 'op', 'code']) }>#{concatMap(conValStr) c.values}</constraint>"""
+idConStr = (c)     -> """<constraint #{ conAttrs(c, ['path', 'op', 'code']) }ids="#{c.ids.join(',')}"/>"""
 conStr = (c) -> if c.values?
         multiConStr(c)
     else if c.ids?
         idConStr(c)
+    else if !c.op?
+        typeConStr(c)
+    else if c.op in Query.NULL_OPS
+        noValueConStr(c)
     else
         simpleConStr(c)
 
@@ -96,7 +103,7 @@ class Query
         "NONE OF": "NONE OF"
         "none of": "NONE OF"
         "in": "IN"
-        "not in": "IN"
+        "not in": "NOT IN"
         "IN": "IN"
         "NOT IN": "NOT IN"
         "WITHIN": "WITHIN"
