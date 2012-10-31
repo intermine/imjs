@@ -12,7 +12,7 @@ root = exports ? this
 if typeof exports is 'undefined'
     IS_NODE = false
     _ = root._
-    {partition, fold, take, concatMap, id} = root._func_shiv
+    {partition, fold, take, concatMap, id} = root.intermine.funcutils
     _CLONE = (o) -> jQuery.extend true, {}, o
     toQueryString = (req) -> jQuery.param(req)
     if typeof root.console is 'undefined'

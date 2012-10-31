@@ -13,8 +13,9 @@ unless Array::reduce?
 
 root = exports ? this
 unless exports?
-    root._func_shiv = {}
-    root = root._func_shiv
+    root.intermine ?= {}
+    root.intermine.funcutils ?= {}
+    root = root.intermine.funcutils
 
 root.fold = (init, f) -> (xs) ->
     if xs.reduce? # arrays
@@ -69,4 +70,6 @@ root.OR = (a, b) -> a or b
 root.NOT = (x) -> not x
 
 root.id = (x) -> x
+
+root.invoke = (name, args...) -> (obj) -> obj[name].apply(obj, args)
 

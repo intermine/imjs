@@ -13,7 +13,7 @@ expected = """
        <constraint path="Employee.name" op="=" value="David*" />
        <constraint path="Employee.end" op="IS NULL" />
        <constraint path="Employee.age" op="&gt;" value="50" />
-       <constraint path="Employee.department.name" op="ONE OF">
+       <constraint path="Employee.department.name" op="ONE OF" >
          <value>Sales</value>
          <value>Accounting</value>
        </constraint>
@@ -34,7 +34,7 @@ exports['test escape XML entities where needed'] = (beforeExit, assert) ->
     exp = """
         <query model="testmodel" view="Employee.name" >
             <constraint path="Employee.name" op="CONTAINS" value="&lt;" />
-            <constraint path="Employee.department.name" op="ONE OF">
+            <constraint path="Employee.department.name" op="ONE OF" >
                 <value>R &amp; D</value>
                 <value>&gt;</value>
             </constraint>
@@ -42,8 +42,8 @@ exports['test escape XML entities where needed'] = (beforeExit, assert) ->
     """
     got = normalise(q.toXML())
     exp = normalise(exp)
-    # console.log got
-    # console.log exp
+    #console.log "GOT", got
+    #console.log "EXP", exp
     assert.eql got, exp
 
 
