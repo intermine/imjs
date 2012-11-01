@@ -34,7 +34,7 @@
   "scripts": {
     "pretest": "coffee -c -o lib src/*.coffee",
     "prepublish": "coffee -c -o lib src/*.coffee",
-    "build-for-browser": "coffee -c -o lib src/*.coffee; cat lib/shiv.js lib/model.js lib/user.js lib/service.js lib/query.js lib/lists.js > build/im.js",
+    "build-for-browser": "coffee -c -o lib src/*.coffee; cat lib/ie8-cors-support.js lib/shiv.js lib/model.js lib/user.js lib/service.js lib/query.js lib/lists.js > build/im.js",
     "test": "C=0; T=0; for t in test/node/*.coffee; do T=$(($T + 1)); echo running $t; expresso $t && C=$(($C + 1)) && echo ok; done; test $C = $T && echo aok || echo tests failed"
   },
   "devDependencies": {
