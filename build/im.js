@@ -803,15 +803,88 @@
         if (typeof User === 'undefined' && intermine) {
             User = intermine.User;
         }
+        
+        /**
+         * The kind of object that the server sends as for every
+         * JSON request. A results envelope will be sent for every request, even if the
+         * request is unsuccessful.
+         * @name ResultsEnvelope
+         * @property {boolean} wasSuccessful Whether or not this request was successful. This
+         *           property should be checked for streaming requests (such as query results),
+         *           as errors can occur while results are being processed.
+         * @property {int} statusCode The HTTP error code.
+         * @property {String} error A human-readable error message saying what went wrong.
+         * @property {String} executionTime The time when this result set was generated. eg: 2012.11.02 16:00::16
+         */
 
-        var getResultProcessor = function(key) { return function(cb) { return function(data) {
-            var item = data[key];
-            (cb || IDENTITY)(item, data);
-            return item;
+        var wrapErrorHandler = function(handler) { return function(xhr, textStatus, e) {
+            try {
+                return JSON.parse(xhr.responseText);
+            } catch (parseError) {
+                return textStatus;
+            }
+        }};
+
+        /**
+         * A function that can be passed as the callback to handle
+         * the successful completion of an HTTP service request.
+         * @name SuccessCallback
+         * @param data {ResultsEnvelope} The data received from the server.
+         * @return void
+         */
+
+        /**
+         * A function to wrap an optional callback which extracts
+         * a specific property from a results envelope and passes it into
+         * the callback if it exists and returns the extracted value.
+         * @name ResultProcessor
+         * @param cb {ItemProcessor} The optional callback
+         * @return {SuccessCallback} A success callback.
+         */
+
+        /**
+         * A function that handles the results returned from as server call.
+         * @name ItemProcessor
+         * @param item The item to process
+         * @param data {ResultsEnvelope} The original envelope, possibly containing metadata.
+         */
+
+        /**
+         * A function to generate a function that wraps an optional callback and passes into
+         * it the value of a specific property of the first argument passed in, returning that
+         * value.
+         * @private
+         * @param key The key to extract from the eventual results object.
+         * @return {ResultProcessor} A result processor.
+         */
+        var getResultProcessor = function(key) { return function(cb) { return function(response) {
+            var deferred = Deferred(), item = response[key];
+            if (!response.wasSuccessful) {
+                deferred.reject(response.error);
+            } else {
+                (cb || IDENTITY)(item, response);
+                deferred.resolve(item, response);
+            }
+            return deferred.promise();
         }}};
 
+        /**
+         * A function to wrap an optional callback which extracts the
+         * 'results' property from the results envelope and passes it into
+         * the callback if it exists and returns the extracted value.
+         * @private
+         * @param cb {function} The optional callback
+         * @return Whatever the value of the 'results' property is.
+         */
         var getResulteriser = getResultProcessor('results');
 
+        /**
+         * Get the format for a request, given a default.
+         * Basically this function is here to make sure that
+         * we do jsonp requests when we have to.
+         * @private
+         * @param def The default format for this request.
+         */
         var getFormat = function(def) {
             var format = def || "json";
             if (!(IS_NODE || jQuery.support.cors)) {
@@ -821,27 +894,60 @@
         };
 
         /**
+         * Short-cut for the common POST operation. For more fine-grained
+         * request handling use makeRequest.
+         * @this {Service}
+         * @param path {string} The path to the resource to post to.
+         * @param data {Object} The data to post to the resource.
+         * @param cb {function} An optional callback.
+         * @return {Deferred} A promise to perform this action.
+         */
+        this.post = function(path, data, cb) {
+            return this.makeRequest(path, data, cb, 'POST');
+        };
+
+        /**
+         * Short-cut for the common GET operation. For more fine-grained
+         * request handling use makeRequest.
+         * @this {Service}
+         * @param {string} path The path to the resource to post to.
+         * @param {Object.<string, string>} data An optional set of data to send to the server.
+         * @param {SuccessCallback} cb An optional callback.
+         * @return {Deferred} A promise to perform this action.
+         */
+        this.get = function(path, data, cb) {
+            if(!cb && data && _.isFunction(data)) {
+                cb = data; // Allow calling with get(path, cb);
+                data = {};
+            }
+            return this.makeRequest(path, data, cb, 'GET');
+        }
+
+        /**
         * Performs a get request for data against a url. 
         * This method makes use of jsonp where available.
         */
         this.makeRequest = function(path, data, cb, method, itemByItem) {
+            method = (method || "GET");
+            cb = (cb || IDENTITY);
+            data = (data || {});
+
             var url   = this.root + path;
             var errorCB = this.errorHandler;
-            method = method || "GET";
-            data = data || {};
+            if (cb[0] && cb[1]) {
+                errorCB = cb[1];
+                cb = cb[0];
+            }
+
             if (_.isArray(data)) { // We also accept lists of pairs.
                 data = _.foldl(data, function(m, pair) { m[pair[0]] = pair[1]; return m;}, {});
             }
-            cb = cb || IDENTITY;
+
             if (this.token) {
                 data.token = this.token;
             }
             data.format = getFormat(data.format);
 
-            if (_(cb).isArray()) {
-                errorCB = cb[1];
-                cb = cb[0];
-            }
             if (/jsonp/.test(data.format)) {
                 // Tunnel the method in a parameter.
                 data.method = method;
@@ -931,7 +1037,7 @@
                      try {
                          var container = JSON.parse(containerBuffer);
                          if (container.error) {
-                             var e = new Error("Server reported error: " + container.error + ", " + container.statusCode);
+                             var e = new Error(container.error);
                              ret.reject(e);
                              iter.emit('error', e);
                          }
@@ -952,8 +1058,7 @@
                         try {
                             parsed = JSON.parse(contentBuffer);
                             if (parsed.error) {
-                                var error = new Error("When running " + JSON.stringify(opts.data) + ": " + parsed.error);
-                                ret.reject(error, parsed.status);
+                                ret.reject(new Error(parsed.error));
                             } else {
                                 ret.resolve(parsed);
                             }
@@ -963,7 +1068,7 @@
                      } else {
                          var e;
                          if (e = contentBuffer.match(/\[Error\] (\d+)(.*)/m)) {
-                             ret.reject(new Error(e[2], e[1]));
+                             ret.reject(new Error(e[2]));
                          } else {
                              ret.resolve(contentBuffer);
                          }
@@ -1002,19 +1107,21 @@
             };
         } else {
             this.doReq = function(opts) {
-                return jQuery.ajax(opts);
+                var errorHandler = wrapErrorHandler(opts.error);
+                delete opts.error;
+                return jQuery.ajax(opts).pipe(IDENTITY, errorHandler);
             }
             if (typeof XDomainRequest !== 'undefined') {
                 this.getEffectiveMethod = (function(mapping) {
                     return function(x) { return mapping[x]; }
-                })({POST: "PUT", DELETE: "GET"});
+                })({PUT: "POST", DELETE: "GET"});
                 this.supports = function(method) {
                     return this.getEffectiveMethod(method) === method;
                 };
             }
             var __wrap_cbs = function(cbs) {
                 var wrappedSuccess, error;
-                if (_.isArray(cbs)) {
+                if (cbs[0] && cbs[1]) {
                     wrappedSuccess = function(rows) {
                         _.each(rows, cbs[0]);
                     };
@@ -1027,26 +1134,26 @@
                     return wrappedSuccess;
                 }
             };
+
             this.rowByRow = function(q, page, cbs) {
-                var _cbs = __wrap_cbs(cbs);
                 page = page || {};
-                var req = _(page).extend({query: q.toXML()});
-                return this.makeRequest(QUERY_RESULTS_PATH, req, _cbs, 'POST');
-
+                var _cbs = __wrap_cbs(cbs), req = _(page).extend({query: q.toXML()});
+                return this.post(QUERY_RESULTS_PATH, req, _cbs);
             };
-            this.recordByRecord = function(q, page, cbs) {
-                var _cbs = __wrap_cbs(cbs);
-                page = page || {};
-                var req = _(page).extend({query: q.toXML(), format: "jsonobjects"});
-                return this.makeRequest(QUERY_RESULTS_PATH, req, _cbs, 'POST');
 
+            this.recordByRecord = function(q, page, cbs) {
+                page = page || {};
+                var _cbs = __wrap_cbs(cbs), req = _(page).extend({query: q.toXML(), format: "jsonobjects"});
+                return this.post(QUERY_RESULTS_PATH, req, _cbs);
             };
         }
         this.eachRow = this.rowByRow;
         this.eachRecord = this.recordByRecord;
 
+        var widgeteriser = getResultProcessor('widgets');
+
         this.widgets = function(cb) {
-            return this.makeRequest(WIDGETS_PATH).pipe(getResultProcessor('widgets')(cb));
+            return this.get(WIDGETS_PATH).pipe(widgeteriser(cb));
         };
 
         this.enrichment = function(req, cb) {
@@ -1071,7 +1178,7 @@
                     req["facet_" + k] = v;
                 });
             }
-            return this.makeRequest(QUICKSEARCH_PATH, req, null, "POST").pipe(function(data) {
+            return this.post(QUICKSEARCH_PATH, req).pipe(function(data) {
                 cb(data.results, data.facets);
                 return data.results;
             });
@@ -1129,7 +1236,7 @@
                 page = {};
             }
             var req = _(page || {}).extend({query: q.toXML(), format: format});
-            return this.makeRequest(path, req, null, 'POST').pipe(getResulteriser(cb));
+            return this.post(path, req).pipe(getResulteriser(cb));
         };
 
         this.table = function(q, page, cb) {
@@ -1148,6 +1255,14 @@
             return doPagedRequest.call(this, QUERY_RESULTS_PATH + '/tablerows', page, cb, q, "json");
         };
 
+        var DEFAULT_ERROR_HANDLER = function(error) {
+            if (console.error) {
+                console.error(error);
+            } else if (console.log) {
+                console.log(error);
+            }
+        };
+
         var constructor = _.bind(function(properties) {
             var root = properties.root;
             if (!HAS_PROTOCOL.test(root)) {
@@ -1157,25 +1272,16 @@
                 root = root + SUFFIX;
             }
             root = root.replace(/ice$/, "ice/");
-            if (properties.errorHandler) {
-                this.errorHandler = properties.errorHandler;
-            } else {
-                this.errorHandler = function(err, text) {
-                    console.log(err);
-                    if (text) {
-                        console.log(text);
-                    }
-                    console.log(err.stack ? err.stack : "");
-                };
-            }
+            this.errorHandler = (properties.errorHandler || DEFAULT_ERROR_HANDLER);
             this.root = root;
             this.token = properties.token
             this.DEBUG = properties.debug || false;
             this.help = properties.help || 'no.help.available@dev.null'
 
             _.bindAll(this, "fetchVersion", "rows", "records", "fetchTemplates", "fetchLists", 
-                "count", "makeRequest", "fetchModel", "fetchSummaryFields", "combineLists", 
-                "merge", "intersect", "diff", "query", "whoami", "findById");
+                "fetchListsContaining", "count", "makeRequest", "fetchModel", "fetchSummaryFields",
+                "combineLists", "merge", "intersect", "diff", "query", "whoami", "findById",
+                "post", "get");
 
         }, this);
 
@@ -1202,41 +1308,44 @@
             return this.makeRequest(TEMPLATES_PATH).pipe(getResultProcessor('templates')(cb));
         };
 
+        var __service = this;
+
+        var listProcessor = getResultProcessor('lists')();
+        var instantiate_lists = function(lists) {
+            return lists.map(function(l) { return new List(l, __service); });
+        };
+        var listFinder = function(name) { return function(lists) {
+            var ret = Deferred(), l = _.find(lists, function(l) { return l.name === name });
+            if (l == null) {
+                ret.reject("List not found");
+            } else {
+                ret.resolve(l);
+            }
+            return ret.promise();
+        }};
+
         this.fetchLists = function(cb) {
-            var self = this, toLists = function(data) {
-                return _(data.lists).map(function (l) {return new List(l, self)});
-            };
-            return this.makeRequest(LISTS_PATH).pipe(toLists).then(cb || IDENTITY);
+            return this.makeRequest(LISTS_PATH).pipe(listProcessor).pipe(instantiate_lists).done(cb);
         };
 
         this.fetchList = function(name, cb) {
-            var promise = this.fetchLists(), processor = function(lists) {
-                var l = _.find(lists, function(l) { return l.name === name });
-                if (l == null) {
-                    promise.reject("List not found");
-                } 
-                return l;
-            };
-
-            return promise.pipe(processor).then(cb || IDENTITY);
+            return this.fetchLists().pipe(listFinder(name)).done(cb);
         }
 
         this.combineLists = function(operation) {
             var self = this;
             return function(options, cb) {
-                var promise = Deferred().fail(self.errorHandler),
-                    path = LIST_OPERATION_PATHS[operation],
+                var path = LIST_OPERATION_PATHS[operation],
                     params = {
                         name: options.name,
                         tags: options.tags.join(';'),
                         lists: options.lists.join(";"),
                         description: options.description
                     };
-                self.makeRequest(path, params, function(data) {
-                    var name = data.listName;
-                    self.fetchList(name, cb).fail(promise.reject);
-                }).fail(promise.reject);
-                return promise;
+                return self.get(path, params)
+                    .pipe(getResultProcessor('listName')())
+                    .pipe(function(name) { return self.fetchList(name) })
+                    .done(cb);
             };
         };
 
@@ -1244,29 +1353,35 @@
         this.intersect = this.combineLists("intersect");
         this.diff = this.combineLists("diff");
 
+        var getModeller = function(self) { return function(data) {
+            var fn = ((Model && function(m) { return new Model(m); }) || IDENTITY);
+            self.model = fn(data.model);
+            self.model.service = self;
+            return MODELS[self.root] = self.model;
+        }};
+
+        /**
+         * A function that handles a data model.
+         * @name ModelHandler
+         * @param model {Model} The model to process.
+         */
+
+        /**
+         * Fetch the definition of the data model from the server.
+         *
+         * @this {Service}
+         * @param cb {ModelHandler} An optional model handling callback.
+         * @return {Deferred} A promise to fetch the data-model.
+         */
         this.fetchModel = function(cb) {
-            var self = this;
-            var promise = Deferred();
-            if (MODELS[self.root]) {
-                self.model = MODELS[self.root];
+            if (!this.model && MODELS[this.root]) {
+                this.model = MODELS[this.root];
             }
-            if (self.model) {
-                cb(self.model);
-                promise.resolve(self.model);
+            if (this.model) {
+                return Deferred().resolve(this.model).done(cb).promise();
             } else {
-                this.makeRequest(MODEL_PATH, null, function(data) {
-                    if (Model) {
-                        self.model = new Model(data.model);
-                    } else {
-                        self.model = data.model;
-                    }
-                    self.model.service = self;
-                    MODELS[self.root] = self.model;
-                    cb(self.model);
-                    promise.resolve(self.model);
-                }).fail(promise.reject);
+                return this.get(MODEL_PATH).pipe(getModeller(this)).done(cb);
             }
-            return promise;
         };
 
         this.fetchSummaryFields = function(cb) {
@@ -1291,24 +1406,30 @@
         };
 
         /**
+         * A request to fetch lists that contain an item by their internal ID.
+         * @name InternalIDRequest
+         * @property {number|string} The Internal ID (should be a valid Java Integer).
+         */
+
+        /**
+         * A request to fetch lists containing an item by a stable external identifier.
+         * @name PublicIdRequest
+         * @property {!string} publicId The stable external unique identifier.
+         * @property {!string} type The type of the object (eg: "Gene").
+         * @property {?string} extraValue An optional extra value to help resolve the object.
+         *                                (eg, for a Gene, the Organism name).
+         */
+
+        /**
         * Fetch lists containing an item.
         *
-        * @param options Options should contain: 
-        *  - either:
-        *    * id: The internal id of the object in question
-        *  - or: 
-        *    * publicId: An identifier
-        *    * type: The type of object (eg. "Gene")
-        *    * extraValue: (optional) A domain to help resolve the object (eg an organism for a gene).
-        *
-        *  @param cb function of the type: [List] -> ()
-        *  @return A promise
+        * @param {InternalIDRequest | PublicIdRequest} options Options should contain: 
+        * @param {function(Array.<List>)} an optional callback function.
+        * @return {Deferred.<Model>} A promise to return a model
         */
         this.fetchListsContaining = function(opts, cb) {
-            cb = cb || IDENTITY;
-            return this.makeRequest(WITH_OBJ_PATH, opts, function(data) {cb(data.lists)});
+            return this.get(WITH_OBJ_PATH, opts).pipe(listProcessor).done(cb);
         };
-
 
         /**
          * Construct a query, and yield it to the callback.
@@ -2003,6 +2124,16 @@
       });
     };
 
+    Query.prototype.getOuterJoin = function(path) {
+      var joinPaths,
+        _this = this;
+      path = this.adjustPath(path);
+      joinPaths = _.sortBy(_.keys(this.joins), 'length').reverse();
+      return _.find(joinPaths, function(p) {
+        return _this.joins[p] === 'OUTER' && path.indexOf(p) === 0;
+      });
+    };
+
     Query.prototype._parse_sort_order = function(input) {
       var k, so, v;
       so = input;
@@ -2525,13 +2656,13 @@
         };
 
         this.shareWithUser = function(recipient, cb) {
-            var data = {list: this.name, with: recipient};
-            return this.service.makeRequest("lists/shares", data, cb, "POST");
+            var data = {'list': this.name, 'with': recipient};
+            return this.service.makeRequest('lists/shares', data, cb, 'POST');
         };
 
         this.inviteUserToShare = function(recipient, cb) {
-            var data = {list: this.name, to: recipient, notify: true};
-            return this.service.makeRequest("lists/invitations", data, cb, "POST");
+            var data = {'list': this.name, 'to': recipient, 'notify': true};
+            return this.service.makeRequest("lists/invitations", data, cb, 'POST');
         };
 
     };
