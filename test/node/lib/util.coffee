@@ -8,8 +8,13 @@ exports.testCase = (setup, teardown) -> (f) -> (beforeExit, assert) ->
     beforeExit(teardown) if teardown?
     f.call(context, beforeExit, assert)
 
+exports.fail = (testCase, assert) -> () -> testCase.runTest -> assert.ok false
+exports.pass = (testCase, assert) -> () -> testCase.runTest -> assert.ok true
+
 exports.asyncTestCase = (setup, teardown) -> (n, f) -> exports.testCase(setup, teardown) (beforeExit, assert) ->
     done = 0
+    @pass = exports.pass(@, assert)
+    @fail = exports.pass(@, assert)
     @runTest = (toRun) ->
         try
             toRun()
