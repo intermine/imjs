@@ -372,6 +372,11 @@ class Query
         path = @adjustPath(path)
         _.any(@joins, (d, p) -> d is 'OUTER' and path.indexOf(p) is 0)
 
+    getOuterJoin: (path) ->
+        path = @adjustPath(path)
+        joinPaths = _.sortBy(_.keys(@joins), 'length').reverse()
+        _.find(joinPaths, (p) => @joins[p] is 'OUTER' and path.indexOf(p) is 0)
+
     _parse_sort_order: (input) ->
         so = input
         if _.isString(input)
