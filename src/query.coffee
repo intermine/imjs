@@ -601,7 +601,7 @@ _get_data_fetcher = (server_fn) -> (page, cb) ->
     page = if (_.isFunction(page) or not page) then {} else page
     if @service[server_fn]
         _.defaults page, {start: @start, size: @maxRows}
-        @service[server_fn](@, page, cb)
+        return @service[server_fn](@, page, cb)
     else
         throw new Error("Could not find #{ server_fn } at this service. Sorry.")
 
