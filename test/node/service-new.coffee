@@ -18,6 +18,9 @@ exports['model'] = asyncTest 1, (beforeExit, assert) ->
 exports['get templates'] = asyncTest 1, (beforeExit, assert) ->
     @service.fetchTemplates (ts) => @runTest () -> assert.includes (n for n, _ of ts), 'ManagerLookup'
 
+exports['get templates'] = asyncTest 1, (beforeExit, assert) ->
+    @service.fetchTemplates().done (ts) => @runTest () -> assert.includes (n for n, _ of ts), 'ManagerLookup'
+
 exports['summary fields'] = asyncTest 1, (beforeExit, assert) ->
     expected = [
         "Employee.name",
