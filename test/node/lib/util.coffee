@@ -13,6 +13,8 @@ exports.pass = (testCase, assert) -> () -> testCase.runTest -> assert.ok true
 
 exports.asyncTestCase = (setup, teardown) -> (n, f) -> exports.testCase(setup, teardown) (beforeExit, assert) ->
     done = 0
+    @beforeExit = beforeExit
+    @assert = assert
     @pass = exports.pass(@, assert)
     @fail = exports.pass(@, assert)
     @runTest = (toRun) ->
