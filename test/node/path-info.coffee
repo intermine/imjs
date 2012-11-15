@@ -1,4 +1,5 @@
-{asyncTest, older_emps} = require './lib/service-setup'
+{setup, asyncTest, older_emps} = require './lib/service-setup'
+{LOG, ERR} = require './lib/util'
 {invoke, id, NOT} = require '../../src/shiv'
 
 piTest = (f) -> asyncTest 1, (beforeExit, assert) ->
@@ -30,6 +31,24 @@ exports['path to string'] = asyncTest 3, (beforeExit, assert) ->
         check invoke 'toString'
         check invoke 'toPathString'
         check (x) -> '' + x
+
+exports['PathInfo#containsCollection'] = asyncTest 6, (be, A) ->
+    hasColls = [
+        'Company.departments.employees.name',
+        'Employee.department.employees.age',
+        'Contractor.companys'
+    ]
+    doesnt = [
+        'Employee.department.manager.address.address',
+        'Company',
+        'Employee.age'
+    ]
+    makePath = (str) => @service.fetchModel().then(invoke 'getPathInfo', str)
+    test  = (f = id) => @testCB (p) -> A.ok f p.containsCollection()
+    for hasgot in hasColls
+        makePath(hasgot).done(test id)
+    for hasnt in doesnt
+        makePath(hasnt).done(test NOT)
 
 exports['path types'] = asyncTest 16, (beforeExit, assert) ->
     attr = 'Company.departments.employees.address.address'
