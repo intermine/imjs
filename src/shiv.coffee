@@ -7,7 +7,7 @@ unless Array::filter?
 unless Array::reduce?
     Array::reduce = (f, initValue) ->
         xs = @slice()
-        ret = initValue ? xs.pop()
+        ret = if arguments.length < 2 then xs.pop() else initValue
         ret = (f ret, x) for x in xs
         ret
 
@@ -93,7 +93,11 @@ root.NOT = (x) -> not x
 #
 # @param x Something
 # @return The self same thing.
-root.id = (x) -> x
+root.id = id = (x) -> x
+
+root.any = (xs, f = id) ->
+    for x in xs
+        return true if f x
 
 # A set of functions that are helpful when dealing with promises,
 # in that they help produce the kinds of simple pipes that are
