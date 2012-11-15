@@ -1,14 +1,18 @@
-{asyncTest, older_emps} = require './lib/service-setup'
-{omap, fold}  = require '../../src/shiv'
+{asyncTest, older_emps, clearTheWay} = require './lib/service-setup'
+{get, invoke}  = require '../../src/shiv'
+$ = require 'underscore.deferred'
 
-exports['can perform a list diff'] = asyncTest 3, (beforeExit, assert) ->
-    ls = ['The great unknowns', 'some favs-some unknowns-some umlauts']
-    new_name = "created_in_js-diff"
-    tags = ['js', 'node', 'testing']
-    @service.diff {name: new_name, lists: ls, tags: tags}, (l) =>
-        @runTest () -> assert.eql l.size, 4
-        @runTest () -> assert.ok l.hasTag 'js'
-        l.contents (xs) =>
-            @runTest () -> assert.includes xs.map( (x) -> x.name ), 'Brenda'
-            l.del().fail () => @runTest () -> assert.ok false
+name = "temp-created_in_js-diff"
+tags = ['js', 'node', 'testing']
+lists = ['The great unknowns', 'some favs-some unknowns-some umlauts']
 
+exports['can perform a list diff'] = asyncTest 4, (beforeExit, assert) ->
+    setup   = => clearTheWay(@service, name)
+    cleanUp = => @service.fetchList(name).then(invoke 'del')
+    run     = => @service.diff( {name, lists, tags} )
+        .done(@testCB (l) -> assert.eql name, l.name)
+        .done(@testCB (l) -> assert.eql 4,    l.size)
+        .done(@testCB (l) -> assert.ok  l.hasTag 'js')
+        .then(invoke 'contents').then(invoke 'map', get 'name')
+        .done @testCB (names) -> assert.includes names, 'Brenda'
+    setup().then(run).always(cleanUp)

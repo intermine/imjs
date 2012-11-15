@@ -1,12 +1,12 @@
 {Query} = require '../../src/query'
-{omap, fold}  = require '../../src/shiv'
+{omap, fold, get}  = require '../../src/shiv'
 {decap, lc} = require './lib/util'
 
 expected = [
     {path: 'Employee.name', direction: 'DESC'},
     {path: 'Employee.age', direction: 'ASC'}
 ]
-views = expected.map (oe) -> oe.path
+views = expected.map get 'path'
 
 exports['test default sort order'] = (beforeExit, assert) ->
     q = new Query()

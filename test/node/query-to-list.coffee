@@ -1,13 +1,16 @@
-{asyncTest, older_emps} = require './lib/service-setup'
-{omap, fold}  = require '../../src/shiv'
+{asyncTest, older_emps, clearTheWay} = require './lib/service-setup'
+{invoke, get, omap, fold}  = require '../../src/shiv'
 
-exports['can make a list from a query'] = asyncTest 4, (beforeExit, assert) ->
-    list_opts = name: 'list-from-js-query', tags: ['foo', 'bar', 'baz', 'js', 'node']
-    @service.query older_emps, (q) => q.saveAsList list_opts, (l) =>
-        @runTest () -> assert.eql 46, l.size
-        @runTest () -> assert.ok l.hasTag 'js'
-        l.contents (xs) =>
-            @runTest () -> assert.includes (xs.map (x) -> x.name), 'Carol'
-            l.del().done(() => @runTest () -> assert.ok true)
-                   .fail(() => @runTest () -> assert.ok false)
+list_opts = name: 'list-from-js-query', tags: ['foo', 'bar', 'baz', 'js', 'node', 'testing']
+
+exports['can make a list from a query'] = asyncTest 3, (beforeExit, assert) ->
+    sizeIsRight = @testCB (l) -> assert.eql 46, l.size
+    hasTag = @testCB (l) -> assert.ok l.hasTag 'js'
+    clearTheWay(@service, list_opts.name)
+        .then(=> @service.query older_emps)
+        .then(invoke 'saveAsList', list_opts)
+        .done([sizeIsRight, hasTag])
+        .then(invoke 'contents')
+        .done(@testCB (xs) -> assert.includes (xs.map get 'name'), 'Carol')
+        .always => @service.fetchList(list_opts.name).then(invoke 'del')
 

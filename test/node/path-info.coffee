@@ -1,4 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
+{invoke, id, NOT} = require '../../src/shiv'
 
 piTest = (f) -> asyncTest 1, (beforeExit, assert) ->
     @service.fetchModel (m) => @runTest f assert, m
@@ -18,39 +19,43 @@ parentTest = (path, expType, subclasses) -> piTest (assert, m) -> () ->
     assert.eql expType, m.getPathInfo(path, subclasses).getParent().getType().name
 
 exports['type of parent'] = parentTest "Department.employees.name", "Employee", {}
+
 exports['type of subclassed parent'] =
     parentTest "Department.employees.name", "Manager", {"Department.employees": "Manager"}
 
-exports['path to string'] = asyncTest 4, (beforeExit, assert) ->
+exports['path to string'] = asyncTest 3, (beforeExit, assert) ->
     path = 'Company.departments.employees.address.address'
-    @service.fetchModel (m) =>
-        @runTest () -> assert.eql path, m.getPathInfo(path).toString()
-        @runTest () -> assert.eql path, m.getPathInfo(path).toPathString()
-        @runTest () -> assert.eql path, "" + m.getPathInfo(path)
-        @runTest () -> assert.equal path, "" + m.getPathInfo(path)
+    checker = (m) => @testCB (f) -> assert.eql path, f m.getPathInfo(path)
+    @service.fetchModel().then(checker).then (check) ->
+        check invoke 'toString'
+        check invoke 'toPathString'
+        check (x) -> '' + x
 
-exports['path to string'] = asyncTest 16, (beforeExit, assert) ->
+exports['path types'] = asyncTest 16, (beforeExit, assert) ->
     attr = 'Company.departments.employees.address.address'
     ref = 'Company.departments.employees.address'
     coll = 'Company.departments.employees'
     root = 'Company'
-    @service.fetchModel (m) =>
-        @runTest () -> assert.ok m.getPathInfo(attr).isAttribute()
-        @runTest () -> assert.ok !m.getPathInfo(attr).isReference()
-        @runTest () -> assert.ok !m.getPathInfo(attr).isCollection()
-        @runTest () -> assert.ok !m.getPathInfo(attr).isClass()
+    checker = (m) => @testCB (path, pred, f = id) -> assert.ok f m.getPathInfo(path)[pred]()
 
-        @runTest () -> assert.ok !m.getPathInfo(ref).isAttribute()
-        @runTest () -> assert.ok m.getPathInfo(ref).isReference()
-        @runTest () -> assert.ok !m.getPathInfo(ref).isCollection()
-        @runTest () -> assert.ok m.getPathInfo(ref).isClass()
+    @service.fetchModel().then(checker).then (check) ->
+        check attr, 'isAttribute'
+        check attr, 'isReference', NOT
+        check attr, 'isCollection', NOT
+        check attr, 'isClass', NOT
 
-        @runTest () -> assert.ok !m.getPathInfo(coll).isAttribute()
-        @runTest () -> assert.ok m.getPathInfo(coll).isReference()
-        @runTest () -> assert.ok m.getPathInfo(coll).isCollection()
-        @runTest () -> assert.ok m.getPathInfo(coll).isClass()
+        check ref, 'isAttribute', NOT
+        check ref, 'isReference'
+        check ref, 'isCollection', NOT
+        check ref, 'isClass'
 
-        @runTest () -> assert.ok !m.getPathInfo(root).isAttribute()
-        @runTest () -> assert.ok !m.getPathInfo(root).isReference()
-        @runTest () -> assert.ok !m.getPathInfo(root).isCollection()
-        @runTest () -> assert.ok m.getPathInfo(root).isClass()
+        check coll, 'isAttribute', NOT
+        check coll, 'isReference'
+        check coll, 'isCollection'
+        check coll, 'isClass'
+
+        check root, 'isAttribute', NOT
+        check root, 'isReference', NOT
+        check root, 'isCollection', NOT
+        check root, 'isClass'
+

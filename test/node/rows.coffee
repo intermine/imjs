@@ -1,44 +1,47 @@
-{asyncTest, older_emps} = require './lib/service-setup'
-{omap, fold, invoke}  = require '../../src/shiv'
-{_} = require 'underscore'
+{setup, asyncTestCase, older_emps} = require './lib/service-setup'
+{asyncTestCase} = require './lib/util'
+{set, omap, fold, invoke, flatMap}  = require '../../src/shiv'
 
-LOG = -> console.log arguments...
-add = (a, b) -> a + b
+# Helper class to incapsulate the logic for iterating testing.
+class Counter
+    constructor: ->
+        @n = 0
+        @total = 0
+    count: (row) =>
+        @n++
+        @total += row[row.length - 1]
+    checker: (assert, n, total) -> () =>
+        assert.eql n, @n, "#{ @n } should be #{ n }"
+        assert.eql total, @total, "#{ @total } should be #{ total }"
 
-getQuery = -> omap((k, v) -> [k, if k is 'select' then v.concat(['age']) else v]) older_emps
+opts = -> omap((k, v) -> [k, if k is 'select' then v.concat(['age']) else v]) older_emps
+extension = (n, total) ->
+    counter: new Counter
+    testCounts: (assert) -> @testCB @counter.checker assert, n, total
+    testRows: (assert) -> @testCB (rows) ->
+        assert.eql n, rows.length
+        assert.eql total, (flatMap invoke 'pop') rows
 
-exports['can fetch rows'] = asyncTest 2, (beforeExit, assert) ->
-    @service.query getQuery(), (q) => q.rows (rows) =>
-        i = q.views.length - 1
-        @runTest -> assert.eql rows.length, 46
-        @runTest -> assert.equal rows.map(invoke 'pop').reduce(add), 2688
+asyncTest = asyncTestCase -> (set extension(46, 2688)) setup()
+
+exports['can fetch rows'] = asyncTest 1, (beforeExit, assert) ->
+    @service.query opts(), (q) => q.rows @testRows assert
     
-exports['can fetch rows - promise'] = asyncTest 2, (beforeExit, assert) ->
-    test = (rows) =>
-        @runTest -> assert.eql rows.length, 46
-        @runTest -> assert.equal rows.map(invoke 'pop').reduce(add), 2688
+exports['can fetch rows - promise'] = asyncTest 1, (beforeExit, assert) ->
+    @service.query(opts()).then(invoke 'rows').then @testRows assert
 
-    @service.query(getQuery()).then(invoke 'rows').then(test, @fail)
+exports['can lift opts to query'] = asyncTest 1, (beforeExit, assert) ->
+    @service.rows(opts()).then @testRows assert
 
-exports['can iterate over rows'] = asyncTest 2, (beforeExit, assert) ->
-    n = totalAge = 0
-    doThis = (row) ->
-        n++
-        totalAge += row.pop()
-    andFinally = =>
-        @runTest -> assert.eql n, 46
-        @runTest -> assert.eql totalAge, 2688
+exports['can iterate over rows'] = asyncTest 1, (beforeExit, assert) ->
+    @service.query opts(), (q) => q.eachRow [@counter.count, @fail, @testCounts assert]
 
-    @service.query getQuery(), (q) => q.eachRow [doThis, @fail, andFinally]
+exports['can iterate over rows single cb'] = asyncTest 1, (beforeExit, assert) ->
+    @service.query opts(), (q) =>
+        q.eachRow( @counter.count ).done invoke 'done', @testCounts assert
 
-exports['can iterate over rows - promises'] = asyncTest 2, (beforeExit, assert) ->
-    n = totalAge = 0
-    checkTotals = =>
-        @runTest -> assert.eql n, 46
-        @runTest -> assert.eql totalAge, 2688
-    @service.query(getQuery()).then(invoke 'eachRow').then (iter) ->
-        iter.each (row) ->
-            n++
-            totalAge += row.pop()
-        iter.error _.compose @fail, @fail
-        iter.done checkTotals
+exports['can iterate over rows - promises'] = asyncTest 1, (beforeExit, assert) ->
+    @service.query(opts()).then(invoke 'eachRow').then (iter) =>
+        iter.each  @counter.count
+        iter.done  @testCounts assert
+

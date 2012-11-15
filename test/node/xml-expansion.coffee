@@ -11,5 +11,5 @@ expected_views = [
 
 exports['view expansion'] = asyncTest 2, (beforeExit, assert) ->
     @service.query older_emps, (q) =>
-        @runTest () -> assert.eql q.views, expected_views
-        @runTest () -> assert.eql q.constraints, [{path: 'Employee.age', op: '>', value: 50}]
+        @runTest -> assert.eql q.views, expected_views
+        @runTest -> assert.eql q.constraints, [{path: 'Employee.age', op: '>', value: 50}]
