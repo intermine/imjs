@@ -15,7 +15,10 @@ unless Array::reduce?
 # exports object (if we are in node) or onto the global
 # intermine.funcutils namespace
 root = exports ? this
-unless exports?
+if exports?
+    {Deferred} = require 'underscore.deferred'
+else
+    {Deferred} = root.jQuery
     root.intermine ?= {}
     root.intermine.funcutils ?= {}
     root = root.intermine.funcutils
@@ -40,6 +43,8 @@ root.omap = (f) -> (o) ->
         a[kk] = vv
         a
     domap o
+
+root.copy = root.omap (k, v) -> [k, v]
 
 root.partition = (f) -> (xs) ->
     trues = []
@@ -66,7 +71,7 @@ root.concatMap = (f) -> (xs) ->
         fx = f x
         ret = if ret is undefined
             fx
-        else if typeof fx is 'string'
+        else if typeof fx in ['string', 'number']
             ret + fx
         else if fx.slice?
             ret.concat(fx)
@@ -74,6 +79,9 @@ root.concatMap = (f) -> (xs) ->
             ret[k] = v for k, v of fx
             ret
     ret
+root.flatMap = root.concatMap
+
+root.sum = root.concatMap ->
 
 root.AND = (a, b) -> a and b
 
@@ -97,7 +105,11 @@ root.id = (x) -> x
 # @param [String] name The name of a method
 # @param [Array] args An optional argument list, passed as varargs
 # @return [(obj) -> ?] A function that invokes a named method.
-root.invoke = (name, args...) -> (obj) -> obj[name].apply(obj, args)
+root.invoke = (name, args...) -> (obj) ->
+    if obj[name]?.apply
+        obj[name].apply(obj, args)
+    else
+        Deferred().reject("No method: #{ name }").promise()
 
 # Get a function that invokes a method on an object
 # that is passed to it with the arguments given here, with

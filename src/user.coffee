@@ -24,12 +24,26 @@ else
     Deferred = require('jquery-deferred').Deferred
     _ = require('underscore')._
 
+# A representation of the user we are logged in as.
 class User
 
+    # Save references to the service, as well as
+    # extracting the user's preferences from the options.
+    #
+    # @param [intermine.Service] service the connection to the webservice
+    # @param [Object] options The data used to instantiate this object
+    # @option options [String] username The user's log-in name
+    # @option options [Object] preferences A key-value mapping of the preferences this user has set.
+    #
     constructor: (@service, {@username, @preferences}) ->
         @hasPreferences = @preferences?
         @preferences ?= {}
 
+    # Set a given preference.
+    #
+    # @param [String] key The key to set.
+    # @param [String] value The value to set.
+    # @return [Deferred] a promise to set a preference.
     setPreference: (key, value) ->
         if _.isString(key)
             data = {}
@@ -40,19 +54,13 @@ class User
             return Deferred().reject("bad-arguments", "Incorrect arguments to setPreference")
         @setPreferences(data)
 
-    ##
     # Set one or more preferences, provided as an object.
-    ##
     setPreferences: (prefs) -> @_do_pref_req prefs, 'POST'
 
-    ##
     # Clear a preference.
-    ##
     clearPreference: (key) -> @_do_pref_req {key: key}, 'DELETE'
 
-    ## 
     # Clear all preferences.
-    ##
     clearPreferences: () -> @_do_pref_req {}, 'DELETE'
 
     refresh: () -> @_do_pref_req {}, 'GET'

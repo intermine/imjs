@@ -337,7 +337,8 @@ class Service
     search: (options = {}, cb = (->)) ->
         [cb, options] = [options, {}] if _.isFunction options
         options = {q: options} if _.isString options
-        req = _.omit (_.defaults {}, options, {q: ''}), 'facets'
+        req = _.defaults {}, options, {q: ''}
+        delete req.facets # bad practice, but underscore 1.4.2 isn't well-established yet.
         if options.facets
             for k, v of options.facets
                 req["facet_#{ k }"] = v
@@ -364,7 +365,7 @@ class Service
     # @param [Number] id The internal DB id of the object.
     # @param [(obj) ->] A callback that receives an object. (optional).
     # @return [Deferred] A promise to yield an object.
-    findById: (type, id, cb) ->
+    findById: (type, id, cb) =>
         @query(from: type, select: ['**'], where: {id: id})
             .pipe(dejoin)
             .pipe(invoke 'records')
@@ -386,37 +387,48 @@ class Service
     # Retrieve information about the currently authenticated user.
     # @param [(User) ->] A callback the receives a User object.
     # @return [Deferred.<User>] A promise to yield a user.
-    whoami: (cb) -> @fetchVersion().pipe (v) ->
+    whoami: (cb) -> @fetchVersion().pipe (v) =>
+        fn = (x) => new User(@, x)
         if v < 9
             Deferred -> @reject REQUIRES 9, v
         else
-            @get(WHOAMI_PATH).pipe(get 'user').done cb, (data) => new User(@, data)
+            try
+                @get(WHOAMI_PATH).pipe(get 'user').pipe(fn).done(cb)
+            catch e
+                Deferred -> @reject e
 
     doPagedRequest: (q, path, page = {}, format, cb) ->
-        req = _.defaults {}, {query: q.toXML(), format: format}, page
-        @post(path, req).pipe(get 'results').done(cb)
+        if q.toXML?
+            req = _.defaults {}, {query: q.toXML(), format: format}, page
+            @post(path, req).pipe(get 'results').done(cb)
+        else
+            @query(q).pipe((query) => @doPagedRequest(query, path, page, format, cb))
 
-    table: (q, page, cb) -> @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'jsontable', cb)
+    table: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'jsontable', cb)
 
-    records: (q, page, cb) -> @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'jsonobjects', cb)
+    records: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'jsonobjects', cb)
 
-    rows: (q, page, cb) -> @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'json', cb)
+    rows: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'json', cb)
 
-    tableRows: (q, page, cb) -> @doPagedRequest(q, TABLE_ROW_PATH, page, 'json', cb)
+    tableRows: (q, page, cb) => @doPagedRequest(q, TABLE_ROW_PATH, page, 'json', cb)
 
-    fetchTemplates: (cb) -> @get(TEMPLATES_PATH).pipe(get 'templates').done(cb)
+    fetchTemplates: (cb) => @get(TEMPLATES_PATH).pipe(get 'templates').done(cb)
 
     fetchLists: (cb) -> @findLists '', cb
 
     findLists: (name, cb) ->
-        fn = (ls) => (new List(data, @) for data in lists)
+        fn = (ls) => (new List(data, @) for data in ls)
         @get(LISTS_PATH, {name}).pipe(get 'lists').pipe(fn).done(cb)
 
-    fetchList: (name, cb) => @fetchVersion().pipe (v) ->
+    fetchList: (name, cb) => @fetchVersion().pipe (v) =>
         if v < 13
             @fetchLists().pipe(getListFinder(name)).done(cb)
         else
             @findLists(name).pipe(get 0).done(cb)
+
+    fetchListsContaining: (opts, cb) =>
+        fn = (xs) => (new List(x, @) for x in xs)
+        @get(WITH_OBJ_PATH, opts).pipe(get 'lists').pipe(fn).done(cb)
 
     combineLists: (operation, options, cb) ->
         req = _.pick options, 'name', 'description'
@@ -468,7 +480,7 @@ class Service
     # @param [Object] options The JSON representation of the query.
     # @param [(Query) ->] cb An optional callback to be called when the query is made.
     # @return [Deferred<Query>] A promise to make a new query.
-    query: (options, cb) -> $.when(@fetchModel(), @fetchSummaryFields()).pipe (m, sfs) =>
+    query: (options, cb) => $.when(@fetchModel(), @fetchSummaryFields()).pipe (m, sfs) =>
         args = _.defaults {}, options, {model: m, summaryFields: sfs}
         service = @
         Deferred ->
@@ -496,11 +508,17 @@ wire_for_node = ->
     PESKY_COMMA = /,\s*$/
 
     iterReq = (format) -> (q, page = {}, cbs = []) ->
-        if !cbs? and _.isFunction page
-            [page, cbs] = [cbs, {}]
+        if !cbs? and not (page.start? or page.size?)
+            [page, cbs] = [{}, page]
+        if _.isFunction cbs
+            cbs = [cbs]
         req = _.extend {format}, page, query: q.toXML()
-        onEnd = cbs[2]
-        @makeRequest('POST', QUERY_RESULTS_PATH, req, cbs, true).done(invoke 'done', onEnd)
+        [doThis, onErr, onEnd] = cbs
+        @makeRequest('POST', QUERY_RESULTS_PATH, req, null, true)
+            .fail(onErr)
+            .done(invoke 'each', doThis)
+            .done(invoke 'error', onErr)
+            .done(invoke 'done', onEnd)
 
     Service::rowByRow = iterReq 'json'
 
@@ -547,22 +565,30 @@ wire_for_node = ->
         resp.on 'error', (e) -> ret.reject(e)
         resp.on 'end', ->
             if /json/.test opts.data.format
-                try
-                    parsed = JSON.parse containerBuffer
-                    if parsed.error
-                        ret.reject new Error(parsed.error)
-                    else
-                        ret.resolve parsed
-                catch e
-                    ret.reject new Error "Could not parse response: #{ containerBuffer }", e
+                if '' is containerBuffer and resp.statusCode is 200
+                    # No body, but all-good.
+                    ret.resolve()
+                else
+                    try
+                        parsed = JSON.parse containerBuffer
+                        if err = parsed.error
+                            ret.reject new Error(err)
+                        else
+                            ret.resolve parsed
+                    catch e
+                        if resp.statusCode >= 400
+                            ret.reject new Error(resp.statusCode)
+                        else
+                            ret.reject new Error "Could not parse response to #{ opts.type } #{ opts.url }: '#{ containerBuffer }' (#{ e })"
             else
-                if e = contentBuffer.match /\[Error\] (\d+)(.*)/m
+                if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
                     ret.reject new Error(e[2])
                 else
                     ret.resolve containerBuffer
 
     Service::doReq = (opts, iter) -> Deferred ->
         @fail opts.error
+        @done opts.success
         if _.isString opts.data
             postdata = opts.data
             if opts.type in [ 'GET', 'DELETE' ]
@@ -605,11 +631,11 @@ wire_for_browser = ->
             [(rows) -> _.each rows, cbs]
 
     iterReq = (format) -> (q, page = {}, cbs = []) ->
-        if !cbs? and _.isFunction page
-            [page, cbs] = [cbs, {}]
+        if !cbs? and not (page.start? or page.size?)
+            [page, cbs] = [{}, page]
         _cbs = wrapCbs(cbs)
         req = _.extend {format}, page, query: q.toXML()
-        onEnd = _cbs.pop()
+        [doThis, fail, onEnd] = _cbs
         @post(QUERY_RESULTS_PATH, req, _cbs).done(onEnd)
 
     # TODO: make these work with finally callback.
@@ -620,7 +646,7 @@ wire_for_browser = ->
     Service::doReq = (opts) ->
         errBack = (opts.error or @errorHandler)
         opts.error = _.compose errBack, ERROR_PIPE
-        return jQuery.ajax(opts).pipe(CHECKING_PIPE, ERROR_PIPE)
+        return jQuery.ajax(opts).pipe(CHECKING_PIPE).fail(errBack)
 
 if IS_NODE
     wire_for_node()
@@ -640,6 +666,10 @@ Service.flushCaches = () ->
     VERSIONS = {}
     SUMMARY_FIELDS = {}
     WIDGETS = {}
+
+# Static method for instantiation. Allows us to provide
+# alternate implementations in the future.
+Service.connect = (opts) -> new Service(opts)
 
 # Export the Service class to the world
 intermine.Service = Service

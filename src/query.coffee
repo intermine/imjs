@@ -12,9 +12,10 @@ root = exports ? this
 if typeof exports is 'undefined'
     IS_NODE = false
     _ = root._
-    {partition, fold, take, concatMap, id} = root.intermine.funcutils
-    _CLONE = (o) -> jQuery.extend true, {}, o
-    toQueryString = (req) -> jQuery.param(req)
+    {partition, fold, take, concatMap, id, get} = root.intermine.funcutils
+    {Deferred} = $ = root.jQuery
+    _CLONE = (o) -> root.jQuery.extend true, {}, o
+    toQueryString = (req) -> root.jQuery.param(req)
     if typeof root.console is 'undefined'
         root.console =
             log: ->
@@ -24,10 +25,11 @@ if typeof exports is 'undefined'
     root = root.intermine
 else
     IS_NODE = true
-    _ = require('underscore')._
-    _CLONE = require('clone')
-    toQueryString = require('querystring').stringify
-    {partition, fold, take, concatMap, id} = require('./shiv')
+    _               = require('underscore')._
+    {Deferred}  = $ = require('underscore.deferred')
+    _CLONE          = require('clone')
+    toQueryString   = require('querystring').stringify
+    {partition, fold, take, concatMap, id, get} = require('./shiv')
 
 get_canonical_op = (orig) ->
     canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
@@ -62,6 +64,14 @@ conStr = (c) -> if c.values?
         noValueConStr(c)
     else
         simpleConStr(c)
+
+LIST_PIPE = (service) -> _.compose service.fetchList, get 'listName'
+
+CODES = [
+    null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+]
+       
 
 class Query
     @JOIN_STYLES = ['INNER', 'OUTER']
@@ -113,6 +123,8 @@ class Query
         "ISA": "ISA"
         "isa": "ISA"
 
+    getPaths = ->
+
     on: (events, callback, context) ->
         events = events.split /\s+/
         calls = (@_callbacks ?= {})
@@ -162,12 +174,22 @@ class Query
         @maxRows = properties.size ? properties.limit ? properties.maxRows
         @start = properties.start ? properties.offset ? 0
 
-        @select(properties.views or properties.select or [])
+        @select(properties.views or properties.view or properties.select or [])
         @addConstraints(properties.constraints or properties.where or [])
         @addJoins(properties.joins or properties.join or [])
         @orderBy(properties.sortOrder or properties.orderBy or [])
 
         @constraintLogic = properties.constraintLogic if properties.constraintLogic?
+
+        # Define private method.
+        getPaths = (root, depth) =>
+            cd = @getPathInfo(root).getEndClass()
+            ret = [root]
+            others = unless ( cd and depth > 0 ) then [] else
+                _.flatten _.map cd.fields, (r) =>
+                    getPaths "#{root}.#{r.name}", depth - 1
+
+            _.flatten ret.concat others
 
     removeFromSelect: (unwanted) ->
         unwanted = if _.isString(unwanted) then [unwanted] else (unwanted || [])
@@ -217,35 +239,15 @@ class Query
             @root = path.split('.')[0]
         path
 
-    # necessary now?
-    _getAllFields: (table) ->
-        attrs = _.values(table.attributes)
-        refs = _.values(table.references)
-        cols = _.values(table.collections)
-        _.union(attrs, refs, cols)
-
-    _getPaths: (root, cd, depth) ->
-        self = @
-        ret = [root]
-        others = []
-        if cd and depth > 0
-            others = _.flatten(_.map(cd.fields, (r) ->
-                self._getPaths(
-                    "#{root}.#{r.name}",
-                    self.getPathInfo("#{root}.#{r.name}").getEndClass(),
-                    depth - 1)))
-
-        ret.concat(others)
 
     getPossiblePaths: (depth = 3) ->
         @_possiblePaths ?= {}
-        cd = @service.model.classes[@root]
-        @_possiblePaths[depth] ?= _.flatten(@_getPaths(@root, cd, depth))
+        @_possiblePaths[depth] ?= getPaths @root, depth
 
     getPathInfo: (path) ->
         adjusted = @adjustPath path
-        pi = @service.model?.getPathInfo(adjusted, @getSubclasses())
-        pi.displayName = @displayNames[adjusted] if (adjusted of @displayNames)
+        pi = @model?.getPathInfo?(adjusted, @getSubclasses())
+        pi.displayName = @displayNames[adjusted] if (pi and adjusted of @displayNames)
         return pi
 
     getSubclasses: () ->
@@ -301,10 +303,9 @@ class Query
         req =
             listName: name
             query: toRun.toXML()
-        wrapped = if (target && target.name) then ((list) -> target.size = list.size; cb(list)) else cb
+        updateTarget = if (target?.name) then ((list) -> target.size = list.size) else (->)
 
-        return @service.makeRequest('query/append/tolist',
-            req, getListResponseHandler(@service, wrapped), 'POST')
+        @service.post('query/append/tolist', req).pipe(LIST_PIPE @service).done(cb, updateTarget)
 
     saveAsList: (options, cb) ->
         toRun = @clone()
@@ -316,30 +317,29 @@ class Query
         req.query = toRun.toXML()
         if (options.tags)
             req.tags = options.tags.join(';')
-        @service.makeRequest('query/tolist', req, getListResponseHandler(@service, cb), 'POST')
+        @service.post('query/tolist', req).pipe(LIST_PIPE @service).done(cb)
 
     summarise: (path, limit, cont) -> @filterSummary(path, '', limit, cont)
 
     summarize: (args...) -> @summarise.apply(@, args)
 
-    filterSummary: (path, term, limit, cont) ->
-        if _.isFunction(limit) && !cont
-            cont = limit
-            limit = null
+    filterSummary: (path, term, limit, cont = (->)) ->
+        if _.isFunction(limit)
+            [cont, limit] = [limit, null]
 
-        cont ?= ->
         path = @adjustPath(path)
         toRun = @clone()
         unless _.include(toRun.views, path)
             toRun.views.push(path)
         req =
             query: toRun.toXML()
-            format: 'jsonrows'
             summaryPath: path
+            format: 'jsonrows'
+
         req.size = limit if limit
         req.filterTerm = term if term
-        @service.makeRequest('query/results', req,
-            (data) -> cont(data.results, data.uniqueValues, data.filteredCount))
+        parse = (data) -> Deferred -> @resolve data.results, data.uniqueValues, data.filteredCount
+        @service.post('query/results', req).pipe(parse).done(cont)
 
     clone: (cloneEvents) ->
         cloned = _CLONE(@)
@@ -374,7 +374,7 @@ class Query
 
     getOuterJoin: (path) ->
         path = @adjustPath(path)
-        joinPaths = _.sortBy(_.keys(@joins), 'length').reverse()
+        joinPaths = _.sortBy(_.keys(@joins), get 'length').reverse()
         _.find(joinPaths, (p) => @joins[p] is 'OUTER' and path.indexOf(p) is 0)
 
     _parse_sort_order: (input) ->
@@ -502,6 +502,10 @@ class Query
             catch error
                 throw new Error("Illegal operator: #{ constraint.op }")
         @constraints.push constraint
+
+        if @constraintLogic? and @constraintLogic isnt '' # Naively add this constraint as an 'AND' filter.
+            @constraintLogic = "(#{@constraintLogic}) and #{ CODES[@constraints.length] }"
+
         unless @__silent__
             @trigger 'add:constraint', constraint
             @trigger 'change:constraints'
@@ -527,6 +531,7 @@ class Query
             view: @views.join(' ')
             sortOrder: @getSorting()
             constraintLogic: @constraintLogic
+        attrs.name = @name if @name?
         headAttrs = (k + '="' + v + '"' for k, v of attrs when v).join(' ')
         "<query #{headAttrs} >#{ @getJoinXML() }#{ @getConstraintXML() }</query>"
 
@@ -540,12 +545,26 @@ class Query
             true # No model available - for testing return true.
 
     fetchCode: (lang, cb) ->
-        cb ?= ->
         req =
             query: @toXML()
             lang: lang
-            format: 'json'
-        @service.makeRequest('query/code', req, (data) -> cb(data.code))
+        @service.get('query/code', req).pipe(@service.VERIFIER).pipe(get 'code').done(cb)
+
+    # Save a query to the server, with the name given.
+    save: (name, cb) ->
+        @name = name if name?
+        req =
+            data: @toXML()
+            contentType: "application/xml; charset=UTF-8"
+            url: @service.root + 'query'
+            type: 'POST'
+            dataType: 'json'
+        @service.doReq(req)
+            .pipe(@service.VERIFIER)
+            .pipe(get 'name')
+            .done(cb, (name) => @name = name)
+
+    # TODO: saveAsTemplate()
 
     getCodeURI: (lang) ->
         req =
@@ -586,10 +605,9 @@ for f in Query.BIO_FORMATS then do (f) ->
     reqMeth = "_#{ f }_req"
     getMeth = "get#{ f.toUpperCase() }"
     uriMeth = getMeth + "URI"
-    Query.prototype[getMeth] = (cb) ->
+    Query.prototype[getMeth] = (cb = ->) ->
         req = @[reqMeth]()
-        cb ?= ->
-        @service.makeRequest('query/results/' + f, req, cb, 'POST')
+        @service.post('query/results/' + f, req).done cb
     Query.prototype[uriMeth] = (cb) ->
         req = @[reqMeth]()
         if @service?.token? # hard to tell if necessary. Include it.
