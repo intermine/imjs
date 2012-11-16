@@ -1,5 +1,5 @@
 {asyncTest, older_emps, clearTheWay} = require './lib/service-setup'
-{get, invoke}  = require '../../src/shiv'
+{get, invoke}  = require '../../src/util'
 $ = require 'underscore.deferred'
 
 name = "temp-created_in_js-diff"

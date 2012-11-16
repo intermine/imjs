@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{invoke, copy, set, get}  = require '../../src/shiv'
+{invoke, copy, set, get}  = require '../../src/util'
 
 query = (set {limit: 10}) copy older_emps
 expected =  [

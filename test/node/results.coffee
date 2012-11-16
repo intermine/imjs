@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{omap, fold, invoke}  = require '../../src/shiv'
+{omap, fold, invoke}  = require '../../src/util'
 
 expected = [
     "EmployeeB3",

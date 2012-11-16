@@ -1,5 +1,5 @@
 {asyncTest} = require './lib/service-setup'
-{omap, fold}  = require '../../src/shiv'
+{omap, fold}  = require '../../src/util'
 
 query =
     from: 'Department'

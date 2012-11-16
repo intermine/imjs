@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{fold, AND}  = require '../../src/shiv'
+{fold, AND}  = require '../../src/util'
 
 exports['quick search:all'] = asyncTest 2, (beforeExit, assert) ->
     @service.search (rs, facets) =>

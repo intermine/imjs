@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{omap, fold}  = require '../../src/shiv'
+{omap, fold}  = require '../../src/util'
 
 me = 'intermine-test-user'
 

@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{get, invoke} = require '../../src/shiv'
+{get, invoke} = require '../../src/util'
 $ = require 'underscore.deferred'
 
 # This query was failing in the webapp.

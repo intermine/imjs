@@ -1,6 +1,6 @@
 {asyncTest, older_emps} = require './lib/service-setup'
 {LOG, ERR} = require './lib/util'
-{get, invoke, concatMap}  = require '../../src/shiv'
+{get, invoke, concatMap}  = require '../../src/util'
 
 sumCounts = concatMap get 'count'
 

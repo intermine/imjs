@@ -1,5 +1,5 @@
 {asyncTest} = require './lib/service-setup'
-{omap}  = require '../../src/shiv'
+{omap}  = require '../../src/util'
 
 # Normalise whitespace so that XML can be compared more easily.
 normalise = (s) -> s.replace(/\s+/gm, ' ').replace(/>\s*</gm, '><')

@@ -1,6 +1,6 @@
 {setup, asyncTestCase, older_emps} = require './lib/service-setup'
 {asyncTestCase} = require './lib/util'
-{set, omap, fold, invoke, flatMap}  = require '../../src/shiv'
+{set, omap, fold, invoke, flatMap}  = require '../../src/util'
 
 # Helper class to incapsulate the logic for iterating testing.
 class Counter

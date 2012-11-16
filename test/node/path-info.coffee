@@ -1,6 +1,6 @@
 {setup, asyncTest, older_emps} = require './lib/service-setup'
 {LOG, ERR} = require './lib/util'
-{invoke, id, NOT} = require '../../src/shiv'
+{invoke, id, NOT} = require '../../src/util'
 
 piTest = (f) -> asyncTest 1, (beforeExit, assert) ->
     @service.fetchModel (m) => @runTest f assert, m

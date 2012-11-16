@@ -1,5 +1,5 @@
 {asyncTest, older_emps, clearTheWay} = require './lib/service-setup'
-{invoke, get, omap, fold}  = require '../../src/shiv'
+{invoke, get, omap, fold}  = require '../../src/util'
 
 list_opts = name: 'list-from-js-query', tags: ['foo', 'bar', 'baz', 'js', 'node', 'testing']
 

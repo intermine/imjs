@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{get, invoke} = require '../../src/shiv'
+{get, invoke} = require '../../src/util'
 
 davidQ = select: ['id'], from: 'Employee', where: {name: 'David Brent'}
 b1q = select: ['id'], from: 'Employee', where: {name: 'EmployeeB1'}

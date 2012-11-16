@@ -1,5 +1,5 @@
 {Query} = require '../../src/query'
-{omap, fold, get}  = require '../../src/shiv'
+{omap, fold, get}  = require '../../src/util'
 {decap, lc} = require './lib/util'
 
 expected = [

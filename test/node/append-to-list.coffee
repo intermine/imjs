@@ -1,5 +1,5 @@
 {asyncTest, older_emps, clearTheWay} = require './lib/service-setup'
-{omap, fold, invoke}  = require '../../src/shiv'
+{omap, fold, invoke}  = require '../../src/util'
 $ = require 'underscore.deferred'
 
 name = 'temp-olders'

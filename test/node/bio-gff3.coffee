@@ -1,6 +1,6 @@
 {Service} = require '../../lib/service'
 {testCase, asyncTestCase} = require './lib/util'
-{invoke} = require '../../src/shiv'
+{invoke} = require '../../src/util'
 
 test = asyncTestCase -> ctx =
     service: new Service(root: 'www.flymine.org/query')

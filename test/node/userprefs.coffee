@@ -1,4 +1,5 @@
 {asyncTest} = require './lib/service-setup'
+{LOG, ERR} = require './lib/util'
 
 exports['Can manage user preferences'] = asyncTest 2, (beforeExit, assert) ->
     @service.whoami (u) =>

@@ -1,5 +1,5 @@
 {clearTheWay, asyncTest, older_emps} = require './lib/service-setup'
-{invoke, omap, fold}  = require '../../src/shiv'
+{invoke, omap, fold}  = require '../../src/util'
 
 lists = ['My-Favourite-Employees', 'Umlaut holders']
 name = 'created_in_js-union'

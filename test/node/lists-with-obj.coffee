@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{get} = require '../../src/shiv'
+{get} = require '../../src/util'
 
 exports['can find lists containing an item'] = asyncTest 2, (beforeExit, assert) ->
     @service.fetchListsContaining publicId: 'Brenda', type: 'Employee', (ls) =>

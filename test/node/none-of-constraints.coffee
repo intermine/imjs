@@ -1,5 +1,5 @@
 {asyncTest, older_emps} = require './lib/service-setup'
-{get, invoke} = require '../../src/shiv'
+{get, invoke} = require '../../src/util'
 
 # This query was failing in the webapp.
 query =
