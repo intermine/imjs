@@ -1,3 +1,4 @@
+/**
 0.0.1: Fri May 25 17:00:00 BST 2012
        Inital release
 0.0.2: Fri May 25 18:12:17 BST 2012
@@ -17,3 +18,13 @@
        Support for tableRows.
 0.1.1: Mon Jun 25 16:14:43 BST 2012
        Fix for view removal bug.
+1.0.0: Thu Nov 15 16:43:40 GMT 2012
+       Rewrite of the service module into coffee-script.
+       Internal API changes (see Service#makeRequest)
+       Comprehensive promise support.
+1.1.0  Fri Nov 16 18:46:30 GMT 2012
+       Completion of caffination.
+       Added tests for model functions.
+       Separated shimming and util-functions.
+       Removed functions from the model class that are better supported in PathInfo
+**/
