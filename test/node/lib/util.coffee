@@ -8,13 +8,12 @@ exports.around = (before, after) -> (f) -> (args...) -> before(f, after, args)
 
 exports.testCase = (setup, teardown) -> (f) -> (beforeExit, assert) ->
     context = setup()
-    wrapped = -> teardown.call(context)
-    beforeExit(wrapped) if teardown?
+    bound = -> teardown.call(context)
+    beforeExit(bound) if teardown?
     f.call(context, beforeExit, assert)
 
-exports.fail = (testCase, assert) -> () ->
-    console.error.appy(console, arguments)
-    testCase.runTest -> assert.ok false
+exports.fail = (testCase, assert) -> (e) ->
+    testCase.runTest -> assert.ok false, (e.stack or e)
 
 exports.pass = (testCase, assert) -> () -> testCase.runTest -> assert.ok true
 
@@ -24,15 +23,14 @@ exports.asyncTestCase = (setup, teardown) -> (n, f) -> exports.testCase(setup, t
     @beforeExit = beforeExit
     @assert = assert
     @pass = exports.pass(@, assert)
-    @fail = exports.pass(@, assert)
+    @fail = exports.fail(@, assert)
     @failN = (n) -> (e) ->
-        console.log "IN FAIL-N"
-        console.error e
-        test.fail() for _ in [1 .. n]
+        console.error (e.stack or e)
+        test.fail("Aggregated failure") for _ in [1 .. n]
     @runTest = (toRun) ->
         try
-            toRun()
             done++
+            toRun()
         catch e
             throw e
     @testCB = (toRun) => (args...) => @runTest -> toRun args... # Shortcut for passing tests into deferred pipes

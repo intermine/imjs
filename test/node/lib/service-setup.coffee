@@ -1,6 +1,6 @@
 {Service} = require '../../../lib/service'
 {testCase, asyncTestCase} = require './util'
-{invoke}  = require '../../../src/shiv'
+{invoke}  = require '../../../src/util'
 {Deferred} = require 'underscore.deferred'
 
 exports.setup = setup = () ->
