@@ -8,8 +8,8 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 #
-root = exports ? this
 IS_NODE = typeof exports isnt 'undefined'
+__root__ = exports ? this
 
 # The Accept headers that correspond to each data-type.
 ACCEPT_HEADER =
@@ -29,27 +29,25 @@ URLENC = "application/x-www-form-urlencoded"
 # Import from the appropriate place depending on whether
 # if we are in node.js or in the browser.
 if IS_NODE
-    {_}          = require('underscore')
-    {Deferred}   = $ = require('underscore.deferred')
-    http         = require('http')
-    URL          = require('url')
-    qs           = require('querystring')
+    {_}            = require('underscore')
+    {Deferred}     = $ = require('underscore.deferred')
+    http           = require('http')
+    URL            = require('url')
+    qs             = require('querystring')
     {Model}        = require('./model')
     {Query}        = require('./query')
     {List}         = require('./lists')
     {User}         = require('./user')
-    {get, set, invoke} = require('./shiv')
+    funcutils      = require('./util')
     {EventEmitter} = require('events')
     {BufferedResponse} = require('buffered-response')
     to_query_string = qs.stringify
     intermine = exports
 else
-    {_, jQuery} = root
+    {_, jQuery, intermine} = __root__
     {Deferred} = $ = jQuery
-    root.intermine ?= {}
     to_query_string = jQuery.param
-    {Model, Query, List, User} = root.intermine
-    {get, set, invoke} = root.intermine.funcutils
+    {Model, Query, List, User, funcutils} = intermine
 
     do ->
         converters = {}
@@ -60,10 +58,7 @@ else
             contents: {json: /json/}
             converters: converters
 
-    intermine = root.intermine
-
-# A function that wraps the Model's constructor.
-modeller = (x) -> if Model? then new Model(x) else x
+{get, set, invoke, success, error} = funcutils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -139,10 +134,7 @@ ERROR_PIPE = (xhr, textStatus, e) ->
 # @return A factory that wraps callbacks for passing as success callbacks
 CHECKING_PIPE = (response) -> Deferred ->
     if response.wasSuccessful
-        try
-            @resolve response
-        catch e
-            @reject e, response
+        @resolve response
     else
         @reject response.error, response
 
@@ -158,11 +150,18 @@ dejoin = (q) ->
 # A private helper for a repeated pattern where
 # we only fetch a piece of information if it is not
 # already available in a instance or static cache.
-_get_or_fetch = (propName, store, path, key, cb) -> @[propName] ?=
-    if @useCache and value = store[@root]
-        Deferred().resolve(value).promise().done(cb)
+_get_or_fetch = (propName, store, path, key, cb) ->
+    prop = @[propName] ?= if (@useCache and value = store[@root])
+        success(value)
     else
-        @get(path).pipe(get key).done(cb, (x) => store[@root] = x)
+        @get(path).pipe(get key).done (x) => store[@root] = x
+    prop.done cb
+
+REQUIRES_VERSION = (s, n, f) -> s.fetchVersion().pipe (v) ->
+    if v >= n
+        f()
+    else
+        error REQUIRES n, v
 
 # A private helper that produces a function that will read
 # through an array of Lists, and find the first one with the
@@ -319,7 +318,8 @@ class Service
     # @option opts [String] population The name of a list to use as a background population (optional).
     # @option opts [String] filter An extra value that some widget calculations accept.
     # @return [Deferred<Array<Object>>] A promise to get results.
-    enrichment: (opts, cb) -> @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05).pipe get 'results'
+    enrichment: (opts, cb) -> REQUIRES_VERSION @, 8, =>
+        @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05).pipe(get 'results').done(cb)
 
     # Search for items in the database by any term or facet.
     #
@@ -334,17 +334,16 @@ class Service
     # @option options [String] q The term to search by.
     # @option options [Object<String, String>] facets A set of facet constraints.
     # @return [Deferred.<Array, Object, Object>] A promise to search the database.
-    search: (options = {}, cb = (->)) ->
+    search: (options = {}, cb = (->)) -> REQUIRES_VERSION @, 9, =>
         [cb, options] = [options, {}] if _.isFunction options
         options = {q: options} if _.isString options
         req = _.defaults {}, options, {q: ''}
-        delete req.facets # bad practice, but underscore 1.4.2 isn't well-established yet.
+        delete req.facets # bad, but underscore 1.4.2 isn't common yet, so we can't use omit.
         if options.facets
             for k, v of options.facets
                 req["facet_#{ k }"] = v
-        @post(QUICKSEARCH_PATH, req).pipe (results) -> Deferred ->
-            cb results.results, results.facets
-            @resolve results.results, results.facets
+        parse = (response) -> success response.results, response.facets
+        @post(QUICKSEARCH_PATH, req).pipe(parse).done(cb)
 
     # Find out how many rows a given query would return when run.
     #
@@ -387,15 +386,8 @@ class Service
     # Retrieve information about the currently authenticated user.
     # @param [(User) ->] A callback the receives a User object.
     # @return [Deferred.<User>] A promise to yield a user.
-    whoami: (cb) -> @fetchVersion().pipe (v) =>
-        fn = (x) => new User(@, x)
-        if v < 9
-            Deferred -> @reject REQUIRES 9, v
-        else
-            try
-                @get(WHOAMI_PATH).pipe(get 'user').pipe(fn).done(cb)
-            catch e
-                Deferred -> @reject e
+    whoami: (cb) -> REQUIRES_VERSION @, 9, =>
+        @get(WHOAMI_PATH).pipe(get 'user').pipe((x) => new User(@, x)).done(cb)
 
     doPagedRequest: (q, path, page = {}, format, cb) ->
         if q.toXML?
@@ -452,14 +444,14 @@ class Service
 
     # Fetch the list widgets that are available from this service.
     # @return [Deferred<Array<Object>>] A promise to return a list of widgets.
-    fetchWidgets: (cb) ->
+    fetchWidgets: (cb) -> REQUIRES_VERSION @, 8, =>
         _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
     # Fetch the description of the data model for this service.
     # @return [Deferred<Model>] A promise to return metadata about this service.
     fetchModel: (cb) ->
         _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
-            .pipe(modeller)
+            .pipe(Model.load)
             .pipe(set service: @)
             .done(cb)
 
@@ -491,16 +483,8 @@ class Service
             catch e
                 @reject e
 
-
-    manageUserPreferences: (method, data) ->
-        s = @
-        @fetchVersion().pipe (v) ->
-            if v >= 11
-                s.makeRequest(method, PREF_PATH, data).pipe(get 'preferences')
-            else
-                Deferred( -> @reject REQUIRES 11, v ).promise()
-
-
+    manageUserPreferences: (method, data) -> REQUIRES_VERSION @, 11, =>
+        @makeRequest(method, PREF_PATH, data).pipe(get 'preferences')
     
 wire_for_node = ->
 
@@ -673,10 +657,9 @@ Service.connect = (opts) -> new Service(opts)
 
 # Export the Service class to the world
 intermine.Service = Service
-if IS_NODE
-    # And re-export the other public classes if in node.js
-    intermine.Model = Model
-    intermine.Query = Query
-    intermine.List = List
-    intermine.User = User
+# And re-export the other public classes if in node.js
+intermine.Model ?= Model
+intermine.Query ?= Query
+intermine.List ?= List
+intermine.User ?= User
 

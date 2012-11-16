@@ -9,22 +9,19 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-## TODO: write unit tests.
-
 IS_NODE = typeof exports isnt 'undefined'
-
 __root__ = exports ? this
 
 if IS_NODE
-    intermine       = exports
+    intermine       = __root__
     {_}             = require 'underscore'
     {Deferred}  = $ = require 'underscore.deferred'
-    {concatMap, get, any, set, copy}     = require('./shiv')
+    {concatMap, get, any, set, copy, success, error} = require('./util')
 else
     {_}            = __root__
     {Deferred} = $ = __root__.jQuery
-    intermine      = (__root__.intermine ?= {})
-    {concatMap, get, any, set, copy} = intermine.funcutils
+    intermine      = __root__.intermine
+    {concatMap, get, any, set, copy, success, error} = intermine.funcutils
 
 NAMES = {}
 PARSED = {}
@@ -91,9 +88,9 @@ class PathInfo
     getDisplayName: (cb) ->
         @namePromise ?=
             if cached = (@displayName or NAMES[@ident])
-                Deferred().resolve(cached).promise()
+                success cached
             else if not @model.service?
-                Deferred().reject(new Error("No service")).promise()
+                error "No service"
             else
                 path = 'model' + (concatMap (d) -> '/' + d.name) @allDescriptors()
                 params = (set format: 'json') copy @subclasses

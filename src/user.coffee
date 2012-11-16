@@ -1,4 +1,3 @@
-###
 # @source: /src/user.coffee
 #
 # The User class represents the authenticated user's profile
@@ -6,23 +5,25 @@
 # a user's preferences.
 #
 # @author: Alex Kalderimis
-###
-root = exports ? this
-if typeof exports is 'undefined'
-    IS_NODE = false
-    Deferred = root.jQuery.Deferred
-    _ = root._
-    if typeof root.console is 'undefined'
-        root.console =
-            log: ->
-            error: ->
-    if root.intermine is 'undefined'
-        root.intermine = {}
-    root = root.intermine
+
+IS_NODE = typeof exports isnt 'undefined'
+__root__ = exports ? this
+
+if IS_NODE
+    {Deferred} = require 'underscore.deferred'
+    {_}        = require 'underscore'
+    {error}    = require './util'
+    intermine  = __root__
 else
-    IS_NODE = true
-    Deferred = require('jquery-deferred').Deferred
-    _ = require('underscore')._
+    {_}        = __root__
+    {Deferred} = __root__.jQuery
+    intermine  = __root__.intermine
+    {error}    = intermine.funcutils
+
+# Simple utility to take the returned value from manageUserPreferences and
+# update the preferences property on this object.
+do_pref_req = (user, data, method) ->
+    user.service.manageUserPreferences(method, data).done (prefs) -> user.preferences = prefs
 
 # A representation of the user we are logged in as.
 class User
@@ -51,24 +52,21 @@ class User
         else if not value?
             data = key
         else
-            return Deferred().reject("bad-arguments", "Incorrect arguments to setPreference")
+            error "Incorrect arguments to setPreference"
         @setPreferences(data)
 
     # Set one or more preferences, provided as an object.
-    setPreferences: (prefs) -> @_do_pref_req prefs, 'POST'
+    setPreferences: (prefs) ->
+        do_pref_req @, prefs, 'POST'
 
     # Clear a preference.
-    clearPreference: (key) -> @_do_pref_req {key: key}, 'DELETE'
+    clearPreference: (key) -> do_pref_req @, {key: key}, 'DELETE'
 
     # Clear all preferences.
-    clearPreferences: () -> @_do_pref_req {}, 'DELETE'
+    clearPreferences: () -> do_pref_req @, {}, 'DELETE'
 
-    refresh: () -> @_do_pref_req {}, 'GET'
+    refresh: () -> do_pref_req @, {}, 'GET'
 
-    # Simple utility to take the returned value from manageUserPreferences and
-    # update the preferences property on this object.
-    _do_pref_req: (data, method) ->
-        @service.manageUserPreferences(method, data).done (prefs) => @preferences = prefs
 
-root.User = User
+intermine.User = User
 

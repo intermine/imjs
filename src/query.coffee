@@ -8,28 +8,22 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-root = exports ? this
-if typeof exports is 'undefined'
-    IS_NODE = false
-    _ = root._
-    {partition, fold, take, concatMap, id, get} = root.intermine.funcutils
-    {Deferred} = $ = root.jQuery
-    _CLONE = (o) -> root.jQuery.extend true, {}, o
-    toQueryString = (req) -> root.jQuery.param(req)
-    if typeof root.console is 'undefined'
-        root.console =
-            log: ->
-            error: ->
-    if root.intermine is 'undefined'
-        root.intermine = {}
-    root = root.intermine
-else
-    IS_NODE = true
-    _               = require('underscore')._
+IS_NODE = typeof exports isnt 'undefined'
+__root__ = exports ? this
+
+if IS_NODE
+    intermine       = __root__
+    {_}             = require('underscore')
     {Deferred}  = $ = require('underscore.deferred')
     _CLONE          = require('clone')
     toQueryString   = require('querystring').stringify
-    {partition, fold, take, concatMap, id, get} = require('./shiv')
+    {partition, fold, take, concatMap, id, get} = require('./util')
+else
+    {_, jQuery, intermine} = __root__
+    {partition, fold, take, concatMap, id, get} = intermine.funcutils
+    {Deferred}  = $ = jQuery
+    _CLONE = (o) -> root.jQuery.extend true, {}, o
+    toQueryString = (req) -> jQuery.param(req)
 
 get_canonical_op = (orig) ->
     canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
@@ -626,4 +620,4 @@ _get_data_fetcher = (server_fn) -> (page, cb) ->
 for mth in ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table', 'tableRows']
     Query.prototype[mth] = _get_data_fetcher mth
 
-root.Query = Query
+intermine.Query = Query
