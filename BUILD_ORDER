@@ -1,11 +1,13 @@
 LICENCE
 lib/ie8-cors-support.js
+lib/constants.js
 lib/shiv.js
 lib/util.js
+lib/jquery-http.js
 lib/table.js
 lib/path.js
 lib/model.js
 lib/user.js
-lib/service.js
-lib/query.js
 lib/lists.js
+lib/query.js
+lib/service.js
