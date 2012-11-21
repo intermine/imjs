@@ -11,54 +11,27 @@
 IS_NODE = typeof exports isnt 'undefined'
 __root__ = exports ? this
 
-# The Accept headers that correspond to each data-type.
-ACCEPT_HEADER =
-    "json": "application/json",
-    "jsonobjects": "application/json;type=objects",
-    "jsontable": "application/json;type=table",
-    "jsonrows": "application/json;type=rows",
-    "jsoncount": "application/json;type=count",
-    "jsonp": "application/javascript",
-    "jsonpobjects": "application/javascript;type=objects",
-    "jsonptable": "application/javascript;type=table",
-    "jsonprows": "application/javascript;type=rows",
-    "jsonpcount": "application/javascript;type=count"
-
-URLENC = "application/x-www-form-urlencoded"
-
 # Import from the appropriate place depending on whether
 # if we are in node.js or in the browser.
 if IS_NODE
     {_}            = require('underscore')
     {Deferred}     = $ = require('underscore.deferred')
-    http           = require('http')
-    URL            = require('url')
-    qs             = require('querystring')
     {Model}        = require('./model')
     {Query}        = require('./query')
     {List}         = require('./lists')
     {User}         = require('./user')
+    {IDResolutionJob} = require('./id-resolution-job')
     funcutils      = require('./util')
-    {EventEmitter} = require('events')
-    {BufferedResponse} = require('buffered-response')
-    to_query_string = qs.stringify
+    to_query_string    = require('querystring').stringify
+    http           = require('./http')
     intermine = exports
 else
     {_, jQuery, intermine} = __root__
     {Deferred} = $ = jQuery
     to_query_string = jQuery.param
-    {Model, Query, List, User, funcutils} = intermine
+    {Model, Query, List, User, IDResolutionJob, funcutils, http} = intermine
 
-    do ->
-        converters = {}
-        for format, header of ACCEPT_HEADER
-            converters["text #{ format }"] = jQuery.parseJSON
-        jQuery.ajaxSetup
-            accepts: ACCEPT_HEADER
-            contents: {json: /json/}
-            converters: converters
-
-{get, set, invoke, success, error} = funcutils
+{fold, get, set, invoke, success, error, REQUIRES_VERSION} = funcutils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -95,12 +68,6 @@ WHOAMI_PATH = "user/whoami"
 TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
 
-# Make a function that lets users know
-# when they are trying to use a service that
-# isn't supported by their current service.
-REQUIRES = (required, got) ->
-    "This service requires a service at version #{ required } or above. This one is at #{ got }"
-
 # The identity function f x = x
 IDENTITY = (x) -> x
 
@@ -118,25 +85,8 @@ DEFAULT_ERROR_HANDLER = (e) ->
     if IS_NODE and e.stack?
         console.error e.stack
     else
-        (console.error || console.log)?.apply(console, arguments) if console?
-
-# Process the errors returned from the webservice.
-ERROR_PIPE = (xhr, textStatus, e) ->
-    try
-        JSON.parse(xhr.responseText).error
-    catch e
-        textStatus
-
-# Produce a factory function that will in turn wrap a
-# function and make it suitable for passing on as
-# the success callback to an HTTP web-service request.
-# @param [String] key The name of the object of interest on the response (optional)
-# @return A factory that wraps callbacks for passing as success callbacks
-CHECKING_PIPE = (response) -> Deferred ->
-    if response.wasSuccessful
-        @resolve response
-    else
-        @reject response.error, response
+        args = if (e?.stack) then [e.stack] else arguments
+        (console.error || console.log)?.apply(console, args) if console?
 
 # Helper function that makes sure a query doesn't have
 # any implicit constraints through the use of inner-joins.
@@ -156,12 +106,6 @@ _get_or_fetch = (propName, store, path, key, cb) ->
     else
         @get(path).pipe(get key).done (x) => store[@root] = x
     prop.done cb
-
-REQUIRES_VERSION = (s, n, f) -> s.fetchVersion().pipe (v) ->
-    if v >= n
-        f()
-    else
-        error REQUIRES n, v
 
 # A private helper that produces a function that will read
 # through an array of Lists, and find the first one with the
@@ -214,7 +158,7 @@ class Service
             @root = DEFAULT_PROTOCOL + @root
         if !HAS_SUFFIX.test @root
             @root = @root + SUFFIX
-        @root = @root.replace /ics$/, "ice/"
+        @root = @root.replace /ice$/, "ice/"
         @errorHandler ?= DEFAULT_ERROR_HANDLER
         @help ?= 'no.help.available@dev.null'
         @useCache = !noCache # Peristent processed might not want to cache model, version, etc.
@@ -277,9 +221,8 @@ class Service
             url += '?callback=?'
 
         # IE requires that we tunnel DELETE and PUT
-        unless @supports method
-            data.method = method
-            method = @getEffectiveMethod method
+        unless http.supports method
+            [data.method, method] = [method, http.getMethod(method)]
 
         if method is 'DELETE'
             # grumble grumble struts grumble grumble...
@@ -295,17 +238,8 @@ class Service
             url: url,
             type: method
 
-        return @doReq(opts, indiv)
+        return http.doReq(opts, indiv)
 
-    # Whether or not this service supports the given method
-    # The default implementation returns true for all inputs.
-    supports: -> true
-
-    # Get the method we should actually use to make a request of
-    # method 'x'.
-    #
-    # @param [String] x The method I'm thinking of using.
-    getEffectiveMethod: (x) -> x
 
     # Get the results of using a list enrichment widget to calculate
     # statistics for a set of objects. An enrichment calculation
@@ -318,8 +252,10 @@ class Service
     # @option opts [String] population The name of a list to use as a background population (optional).
     # @option opts [String] filter An extra value that some widget calculations accept.
     # @return [Deferred<Array<Object>>] A promise to get results.
-    enrichment: (opts, cb) -> REQUIRES_VERSION @, 8, =>
-        @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05).pipe(get 'results').done(cb)
+    enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
+        @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05, correction: 'Holm-Bonferroni')
+            .pipe(get 'results')
+            .done(cb)
 
     # Search for items in the database by any term or facet.
     #
@@ -447,6 +383,10 @@ class Service
     fetchWidgets: (cb) -> REQUIRES_VERSION @, 8, =>
         _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
+    fetchWidgetMap: (cb) -> REQUIRES_VERSION @, 8, =>
+        toMap = fold {}, (m, w) -> m[w.name] = w; m
+        (@__wmap__ ?= @fetchWidgets().then(toMap)).done(cb)
+
     # Fetch the description of the data model for this service.
     # @return [Deferred<Model>] A promise to return metadata about this service.
     fetchModel: (cb) ->
@@ -485,159 +425,30 @@ class Service
 
     manageUserPreferences: (method, data) -> REQUIRES_VERSION @, 11, =>
         @makeRequest(method, PREF_PATH, data).pipe(get 'preferences')
-    
-wire_for_node = ->
 
-    # Pattern to match optional trailing commas
-    PESKY_COMMA = /,\s*$/
+    # Submit an ID resolution job. 
+    # @param [Object] opts The parameters to the id resolution service.
+    # @option opts [Array<String>] identifiers The identifiers you want to resolve.
+    # @option opts [String] type The type of objects these identifiers refer to.
+    # @option opts [String] extra Extra values that can be used to disambiguate values (optional).
+    # @option opts [boolean] caseSensitive Whether these identifiers should be treated as case-sensitive. (optional).
+    # @option opts [boolean] wildCards Whether wild-cards should be allowed in these identifiers. (optional).
+    # @param [->] cb An optional callback.
+    # @return [Promise<IDResolutionJob>] A promise to return a job id.
+    resolveIds: (opts, cb) -> REQUIRES_VERSION @, 10, =>
+        console.log @
+        req =
+            data: JSON.stringify(opts)
+            dataType: 'json'
+            url: @root + 'ids'
+            type: 'POST'
+            contentType: 'application/json'
+        http.doReq(req).pipe(get 'uid').pipe(IDResolutionJob.create @).done(cb)
 
-    iterReq = (format) -> (q, page = {}, cbs = []) ->
-        if !cbs? and not (page.start? or page.size?)
-            [page, cbs] = [{}, page]
-        if _.isFunction cbs
-            cbs = [cbs]
-        req = _.extend {format}, page, query: q.toXML()
-        [doThis, onErr, onEnd] = cbs
-        @makeRequest('POST', QUERY_RESULTS_PATH, req, null, true)
-            .fail(onErr)
-            .done(invoke 'each', doThis)
-            .done(invoke 'error', onErr)
-            .done(invoke 'done', onEnd)
-
-    Service::rowByRow = iterReq 'json'
-
-    Service::recordByRecord = iterReq 'jsonobjects'
-
-    streaming = (ret, opts) -> (resp) ->
-        containerBuffer = ''
-        char0 = if opts.data.format is 'json' then '[' else '{'
-        charZ = if opts.data.format is 'json' then ']' else '}'
-        toItem = (line, idx) ->
-            try
-                parsed = JSON.parse line.replace PESKY_COMMA, ''
-                return parsed
-            catch e
-                containerBuffer += line
-                lastChar = line[line.length - 1]
-                if idx > 0 and (lastChar is ',' or (lastChar is char0 && line[0] is charZ))
-                    # This should have parsed
-                    iter.emit('error', e, line)
-                return undefined
-        onlyDefinedItems = (item) -> item?
-        onEnd = ->
-            # Check the container on end to make sure all was well.
-            try
-                container = JSON.parse containerBuffer
-                if container.error
-                    iter.emit 'error', new Error(container.error)
-            catch e
-                iter.emit 'error', "Mal-formed JSON response: #{ containerBuffer }"
-
-        iter = new BufferedResponse(resp, 'utf8')
-            .map(toItem)
-            .filter(onlyDefinedItems)
-            .each(opts.success)
-            .error(opts.error)
-            .done(onEnd)
-
-        ret.resolve iter
-
-    blocking = (ret, opts) -> (resp) ->
-        containerBuffer = ''
-        ret.done(opts.success)
-        resp.on 'data', (chunk) -> containerBuffer += chunk
-        resp.on 'error', (e) -> ret.reject(e)
-        resp.on 'end', ->
-            if /json/.test opts.data.format
-                if '' is containerBuffer and resp.statusCode is 200
-                    # No body, but all-good.
-                    ret.resolve()
-                else
-                    try
-                        parsed = JSON.parse containerBuffer
-                        if err = parsed.error
-                            ret.reject new Error(err)
-                        else
-                            ret.resolve parsed
-                    catch e
-                        if resp.statusCode >= 400
-                            ret.reject new Error(resp.statusCode)
-                        else
-                            ret.reject new Error "Could not parse response to #{ opts.type } #{ opts.url }: '#{ containerBuffer }' (#{ e })"
-            else
-                if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
-                    ret.reject new Error(e[2])
-                else
-                    ret.resolve containerBuffer
-
-    Service::doReq = (opts, iter) -> Deferred ->
-        @fail opts.error
-        @done opts.success
-        if _.isString opts.data
-            postdata = opts.data
-            if opts.type in [ 'GET', 'DELETE' ]
-                return ret.reject("Invalid request. #{ opts.type } requests must not have bodies")
-        else
-            postdata = to_query_string opts.data
-        url = URL.parse(opts.url, true)
-        url.method = opts.type
-        url.port = url.port || 80
-        url.headers =
-            'User-Agent': 'node-http/imjs',
-            'Accept': ACCEPT_HEADER[opts.dataType]
-        if url.method in ['GET', 'DELETE'] and _.size opts.data
-            url.path += '?' + postdata
-        else
-            url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
-            url.headers['Content-Length'] = postdata.length
-
-        req = http.request url, (if iter then streaming else blocking) @, opts
-
-        req.on 'error', @reject
-
-        if url.method in [ 'POST', 'PUT' ]
-            req.write postdata
-        req.end()
-
-
-wire_for_browser = ->
-
-    if XDomainRequest?
-        mapping = PUT: 'POST', DELETE: 'GET'
-        Service::getEffectiveMethod = (x) -> mapping[x]
-        Service::supports = (m) -> mapping[m] is m
-
-    wrapCbs = (cbs) ->
-        if _.isArray cbs
-            [doThis, err, atEnd] = cbs
-            [((rows) -> _.each(rows, doThis)), err, atEnd]
-        else
-            [(rows) -> _.each rows, cbs]
-
-    iterReq = (format) -> (q, page = {}, cbs = []) ->
-        if !cbs? and not (page.start? or page.size?)
-            [page, cbs] = [{}, page]
-        _cbs = wrapCbs(cbs)
-        req = _.extend {format}, page, query: q.toXML()
-        [doThis, fail, onEnd] = _cbs
-        @post(QUERY_RESULTS_PATH, req, _cbs).done(onEnd)
-
-    # TODO: make these work with finally callback.
-    Service::rowByRow = iterReq 'json'
-
-    Service::recordByRecord = iterReq 'jsonobjects'
-
-    Service::doReq = (opts) ->
-        errBack = (opts.error or @errorHandler)
-        opts.error = _.compose errBack, ERROR_PIPE
-        return jQuery.ajax(opts).pipe(CHECKING_PIPE).fail(errBack)
-
-if IS_NODE
-    wire_for_node()
-else
-    wire_for_browser()
-
+Service::rowByRow = http.iterReq 'POST', QUERY_RESULTS_PATH, 'json'
 Service::eachRow = Service::rowByRow
+
+Service::recordByRecord = http.iterReq 'POST', QUERY_RESULTS_PATH, 'jsonobjects'
 Service::eachRecord = Service::recordByRecord
 
 # Static method to flush the cached
