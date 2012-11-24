@@ -1,18 +1,23 @@
-'use strict';
+(function () {
+    'use strict';
 
-(function() {
-    var get    = intermine.funcutils.get,
-        invoke = intermine.funcutils.invoke,
-        flip   = intermine.funcutils.flip,
-        tags   = ['js', 'qunit', 'testing'],
-        namePrefix = 'temp-created-in-js-',
-        clear  = function(service, name) { return function() {
-            return new jQuery.Deferred(function() {
+    var get    = intermine.funcutils.get
+      , invoke = intermine.funcutils.invoke
+      , flip   = intermine.funcutils.flip
+      , tags   = ['js', 'qunit', 'testing']
+      , namePrefix = 'temp-created-in-js-'
+
+    function clear(service, name) {
+        return function () {
+            return jQuery.Deferred(function () {
                 service.fetchList(name).then(invoke('del')).always(this.resolve);
-            });
-        }},
-        // Runs 4 tests for each operation.
-        operationTest = function(service, args, method, size, employee) { return function() {
+            }).promise();
+        }
+    }
+
+    // Runs 4 tests for each operation.
+    function operationTest(service, args, method, size, employee) {
+        return function () {
             return service[method](args)
                 .done(_.compose(_.bind(equal, null, args.name), get('name')))
                 .done(_.compose(_.bind(equal, null, size),      get('size')))
@@ -20,18 +25,19 @@
                 .then(invoke('contents'))
                 .then(invoke('map', get('name')))
                 .done(_.compose(ok, _.bind(flip(_.include), _, employee)));
-        }},
-        // Wrap the actual tests in code to delete the list before and after.
-        operationTestCase = function(method, size, employee, args) {
-            asyncTest(method, 4, function() {
-                var clearList = clear(this.s, args.name),
-                    onEnd = _.compose(start, clearList),
-                    run = operationTest(this.s, args, method, size, employee);
-                clearList().then(run).always(onEnd);
-            });
-        };
+        }
+    }
 
-    module('List Operations', TestCase);
+    // Wrap the actual tests in code to delete the list before and after.
+    function operationTestCase(method, size, employee, args) {
+        asyncTest(method, 4, function () {
+            var clearList = clear(this.s, args.name)
+              , run = operationTest(this.s, args, method, size, employee)
+            clearList().then(run).always(start, clearList);
+        });
+    }
+
+    module('List Operations', window.TestCase);
 
     operationTestCase('diff', 4, 'Brenda', {
         name: namePrefix + 'diff',

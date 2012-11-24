@@ -1,18 +1,18 @@
-'use strict';
+(function () {
+    'use strict';
 
-(function() {
-    var get       = intermine.funcutils.get,
-        concatMap = intermine.funcutils.concatMap,
-        invoke    = intermine.funcutils.invoke,
-        eql       = intermine.funcutils.flip(equal),
-        curry     = function(f, args) { return _.bind.apply(_, [f, null].concat(args)); },
-        sumCount  = concatMap(get('count'));
+    var get       = intermine.funcutils.get
+      , concatMap = intermine.funcutils.concatMap
+      , invoke    = intermine.funcutils.invoke
+      , curry     = intermine.funcutils.curry
+      , eql       = intermine.funcutils.flip(equal)
+      , sumCount  = concatMap(get('count'))
 
-    module('Column Summaries', TestCase);
+    module('Column Summaries', window.TestCase);
 
-    asyncTest('Can summarise a path - callbacks', 2, function() {
-        this.s.query(this.olderEmployees, function(q) {
-            q.summarise('department.company.name', function(items) {
+    asyncTest('Can summarise a path - callbacks', 2, function () {
+        this.s.query(this.olderEmployees, function (q) {
+            q.summarise('department.company.name', function (items) {
                 equal(items.length, 6);
                 equal(sumCount(items), 46);
                 start();
@@ -20,7 +20,7 @@
         });
     });
 
-    asyncTest('Can summarise a path - promises', 2, function() {
+    asyncTest('Can summarise a path - promises', 2, function () {
         this.s.query(this.olderEmployees)
             .then(invoke('summarise', 'department.company.name'))
             .done(_.compose(curry(eql, 6),  get('length')))
@@ -28,7 +28,7 @@
             .always(start);
     });
 
-    asyncTest('Can summarise a numeric path - promises', 5, function() {
+    asyncTest('Can summarise a numeric path - promises', 5, function () {
         this.s.query(this.olderEmployees)
             .then(invoke('summarise', 'department.company.vatNumber'))
             .done(_.compose(curry(eql, 4),  get('length')))

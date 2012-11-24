@@ -1,12 +1,14 @@
-'use strict';
 
-(function() {
-    var get = intermine.funcutils.get,
-        curry = intermine.funcutils.curry,
-        invoke = intermine.funcutils.invoke,
-        log = _.bind(console.log, console),
-        shortList = ['Anne', 'Brenda', 'Carol'],
-        longList = [
+(function () {
+    'use strict';
+    var get = intermine.funcutils.get
+      , curry = intermine.funcutils.curry
+      , invoke = intermine.funcutils.invoke
+      , log = _.bind(console.log, console)
+      , shortList = ['Anne', 'Brenda', 'Carol']
+      , onError = _.compose(start, log)
+      , check = function (exp) { return _.compose(start, curry(equal, exp), get('length'), _.keys); }
+      , longList = [
             'Anne', 'Brenda', 'Carol', 'David*',
             'Foo', 'Bar', 'Neil*', '*Godwin', 'Norbert',
             'Laverne Delillo', 'Lura Bal', 'Everette Shelor',
@@ -52,35 +54,43 @@
             'Lonnis Collins', 'Madge Madsen', 'Magdalena Prellwitz', 'Maja Decker',
             'Malcolm', 'Marie-Claude', 'Matt', 'Meredith Palmer',
             'Michael', 'Michael Scott', 'Nadège', 'Nathan',
-            'Neil Godwin', 'New line', 'here', 'Nicole', 'Nicole Rückert',
+            'Neil Godwin', 'New line', 'here', 'Nicole', 'Nicole Rückert'
         ];
 
-    module('ID-Resolution', TestCase);
+    module('ID-Resolution', window.TestCase);
 
-    asyncTest('Resolve some ids', 1, function() {
-        var onSuccess = _.compose(start, curry(equal, 3), get('length'), _.keys),
-            onError = _.compose(start, log),
-            onProgress = log;
+    asyncTest('Resolve some ids', 2, function () {
+        var polls      = 0
+          , expected   = 3
+          , onSuccess  = check(expected)
+          , onProgress = function () { polls++ }
+
         this.s.resolveIds({identifiers: shortList, type: 'Employee'})
-            .then(invoke('poll', onSuccess, onError, onProgress));
+            .then(invoke('poll', onSuccess, onError, onProgress))
+            .always(function () { ok(polls) });
     });
 
-    asyncTest('Resolve some ids - promises', 1, function() {
-        var onSuccess = _.compose(start, curry(equal, 3), get('length'), _.keys),
-            onError = _.compose(start, log),
-            onProgress = log;
-        var job = this.s.resolveIds({identifiers: shortList, type: 'Employee'})
-                      .then(invoke('poll'));
+    asyncTest('Resolve some ids - promises', 2, function () {
+        var polls      = 0
+          , expected   = 3
+          , onSuccess  = check(expected)
+          , onProgress = function () { polls++ }
+
+        var job = this.s.resolveIds({identifiers: shortList, type: 'Employee'}).then(invoke('poll'));
         job.done(onSuccess);
         job.fail(onError);
         job.progress(onProgress);
+        job.always(function () {ok(polls)});
     });
 
-    asyncTest('Resolve a longer list', 1, function() {
-        var onSuccess = _.compose(start, curry(equal, 87), get('length'), _.keys),
-            onError = _.compose(start, log),
-            onProgress = log;
+    asyncTest('Resolve a longer list', 2, function () {
+        var polls      = 0
+          , expected   = 87
+          , onSuccess  = check(expected)
+          , onProgress = function () { polls++ }
+
         this.s.resolveIds({identifiers: longList, type: 'Employee'})
-            .then(invoke('poll', onSuccess, onError, onProgress));
+            .then(invoke('poll', onSuccess, onError, onProgress))
+            .always(function () { ok(polls) });
     });
 })();
