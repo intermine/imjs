@@ -2,7 +2,7 @@ exports.decap = (x) -> x.replace?(/^\w+\./, '')
 exports.lc = (x) -> x.toLowerCase()
 
 exports.LOG = (args...) -> console.log "LOG", args...
-exports.ERR = (args...) -> console.error "ERROR", args...
+exports.ERR = (e) -> console.error "ERROR", (e.stack? or arguments)
 
 exports.around = (before, after) -> (f) -> (args...) -> before(f, after, args)
 
