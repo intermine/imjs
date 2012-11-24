@@ -1,5 +1,6 @@
 {Service} = require '../../lib/service'
 {test, asyncTest} = require './lib/service-setup'
+{get} = require '../../src/util'
 
 exports['test service root property'] = test (beforeExit, assert) ->
     assert.equal 'http://squirrel/intermine-test/service/', @service.root
@@ -13,10 +14,10 @@ exports['model'] = asyncTest 1, (beforeExit, assert) ->
     @service.fetchModel (m) => @runTest () -> assert.ok (v for _, v of m.classes).length > 0
 
 exports['get templates - cb'] = asyncTest 1, (beforeExit, assert) ->
-    @service.fetchTemplates (ts) => @runTest () -> assert.includes (n for n, _ of ts), 'ManagerLookup'
+    @service.fetchTemplates @testCB (ts) -> assert.ok ts.ManagerLookup
 
 exports['get templates - promise'] = asyncTest 1, (beforeExit, assert) ->
-    @service.fetchTemplates().fail(@fail).done (ts) => @runTest () -> assert.includes (n for n, _ of ts), 'ManagerLookup'
+    @service.fetchTemplates().then(get 'ManagerLookup').done @testCB assert.ok
 
 exports['summary fields'] = asyncTest 2, (beforeExit, assert) ->
     expected = [
@@ -27,5 +28,6 @@ exports['summary fields'] = asyncTest 2, (beforeExit, assert) ->
         "Employee.fullTime",
         "Employee.address.address"
     ]
-    @service.fetchSummaryFields (sfs) => @runTest () -> assert.eql sfs.Employee, expected
-    @service.fetchSummaryFields().fail(@fail).done (sfs) => @runTest () -> assert.eql sfs.Employee, expected
+    @service.fetchSummaryFields @testCB (sfs) -> assert.eql expected,  sfs.Employee
+    @service.fetchSummaryFields().then(get 'Employee').done @testCB (got) -> assert.eql expected, got
+
