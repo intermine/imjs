@@ -1,4 +1,6 @@
 node_modules
-lib/shiv.js
-lib/query.js
-lib/user.js
+lib/*.js
+lib/*.js-old
+build
+build/*.js
+js
