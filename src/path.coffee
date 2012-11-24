@@ -103,14 +103,14 @@ class PathInfo
 
     toString: () -> @allDescriptors().map(get 'name').join('.')
 
-    # 
-    # Get the type of a path. If the path represents a class or a reference, 
-    # the class itself is returned, otherwise the name of the attribute type is returned, 
+    #
+    # Get the type of a path. If the path represents a class or a reference,
+    # the class itself is returned, otherwise the name of the attribute type is returned,
     # minus any "java.lang." prefix.
-    # 
+    #
     # @param path The path to get the type of
     # @return A class-descriptor, or an attribute type name.
-    # 
+    #
     getType: () -> (@end?.type?.replace /java\.lang\./, '') or @getEndClass()
 
 PathInfo::toPathString = PathInfo::toString
@@ -135,4 +135,4 @@ PathInfo.flushCache = () ->
     PARSED = {}
     NAMES = {}
 
-exports.PathInfo = PathInfo
+intermine.PathInfo = PathInfo

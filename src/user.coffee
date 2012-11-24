@@ -45,7 +45,7 @@ class User
     # @param [String] key The key to set.
     # @param [String] value The value to set.
     # @return [Deferred] a promise to set a preference.
-    setPreference: (key, value) ->
+    setPreference: (key, value) =>
         if _.isString(key)
             data = {}
             data[key] = value
@@ -56,16 +56,16 @@ class User
         @setPreferences(data)
 
     # Set one or more preferences, provided as an object.
-    setPreferences: (prefs) ->
+    setPreferences: (prefs) =>
         do_pref_req @, prefs, 'POST'
 
     # Clear a preference.
-    clearPreference: (key) -> do_pref_req @, {key: key}, 'DELETE'
+    clearPreference: (key) => do_pref_req @, {key: key}, 'DELETE'
 
     # Clear all preferences.
-    clearPreferences: () -> do_pref_req @, {}, 'DELETE'
+    clearPreferences: () => do_pref_req @, {}, 'DELETE'
 
-    refresh: () -> do_pref_req @, {}, 'GET'
+    refresh: () => do_pref_req @, {}, 'GET'
 
 
 intermine.User = User

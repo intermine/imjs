@@ -22,14 +22,29 @@ else
     {_, jQuery, intermine} = __root__
     {partition, fold, take, concatMap, id, get} = intermine.funcutils
     {Deferred}  = $ = jQuery
-    _CLONE = (o) -> root.jQuery.extend true, {}, o
-    toQueryString = (req) -> jQuery.param(req)
+    _CLONE          = (o) -> jQuery.extend true, {}, o
+    toQueryString   = jQuery.param
 
 get_canonical_op = (orig) ->
     canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
     unless canonical
-        throw "Illegal constraint operator: #{ orig }"
+        throw new Error "Illegal constraint operator: #{ orig }"
     canonical
+
+BASIC_ATTRS  = [ 'path', 'op', 'code' ]
+SIMPLE_ATTRS = BASIC_ATTRS.concat [ 'value', 'extraValue' ]
+
+RESULTS_METHODS = [
+    'rowByRow', 'eachRow', 'recordByRecord', 'eachRecord',
+    'records', 'rows', 'table', 'tableRows'
+]
+
+LIST_PIPE = (service) -> _.compose service.fetchList, get 'listName'
+
+CODES = [
+    null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+]
 
 decapitate = (x) -> x.substr(x.indexOf('.'))
 
@@ -43,12 +58,14 @@ getListResponseHandler = (service, cb) -> (data) ->
 # Constraint XML machinery
 conValStr = (v) -> "<value>#{_.escape v}</value>"
 conAttrs = (c, names) -> ("""#{k}="#{_.escape(v)}" """ for k, v of c when (k in names)).join('')
-noValueConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'op', 'code']) }/>"""
+noValueConStr = (c) -> """<constraint #{ conAttrs(c, BASIC_ATTRS) }/>"""
 typeConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'type']) }/>"""
-simpleConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'op', 'code', 'value', 'extraValue']) }/>"""
-multiConStr = (c)  -> """<constraint #{ conAttrs(c, ['path', 'op', 'code']) }>#{concatMap(conValStr) c.values}</constraint>"""
-idConStr = (c)     -> """<constraint #{ conAttrs(c, ['path', 'op', 'code']) }ids="#{c.ids.join(',')}"/>"""
-conStr = (c) -> if c.values?
+simpleConStr = (c) -> """<constraint #{ conAttrs(c, SIMPLE_ATTRS) }/>"""
+multiConStr = (c) ->
+    """<constraint #{ conAttrs(c, BASIC_ATTRS) }>#{concatMap(conValStr) c.values}</constraint>"""
+idConStr = (c)     -> """<constraint #{ conAttrs(c, BASIC_ATTRS) }ids="#{c.ids.join(',')}"/>"""
+conStr = (c) ->
+    if c.values?
         multiConStr(c)
     else if c.ids?
         idConStr(c)
@@ -59,13 +76,8 @@ conStr = (c) -> if c.values?
     else
         simpleConStr(c)
 
-LIST_PIPE = (service) -> _.compose service.fetchList, get 'listName'
-
-CODES = [
-    null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-]
-       
+didntRemove = (orig, reduced) ->
+    "Did not remove a single constraint. original = #{ orig }, reduced = #{ reduced }"
 
 class Query
     @JOIN_STYLES = ['INNER', 'OUTER']
@@ -207,7 +219,7 @@ class Query
         reduced = (c for c in orig when (not iscon c))
 
         if reduced.length isnt orig.length - 1
-            throw "Did not remove a single constraint. original = #{ orig }, reduced = #{ reduced }"
+            throw new Error didntRemove orig, reduced
 
         @constraints = reduced
         unless silent
@@ -417,7 +429,7 @@ class Query
         join.path = @adjustPath(join.path)
         join.style = join.style?.toUpperCase() ? join.style
         unless join.style in Query.JOIN_STYLES
-            throw "Invalid join style: #{ join.style }"
+            throw new Error "Invalid join style: #{ join.style }"
         @joins[join.path] = join.style
         @trigger 'set:join', join.path, join.style
         
@@ -497,7 +509,8 @@ class Query
                 throw new Error("Illegal operator: #{ constraint.op }")
         @constraints.push constraint
 
-        if @constraintLogic? and @constraintLogic isnt '' # Naively add this constraint as an 'AND' filter.
+        if @constraintLogic? and @constraintLogic isnt ''
+            # Naively add this constraint as an 'AND' filter.
             @constraintLogic = "(#{@constraintLogic}) and #{ CODES[@constraints.length] }"
 
         unless @__silent__
@@ -608,16 +621,15 @@ for f in Query.BIO_FORMATS then do (f) ->
             req.token = @service.token
         "#{ @service.root }query/results/#{ f }?#{ toQueryString req }"
 
-_get_data_fetcher = (server_fn) -> (page, cb) ->
-    cb ?= page
-    page = if (_.isFunction(page) or not page) then {} else page
+_get_data_fetcher = (server_fn) -> (page = {}, cb = []) ->
+    [cb, page] = [page, {}] if (_.isFunction(page))
     if @service[server_fn]
         _.defaults page, {start: @start, size: @maxRows}
         return @service[server_fn](@, page, cb)
     else
         throw new Error("Could not find #{ server_fn } at this service. Sorry.")
 
-for mth in ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table', 'tableRows']
+for mth in RESULTS_METHODS
     Query.prototype[mth] = _get_data_fetcher mth
 
 intermine.Query = Query

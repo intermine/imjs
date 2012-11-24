@@ -31,7 +31,7 @@ else
     to_query_string = jQuery.param
     {Model, Query, List, User, IDResolutionJob, funcutils, http} = intermine
 
-{fold, get, set, invoke, success, error, REQUIRES_VERSION} = funcutils
+{curry, fold, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -88,15 +88,6 @@ DEFAULT_ERROR_HANDLER = (e) ->
         args = if (e?.stack) then [e.stack] else arguments
         (console.error || console.log)?.apply(console, args) if console?
 
-# Helper function that makes sure a query doesn't have
-# any implicit constraints through the use of inner-joins.
-# All chains of references will be converted to outer-joins.
-dejoin = (q) ->
-    for view in q.views
-        parts = view.split('.')
-        q.addJoin(parts[1..-2].join '.') if parts.length > 2
-    return q
-
 # A private helper for a repeated pattern where
 # we only fetch a piece of information if it is not
 # already available in a instance or static cache.
@@ -129,10 +120,10 @@ getListFinder = (name) -> (lists) -> Deferred ->
 # base url and optional authentication information for accessing
 # private user data. If data is required from more than one user at
 # the same service, multiple connection objects should be instantiated,
-# each authenticated to the appropriate user (requests that return 
+# each authenticated to the appropriate user (requests that return
 # data that can be cached between users will be made as most once, unless
 # the service is connected with the 'noCache' option.
-# 
+#
 class Service
 
     # Construct a new connection to a service.
@@ -147,7 +138,8 @@ class Service
     #   This can be changed by passing an alternative error handler, such as (->) to
     #   suppress error logging.
     # @option options [boolean] DEBUG Whether to log extra debug information (optional).
-    # @option options [String] help An email address to show to the user if help is needed (optional).
+    # @option options [String] help An email address to show to the user if
+    #   help is needed (optional).
     # @option options [boolean] noCache Set this flag to true to prevent the use of the global
     #   results caches for non-volatile data (models, versions, etc). Each service instance will
     #   still continue to use its own private cache.
@@ -171,7 +163,7 @@ class Service
                         return intended.replace 'json', 'jsonp'
 
             return intended
-    
+
     # Convenience method for making basic POST requests.
     # @param [String] path The endpoint to post to.
     # @param [Object.<String, String>|Array.<[String, String]>] data parameters to send (optional)
@@ -200,7 +192,7 @@ class Service
     #   or whether to yield individual results to the cb item by item. This only makes sense
     #   in the node.js context. Don't use this.
     #
-    # All parameters are optional. 
+    # All parameters are optional.
     #
     # @return [Deferred<?>] A promise to fetch data.
     makeRequest: (method = 'GET', path = '', data = {}, cb = (->), indiv = false) ->
@@ -249,7 +241,8 @@ class Service
     # @option opts [String] list The name of the list to analyse.
     # @option opts [String] widget The name of the enrichment calculation to use.
     # @option opts [Float] maxp The maximum permissible p-value (optional, default = 0.05).
-    # @option opts [String] population The name of a list to use as a background population (optional).
+    # @option opts [String] population The name of a list to use as a background
+    #   population (optional).
     # @option opts [String] filter An extra value that some widget calculations accept.
     # @return [Deferred<Array<Object>>] A promise to get results.
     enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
@@ -261,7 +254,7 @@ class Service
     #
     # This method performs a wide-ranging free-text search (powered
     # by Lucene) for items in the database matching a given term. The data
-    # returned is limited to a precalculated document of key-fields for 
+    # returned is limited to a precalculated document of key-fields for
     # each object. To further explore the dataset, the user will
     # want to construct more sophisticated queries. See {@link Query}.
     #
@@ -313,6 +306,7 @@ class Service
     #   comma separated sub-terms. eg: "eve, zen, bib, r, H"
     # @param [(Array.<Object>) ->] cb A callback that receives an Array of objects. (optional).
     # @return [Deferred.<Array.<Object>>] A promise to yield an array of objects.
+    # TODO: add support for extra-values
     find: (type, term, cb) ->
         @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term]])
             .pipe(dejoin)
@@ -342,7 +336,7 @@ class Service
 
     fetchTemplates: (cb) => @get(TEMPLATES_PATH).pipe(get 'templates').done(cb)
 
-    fetchLists: (cb) -> @findLists '', cb
+    fetchLists: (cb) => @findLists '', cb
 
     findLists: (name, cb) ->
         fn = (ls) => (new List(data, @) for data in ls)
@@ -426,17 +420,18 @@ class Service
     manageUserPreferences: (method, data) -> REQUIRES_VERSION @, 11, =>
         @makeRequest(method, PREF_PATH, data).pipe(get 'preferences')
 
-    # Submit an ID resolution job. 
+    # Submit an ID resolution job.
     # @param [Object] opts The parameters to the id resolution service.
     # @option opts [Array<String>] identifiers The identifiers you want to resolve.
     # @option opts [String] type The type of objects these identifiers refer to.
     # @option opts [String] extra Extra values that can be used to disambiguate values (optional).
-    # @option opts [boolean] caseSensitive Whether these identifiers should be treated as case-sensitive. (optional).
-    # @option opts [boolean] wildCards Whether wild-cards should be allowed in these identifiers. (optional).
+    # @option opts [boolean] caseSensitive Whether these identifiers should be treated
+    #   as case-sensitive. (optional).
+    # @option opts [boolean] wildCards Whether wild-cards should be allowed in these
+    #   identifiers. (optional).
     # @param [->] cb An optional callback.
     # @return [Promise<IDResolutionJob>] A promise to return a job id.
     resolveIds: (opts, cb) -> REQUIRES_VERSION @, 10, =>
-        console.log @
         req =
             data: JSON.stringify(opts)
             dataType: 'json'
@@ -444,6 +439,32 @@ class Service
             type: 'POST'
             contentType: 'application/json'
         http.doReq(req).pipe(get 'uid').pipe(IDResolutionJob.create @).done(cb)
+
+    # Create a new list through the identifier upload service.
+    #
+    # This service takes a source of identifiers and attempts to resolve them automatically
+    # and create a new list for the results. If you require more fine-grained control
+    # over this functionality then see [Service#resolveIds].
+    #
+    # @param [Object] opts The options for this list upload.
+    # @option opts [String] name The name for this list (required).
+    # @option opts [String] type The type of objects (eg. Gene) these are identifiers of (required).
+    # @option opts [String] description A description for the new list (optional).
+    # @option opts [String] extraValue A disambiguating value (optional).
+    # @option opts [Array<String>] tags A list of tags to apply to the new list (optional).
+    # @param [Array<String>|String] ids The identifiers to resolve.
+    # @param [(List) ->] cb A function that receives a List.
+    # @return [Promise<List>] A promise to yield a List.
+    createList: (opts, ids, cb = ->) =>
+        adjust = curry _.defaults, token: @token, tags: (opts.tags or []).join(';')
+        req =
+            data: if _.isArray(ids) then ids.map((x) -> "\"#{ x }\"").join("\n") else ids
+            dataType: 'json'
+            url: "#{ @root }lists?#{to_query_string adjust opts}"
+            type: 'POST'
+            contentType: 'text/plain'
+        http.doReq(req).pipe(get 'listName').pipe(@fetchList).done(cb)
+
 
 Service::rowByRow = http.iterReq 'POST', QUERY_RESULTS_PATH, 'json'
 Service::eachRow = Service::rowByRow
@@ -463,14 +484,10 @@ Service.flushCaches = () ->
     WIDGETS = {}
 
 # Static method for instantiation. Allows us to provide
-# alternate implementations in the future.
+# alternate implementations in the future, and pass this function
+# around when needed.
 Service.connect = (opts) -> new Service(opts)
 
 # Export the Service class to the world
 intermine.Service = Service
-# And re-export the other public classes if in node.js
-intermine.Model ?= Model
-intermine.Query ?= Query
-intermine.List ?= List
-intermine.User ?= User
 

@@ -13,8 +13,21 @@ else
     root.intermine.funcutils ?= {}
     root = root.intermine.funcutils
 
+# Simply because this is a whole load cleaner and less ugly than
+# calls to `_.bind(f, null, arg1, arg2, ...)`.
+# @param [->] f The function to curry.
+# @param args the arguments to curry.
+# @return a curried function.
+root.curry = (f, args...) -> (rest...) -> f.apply(null, args.concat(rest))
+
+# Helper for transforming an error into a rejection.
+# @param e The error.
+# @return [Promise<Error>] A promise to reject with an error.
 root.error = (e) -> Deferred( -> @reject new Error(e) ).promise()
 
+# Helper for wrapping a value in a promise.
+# @param args the The resolution.
+# @return [Promise<args...>] A promise to resolve with the resolution.
 root.success = (args...) -> Deferred( -> @resolve args... ).promise()
 
 root.fold = (init, f) -> (xs) ->
@@ -23,7 +36,7 @@ root.fold = (init, f) -> (xs) ->
     else # objects
         ret = init
         for k, v of xs
-           ret = if ret? then f(ret, k, v) else {k: v}
+            ret = if ret? then f(ret, k, v) else {k: v}
         ret
 
 root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
@@ -36,7 +49,7 @@ root.omap = (f) -> (xs) ->
         [newk, newv] = f oldk, oldv
         a[newk] = newv
         return a
-    (exports.fold {}, merger) xs
+    (root.fold {}, merger) xs
 
 root.copy = root.omap (k, v) -> [k, v]
 
@@ -93,6 +106,7 @@ root.id = id = (x) -> x
 root.any = (xs, f = id) ->
     for x in xs
         return true if f x
+    return false
 
 # A set of functions that are helpful when dealing with promises,
 # in that they help produce the kinds of simple pipes that are
@@ -100,7 +114,7 @@ root.any = (xs, f = id) ->
 
 # Get a function that invokes a named method
 # on an object of type A.
-# 
+#
 # @param [String] name The name of a method
 # @param [Array] args An optional argument list, passed as varargs
 # @return [(obj) -> ?] A function that invokes a named method.
@@ -149,4 +163,27 @@ root.set = (name, value) -> (obj) ->
             obj[k] = v
     return obj
 
+root.flip = (f) -> (args...) -> f.apply(null, args.reverse())
 
+# Make a function that lets users know
+# when they are trying to use a service that
+# isn't supported by their current service.
+REQUIRES = (required, got) ->
+    "This service requires a service at version #{ required } or above. This one is at #{ got }"
+
+# A wrapper for functions that make requests to endpoints
+# that require a certain version of the intermine API.
+root.REQUIRES_VERSION = (s, n, f) -> s.fetchVersion().pipe (v) ->
+    if v >= n
+        f()
+    else
+        error REQUIRES n, v
+
+# Helper function that makes sure a query doesn't have
+# any implicit constraints through the use of inner-joins.
+# All chains of references will be converted to outer-joins.
+root.dejoin = (q) ->
+    for view in q.views
+        parts = view.split('.')
+        q.addJoin(parts[1..-2].join '.') if parts.length > 2
+    return q

@@ -1,18 +1,7 @@
 {jQuery, intermine, XDomainRequest} = @
 http = (intermine.http ?= {})
-#
-# The Accept headers that correspond to each data-type.
-ACCEPT_HEADER =
-    "json": "application/json",
-    "jsonobjects": "application/json;type=objects",
-    "jsontable": "application/json;type=table",
-    "jsonrows": "application/json;type=rows",
-    "jsoncount": "application/json;type=count",
-    "jsonp": "application/javascript",
-    "jsonpobjects": "application/javascript;type=objects",
-    "jsonptable": "application/javascript;type=table",
-    "jsonprows": "application/javascript;type=rows",
-    "jsonpcount": "application/javascript;type=count"
+{ACCEPT_HEADER} = intermine.constants
+{get, error} = intermine.funcutils
 
 do ->
     converters = {}
@@ -24,7 +13,7 @@ do ->
         converters: converters
 
 # A pipe for checking the webservice response.
-CHECKING_PIPE = (response) -> Deferred ->
+CHECKING_PIPE = (response) -> jQuery.Deferred ->
     if response.wasSuccessful
         @resolve response
     else
@@ -49,18 +38,22 @@ else
 
 wrapCbs = (cbs) ->
     if _.isArray cbs
+        return [] unless cbs.length
         [doThis, err, atEnd] = cbs
-        [((rows) -> _.each(rows, doThis)), err, atEnd]
+        _doThis = (rows) -> _.each(rows, doThis ? ->)
+        return [_doThis, err, atEnd]
     else
-        [(rows) -> _.each rows, cbs]
+        _doThis = (rows) -> _.each(rows, cbs ? ->)
+        return [_doThis]
 
-http.iterReq = (format) -> (q, page = {}, cbs = []) ->
-    if !cbs? and not (page.start? or page.size?)
-        [page, cbs] = [{}, page]
-    _cbs = wrapCbs(cbs)
-    req = _.extend {format}, page, query: q.toXML()
-    [doThis, fail, onEnd] = _cbs
-    @post(QUERY_RESULTS_PATH, req, _cbs).done(onEnd)
+http.iterReq = (method, path, format) -> (q, page = {}, cbs = []) ->
+    try
+        [cbs, page] = [page, {}] if (_.isFunction(page) or _.isArray(page))
+        req = _.extend {format}, page, query: q.toXML()
+        [doThis, fail, onEnd] = wrapCbs(cbs)
+        @makeRequest(method, path, req).fail(fail).pipe(get 'results').then(doThis).done(onEnd)
+    catch e
+        error e.stack ? e
 
 
 http.doReq = (opts) ->

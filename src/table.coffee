@@ -13,7 +13,7 @@ class Table
 
     constructor: ({@name, @attributes, @references, @collections}) ->
         @fields = {}
-        @superClasses = arguments[0]['extends'] # avoiding js keywords
+        @__parents__ = arguments[0]['extends'] # avoiding js keywords
 
         for prop in properties
             (set @[prop]) @fields
@@ -23,5 +23,7 @@ class Table
 
     toString: -> "[Table name=#{ @name }]"
 
-exports.Table = Table
+    parents: () -> (@__parents__ ? []).slice()
+
+__root__.Table = Table
 

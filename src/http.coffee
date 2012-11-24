@@ -1,7 +1,14 @@
 {BufferedResponse} = require('buffered-response')
+{Deferred}         = require('underscore.deferred')
+{_}                = require('underscore')
 http               = require('http')
 URL                = require('url')
 qs                 = require('querystring')
+os                 = require('os')
+{ACCEPT_HEADER}    = require('./constants')
+{error, invoke}    = require('./util')
+
+USER_AGENT = "node-http/imjs #{os.platform()} (#{os.arch()},#{os.release()})"
 
 # Pattern to match optional trailing commas
 PESKY_COMMA = /,\s*$/
@@ -53,6 +60,9 @@ streaming = (ret, opts) -> (resp) ->
 
     ret.resolve iter
 
+getMsg = ({type, url}, text, e) ->
+    "Could not parse response to #{ type } #{ url }: '#{ text }' (#{ e })"
+
 blocking = (ret, opts) -> (resp) ->
     containerBuffer = ''
     ret.done(opts.success)
@@ -74,52 +84,52 @@ blocking = (ret, opts) -> (resp) ->
                     if resp.statusCode >= 400
                         ret.reject new Error(resp.statusCode)
                     else
-                        ret.reject new Error "Could not parse response to #{ opts.type } #{ opts.url }: '#{ containerBuffer }' (#{ e })"
+                        ret.reject new Error(getMsg opts, containerBuffer, e)
         else
             if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
                 ret.reject new Error(e[2])
             else
                 ret.resolve containerBuffer
 
-exports.iterReq = (format) -> (q, page = {}, cbs = []) ->
-        if !cbs? and not (page.start? or page.size?)
-            [page, cbs] = [{}, page]
-        if _.isFunction cbs
-            cbs = [cbs]
+exports.iterReq = (method, path, format) -> (q, page = {}, cbs = []) ->
+    try
+        [cbs, page] = [page, {}] if (_.isFunction(page) or _.isArray(page))
         req = _.extend {format}, page, query: q.toXML()
-        [doThis, onErr, onEnd] = cbs
-        @makeRequest('POST', QUERY_RESULTS_PATH, req, null, true)
+        [doThis, onErr, onEnd] = if _.isFunction(cbs) then [cbs] else cbs
+        @makeRequest(method, path, req, null, true)
             .fail(onErr)
             .done(invoke 'each', doThis)
             .done(invoke 'error', onErr)
             .done(invoke 'done', onEnd)
+    catch e
+        error e.stack ? e
 
 exports.doReq = (opts, iter) -> Deferred ->
-        @fail opts.error
-        @done opts.success
-        if _.isString opts.data
-            postdata = opts.data
-            if opts.type in [ 'GET', 'DELETE' ]
-                return ret.reject("Invalid request. #{ opts.type } requests must not have bodies")
-        else
-            postdata = qs.stringify opts.data
-        url = URL.parse(opts.url, true)
-        url.method = opts.type
-        url.port = url.port || 80
-        url.headers =
-            'User-Agent': 'node-http/imjs',
-            'Accept': ACCEPT_HEADER[opts.dataType]
-        if url.method in ['GET', 'DELETE'] and _.size opts.data
-            url.path += '?' + postdata
-        else
-            url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
-            url.headers['Content-Length'] = postdata.length
+    @fail opts.error
+    @done opts.success
+    if _.isString opts.data
+        postdata = opts.data
+        if opts.type in [ 'GET', 'DELETE' ]
+            return ret.reject("Invalid request. #{ opts.type } requests must not have bodies")
+    else
+        postdata = qs.stringify opts.data
+    url = URL.parse(opts.url, true)
+    url.method = opts.type
+    url.port = url.port || 80
+    url.headers =
+        'User-Agent': USER_AGENT
+        'Accept': ACCEPT_HEADER[opts.dataType]
+    if url.method in ['GET', 'DELETE'] and _.size opts.data
+        url.path += '?' + postdata
+    else
+        url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
+        url.headers['Content-Length'] = postdata.length
 
-        req = http.request url, (if iter then streaming else blocking) @, opts
+    req = http.request url, (if iter then streaming else blocking) @, opts
 
-        req.on 'error', @reject
+    req.on 'error', @reject
 
-        if url.method in [ 'POST', 'PUT' ]
-            req.write postdata
-        req.end()
+    if url.method in [ 'POST', 'PUT' ]
+        req.write postdata
+    req.end()
 
