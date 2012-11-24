@@ -1,4 +1,4 @@
-{Service} = require '../../../lib/service'
+{Service} = require '../../../bin/index'
 {testCase, asyncTestCase} = require './util'
 {invoke}  = require '../../../src/util'
 {Deferred} = require 'underscore.deferred'
