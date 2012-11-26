@@ -1,0 +1,17 @@
+[
+    "<banner>"
+    ,"LICENCE"
+    ,"src/ie8-cors-support.js"
+    ,"build/constants.js"
+    ,"build/shiv.js"
+    ,"build/util.js"
+    ,"build/jquery-http.js"
+    ,"build/table.js"
+    ,"build/path.js"
+    ,"build/model.js"
+    ,"build/user.js"
+    ,"build/lists.js"
+    ,"build/id-resolution-job.js"
+    ,"build/query.js"
+    ,"build/service.js"
+]
