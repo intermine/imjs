@@ -45,13 +45,13 @@ describe 'Model', ->
         it 'should determine that the common class of a class is itself', ->
             testmodel.findCommonType(['Employee']).should.equal('Employee')
 
-        it 'should determine the the common class of two examples of the same class is that class', ->
+        it 'should say the common class of two examples of the same class is that class', ->
             testmodel.findCommonType(['Employee', 'Employee']).should.equal('Employee')
 
-        it 'should determine the the common type of a class and its super-type is the super-type', ->
+        it 'should say the common type of a class and its super-type is the super-type', ->
             testmodel.findCommonType(['Manager', 'Employee']).should.equal('Employee')
 
-        it 'should determine the the common type of a class and one of its sub-types is the super-type', ->
+        it 'should say the common type of a class and one of its sub-types is the super-type', ->
             testmodel.findCommonType(['Manager', 'CEO']).should.equal('Manager')
 
         it 'should return a non-existent value for incompatible classes', ->
@@ -61,7 +61,8 @@ describe 'Model', ->
             testmodel.findCommonType(['CEO', 'Address']).should.equal('Thing')
 
         it 'should handle more than two classes', ->
-            testmodel.findCommonType(['Employee', 'Contractor', 'Manager']).should.equal('Employable')
+            types = ['Employee', 'Contractor', 'Manager']
+            testmodel.findCommonType(types).should.equal('Employable')
 
         it 'should determine that the set of all things are things', ->
             testmodel.findCommonType(things).should.equal('Thing')
