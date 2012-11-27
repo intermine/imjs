@@ -16,12 +16,14 @@ if IS_NODE
     intermine       = __root__
     {_}             = require 'underscore'
     {Deferred}  = $ = require 'underscore.deferred'
-    {concatMap, get, any, set, copy, success, error} = require('./util')
+    utils           = require('./util')
 else
     {_}            = __root__
     {Deferred} = $ = __root__.jQuery
     intermine      = __root__.intermine
-    {concatMap, get, any, set, copy, success, error} = intermine.funcutils
+    utils          = intermine.funcutils
+
+{concatMap, get, any, set, copy, success, error} = utils
 
 NAMES = {}
 PARSED = {}
@@ -40,21 +42,21 @@ class PathInfo
         @end = _.last @descriptors
         @ident ?= makeKey(@model, @, @subclasses)
 
-    isRoot: () -> @descriptors.length is 0
+    isRoot: () => @descriptors.length is 0
 
-    isAttribute: () -> @end? and not @end.referencedType?
+    isAttribute: () => @end? and not @end.referencedType?
 
-    isClass: () -> @isRoot() or @end.referencedType?
+    isClass: () => @isRoot() or @end.referencedType?
 
-    isReference: () -> @end?.referencedType?
+    isReference: () => @end?.referencedType?
 
-    isCollection: () -> @end?.isCollection
+    isCollection: () => @end?.isCollection ? false
 
-    containsCollection: () -> any @descriptors, (x) -> x.isCollection
+    containsCollection: () => any @descriptors, (x) -> x.isCollection
 
-    getEndClass: () -> (@model.classes[@subclasses[@toString()] or @end?.referencedType]) or @root
+    getEndClass: () => (@model.classes[@subclasses[@toString()] or @end?.referencedType]) or @root
 
-    getParent: () ->
+    getParent: () =>
         if @isRoot()
             throw new Error("Root paths do not have parents")
         data =
@@ -64,7 +66,7 @@ class PathInfo
             subclasses: @subclasses
         return new PathInfo(data)
 
-    append: (attr) ->
+    append: (attr) =>
         if @isAttribute()
             throw new Error("#{ @ } is an attribute.")
         fld = if (_.isString attr) then @getType().fields[attr] else attr
@@ -77,7 +79,7 @@ class PathInfo
             subclasses: @subclasses
         return new PathInfo(data)
 
-    isa: (clazz) ->
+    isa: (clazz) =>
         if @isAttribute()
             @getType() is clazz
         else
@@ -85,7 +87,7 @@ class PathInfo
             type = @getType()
             (name is type.name) or (name in @model.getAncestorsOf(type))
 
-    getDisplayName: (cb) ->
+    getDisplayName: (cb) =>
         @namePromise ?=
             if cached = (@displayName or NAMES[@ident])
                 success cached
@@ -97,9 +99,9 @@ class PathInfo
                 @model.service.get(path, params).then(get 'display').done (n) => NAMES[@ident] ?= n
         @namePromise.done(cb)
 
-    getChildNodes: () -> (@append(fld) for _, fld of (@getEndClass()?.fields or {}))
+    getChildNodes: () => (@append(fld) for _, fld of (@getEndClass()?.fields or {}))
 
-    allDescriptors: -> [@root].concat(@descriptors)
+    allDescriptors: => [@root].concat(@descriptors)
 
     toString: () -> @allDescriptors().map(get 'name').join('.')
 
