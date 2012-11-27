@@ -486,7 +486,7 @@ Service.flushCaches = () ->
 # Static method for instantiation. Allows us to provide
 # alternate implementations in the future, and pass this function
 # around when needed.
-Service.connect = (opts) -> new Service(opts)
+Service.connect = (opts = {}) -> new Service(opts)
 
 # Export the Service class to the world
 intermine.Service = Service
