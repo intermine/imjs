@@ -1,5 +1,9 @@
+/**
+ * Compile coffeescript source files.
+ */
 module.exports = function (grunt) {
     'use strict';
+
     var exec = require('child_process').exec
       , COFFEE = 'coffee'
       , COMPILE = ['--compile', '--output']
@@ -19,6 +23,9 @@ module.exports = function (grunt) {
         });
     });
     
+    /**
+     * Compile a directory of source files to an output directory.
+     */
     grunt.registerMultiTask('compile', 'Compile source files to js', function() {
         var opts
           , log   = grunt.log
