@@ -17,6 +17,16 @@ module.exports = function (grunt) {
                 dest: 'js/<%= pkg.version %>/im.js'
             }
         },
+        min: {
+            latest: {
+                src: 'js/im.js',
+                dest: 'js/im.min.js'
+            },
+            version: {
+                src: 'js/<%= pkg.version %>/im.js',
+                dest: 'js/<%= pkg.version %>/im.min.js'
+            }
+        },
         lint: {
             tests: ['test/qunit/t/*.js'],
             grunt: ['tasks/*.js', 'grunt.js']
@@ -112,7 +122,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('run-qunit-tests', 'compile concat clean:qunit buildqunit qunit');
     grunt.registerTask('node-test', 'compile -load-test-globals simplemocha');
-    grunt.registerTask('default', 'lint coffeelint node-test run-qunit-tests');
+    grunt.registerTask('default', 'lint coffeelint node-test run-qunit-tests min');
 
 };
 
