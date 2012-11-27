@@ -1,2 +1,2 @@
-Tests for widget methods
-Tests for model.getSubclassesOf
+Move to mocha.js (inprogress)
+Get grunt to minify.
