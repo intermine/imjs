@@ -91,6 +91,14 @@ DEFAULT_ERROR_HANDLER = (e) ->
 # A private helper for a repeated pattern where
 # we only fetch a piece of information if it is not
 # already available in a instance or static cache.
+# @private
+# @param [String] propName The name of this property. A promise will be
+#   set at this property.
+# @param [Object] store The cache of things to check if we can use a cache.
+# @param [String] path The path to GET from if we have to make a request.
+# @param [String] key The property of the JSON response which has the value
+#   that should be yielded to the user.
+# @param [->] cb A callback that accepts this kind of thing. (optional)
 _get_or_fetch = (propName, store, path, key, cb) ->
     prop = @[propName] ?= if (@useCache and value = store[@root])
         success(value)
@@ -166,14 +174,14 @@ class Service
 
     # Convenience method for making basic POST requests.
     # @param [String] path The endpoint to post to.
-    # @param [Object.<String, String>|Array.<[String, String]>] data parameters to send (optional)
-    # @return [Deferred] A promise to perform the request.
+    # @param [Object<String, String>|Array<[String, String]>] data parameters to send (optional)
+    # @return [Promise<Object>] A promise to yield a response object.
     post: (path, data = {}) -> @makeRequest 'POST', path, data
 
     # Convenience method for making basic GET requests.
     # @param [String] path The endpoint to get from.
-    # @param [Object.<String, String>|Array.<[String, String]>] data parameters to send (optional)
-    # @return [Deferred] A promise to perform the request.
+    # @param [Object<String, String>|Array<[String, String]>] data parameters to send (optional)
+    # @return [Promise<Object>] A promise to yield a response object.
     get: (path, data) -> @makeRequest 'GET', path, data
 
     # The generalised method through which ALL requests pass when using
@@ -194,7 +202,7 @@ class Service
     #
     # All parameters are optional.
     #
-    # @return [Deferred<?>] A promise to fetch data.
+    # @return [Promise<Object>] A promise to yield a response object.
     makeRequest: (method = 'GET', path = '', data = {}, cb = (->), indiv = false) ->
         if _.isArray cb
             [cb, errBack] = cb
@@ -240,11 +248,11 @@ class Service
     # @param [Object<String, String>] opts The parameters to pass to the calculation.
     # @option opts [String] list The name of the list to analyse.
     # @option opts [String] widget The name of the enrichment calculation to use.
-    # @option opts [Float] maxp The maximum permissible p-value (optional, default = 0.05).
+    # @option opts [Number] maxp The maximum permissible p-value (optional, default = 0.05).
     # @option opts [String] population The name of a list to use as a background
     #   population (optional).
     # @option opts [String] filter An extra value that some widget calculations accept.
-    # @return [Deferred<Array<Object>>] A promise to get results.
+    # @return [Promise<Array<Object>>] A promise to get results.
     enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
         @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05, correction: 'Holm-Bonferroni')
             .pipe(get 'results')
@@ -256,13 +264,13 @@ class Service
     # by Lucene) for items in the database matching a given term. The data
     # returned is limited to a precalculated document of key-fields for
     # each object. To further explore the dataset, the user will
-    # want to construct more sophisticated queries. See {@link Query}.
+    # want to construct more sophisticated queries. See {Query}.
     #
     # @param [Object] options A collection of parameters.
     # @param [(Array.<Object>, Object, Object) ->] An optional call-back function.
     # @option options [String] q The term to search by.
     # @option options [Object<String, String>] facets A set of facet constraints.
-    # @return [Deferred.<Array, Object, Object>] A promise to search the database.
+    # @return [Promise<Array, Object, Object>] A promise to search the database.
     search: (options = {}, cb = (->)) -> REQUIRES_VERSION @, 9, =>
         [cb, options] = [options, {}] if _.isFunction options
         options = {q: options} if _.isString options
@@ -280,7 +288,7 @@ class Service
     #   as a Query object, it will be, so the JSON definition of a query can be used
     #   here.
     # @param [(Number) ->] cb A callback that receives a number. Optional.
-    # @return [Deferred] A promise to yield a count.
+    # @return [Deferred<Number>] A promise to yield a count.
     count: (q, cb) =>
         if q.toXML?
             req = {query: q.toXML(), format: 'jsoncount'}
@@ -292,7 +300,7 @@ class Service
     # @param [String] type The type of the object to find (eg: Gene)
     # @param [Number] id The internal DB id of the object.
     # @param [(obj) ->] A callback that receives an object. (optional).
-    # @return [Deferred] A promise to yield an object.
+    # @return [Promise<Object>] A promise to yield an object.
     findById: (type, id, cb) =>
         @query(from: type, select: ['**'], where: {id: id})
             .pipe(dejoin)
@@ -304,8 +312,8 @@ class Service
     # @param [String] type The type of the object to find (eg: Gene)
     # @param [String] term A search term to use. This may use wild-cards and
     #   comma separated sub-terms. eg: "eve, zen, bib, r, H"
-    # @param [(Array.<Object>) ->] cb A callback that receives an Array of objects. (optional).
-    # @return [Deferred.<Array.<Object>>] A promise to yield an array of objects.
+    # @param [(Array<Object>) ->] cb A callback that receives an Array of objects. (optional).
+    # @return [Promise<Array<Object>>] A promise to yield an array of objects.
     # TODO: add support for extra-values
     find: (type, term, cb) ->
         @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term]])
@@ -315,10 +323,26 @@ class Service
 
     # Retrieve information about the currently authenticated user.
     # @param [(User) ->] A callback the receives a User object.
-    # @return [Deferred.<User>] A promise to yield a user.
+    # @return [Promise<User>] A promise to yield a user.
     whoami: (cb) -> REQUIRES_VERSION @, 9, =>
         @get(WHOAMI_PATH).pipe(get 'user').pipe((x) => new User(@, x)).done(cb)
 
+    # Perform a request for results that accepts a parameter specifying the
+    # page to fetch. Not intended for public consumption.
+    #
+    # @private
+    # @param [Query|Object] q The query to request results for. If not a {Query}, the object
+    #   will be lifted to one via {Service#query}
+    # @param [String] The path to make this request to.
+    # @param [Object] page An object specifying the page (optional).
+    # @option page [Number] start The index of the first result to
+    #   retrieve (default = 0).
+    # @option page [Number] size The maximum number of results to
+    #   retrieve (default = null, ie. 'all').
+    # @param [String] format The format to request results in (eg. 'json').
+    # @param [->] cb A call-back to which results will be yielded. (optional).
+    #
+    # @return [Promise<Array<?>>] A promise to yield results.
     doPagedRequest: (q, path, page = {}, format, cb) ->
         if q.toXML?
             req = _.defaults {}, {query: q.toXML(), format: format}, page
@@ -326,25 +350,90 @@ class Service
         else
             @query(q).pipe((query) => @doPagedRequest(query, path, page, format, cb))
 
+    # Get a page of results in jsontable format.
+    #
+    # @param [Query|Object] q The query to request results for. If not a {Query}, the object
+    #   will be lifted to one via {Service#query}
+    # @param [Object] page An object specifying the page (optional).
+    # @option page [Number] start The index of the first result to
+    #   retrieve (default = 0).
+    # @option page [Number] size The maximum number of results to
+    #   retrieve (default = null, ie. 'all').
+    # @param [->] cb A call-back to which results will be yielded. (optional).
+    #
+    # @return [Promise<Array<?>>] A promise to yield results.
     table: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'jsontable', cb)
 
+    # Get a page of results in jsonobject format.
+    #
+    # @param [Query|Object] q The query to request results for. If not a {Query}, the object
+    #   will be lifted to one via {Service#query}
+    # @param [Object] page An object specifying the page (optional).
+    # @option page [Number] start The index of the first result to
+    #   retrieve (default = 0).
+    # @option page [Number] size The maximum number of results to
+    #   retrieve (default = null, ie. 'all').
+    # @param [->] cb A call-back to which results will be yielded. (optional).
+    #
+    # @return [Promise<Array<Object>>] A promise to yield results.
     records: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'jsonobjects', cb)
 
+    # Get a page of results in json format.
+    #
+    # @param [Query|Object] q The query to request results for. If not a {Query}, the object
+    #   will be lifted to one via {Service#query}
+    # @param [Object] page An object specifying the page (optional).
+    # @option page [Number] start The index of the first result to
+    #   retrieve (default = 0).
+    # @option page [Number] size The maximum number of results to
+    #   retrieve (default = null, ie. 'all').
+    # @param [->] cb A call-back to which results will be yielded. (optional).
+    #
+    # @return [Promise<Array<Array<Object>>] A promise to yield results.
     rows: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'json', cb)
 
+    # Get a page of results suitable for building the cells in a table.
+    #
+    # @param [Query|Object] q The query to request results for. If not a {Query}, the object
+    #   will be lifted to one via {Service#query}
+    # @param [Object] page An object specifying the page (optional).
+    # @option page [Number] start The index of the first result to
+    #   retrieve (default = 0).
+    # @option page [Number] size The maximum number of results to
+    #   retrieve (default = null, ie. 'all').
+    # @param [->] cb A call-back to which results will be yielded. (optional).
+    #
+    # @return [Promise<Array<Array<Object>>] A promise to yield results.
     tableRows: (q, page, cb) => @doPagedRequest(q, TABLE_ROW_PATH, page, 'json', cb)
 
+    # Get the templates this user currently has access to.
+    #
+    # @param [(Array<Object>) ->] cb A callback (optional).
+    # @return [Promise<Array<Object>>] A promise to yield an array of templates.
     fetchTemplates: (cb) => @get(TEMPLATES_PATH).pipe(get 'templates').done(cb)
 
+    # Get the lists this user currently has access to.
+    #
+    # @param [(Array<List>) ->] cb A callback (optional).
+    # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
     fetchLists: (cb) => @findLists '', cb
 
-    findLists: (name, cb) ->
-        fn = (ls) => (new List(data, @) for data in ls)
-        @get(LISTS_PATH, {name}).pipe(get 'lists').pipe(fn).done(cb)
+    # Get the lists this user currently has access to which match the given name.
+    #
+    # @param [String] name The name the lists we want to find must have (may include wildcards).
+    #   (Optional - default = '', ie. all lists).
+    # @param [(Array<List>) ->] cb A callback (optional).
+    # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
+    findLists: (name = '', cb = (->)) => @fetchVersion().pipe (v) =>
+        if name and v < 13
+            error "Finding lists by name on the server requires version 13. This is only #{ v }"
+        else
+            fn = (ls) => (new List(data, @) for data in ls)
+            @get(LISTS_PATH, {name}).pipe(get 'lists').pipe(fn).done(cb)
 
     fetchList: (name, cb) => @fetchVersion().pipe (v) =>
         if v < 13
-            @fetchLists().pipe(getListFinder(name)).done(cb)
+            @findLists().pipe(getListFinder(name)).done(cb)
         else
             @findLists(name).pipe(get 0).done(cb)
 

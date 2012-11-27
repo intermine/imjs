@@ -106,22 +106,31 @@ class PathInfo
     toString: () -> @allDescriptors().map(get 'name').join('.')
 
     #
-    # Get the type of a path. If the path represents a class or a reference,
+    # Get the type of this path. If the path represents a class or a reference,
     # the class itself is returned, otherwise the name of the attribute type is returned,
     # minus any "java.lang." prefix.
     #
-    # @param path The path to get the type of
-    # @return A class-descriptor, or an attribute type name.
+    # @return [String|Table] A class-descriptor, or an attribute type name.
     #
     getType: () -> (@end?.type?.replace /java\.lang\./, '') or @getEndClass()
 
 PathInfo::toPathString = PathInfo::toString
 
+# Parse a string, or stringable thing, into a PathInfo object,
+# given a model to describe the data model and a listing of the
+# optional subclass constraints.
+#
+# @param [Model] model The data model to validate against.
+# @param [#toString] The path to interpret.
+# @subclasses [Object<String,String>] The subclass constraints to bear in mind. (Optional).
+#
+# @return [PathInfo] The path information for this path.
+# @throws if this path is invalid.
 PathInfo.parse = (model, path, subclasses = {}) ->
     ident = makeKey(model, path, subclasses)
     if cached = PARSED[ident]
         return cached
-    parts       = path.split '.'
+    parts       = (path + '').split '.'
     root  = cd  = model.classes[parts.shift()]
     keyPath     = root.name
     descriptors = for part in parts
