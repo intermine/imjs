@@ -25,6 +25,9 @@ else
     {Table, PathInfo} = intermine
     {omap}          = intermine.funcutils
 
+# Either mocha or should is breaking the reference to _
+{flatten, intersection} = _
+
 # Lift classes to Tables
 liftToTable = omap (k, v) -> [k, new Table(v)]
 
@@ -56,18 +59,20 @@ class Model
         ancestors = clazz.parents()
         for superC in ancestors
             ancestors.push @getAncestorsOf superC
-        _.flatten ancestors
+        flatten ancestors
 
     findSharedAncestor: (classA, classB) =>
-        if classB is null or classA is null or classA is classB
+        if classB is null or classA is null
             return null
+        if classA is classB
+            return classA
         a_ancestry = @getAncestorsOf classA
         b_ancestry = @getAncestorsOf classB
         if classB in a_ancestry
             return classB
         if classA in b_ancestry
             return classA
-        return _.intersection(a_ancestry, b_ancestry).shift()
+        return intersection(a_ancestry, b_ancestry).shift()
 
     findCommonType: (xs) -> xs.reduce @findSharedAncestor
 
@@ -77,8 +82,9 @@ Model::findCommonTypeOfMultipleClasses = Model::findCommonType # API preserving 
 # Static constructor.
 Model.load = (data) -> new Model(data)
 
-Model.NUMERIC_TYPES = ["int", "Integer", "double", "Double", "float", "Float"]
-Model.INTEGRAL_TYPES = ["int", "Integer"]
+Model.INTEGRAL_TYPES = ["int", "Integer", "long", "Long"]
+Model.FRACTIONAL_TYPES = ["double", "Double", "float", "Float"]
+Model.NUMERIC_TYPES = Model.INTEGRAL_TYPES.concat Model.FRACTIONAL_TYPES
 Model.BOOLEAN_TYPES = ["boolean", "Boolean"]
 
 intermine.Model = Model
