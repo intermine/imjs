@@ -1,7 +1,7 @@
 {Service} = require '../../../bin/index'
 
 args =
-    root: 'localhost/intermine-test'
+    root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'
     token: 'test-user-token'
 
 module.exports = ->
