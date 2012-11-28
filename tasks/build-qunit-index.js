@@ -9,13 +9,15 @@
 module.exports = function (grunt) {
     'use strict';
 
-    var fs = require('fs')
-      , _  = require('underscore')._
+    var fs = require('fs');
+    var path = require('path');
+    var _  = require('underscore')._;
+    var template = grunt.template;
 
     function writeUnified (data, conf, done) {
-        var compiled = grunt.template.process(data, conf)
-          , dest = grunt.template.process(conf.dest, {idx: 0, file: 'all'})
-          , written = grunt.file.write(dest, compiled);
+        var compiled = template.process(data, conf);
+        var dest = template.process(conf.dest, {idx: 0, file: 'all'})
+        var written = grunt.file.write(dest, compiled);
         if (written) {
             grunt.log.ok("Wrote " + dest);
         } else {
@@ -25,12 +27,13 @@ module.exports = function (grunt) {
     }
 
     function writeSeparate (data, conf, done) {
-        _.each(conf.testFiles, function (tf, idx) {
-            var ctx = _.defaults({}, {testFiles: [tf]}, conf)
-                , compiled = grunt.template.process(data, ctx)
-                , file = _.last(tf.split('/'))
-                , dest = grunt.template.process(conf.dest, {idx: idx, file: file});
-            grunt.verbose.writeln("Writing to " + dest);
+        _.each(conf.testFiles, function handleFile(tf, idx) {
+            var file     = path.basename(tf);
+            var destCtx  = {idx: idx, file: file};
+            var templCtx = _.defaults({}, {testFiles: [tf]}, conf);
+            var dest     = template.process(conf.dest, destCtx);
+            var compiled = template.process(data, templCtx);
+            grunt.verbose.writeln("Writing " + dest);
             return grunt.file.write(dest, compiled);
         });
         grunt.log.ok("Wrote " + conf.testFiles.length + " files");
@@ -40,7 +43,7 @@ module.exports = function (grunt) {
     function getHandler (conf, done) {
         var write = conf.unified ? writeUnified : writeSeparate;
 
-        return function (err, data) {
+        return function handler(err, data) {
             if (err) {
                 grunt.log.error('Could not read template file: ' + (err.stack || err));
                 done(false);
@@ -50,19 +53,20 @@ module.exports = function (grunt) {
         };
     }
     
-    grunt.registerTask('buildqunit', 'Build the QUnit index file', function () {
-        var template
-          , log = grunt.log
-          , done = this.async()
-          , conf = grunt.config('buildqunit')
-        
-        //this.requiresConfig('template', 'tests', 'tested');
+    grunt.registerTask(
+            'buildqunit',
+            'Build the QUnit index file',
+            function buildqunit() {
+        var done = this.async();
+        var conf = grunt.config('buildqunit');
+        var expandFileURLs = grunt.file.expandFileURLs;
 
-        conf.setup = (conf.setup || '');
-        conf.dest = (conf.dest || 'qunit-index.html');
-        conf.targets = grunt.file.expandFileURLs(conf.tested);
-        conf.setupFiles = grunt.file.expandFileURLs(conf.setup);
-        conf.testFiles = _.difference(grunt.file.expandFileURLs(conf.tests), conf.setupFiles);
+        conf.setup      = (conf.setup || '');
+        conf.dest       = (conf.dest || 'qunit-index.html');
+        conf.targets    = expandFileURLs(conf.tested);
+        conf.setupFiles = expandFileURLs(conf.setup);
+        conf.testFiles  =
+            _.difference(expandFileURLs(conf.tests), conf.setupFiles);
 
         fs.readFile(conf.template, 'utf8', getHandler(conf, done));
     });

@@ -4,24 +4,65 @@
 module.exports = function (grunt) {
     'use strict';
 
-    var exec = require('child_process').exec
-      , COFFEE = 'coffee'
-      , COMPILE = ['--compile', '--output']
+    var fs = require('fs')
+      , path = require('path')
+      , coffee = require('coffee-script')
+    
 
-    grunt.registerHelper('exec', function(opts, done) {
-        var command = opts.cmd + ' ' + opts.args.join(' ');
-        grunt.verbose.writeln("Running: " + command);
-        exec(command, opts.opts, function (code, stdout, stderr) {
-            if (!done) {
-                return;
+    var compile = function (src, dest, cb) {
+        var files = grunt.file.expandFiles([src])
+          , fileCount = files.length
+          , successes = 0
+          , error = false
+
+        if (fileCount < 1) {
+            return cb(new Error("No files matched '" + src + "'"));
+        }
+        var reportIfDone = function () {
+            if (error || successes >= fileCount) {
+                cb(error);
             }
-            if (code === 0) {
-                done(null, stdout, code);
+        };
+
+        grunt.file.mkdir(dest);
+
+        files.forEach(function (file) {
+            if (file.match(/\.coffee$/)) {
+                fs.readFile(file, 'utf8', function (err, data) {
+                    if (err) {
+                        grunt.log.error("Could not read " + file);
+                        error = err;
+                    } else {
+                        var compiled
+                        , baseName = path.basename(file, path.extname(file))
+                        , newName = path.join(dest, baseName + '.js')
+                        try {
+                            compiled = coffee.compile(data);
+                        } catch (e) {
+                            grunt.log.error("Could not compile " + file);
+                            error = e;
+                            return reportIfDone();
+                        }
+
+                        fs.writeFile(newName, compiled, function (err) {
+                            if (err) {
+                                grunt.log.error("Could not write " + newName);
+                                error = err;
+                            } else {
+                                grunt.verbose.ok("Wrote " + newName);
+                                successes++;
+                            }
+                            reportIfDone();
+                        });
+                    }
+                    reportIfDone();
+                });
             } else {
-                done(code, stderr, code);
+                successes++;
             }
+            reportIfDone();
         });
-    });
+    };
     
     /**
      * Compile a directory of source files to an output directory.
@@ -33,17 +74,9 @@ module.exports = function (grunt) {
           , src   = this.data.src
           , dest  = this.data.dest
 
-        if (src) {
+        if (src && dest) {
 
-            if (!dest) {
-                dest = src;
-            }
-            opts = {
-              cmd: COFFEE
-              , args: COMPILE.concat([dest, src])
-            };
-
-            grunt.helper('exec', opts, function(err, fd, code) {
+            compile(src, dest, function (err) {
                 if (err) {
                     log.error("Compilation failed: " + (err.stack || err));
                     done(false);
