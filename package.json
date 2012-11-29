@@ -39,12 +39,13 @@
   },
   "devDependencies": {
     "mocha": "latest",
+    "grunt-simple-mocha": "latest",
     "should": "latest",
     "coffee-script": "~1.3.3",
     "codo": "~0.3.0",
     "grunt": ">= 0.3.17",
     "coffeelint": ">= 0.5.4",
     "grunt-coffeelint": ">= 0.0.3",
-    "clean": ">= 0.3.0"
+    "grunt-clean": ">= 0.3.0"
   }
 }
