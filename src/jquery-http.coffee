@@ -46,15 +46,17 @@ wrapCbs = (cbs) ->
         _doThis = (rows) -> _.each(rows, cbs ? ->)
         return [_doThis]
 
-http.iterReq = (method, path, format) -> (q, page = {}, cbs = []) ->
-    try
-        [cbs, page] = [page, {}] if (_.isFunction(page) or _.isArray(page))
+exports.iterReq = (method, path, format) ->
+    (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
+        if arguments.length is 2 and _.isFunction page
+            [doThis, page] = [page, {}]
         req = _.extend {format}, page, query: q.toXML()
-        [doThis, fail, onEnd] = wrapCbs(cbs)
-        @makeRequest(method, path, req).fail(fail).pipe(get 'results').then(doThis).done(onEnd)
-    catch e
-        error e.stack ? e
-
+        _doThis = (rows) -> rows.forEach doThis
+        @makeRequest(method, path, req)
+            .fail(onErr)
+            .pipe(get 'results')
+            .done(doThis)
+            .done(onEnd)
 
 http.doReq = (opts) ->
     errBack = (opts.error or @errorHandler)

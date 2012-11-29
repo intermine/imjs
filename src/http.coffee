@@ -7,8 +7,10 @@ qs                 = require('querystring')
 os                 = require('os')
 {ACCEPT_HEADER}    = require('./constants')
 {error, invoke}    = require('./util')
+{VERSION}          = require('./version')
 
-USER_AGENT = "node-http/imjs #{os.platform()} (#{os.arch()},#{os.release()})"
+# The user-agent string we will use to identify ourselves
+USER_AGENT = "node-http/imjs-#{ VERSION } #{os.platform()} (#{os.arch()},#{os.release()})"
 
 # Pattern to match optional trailing commas
 PESKY_COMMA = /,\s*$/
@@ -91,18 +93,16 @@ blocking = (ret, opts) -> (resp) ->
             else
                 ret.resolve containerBuffer
 
-exports.iterReq = (method, path, format) -> (q, page = {}, cbs = []) ->
-    try
-        [cbs, page] = [page, {}] if (_.isFunction(page) or _.isArray(page))
+exports.iterReq = (method, path, format) ->
+    (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
+        if arguments.length is 2 and _.isFunction page
+            [doThis, page] = [page, {}]
         req = _.extend {format}, page, query: q.toXML()
-        [doThis, onErr, onEnd] = if _.isFunction(cbs) then [cbs] else cbs
         @makeRequest(method, path, req, null, true)
             .fail(onErr)
             .done(invoke 'each', doThis)
             .done(invoke 'error', onErr)
             .done(invoke 'done', onEnd)
-    catch e
-        error e.stack ? e
 
 exports.doReq = (opts, iter) -> Deferred ->
     @fail opts.error
