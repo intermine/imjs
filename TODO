@@ -1,2 +1,3 @@
 Move to mocha.js (inprogress)
 Get grunt to minify.
+Have version introspection with with straight up node
