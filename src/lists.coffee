@@ -101,14 +101,40 @@ class List
                 name = "#{ baseName }-#{ c++ }"
             query.pipe(invoke 'saveAsList', {name, @tags, @description}).done(cb)
 
+    # Fetch the results for a particular enrichment calculation
+    # against this list. See Service#enrichment.
+    #
+    # @param [Object] opts The parameters of this request.
+    # @option opts [String] widget The calculation to run.
+    # @option opts [Number] maxp The maximum permissible p-value (optional, default = 0.05).
+    # @option opts [String] correction The correction algorithm to use (default = Holm-Bonferroni).
+    # @option opts [String] population The name of a list to use as a background
+    #   population (optional).
+    # @option opts [String] filter An extra value that some widget calculations accept.
+    # @param [->] cb A function to call with the results when they have been received (optional).
+    # @return [Promise<Array<Object>>] A promise to get results.
     enrichment: (opts, cb) -> @service.enrichment(((set list: @name) opts), cb)
 
-    # TODO - tests
+    # Share this list with a recipient.
+    #
+    # The recipient should exist as a user in the target InterMine instance.
+    #
+    # @param [String] recipient The identifier of a user.
+    # @param [->] cb A function to call on successful completion (optional).
+    # @return [Promise<>] A promise to share a List.
     shareWithUser: (recipient, cb) ->
+        # TODO - tests
         @service.post(SHARES, list: @name, with: recipient).done(cb)
 
-    # TODO - tests
-    inviteUserToShare: (recipient, notify, cb) ->
+    # Invite a user to share this list.
+    #
+    # @param [String] recipient The email address of someone to invite to share this list.
+    # @param [boolean] notify Whether or not to notify the recipient by email.
+    # @param [->] cb A function to call upon successful completion.
+    #
+    # @return [Promise<>] A promise to invite a user to share a list.
+    inviteUserToShare: (recipient, notify = true, cb = (->)) ->
+        # TODO - tests
         @service.post(INVITES, list: @name, to: recipient, notify: !!notify).done(cb)
 
 intermine.List = List

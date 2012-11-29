@@ -61,9 +61,9 @@ WIDGETS_PATH = "widgets"
 ENRICHMENT_PATH = "list/enrichment"
 WITH_OBJ_PATH = "listswithobject"
 LIST_OPERATION_PATHS =
-    merge: "lists/union",
-    intersect: "lists/intersect",
-    diff: "lists/diff"
+    union: "lists/union",
+    intersection: "lists/intersect",
+    difference: "lists/diff"
 WHOAMI_PATH = "user/whoami"
 TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
@@ -249,9 +249,11 @@ class Service
     # @option opts [String] list The name of the list to analyse.
     # @option opts [String] widget The name of the enrichment calculation to use.
     # @option opts [Number] maxp The maximum permissible p-value (optional, default = 0.05).
+    # @option opts [String] correction The correction algorithm to use (default = Holm-Bonferroni).
     # @option opts [String] population The name of a list to use as a background
     #   population (optional).
     # @option opts [String] filter An extra value that some widget calculations accept.
+    # @param [->] cb A function to call with the results when they have been received (optional).
     # @return [Promise<Array<Object>>] A promise to get results.
     enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
         @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05, correction: 'Holm-Bonferroni')
@@ -431,30 +433,88 @@ class Service
             fn = (ls) => (new List(data, @) for data in ls)
             @get(LISTS_PATH, {name}).pipe(get 'lists').pipe(fn).done(cb)
 
+    # Get a list by name.
+    #
+    # @param [String] name The exact name of the list.
+    # @param [->] cb A callback function (optional).
+    # @return [Promise<List>] A promise to yield a {List}.
     fetchList: (name, cb) => @fetchVersion().pipe (v) =>
         if v < 13
             @findLists().pipe(getListFinder(name)).done(cb)
         else
             @findLists(name).pipe(get 0).done(cb)
 
+    # Get the lists that contain the given object.
+    #
+    # @param [Object] opts The options that specify which object.
+    # @option opts [String] publicId The stable identifier of the object (eg.
+    #   for a Gene, the symbol).
+    # @option opts [String] extraValue A disambiguating value (eg. for a
+    #   Gene, the name of the Organism it belongs to).
+    # @option opts [#toString] id If known, an object may be referenced
+    #   by its internal DB id instead. These are NOT stable between releases
+    #   of the webapp, so should never be stored.
+    # @param [->] cb A callback function (Optional).
+    # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
     fetchListsContaining: (opts, cb) =>
         fn = (xs) => (new List(x, @) for x in xs)
         @get(WITH_OBJ_PATH, opts).pipe(get 'lists').pipe(fn).done(cb)
 
+    # Combine two or more lists using the given operation.
+    #
+    # @param [String] operation One of ['merge', 'intersect', 'diff'].
+    # @param [Object] options The options that describe what to combine.
+    # @option options [String] name The name of the new list.
+    # @option options [String] description The description of the new list.
+    #   (optional - defaults to "operation of listA, listB")
+    # @option options [Array<String>] lists The lists to combine.
+    # @option options [Array<String>] tags A set of tags to apply to the new list (optional).
+    # @param [(List) ->] cb A callback function. (optional).
+    # @return [Promise<List>] A promise to yield a {List} object.
     combineLists: (operation, options, cb) ->
         req = _.pick options, 'name', 'description'
-        req.tags = options.tags.join(';')
-        req.lists = options.lists.join(';')
+        req.description ?= "#{ operation } of #{ options.lists.join(', ') }"
+        req.tags = (options.tags or []).join(';')
+        req.lists = (options.lists or []).join(';')
         @get(LIST_OPERATION_PATHS[operation], req).pipe(get 'listName').pipe(@fetchList).done(cb)
 
     # Combine two or more lists through a union operation.
-    merge: -> @combineLists 'merge', arguments...
+    #
+    # also available as {Service#union}.
+    #
+    # @param [Object] options The options that describe what to combine.
+    # @option options [String] name The name of the new list.
+    # @option options [String] description The description of the new list.
+    #   (optional - defaults to "operation of listA, listB")
+    # @option options [Array<String>] lists The lists to combine.
+    # @option options [Array<String>] tags A set of tags to apply to the new list (optional).
+    # @param [(List) ->] cb A callback function. (optional).
+    # @return [Promise<List>] A promise to yield a {List} object.
+    merge: -> @combineLists 'union', arguments...
 
     # Combine two or more lists through an intersection operation.
-    intersect: -> @combineLists 'intersect', arguments...
+    #
+    # @param [Object] options The options that describe what to combine.
+    # @option options [String] name The name of the new list.
+    # @option options [String] description The description of the new list.
+    #   (optional - defaults to "operation of listA, listB")
+    # @option options [Array<String>] lists The lists to combine.
+    # @option options [Array<String>] tags A set of tags to apply to the new list (optional).
+    # @param [(List) ->] cb A callback function. (optional).
+    # @return [Promise<List>] A promise to yield a {List} object.
+    intersect: -> @combineLists 'intersection', arguments...
 
     # Combine two more lists through a symmetric difference opertation.
-    diff: -> @combineLists 'diff', arguments...
+    #
+    # @param [Object] options The options that describe what to combine.
+    # @option options [String] name The name of the new list.
+    # @option options [String] description The description of the new list.
+    #   (optional - defaults to "operation of listA, listB")
+    # @option options [Array<String>] lists The lists to combine.
+    # @option options [Array<String>] tags A set of tags to apply to the new list (optional).
+    # @param [(List) ->] cb A callback function. (optional).
+    # @return [Promise<List>] A promise to yield a {List} object.
+    diff: -> @combineLists 'difference', arguments...
 
     # The following methods fetch resources that can be considered
     # stable - they are not expected to change between releases of
@@ -462,7 +522,7 @@ class Service
     # set 'noCache' on the service, or to regularly call Service.flush().
 
     # Fetch the list widgets that are available from this service.
-    # @return [Deferred<Array<Object>>] A promise to return a list of widgets.
+    # @return [Promise<Array<Object>>] A promise to yield a list of widgets.
     fetchWidgets: (cb) -> REQUIRES_VERSION @, 8, =>
         _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
@@ -471,7 +531,7 @@ class Service
         (@__wmap__ ?= @fetchWidgets().then(toMap)).done(cb)
 
     # Fetch the description of the data model for this service.
-    # @return [Deferred<Model>] A promise to return metadata about this service.
+    # @return [Promise<Model>] A promise to yield metadata about this service.
     fetchModel: (cb) ->
         _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
             .pipe(Model.load)
@@ -480,21 +540,22 @@ class Service
 
     # Fetch the configured summary-fields.
     # The summary fields describe which fields should be used to summarise each class.
-    # @return [Deferred<Object<String, Array<String>>>] A promise to return a mapping
+    # @return [Promise<Object<String, Array<String>>>] A promise to yield a mapping
     #   from class-name to a list of paths.
     fetchSummaryFields: (cb) ->
         _get_or_fetch.call @, 'summaryFields', SUMMARY_FIELDS, SUMMARYFIELDS_PATH, 'classes', cb
 
     # Fetch the number that describes the web-service capabilities.
-    # @return [Deferred<Number>] A promise to return a version number.
+    # @return [Promise<Number>] A promise to yield a version number.
     fetchVersion: (cb) ->
         _get_or_fetch.call @, 'version', VERSIONS, VERSION_PATH, 'version', cb
 
     # Promise to make a new Query.
     #
-    # @param [Object] options The JSON representation of the query.
+    # @param [Object] options The JSON representation of the query. See {Query#constructor}
+    #   for more information on the structure of these options.
     # @param [(Query) ->] cb An optional callback to be called when the query is made.
-    # @return [Deferred<Query>] A promise to make a new query.
+    # @return [Promise<Query>] A promise to yield a new {Query}.
     query: (options, cb) => $.when(@fetchModel(), @fetchSummaryFields()).pipe (m, sfs) =>
         args = _.defaults {}, options, {model: m, summaryFields: sfs}
         service = @
@@ -506,6 +567,13 @@ class Service
             catch e
                 @reject e
 
+    # Perform operations on a user's preferences.
+    #
+    # @private
+    # @param [String] method The HTTP method to call.
+    # @param [Object] data The parameters for this request.
+    # @return [Promise<Object>] A promise to yield the user's preferences
+    #   following the update.
     manageUserPreferences: (method, data) -> REQUIRES_VERSION @, 11, =>
         @makeRequest(method, PREF_PATH, data).pipe(get 'preferences')
 
@@ -519,7 +587,7 @@ class Service
     # @option opts [boolean] wildCards Whether wild-cards should be allowed in these
     #   identifiers. (optional).
     # @param [->] cb An optional callback.
-    # @return [Promise<IDResolutionJob>] A promise to return a job id.
+    # @return [Promise<IDResolutionJob>] A promise to yield a job id.
     resolveIds: (opts, cb) -> REQUIRES_VERSION @, 10, =>
         req =
             data: JSON.stringify(opts)
@@ -542,8 +610,8 @@ class Service
     # @option opts [String] extraValue A disambiguating value (optional).
     # @option opts [Array<String>] tags A list of tags to apply to the new list (optional).
     # @param [Array<String>|String] ids The identifiers to resolve.
-    # @param [(List) ->] cb A function that receives a List.
-    # @return [Promise<List>] A promise to yield a List.
+    # @param [(List) ->] cb A function that receives a {List}.
+    # @return [Promise<List>] A promise to yield a {List}.
     createList: (opts, ids, cb = ->) =>
         adjust = curry _.defaults, token: @token, tags: (opts.tags or []).join(';')
         req =
@@ -554,12 +622,48 @@ class Service
             contentType: 'text/plain'
         http.doReq(req).pipe(get 'listName').pipe(@fetchList).done(cb)
 
+# Methods for processing items individually.
 
+# Process the results of a query row by row.
+#
+# @param [Query] q The query to run.
+# @param [Object] page The page of results to return.
+# @option page [Number] start The index of the first row to
+#   return (optional; default = 0)
+# @option page [Number] size The maximum number of results to
+#   return (optional; default = null, ie. all)
+# @param [->] doThis A callback for each row (optional).
+# @param [->] onErr A callback to handle errors (optional).
+# @param [->] onEnd A callback to be called when all rows have
+#   been received (optional).
+# @return [Promise<BufferedReader<Array<Object>>>] a promise to
+#   yield an iterator over the rows.
 Service::rowByRow = http.iterReq 'POST', QUERY_RESULTS_PATH, 'json'
+# Alias for {Service#rowByRow}
 Service::eachRow = Service::rowByRow
 
+# Process the results of a query item by item.
+#
+# @param [Query] q The query to run.
+# @param [Object] page The page of results to return. It is best
+#   not to try and page object based results unless for batching
+#   reasons.
+# @option page [Number] start The index of the first row to
+#   return (optional; default = 0)
+# @option page [Number] size The maximum number of results to
+#   return (optional; default = null, ie. all)
+# @param [->] doThis A callback for each row (optional).
+# @param [->] onErr A callback to handle errors (optional).
+# @param [->] onEnd A callback to be called when all rows have
+#   been received (optional).
+# @return [Promise<BufferedReader<Object>>] a promise to
+#   yield an iterator over the results.
 Service::recordByRecord = http.iterReq 'POST', QUERY_RESULTS_PATH, 'jsonobjects'
+# Alias for {Service#recordByRecord}
 Service::eachRecord = Service::recordByRecord
+
+# Alias for {Service#merge}
+Service::union = Service::merge
 
 # Static method to flush the cached
 # models, versions and summary-field informations.
