@@ -37,7 +37,7 @@ module.exports = function (grunt) {
         },
         compile: {
             source: {
-                src: 'src',
+                src: 'src/*',
                 dest: 'build'
             }
         },
@@ -51,19 +51,19 @@ module.exports = function (grunt) {
             },
             grunt: {
                 options: {
-                    laxcomma: true,
                     asi: true,
                     curly: true,
+                    maxparams: 5,
+                    indent: 2,
                     node: true
                 }
             },
             tests: {
                 options: {
-                    laxcomma: true,
                     asi: true,
                     curly: true,
                     maxparams: 5,
-                    indent: 4,
+                    indent: 2,
                     browser: true,
                     devel: true,
                     jquery: true
