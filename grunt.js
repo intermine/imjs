@@ -87,12 +87,12 @@ module.exports = function (grunt) {
             index: ['test/qunit/build/*-qunit.html']
         },
         buildqunit: {
-            unified: true,
+            unified: false,
             template: "test/qunit/templates/index.html",
             dest: "test/qunit/build/<%= idx %>-<%= file %>-qunit.html",
             tests: ["test/qunit/t/*.js"],
             setup: ["test/qunit/t/index.js"],
-            tested: ["js/*.js"]
+            tested: ["js/im.js"]
         },
         clean: {
             qunit: 'test/qunit/build',
@@ -120,9 +120,10 @@ module.exports = function (grunt) {
 
     grunt.registerTask('-load-test-globals', function () { global.should = require('should') });
 
-    grunt.registerTask('run-qunit-tests', 'compile concat clean:qunit buildqunit qunit');
-    grunt.registerTask('node-test', 'compile -load-test-globals simplemocha');
-    grunt.registerTask('default', 'lint coffeelint node-test run-qunit-tests min');
+    grunt.registerTask('build', 'clean:build compile concat min');
+    grunt.registerTask('test-browser', 'build clean:qunit buildqunit qunit');
+    grunt.registerTask('test-node', 'build -load-test-globals simplemocha');
+    grunt.registerTask('default', 'lint coffeelint test-node test-browser');
 
 };
 
