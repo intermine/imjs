@@ -347,7 +347,8 @@ class Query
         parse = (data) -> Deferred ->
             # Ideally it would be nice to avoid this ridiculous step
             results = data.results.map (x) -> x.count = parseInt(x.count, 10); x
-            stats = if (results[0]?.max) then results[0] else data.uniqueValues
+            stats = {uniqueValues: data.uniqueValues}
+            _.extend(stats, results[0]) if (results[0]?.max?)
             @resolve results, stats, data.filteredCount
         @service.post('query/results', req).pipe(parse).done(cont)
 
