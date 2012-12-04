@@ -1,14 +1,19 @@
 (function () {
-    'use strict';
+  'use strict';
 
-    module("service root", window.TestCase);
+  var Service = window.intermine.Service;
 
-    test('Add default elements when missing', function () {
-        var host = window.location.host || "localhost";
-        equal(this.s.root, "http://" + host + "/intermine-test/service/");
-    });
+  module("service root");
 
-    test('Leaves URLs that look basically OK alone, but adds a final slash', function () {
-        equal(this.flymine.root, "http://www.flymine.org/query/service/");
-    });
+  asyncTest('Add default elements when missing', 1, function () {
+    var service = new Service({root: "foo/bar"});
+    equal(service.root, "http://foo/bar/service/");
+    start();
+  });
+
+  asyncTest('Leaves URLs that look basically OK alone, but adds a final slash', 1, function () {
+    var flymine = new Service({root: "http://www.flymine.org/query/service"});
+    equal(flymine.root, "http://www.flymine.org/query/service/");
+    start();
+  });
 })();
