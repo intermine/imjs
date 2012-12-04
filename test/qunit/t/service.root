@@ -1,3 +1,0 @@
-(function() {
-    module("service root", TestCase);
-})();

@@ -1,28 +1,34 @@
-{Service} = require '../../../bin/index'
+{Service} = require '../../../js/main.js'
+funcutils = require '../../../build/util'
 
 args =
     root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'
     token: 'test-user-token'
 
-module.exports = ->
-    service = new Service args
+class Fixture
 
-    allEmployees =
-        select: ['*']
-        from: 'Employee'
+    constructor: ->
+        @service = new Service args
 
-    olderEmployees =
-        select: ['*']
-        from: 'Employee'
-        where:
-            age:
-                gt: 50
+        @allEmployees =
+            select: ['*']
+            from: 'Employee'
 
-    youngerEmployees =
-        select: ['*']
-        from: 'Employee'
-        where:
-            age:
-                le: 50
+        @olderEmployees =
+            select: ['*']
+            from: 'Employee'
+            where:
+                age:
+                    gt: 50
 
-    {service, allEmployees, olderEmployees, youngerEmployees}
+        @youngerEmployees =
+            select: ['*']
+            from: 'Employee'
+            where:
+                age:
+                    le: 50
+
+
+Fixture.funcutils = funcutils
+
+module.exports = Fixture

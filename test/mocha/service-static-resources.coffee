@@ -1,4 +1,4 @@
-fixture = require './lib/fixture'
+Fixture = require './lib/fixture'
 should = require 'should'
 
 # These tests are for the behaviour of the accessors
@@ -18,7 +18,7 @@ resolves = (promise) -> (done) ->
 
 describe 'Static service properties:', ->
 
-    {service} = fixture()
+    {service} = new Fixture()
 
     describe 'the version', ->
         

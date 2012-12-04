@@ -1,5 +1,5 @@
-fixture                = require './lib/fixture'
-{invoke, get, flatMap} = require '../../src/util'
+Fixture                = require './lib/fixture'
+{invoke, get, flatMap} = Fixture.funcutils
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
@@ -14,6 +14,7 @@ class Counter
         @total.should.equal(@expT)
         @done()
 
+SLOW = 100
 sumRows = flatMap get 0
 
 test = (rows) ->
@@ -22,7 +23,9 @@ test = (rows) ->
 
 describe 'Query', ->
 
-    {service, olderEmployees} = fixture()
+
+    @slow SLOW
+    {service, olderEmployees} = new Fixture()
 
     query =
         select: ['age']
@@ -43,7 +46,7 @@ describe 'Query', ->
 
         it 'should allow iteration per item', (done) ->
             {check, count} = new Counter 46, 2688, done
-            service.query(query).then (q) -> q.eachRow [count, done, check]
+            service.query(query).then (q) -> q.eachRow count, done, check
 
         it 'should allow iteration per item with a single callback', (done) ->
             {check, count} = new Counter 46, 2688, done
@@ -57,8 +60,9 @@ describe 'Query', ->
                 iter.done check
 
 describe 'Service', ->
+    @slow SLOW
 
-    {service, olderEmployees} = fixture()
+    {service, olderEmployees} = new Fixture()
 
     query =
         select: ['age']
