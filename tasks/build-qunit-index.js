@@ -17,12 +17,13 @@ module.exports = function (grunt) {
     function writeUnified (data, conf, done) {
       var html, dest, written = false;
       try {
-        compiled = template.process(data, conf);
+        html = template.process(data, conf);
         dest     = template.process(conf.dest, {idx: 0, file: 'all'})
-        written  = grunt.file.write(dest, compiled);
+        written  = grunt.file.write(dest, html);
         grunt.log.ok("Wrote " + dest);
       } catch (e) {
         grunt.log.error("Failed to write html");
+        grunt.verbose.error(e.stack || e);
       }
       done(written);
     }
@@ -35,11 +36,12 @@ module.exports = function (grunt) {
       for (idx = 0; idx < filesL; idx++) {
         uri      = files[idx];
         fileName = path.basename(uri);
+        grunt.verbose.writeln('Building html file for ' + uri);
         destFile = template.process(conf.dest, {idx: idx, file: fileName});
         html     = template.process(data, _.defaults({testFiles: [uri]}, conf));
         try {
           grunt.file.write(destFile, html);
-          grunt.verbose.writeln("Wrote " + destFile);
+          grunt.verbose.ok("Wrote " + destFile);
         } catch (e) {
           grunt.log.error('Failed to write ' + destFile);
           return done(false);
@@ -69,13 +71,20 @@ module.exports = function (grunt) {
       var done = this.async();
       var conf = grunt.config('buildqunit');
       var expandFileURLs = grunt.file.expandFileURLs;
+      var tests = this.args.length ? this.args : conf.tests;
 
       conf.setup      = (conf.setup || '');
       conf.dest       = (conf.dest  || 'qunit-index.html');
       conf.targets    = expandFileURLs(conf.tested);
       conf.setupFiles = expandFileURLs(conf.setup);
       conf.testFiles  =
-        _.difference(expandFileURLs(conf.tests), conf.setupFiles);
+        _.difference(expandFileURLs(tests), conf.setupFiles);
+
+      if (conf.testFiles.length < 1) {
+          grunt.log.error("No test files");
+          console.verbose.log(conf);
+          return done(false);
+      }
 
       fs.readFile(conf.template, 'utf8', getHandler(conf, done));
     });

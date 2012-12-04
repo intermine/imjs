@@ -62,7 +62,7 @@ module.exports = function (grunt) {
     var i = 0, file;
     for (i = 0; file = files[i]; i++) {
       if (file.match(/\.coffee$/)) {
-        compileFile(dest, file, finishedWithFile));
+        compileFile(dest, file, finishedWithFile);
       } else {
         finishedWithFile()
       }
