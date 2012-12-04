@@ -12,13 +12,12 @@ if IS_NODE
     # We have to read the version ourself.
     fs = require 'fs'
     path = require 'path'
-    if process.mainModule? 
+    if process.mainModule?
         # only works with coffeescript - but why?
         # TODO: make this work in plain node.
-        dir = path.dirname process.mainModule.filename
-        data = fs.readFileSync path.join(dir, '..', 'package.json'), 'utf8'
+        data = fs.readFileSync path.join(__dirname, '..', 'package.json'), 'utf8'
         pkg = JSON.parse data
         imjs.VERSION = pkg.version
 else
     # Value will be injected by the build system.
-    imjs.VERSION = "<%= pgk.version %>"
+    imjs.VERSION = "<%= pkg.version %>"
