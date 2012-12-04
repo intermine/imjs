@@ -344,7 +344,11 @@ class Query
 
         req.size = limit if limit
         req.filterTerm = term if term
-        parse = (data) -> Deferred -> @resolve data.results, data.uniqueValues, data.filteredCount
+        parse = (data) -> Deferred ->
+            # Ideally it would be nice to avoid this ridiculous step
+            results = data.results.map (x) -> x.count = parseInt(x.count, 10); x
+            stats = if (results[0]?.max) then results[0] else data.uniqueValues
+            @resolve results, stats, data.filteredCount
         @service.post('query/results', req).pipe(parse).done(cont)
 
     clone: (cloneEvents) ->
@@ -621,13 +625,17 @@ for f in Query.BIO_FORMATS then do (f) ->
             req.token = @service.token
         "#{ @service.root }query/results/#{ f }?#{ toQueryString req }"
 
-_get_data_fetcher = (server_fn) -> (page = {}, cb = []) ->
-    [cb, page] = [page, {}] if (_.isFunction(page))
+_get_data_fetcher = (server_fn) -> (page, cbs...) ->
     if @service[server_fn]
+        if not page?
+            page = {}
+        else if _.isFunction page
+            page = {}
+            cbs = (x for x in arguments)
         _.defaults page, {start: @start, size: @maxRows}
-        return @service[server_fn](@, page, cb)
+        return @service[server_fn](@, page, cbs...)
     else
-        throw new Error("Could not find #{ server_fn } at this service. Sorry.")
+        throw new Error("Service does not provide '#{ server_fn }'.")
 
 for mth in RESULTS_METHODS
     Query.prototype[mth] = _get_data_fetcher mth
