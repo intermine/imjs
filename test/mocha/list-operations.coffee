@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{clear} = require './lib/utils'
+{clear, eventually, deferredTest} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 
 testTags = ['js', 'testing', 'mocha', 'imjs']
@@ -22,24 +22,21 @@ listOpTest = ({method, expectedMember, lists, size}) ->
         @slow 400
         @afterAll (done) -> clearList().always -> done()
         @beforeAll (done) ->
-            @combined = clearList().then -> service[method] args
-            @combined.then (-> done()), done
+            @promise = clearList().then -> service[method] args
+            @promise.then (-> done()), done
 
-        basicTest = (test) -> (done) -> @combined.then(test).always -> done()
-
-        it "should have #{ size } members", basicTest (list) ->
+        it "should have #{ size } members", eventually (list) ->
             list.size.should.equal size
 
-        it "should be called #{ args.name }", basicTest (list) ->
+        it "should be called #{ args.name }", eventually (list) ->
             list.name.should.equal args.name
 
-        it 'should have the test tags', basicTest (list) ->
-            list.hasTag(t).should.be.true for t in testTags
+        it 'should contain the expected member', eventually (list) ->
+            list.contents().then deferredTest (contents) ->
+                (x.name for x in contents).should.include expectedMember
 
-        it 'should contain the expected member', (done) ->
-            @combined.then(invoke 'contents').then(invoke 'map', get 'name')
-                     .then((names) -> names.should.include expectedMember)
-                     .then((-> done()), done)
+        it 'should have the test tags', eventually (list) ->
+            list.hasTag(t).should.be.true for t in testTags
 
 describe 'List Operations', ->
 
