@@ -46,7 +46,7 @@ wrapCbs = (cbs) ->
         _doThis = (rows) -> _.each(rows, cbs ? ->)
         return [_doThis]
 
-exports.iterReq = (method, path, format) ->
+http.iterReq = (method, path, format) ->
     (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
         if arguments.length is 2 and _.isFunction page
             [doThis, page] = [page, {}]
