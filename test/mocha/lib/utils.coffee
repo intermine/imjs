@@ -6,7 +6,12 @@ clear = (service, name) -> () -> Deferred ->
 
 deferredTest = DT = (test) -> (args...) -> Deferred ->
     try
-        @resolve test args...
+        ret = test args...
+        if ret and ret.then and ret.fail and ret.done
+            ret.fail @reject
+            ret.done @resolve
+        else
+            @resolve ret
     catch e
         @reject new Error(e)
 
@@ -17,5 +22,4 @@ eventually = (test) -> (done) -> report done, @promise.then DT test
 promising = (p, test) -> (done) -> report done, p.then DT test
 
 module.exports = {clear, deferredTest, report, eventually, promising}
-
 
