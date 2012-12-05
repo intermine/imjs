@@ -31,7 +31,7 @@ listOpTest = ({method, expectedMember, lists, size}) ->
         it "should be called #{ args.name }", eventually (list) ->
             list.name.should.equal args.name
 
-        it 'should contain the expected member', eventually (list) ->
+        it "should contain #{ expectedMember }", eventually (list) ->
             list.contents().then deferredTest (contents) ->
                 (x.name for x in contents).should.include expectedMember
 

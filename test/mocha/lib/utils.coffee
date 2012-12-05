@@ -4,7 +4,7 @@
 clear = (service, name) -> () -> Deferred ->
     service.fetchList(name).then(invoke 'del').always(@resolve)
 
-deferredTest = (test) -> (args...) -> Deferred ->
+deferredTest = DT = (test) -> (args...) -> Deferred ->
     try
         @resolve test args...
     catch e
@@ -12,8 +12,10 @@ deferredTest = (test) -> (args...) -> Deferred ->
 
 report = (done, promise) -> promise.fail(done).done -> done()
 
-eventually = (test) -> (done) -> report done, @promise.then deferredTest test
+eventually = (test) -> (done) -> report done, @promise.then DT test
 
-module.exports = {clear, deferredTest, report, eventually}
+promising = (p, test) -> (done) -> report done, p.then DT test
+
+module.exports = {clear, deferredTest, report, eventually, promising}
 
 
