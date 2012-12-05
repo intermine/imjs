@@ -101,14 +101,7 @@ module.exports = function (grunt) {
         simplemocha: {
             all: {
                 src: 'test/mocha/*',
-                options: {
-                    globals: ['should'],
-                    compiler: "coffee:coffee-script",
-                    timeout: 3000,
-                    ignoreLeaks: false,
-                    ui: 'bdd',
-                    reporter: 'dot'
-                }
+                options: '<json:mocha-opts.json>'
             }
         }
     });
@@ -118,11 +111,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-clean');
 
-    grunt.registerTask('-load-test-globals', function () { global.should = require('should') });
+    grunt.registerTask('-load-test-globals', function () {
+        global.should = require('should');
+    });
 
     grunt.registerTask('build', 'clean:build compile concat min');
     grunt.registerTask('test-browser', 'build clean:qunit buildqunit qunit');
-    grunt.registerTask('test-node', 'build -load-test-globals simplemocha');
+    grunt.registerTask('test-node', 'build -load-test-globals simplemocha:all');
     grunt.registerTask('default', 'lint coffeelint test-node test-browser');
 
 };
