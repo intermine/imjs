@@ -21,5 +21,9 @@ eventually = (test) -> (done) -> report done, @promise.then DT test
 
 promising = (p, test) -> (done) -> report done, p.then DT test
 
-module.exports = {clear, deferredTest, report, eventually, promising}
+prepare = (promiser) -> (done) -> report done, @promise = promiser()
+
+always = (fn) -> (done) -> fn().always -> done()
+
+module.exports = {clear, deferredTest, report, eventually, promising, prepare, always}
 
