@@ -1,4 +1,4 @@
-{Service} = require '../../../js/main.js'
+{Service, Query} = require '../../../js/main.js'
 funcutils = require '../../../build/util'
 
 args =
@@ -30,5 +30,6 @@ class Fixture
 
 
 Fixture.funcutils = funcutils
+Fixture.Query = Query
 
 module.exports = Fixture
