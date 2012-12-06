@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{clear, eventually, deferredTest} = require './lib/utils'
+{prepare, always, clear, eventually, deferredTest} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 
 testTags = ['js', 'testing', 'mocha', 'imjs']
@@ -20,10 +20,8 @@ listOpTest = ({method, expectedMember, lists, size}) ->
         gotInputs = args.lists.map service.fetchList
 
         @slow 400
-        @afterAll (done) -> clearList().always -> done()
-        @beforeAll (done) ->
-            @promise = clearList().then -> service[method] args
-            @promise.then (-> done()), done
+        @afterAll always clearList
+        @beforeAll prepare -> clearList().then -> service[method] args
 
         it "should have #{ size } members", eventually (list) ->
             list.size.should.equal size
