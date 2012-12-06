@@ -266,6 +266,14 @@ class Query
         toParentNode = (v) => @getPathInfo(v).getParent()
         _.uniq(_.map(@views, toParentNode), false, (n) -> n.toPathString())
 
+    isInView: (path) ->
+        pi = @getPathInfo(path)
+        if pi.isAttribute()
+            return pi.toString() in @views
+        else
+            pstr = pi.toString()
+            return _.any @getViewNodes(), (n) -> n.toString() is pstr
+
     canHaveMultipleValues: (path) -> @getPathInfo(path).containsCollection()
 
     getQueryNodes: () ->
@@ -300,12 +308,9 @@ class Query
         else
             throw new Error("This query has no service with count functionality attached.")
 
-    # TODO: unit tests
     appendToList: (target, cb) ->
         name = if (target && target.name) then target.name else '' + target
-        toRun = @clone()
-        if toRun.views.length isnt 1 || !toRun.views[0].match(/\.id$/)
-            toRun.select(['id'])
+        toRun = @makeListQuery()
         req =
             listName: name
             query: toRun.toXML()
@@ -313,11 +318,23 @@ class Query
 
         @service.post('query/append/tolist', req).pipe(LIST_PIPE @service).done(cb, updateTarget)
 
-    saveAsList: (options, cb) ->
+    makeListQuery: ->
         toRun = @clone()
         if toRun.views.length != 1 || toRun.views[0] is null || !toRun.views[0].match(/\.id$/)
             toRun.select(['id'])
 
+        # Ensure we aren't changing the query by removing implicit
+        # join constraints; replace these implicit constraints with
+        # explicit constraints. This only works with joins on objects that
+        # have ids; you will have to handle simple objects yourself.
+        for vn in @getViewNodes() when not @isOuterJoined vn
+            if (not toRun.isInView vn) and vn.getEndClass().attributes.id?
+                toRun.addConstraint [vn.append('id'), 'IS NOT NULL']
+
+        return toRun
+
+    saveAsList: (options, cb) ->
+        toRun = @makeListQuery()
         req = _.clone(options)
         req.listName = req.listName || req.name
         req.query = toRun.toXML()
