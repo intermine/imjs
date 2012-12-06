@@ -100,7 +100,7 @@ module.exports = function (grunt) {
         },
         simplemocha: {
             all: {
-                src: 'test/mocha/*',
+                src: 'test/mocha/*.coffee',
                 options: '<json:mocha-opts.json>'
             }
         }
