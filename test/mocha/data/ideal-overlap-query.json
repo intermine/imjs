@@ -1,0 +1,23 @@
+{
+  "select": [
+    "name", "age", "address.address"
+  ],
+  "from": "Employee"
+  "where": [
+    {
+      "path": "Employee",
+      "type": "Manager"
+    },
+    {
+      "path": "department.company.departments.employees.name",
+      "op": "=",
+      "value": "David Brent"
+    },
+    {  
+      "path": "employmentPeriod",
+      "op": "OVERLAPS",
+      "target": "department.company.departments.employees.employmentPeriod",
+      "tolerance": "1month"
+    }
+  ]
+}
