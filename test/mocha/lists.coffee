@@ -42,3 +42,14 @@ describe 'Service', ->
             list.contents().then (members) ->
                 (m.name for m in members).should.include 'David Brent'
 
+    describe '#fetchList (list) ->', ->
+
+        it 'should find "My-Favourite-Employees"', (done) ->
+            promise = service.fetchList 'My-Favourite-Employees', (list) ->
+                should.exist list
+                list.name.should.equal 'My-Favourite-Employees'
+                list.size.should.equal 4
+                done()
+
+            promise.fail done
+
