@@ -25,5 +25,8 @@ prepare = (promiser) -> (done) -> report done, @promise = promiser()
 
 always = (fn) -> (done) -> fn().always -> done()
 
-module.exports = {clear, deferredTest, report, eventually, promising, prepare, always}
+shouldFail = (fn) -> (done) -> fn().fail(-> done()).done (args...) ->
+    done new Error "Expected failure, got: #{ args }"
+
+module.exports = {clear, deferredTest, report, eventually, promising, prepare, always, shouldFail}
 
