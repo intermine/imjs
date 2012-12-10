@@ -1,6 +1,6 @@
-Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 should = require 'should'
+Fixture = require './lib/fixture'
 
 describe 'Service', ->
 
