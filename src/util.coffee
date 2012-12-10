@@ -7,8 +7,10 @@ root = exports ? this
 
 if IS_NODE
     {Deferred} = require 'underscore.deferred'
+    {_} = require 'underscore'
 else
     {Deferred} = root.jQuery
+    {_} = root
     root.intermine ?= {}
     root.intermine.funcutils ?= {}
     root = root.intermine.funcutils
@@ -28,9 +30,9 @@ root.error = (e) -> Deferred( -> @reject new Error(e) ).promise()
 # Helper for wrapping a value in a promise.
 # @param args the The resolution.
 # @return [Promise<args...>] A promise to resolve with the resolution.
-root.success = (args...) -> Deferred( -> @resolve args... ).promise()
+root.success = success = (args...) -> Deferred( -> @resolve args... ).promise()
 
-root.fold = (init, f) -> (xs) ->
+root.fold = fold = (init, f) -> (xs) ->
     if xs.reduce? # arrays
         xs.reduce f, init
     else # objects
@@ -187,3 +189,8 @@ root.dejoin = (q) ->
         parts = view.split('.')
         q.addJoin(parts[1..-2].join '.') if parts.length > 2
     return q
+
+# Sequence a series of asynchronous functions.
+root.sequence = (fns...) ->
+    fld = fold success(), (p, f) -> p.then f
+    fld _.flatten fns
