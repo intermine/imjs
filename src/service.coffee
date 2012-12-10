@@ -64,6 +64,7 @@ LIST_OPERATION_PATHS =
     union: "lists/union",
     intersection: "lists/intersect",
     difference: "lists/diff"
+SUBTRACT_PATH = 'lists/subtract'
 WHOAMI_PATH = "user/whoami"
 TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
@@ -119,6 +120,9 @@ getListFinder = (name) -> (lists) -> Deferred ->
         @resolve list
     else
         @reject """List "#{ name }" not found among: #{ lists.map get 'name' }"""
+
+LIST_PIPE = (service) -> _.compose service.fetchList, get 'listName'
+TO_NAMES = (xs = []) -> (x.name ? x for x in (if _.isArray(xs) then xs else [xs]))
 
 # The representation of a connection to an InterMine web-service.
 #
@@ -476,7 +480,7 @@ class Service
         req.description ?= "#{ operation } of #{ options.lists.join(', ') }"
         req.tags = (options.tags or []).join(';')
         req.lists = (options.lists or []).join(';')
-        @get(LIST_OPERATION_PATHS[operation], req).pipe(get 'listName').pipe(@fetchList).done(cb)
+        @get(LIST_OPERATION_PATHS[operation], req).pipe(LIST_PIPE @).done(cb)
 
     # Combine two or more lists through a union operation.
     #
@@ -516,9 +520,40 @@ class Service
     # @return [Promise<List>] A promise to yield a {List} object.
     diff: -> @combineLists 'difference', arguments...
 
+    # Create a new list from the complement of two groups of lists. The
+    # complement is often what is meant by the concept of subtraction, in that the
+    # result of this operation will always be a proper subset of the union
+    # of the references.
+    #
+    # @param [Object] options The parameters to this option.
+    # @option options [String] name The name for the new list. (optional,
+    #   defaults to "The reverse complement of B in A")
+    # @option options [String] description The description of the new list (optional,
+    #   defailts to "The reverse complement of B in A")
+    # @option options [String|Array<String>] tags The tags the new list should have.
+    # @option options [String|List|Array<String|List>] from The lists that serve
+    #   as the left hand side in the complement, ie. the union of lists we will subtract
+    #   items from.
+    # @option options [String|List|Array<String|List>] exclude The lists that serve
+    #   as the right hand side in the complement, ie. the union of lists we will subtract
+    #   from the reference lists.
+    # @param cb [(List) ->] cb An optional callback.
+    # @return [Promise<List>] A promise to yield a {List}.
+    complement: (options = {}, cb = ->) =>
+        {from, exclude, name, description, tags} = options
+        defaultDesc = ->
+            "Relative complement of #{ lists.join ' and ' } in #{ references.join ' and '}"
+        references = TO_NAMES from
+        lists = TO_NAMES exclude
+        name ?= defaultDesc()
+        description ?= defaultDesc()
+        tags ?= []
+        req = {name, description, tags, lists, references}
+        @post(SUBTRACT_PATH, req).pipe(LIST_PIPE @).done(cb)
+
     # The following methods fetch resources that can be considered
     # stable - they are not expected to change between releases of
-    # the web-service. Lonk running processes should take care either to
+    # the web-service. Long running processes should take care either to
     # set 'noCache' on the service, or to regularly call Service.flush().
 
     # Fetch the list widgets that are available from this service.
@@ -620,7 +655,7 @@ class Service
             url: "#{ @root }lists?#{to_query_string adjust opts}"
             type: 'POST'
             contentType: 'text/plain'
-        http.doReq(req).pipe(get 'listName').pipe(@fetchList).done(cb)
+        http.doReq(req).pipe(LIST_PIPE @).done(cb)
 
 # Methods for processing items individually.
 
@@ -664,6 +699,14 @@ Service::eachRecord = Service::recordByRecord
 
 # Alias for {Service#merge}
 Service::union = Service::merge
+
+# Alias for {Service#diff}
+Service::difference = Service::diff
+Service::symmetricDifference = Service::diff
+
+# Alias for {Service#complement}
+Service::relativeComplement = Service::complement
+Service::subtract = Service::complement
 
 # Static method to flush the cached
 # models, versions and summary-field informations.
