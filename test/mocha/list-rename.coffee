@@ -1,24 +1,25 @@
 {prepare, eventually, always, clear} = require './lib/utils'
 should = require 'should'
 Fixture = require './lib/fixture'
-{success} = Fixture.funcutils
-once = require('underscore.deferred').when
+{success, sequence, curry, invoke} = Fixture.funcutils
 
 describe 'List', ->
 
     {service} = new Fixture()
+    remove = curry clear, service
+    FAVS = 'My-Favourite-Employees'
+    tags = ['temp', 'testing', 'node', 'mocha', 'rename']
+
+    @slow 500
 
     describe '#rename(name)', ->
 
         name = 'temp-copy-of-favs-rename'
         newName = 'temp-renamed'
-        tags = ['temp', 'testing', 'node', 'mocha', 'copy']
-        wipers = [clear(service, name), clear(service, newName)]
-        cleanUp = -> once( f() for f in wipers )
+        cleanUp = -> sequence (remove name), (remove newName)
         @afterAll always cleanUp
         @beforeAll prepare -> cleanUp().then ->
-            service.fetchList('My-Favourite-Employees')
-                   .then( (list) -> list.copy {tags, name} )
+            service.fetchList(FAVS).then(invoke 'copy', {tags, name})
                    .then( (copy) -> copy.rename newName )
 
         it 'should exist', eventually (list) ->
@@ -32,14 +33,22 @@ describe 'List', ->
 
     describe '#rename(name, cb)', ->
         
-        name = 'temp-copy-of-favs-rename'
+        name = 'temp-copy-of-favs-rename-w-cb'
         newName = 'temp-renamed'
+        cleanup = -> sequence (remove name), (remove newName)
         
-        it 'should exist', eventually (list) ->
-            should.exist list
-        
-        it 'should be called ' + newName, eventually (list) ->
-            list.name.should.equal newName
+        @beforeAll prepare cleanup
+        @afterAll always cleanup
 
-        it 'should have 4 members', eventually (list) ->
-            list.size.should.equal 4
+        it 'should support the callback API', (done) -> @promise.then ->
+            promise = service.fetchList(FAVS).then(invoke 'copy', {tags, name})
+                             .then (copy) -> copy.rename newName, (renamed) ->
+                                copy.name.should.equal newName
+                                copy.size.should.equal 4
+                                should.exist renamed
+                                renamed.name.should.equal newName
+                                renamed.size.should.equal 4
+                                done()
+
+            promise.fail done
+
