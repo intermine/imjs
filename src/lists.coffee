@@ -77,10 +77,11 @@ class List
     # name property set to the new value.
     #
     # @param [String] newName The name this list should have.
-    # @param [(String) ->] cb A function that receives a string. optional.
-    # @return [Promise<String>] A promise to yield a name (the name this list now has).
+    # @param [(List) ->] cb An optional callback.
+    # @return [Promise<List>] A promise to yield the new state of the list.
     rename: (newName, cb) -> @service.post('lists/rename', oldname: @name, newname: newName)
                                      .pipe(get 'listName').done((n) => @name = n)
+                                     .pipe(@service.fetchList)
                                      .done(cb)
 
     # Copy this list to an exact duplicate with a different name.
@@ -89,17 +90,30 @@ class List
     # list you have access to, adding a suffix to avoid name clashes. This means you should
     # probably check the yielded value to see what name it ended up with.
     #
-    # @param [String] name The name to copy this list as. Optional. Defaults to @name + _copy.
+    # @param [Object|String] opts Either an options object specifying the parameters
+    #   for this operation, or the name to copy this list as.
+    # @option opts [String] name The name for the copy. If a list already exists with this name
+    #   then a number will be added to the name to make it unique. (optional,
+    #   defaults to @name + _copy.)
+    # @option opts [Array<String>] tags Tags to apply to the new list. These tags will be in
+    #   addition to any that the list currently has, which will be copied over. (optional)
     # @param [(List) ->] cb An optional function that receives a List.
     # @return [Promise<List>] A promise to yield a list.
-    copy: (name, cb) ->
-        name = baseName = (name ? "#{ @name }_copy")
+    copy: (opts = {}, cb = (->)) ->
+        # Allow calling with copy(name, [cb]) and copy(cb)
+        if arguments.length is 1 and _.isFunction opts
+            [opts, cb] = [{}, opts]
+        if _.isString opts
+            opts = name: '' + opts
+
+        name = baseName = (opts.name ? "#{ @name }_copy")
+        tags = @tags.concat opts.tags ? []
         query = @query ['id']
         @service.fetchLists().pipe(invoke 'map', get 'name').pipe (names) =>
             c = 1
             while name in names
                 name = "#{ baseName }-#{ c++ }"
-            query.pipe(invoke 'saveAsList', {name, @tags, @description}).done(cb)
+            query.pipe(invoke 'saveAsList', {name, tags, @description}).done(cb)
 
     # Fetch the results for a particular enrichment calculation
     # against this list. See Service#enrichment.
@@ -138,8 +152,4 @@ class List
         @service.post(INVITES, list: @name, to: recipient, notify: !!notify).done(cb)
 
 intermine.List = List
-
-
-
-
 
