@@ -3,27 +3,6 @@ Fixture = require './lib/fixture'
 
 describe 'Query', ->
 
-    expected_views = [
-        'Employee.name',
-        'Employee.department.name',
-        'Employee.department.manager.name',
-        'Employee.department.company.name',
-        'Employee.fullTime',
-        'Employee.address.address'
-    ]
-
-    double_star = [
-        'Employee.name',
-        'Employee.department.name',
-        'Employee.department.manager.name',
-        'Employee.department.company.name',
-        'Employee.fullTime',
-        'Employee.address.address',
-        'Employee.age',
-        'Employee.end',
-        'Employee.id'
-    ]
-
     {service} = new Fixture()
 
     describe "#select(['*'])", ->
@@ -31,11 +10,35 @@ describe 'Query', ->
         @beforeEach prepare -> service.query root: 'Employee'
 
         it 'should expand stars to the summary fields', eventually (q) ->
+            expected_views = [
+                'Employee.name',
+                'Employee.department.name',
+                'Employee.department.manager.name',
+                'Employee.department.company.name',
+                'Employee.fullTime',
+                'Employee.address.address'
+            ]
             q.select ['*']
             q.views.should.eql expected_views
 
         it 'should expand double stars to all fields', eventually (q) ->
+            expected_views = [
+                'Employee.name',
+                'Employee.department.name',
+                'Employee.department.manager.name',
+                'Employee.department.company.name',
+                'Employee.fullTime',
+                'Employee.address.address',
+                'Employee.age',
+                'Employee.end',
+                'Employee.id'
+            ]
             q.select ['**']
-            q.views.should.eql double_star
+            q.views.should.eql expected_views
+
+        it 'should be able to expand paths ending in a star', eventually (q) ->
+            expected_views = [ 'Employee.department.name' ]
+            q.select ['department.*']
+            q.views.should.eql expected_views
 
 
