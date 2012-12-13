@@ -23,7 +23,8 @@ else
 # Simple utility to take the returned value from manageUserPreferences and
 # update the preferences property on this object.
 do_pref_req = (user, data, method) ->
-    user.service.manageUserPreferences(method, data).done (prefs) -> user.preferences = prefs
+    user.service.manageUserPreferences(method, data)
+        .done (prefs) -> user.preferences = prefs
 
 # A representation of the user we are logged in as.
 class User
