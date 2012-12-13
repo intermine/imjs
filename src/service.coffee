@@ -330,8 +330,11 @@ class Service
     # Retrieve information about the currently authenticated user.
     # @param [(User) ->] A callback the receives a User object.
     # @return [Promise<User>] A promise to yield a user.
-    whoami: (cb) -> REQUIRES_VERSION @, 9, =>
+    whoami: (cb) => REQUIRES_VERSION @, 9, =>
         @get(WHOAMI_PATH).pipe(get 'user').pipe((x) => new User(@, x)).done(cb)
+
+    # Alias for {Service#whoami}
+    fetchUser: (args...) => @whoami args...
 
     # Perform a request for results that accepts a parameter specifying the
     # page to fetch. Not intended for public consumption.
