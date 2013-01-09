@@ -1,20 +1,22 @@
 (function () {
-    var get = intermine.funcutils.get;
+  "use strict";
 
-    module('get templates', window.TestCase);
+  var get = intermine.funcutils.get
 
-    asyncTest('fetchTemplates(cb)', 1, function () {
-        this.s.fetchTemplates(function (templates) {
-            ok(templates.ManagerLookup);
-            start();
-        });
-    });
+  module('get templates', window.TestCase)
 
-    asyncTest('fetchTemplates().then()', 1, function () {
-        this.s.fetchTemplates()
-            .then(get('ManagerLookup'))
-            .then(ok)
-            .always(start);
-    });
+  asyncTest('fetchTemplates(cb)', 1, function () {
+    this.s.fetchTemplates(function (templates) {
+      ok(templates.ManagerLookup)
+      start()
+    })
+  })
 
-})();
+  asyncTest('fetchTemplates().then()', 1, function () {
+    this.s.fetchTemplates()
+        .then(get('ManagerLookup'))
+        .then(ok)
+        .always(start)
+  })
+
+})()
