@@ -28,108 +28,111 @@ exports.getMethod = (x) -> x
 # The default implementation returns true for all inputs.
 exports.supports = -> true
 
+# The function to use when streaming results one by
+# one from the connection, rather than buffering them all
+# in memory.
 streaming = (ret, opts) -> (resp) ->
-    containerBuffer = ''
-    char0 = if opts.data.format is 'json' then '[' else '{'
-    charZ = if opts.data.format is 'json' then ']' else '}'
-    toItem = (line, idx) ->
-        try
-            parsed = JSON.parse line.replace PESKY_COMMA, ''
-            return parsed
-        catch e
-            containerBuffer += line
-            lastChar = line[line.length - 1]
-            if idx > 0 and (lastChar is ',' or (lastChar is char0 && line[0] is charZ))
-                # This should have parsed
-                iter.emit('error', e, line)
-            return undefined
-    onlyDefinedItems = (item) -> item?
-    onEnd = ->
-        # Check the container on end to make sure all was well.
-        try
-            container = JSON.parse containerBuffer
-            if container.error
-                iter.emit 'error', new Error(container.error)
-        catch e
-            iter.emit 'error', "Mal-formed JSON response: #{ containerBuffer }"
+  containerBuffer = ''
+  char0   = if opts.data.format is 'json' then '[' else '{'
+  charZ   = if opts.data.format is 'json' then ']' else '}'
+  defined = (item) -> item?
+  toItem  = (line, idx) ->
+    try
+      return JSON.parse line.replace PESKY_COMMA, ''
+    catch e
+      containerBuffer += line
+      lastChar = line[line.length - 1]
+      if idx > 0 and (lastChar is ',' or (lastChar is char0 && line[0] is charZ))
+        # This should have parsed
+        iter.emit('error', e, line)
+      return undefined
+  onEnd = ->
+    # Check the container on end to make sure all was well.
+    try
+      container = JSON.parse containerBuffer
+      if container.error
+        iter.emit 'error', new Error(container.error)
+    catch e
+      iter.emit 'error', "Mal-formed JSON response: #{ containerBuffer }"
 
-    iter = new BufferedResponse(resp, 'utf8')
-        .map(toItem)
-        .filter(onlyDefinedItems)
-        .each(opts.success)
-        .error(opts.error)
-        .done(onEnd)
+  iter = new BufferedResponse(resp, 'utf8')
+    .map(toItem)
+    .filter(defined)
+    .each(opts.success)
+    .error(opts.error)
+    .done(onEnd)
 
-    ret.resolve iter
+  ret.resolve iter
 
+# Get a message that explains what went wrong.
 getMsg = ({type, url}, text, e) ->
-    "Could not parse response to #{ type } #{ url }: '#{ text }' (#{ e })"
+  "Could not parse response to #{ type } #{ url }: '#{ text }' (#{ e })"
 
 blocking = (ret, opts) -> (resp) ->
-    containerBuffer = ''
-    ret.done(opts.success)
-    resp.on 'data', (chunk) -> containerBuffer += chunk
-    resp.on 'error', (e) -> ret.reject(e)
-    resp.on 'end', ->
-        if /json/.test opts.data.format
-            if '' is containerBuffer and resp.statusCode is 200
-                # No body, but all-good.
-                ret.resolve()
-            else
-                try
-                    parsed = JSON.parse containerBuffer
-                    if err = parsed.error
-                        ret.reject new Error(err)
-                    else
-                        ret.resolve parsed
-                catch e
-                    if resp.statusCode >= 400
-                        ret.reject new Error(resp.statusCode)
-                    else
-                        ret.reject new Error(getMsg opts, containerBuffer, e)
-        else
-            if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
-                ret.reject new Error(e[2])
-            else
-                ret.resolve containerBuffer
+  containerBuffer = ''
+  ret.done(opts.success)
+  resp.on 'data', (chunk) -> containerBuffer += chunk
+  resp.on 'error', (e) -> ret.reject(e)
+  resp.on 'end', ->
+    if /json/.test opts.data.format
+      if '' is containerBuffer and resp.statusCode is 200
+        # No body, but all-good.
+        ret.resolve()
+      else
+        try
+          parsed = JSON.parse containerBuffer
+          if err = parsed.error
+            ret.reject new Error(err)
+          else
+            ret.resolve parsed
+        catch e
+          if resp.statusCode >= 400
+            ret.reject new Error(resp.statusCode)
+          else
+            ret.reject new Error(getMsg opts, containerBuffer, e)
+    else
+      if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
+        ret.reject new Error(e[2])
+      else
+        ret.resolve containerBuffer
 
 exports.iterReq = (method, path, format) ->
-    (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
-        if arguments.length is 2 and _.isFunction page
-            [doThis, page] = [page, {}]
-        req = _.extend {format}, page, query: q.toXML()
-        @makeRequest(method, path, req, null, true)
-            .fail(onErr)
-            .done(invoke 'each', doThis)
-            .done(invoke 'error', onErr)
-            .done(invoke 'done', onEnd)
+  (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
+    if arguments.length is 2 and _.isFunction page
+      [doThis, page] = [page, {}]
+    req = _.extend {format}, page, query: q.toXML()
+    @makeRequest(method, path, req, null, true)
+      .fail(onErr)
+      .done(invoke 'each', doThis)
+      .done(invoke 'error', onErr)
+      .done(invoke 'done', onEnd)
 
 exports.doReq = (opts, iter) -> Deferred ->
-    @fail opts.error
-    @done opts.success
-    if _.isString opts.data
-        postdata = opts.data
-        if opts.type in [ 'GET', 'DELETE' ]
-            return ret.reject("Invalid request. #{ opts.type } requests must not have bodies")
-    else
-        postdata = qs.stringify opts.data
-    url = URL.parse(opts.url, true)
-    url.method = opts.type
-    url.port = url.port || 80
-    url.headers =
-        'User-Agent': USER_AGENT
-        'Accept': ACCEPT_HEADER[opts.dataType]
-    if url.method in ['GET', 'DELETE'] and _.size opts.data
-        url.path += '?' + postdata
-    else
-        url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
-        url.headers['Content-Length'] = postdata.length
+  @fail opts.error
+  @done opts.success
+  if _.isString opts.data
+    postdata = opts.data
+    if opts.type in [ 'GET', 'DELETE' ]
+      return ret.reject("Invalid request. #{ opts.type } requests must not have bodies")
+  else
+    postdata = qs.stringify opts.data
+  url = URL.parse(opts.url, true)
+  url.method = opts.type
+  url.port = url.port || 80
+  url.headers =
+    'User-Agent': USER_AGENT
+    'Accept': ACCEPT_HEADER[opts.dataType]
+  if url.method in ['GET', 'DELETE'] and _.size opts.data
+    url.path += '?' + postdata
+  else
+    url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
+    url.headers['Content-Length'] = postdata.length
 
-    req = http.request url, (if iter then streaming else blocking) @, opts
+  req = http.request url, (if iter then streaming else blocking) @, opts
 
-    req.on 'error', @reject
+  req.on 'error', @reject
 
-    if url.method in [ 'POST', 'PUT' ]
-        req.write postdata
-    req.end()
+  if url.method in [ 'POST', 'PUT' ]
+    req.write postdata
+  req.end()
 

@@ -12,26 +12,26 @@ IS_NODE = typeof exports isnt 'undefined'
 
 unless IS_NODE
 
-    unless Array::map?
-        Array::map = (f) -> (f x for x in @)
+  unless Array::map?
+    Array::map = (f) -> (f x for x in @)
 
-    unless Array::filter?
-        Array::filter = (f) -> (x for x in @ when (f x))
+  unless Array::filter?
+    Array::filter = (f) -> (x for x in @ when (f x))
 
-    unless Array::reduce?
-        Array::reduce = (f, initValue) ->
-            xs = @slice()
-            ret = if arguments.length < 2 then xs.pop() else initValue
-            ret = (f ret, x) for x in xs
-            ret
+  unless Array::reduce?
+    Array::reduce = (f, initValue) ->
+      xs = @slice()
+      ret = if arguments.length < 2 then xs.pop() else initValue
+      ret = (f ret, x) for x in xs
+      ret
 
-    unless Array::forEach?
-        Array::forEach = (f, ctx) ->
-            throw new Error("No function provided") unless f
-            for x, i in @
-                f.call((ctx ? @), x, i, @)
+  unless Array::forEach?
+    Array::forEach = (f, ctx) ->
+      throw new Error("No function provided") unless f
+      for x, i in @
+        f.call((ctx ? @), x, i, @)
 
-    @console ?= {log: (->), error: (->), debug: (->)}
-    @console.log ?= ->
-    @console.error ?= ->
-    @console.debug ?= ->
+  @console ?= {log: (->), error: (->), debug: (->)}
+  @console.log ?= ->
+  @console.error ?= ->
+  @console.debug ?= ->

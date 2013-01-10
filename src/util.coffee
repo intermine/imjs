@@ -6,14 +6,14 @@ IS_NODE = typeof exports isnt 'undefined'
 root = exports ? this
 
 if IS_NODE
-    {Deferred} = require 'underscore.deferred'
-    {_} = require 'underscore'
+  {Deferred} = require 'underscore.deferred'
+  {_} = require 'underscore'
 else
-    {Deferred} = root.jQuery
-    {_} = root
-    root.intermine ?= {}
-    root.intermine.funcutils ?= {}
-    root = root.intermine.funcutils
+  {Deferred} = root.jQuery
+  {_} = root
+  root.intermine ?= {}
+  root.intermine.funcutils ?= {}
+  root = root.intermine.funcutils
 
 # Simply because this is a whole load cleaner and less ugly than
 # calls to `_.bind(f, null, arg1, arg2, ...)`.
@@ -33,13 +33,13 @@ root.error = (e) -> Deferred( -> @reject new Error(e) ).promise()
 root.success = success = (args...) -> Deferred( -> @resolve args... ).promise()
 
 root.fold = fold = (init, f) -> (xs) ->
-    if xs.reduce? # arrays
-        xs.reduce f, init
-    else # objects
-        ret = init
-        for k, v of xs
-            ret = if ret? then f(ret, k, v) else {k: v}
-        ret
+  if xs.reduce? # arrays
+    xs.reduce f, init
+  else # objects
+    ret = init
+    for k, v of xs
+      ret = if ret? then f(ret, k, v) else {k: v}
+    ret
 
 root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
 
@@ -47,23 +47,23 @@ root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
 # Basically a mapping over an object, taking a
 # function of the form (oldk, oldv) -> [newk, newv]
 root.omap = (f) -> (xs) ->
-    merger = (a, oldk, oldv) ->
-        [newk, newv] = f oldk, oldv
-        a[newk] = newv
-        return a
-    (root.fold {}, merger) xs
+  merger = (a, oldk, oldv) ->
+    [newk, newv] = f oldk, oldv
+    a[newk] = newv
+    return a
+  (root.fold {}, merger) xs
 
 root.copy = root.omap (k, v) -> [k, v]
 
 root.partition = (f) -> (xs) ->
-    trues = []
-    falses = []
-    for x in xs
-        if f x
-            trues.push x
-        else
-            falses.push x
-    [trues, falses]
+  trues = []
+  falses = []
+  for x in xs
+    if f x
+      trues.push x
+    else
+      falses.push x
+  [trues, falses]
 
 # Implementation of concatmap.
 #
@@ -75,19 +75,19 @@ root.partition = (f) -> (xs) ->
 # @param f The function to apply to each item.
 # @param xs The things to apply them to.
 root.concatMap = (f) -> (xs) ->
-    ret = undefined
-    for x in xs
-        fx = f x
-        ret = if ret is undefined
-            fx
-        else if typeof fx in ['string', 'number']
-            ret + fx
-        else if fx.slice?
-            ret.concat(fx)
-        else
-            ret[k] = v for k, v of fx
-            ret
-    ret
+  ret = undefined
+  for x in xs
+    fx = f x
+    ret = if ret is undefined
+      fx
+    else if typeof fx in ['string', 'number']
+      ret + fx
+    else if fx.slice?
+      ret.concat(fx)
+    else
+      ret[k] = v for k, v of fx
+      ret
+  ret
 
 root.flatMap = root.concatMap
 
@@ -106,9 +106,9 @@ root.NOT = (x) -> not x
 root.id = id = (x) -> x
 
 root.any = (xs, f = id) ->
-    for x in xs
-        return true if f x
-    return false
+  for x in xs
+    return true if f x
+  return false
 
 # A set of functions that are helpful when dealing with promises,
 # in that they help produce the kinds of simple pipes that are
@@ -121,10 +121,10 @@ root.any = (xs, f = id) ->
 # @param [Array] args An optional argument list, passed as varargs
 # @return [(obj) -> ?] A function that invokes a named method.
 root.invoke = (name, args...) -> (obj) ->
-    if obj[name]?.apply
-        obj[name].apply(obj, args)
-    else
-        Deferred().reject("No method: #{ name }").promise()
+  if obj[name]?.apply
+    obj[name].apply(obj, args)
+  else
+    Deferred().reject("No method: #{ name }").promise()
 
 # Get a function that invokes a method on an object
 # that is passed to it with the arguments given here, with
@@ -158,12 +158,12 @@ root.get = (name) -> (obj) -> obj[name]
 # @param [?] value The value to set (optional).
 # @return [(obj) -> ?] A function that sets a property's value, and returns the object.
 root.set = (name, value) -> (obj) ->
-    if arguments.length is 2
-        obj[name] = value
-    else
-        for own k, v of name
-            obj[k] = v
-    return obj
+  if arguments.length is 2
+    obj[name] = value
+  else
+    for own k, v of name
+      obj[k] = v
+  return obj
 
 root.flip = (f) -> (args...) -> f.apply(null, args.reverse())
 
@@ -171,26 +171,26 @@ root.flip = (f) -> (args...) -> f.apply(null, args.reverse())
 # when they are trying to use a service that
 # isn't supported by their current service.
 REQUIRES = (required, got) ->
-    "This service requires a service at version #{ required } or above. This one is at #{ got }"
+  "This service requires a service at version #{ required } or above. This one is at #{ got }"
 
 # A wrapper for functions that make requests to endpoints
 # that require a certain version of the intermine API.
 root.REQUIRES_VERSION = (s, n, f) -> s.fetchVersion().pipe (v) ->
-    if v >= n
-        f()
-    else
-        error REQUIRES n, v
+  if v >= n
+    f()
+  else
+    error REQUIRES n, v
 
 # Helper function that makes sure a query doesn't have
 # any implicit constraints through the use of inner-joins.
 # All chains of references will be converted to outer-joins.
 root.dejoin = (q) ->
-    for view in q.views
-        parts = view.split('.')
-        q.addJoin(parts[1..-2].join '.') if parts.length > 2
-    return q
+  for view in q.views
+    parts = view.split('.')
+    q.addJoin(parts[1..-2].join '.') if parts.length > 2
+  return q
 
 # Sequence a series of asynchronous functions.
 root.sequence = (fns...) ->
-    fld = fold success(), (p, f) -> p.then f
-    fld _.flatten fns
+  fld = fold success(), (p, f) -> p.then f
+  fld _.flatten fns
