@@ -1,8 +1,8 @@
 module.exports = function (grunt) {
   'use strict';
 
-  var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - '
-               + '<%= grunt.template.today("yyyy-mm-dd") %> */'
+  var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+               '<%= grunt.template.today("yyyy-mm-dd") %> */'
 
   grunt.initConfig({
     pkg: '<json:package.json>',
@@ -107,18 +107,39 @@ module.exports = function (grunt) {
     }
   })
 
-  grunt.loadTasks('tasks')
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-clean')
+  grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {
     global.should = require('should')
   })
 
+  grunt.registerTask('-testglob', 'Run some tests', function () {
+    var done = this.async();
+    var glob = grunt.option('grep');
+    var cmd = 'mocha';
+    var args = ['--grep', glob].concat(grunt.file.expandFiles(['test/mocha/*.coffee']));
+    grunt.log.writeln('RUNNING > ' + cmd + ' ' + args.join(' '));
+    var child = require('child_process').spawn(cmd, args);
+    child.stderr.setEncoding('utf8');
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', function (data) {
+      grunt.log.write(data);
+    });
+    child.stderr.on('data', function (data) {
+      grunt.log.write(data);
+    });
+    child.on('exit', function (code) {
+      done(code === 0);
+    });
+  });
+
   grunt.registerTask('build', 'clean:build compile concat min')
   grunt.registerTask('test-browser', 'build clean:qunit buildqunit qunit')
   grunt.registerTask('test-node', 'build -load-test-globals simplemocha:all')
-  grunt.registerTask('default', 'lint coffeelint test-node test-browser')
+  grunt.registerTask('justtest', 'build -load-test-globals -testglob');
+  grunt.registerTask('default', 'lint coffeelint test-node')
 
 }
