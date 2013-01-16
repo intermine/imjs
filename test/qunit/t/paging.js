@@ -1,39 +1,38 @@
 (function () {
-    'use strict';
+  'use strict';
 
-    var invoke  = intermine.funcutils.invoke
-      , get     = intermine.funcutils.get
-      , from0   = { select: ['*'], from: 'Employee', where: {age: {gt: 50}}, limit: 10, start: 0  }
-      , from20  = { select: ['*'], from: 'Employee', where: {age: {gt: 50}}, limit: 10, start: 20 }
-      , expected = [
-            "Tatjana Berkel",
-            "Jennifer Schirrmann",
-            "Herr Fritsche",
-            "Lars Lehnhoff",
-            "Josef M\u00FCller",
-            "Nyota N'ynagasongwa",
-            "Herr Grahms",
-            "Frank Montenbruck",
-            "Andreas Hermann",
-            "Jochen Sch\u00FCler"
-        ]
+  var invoke  = intermine.funcutils.invoke
+  var get     = intermine.funcutils.get
+  var from0   = { select: ['*'], from: 'Employee', where: {age: {gt: 50}}, limit: 10, start: 0  }
+  var from20  = { select: ['*'], from: 'Employee', where: {age: {gt: 50}}, limit: 10, start: 20 }
+  var expected = [
+    "Tatjana Berkel",
+    "Jennifer Schirrmann",
+    "Herr Fritsche",
+    "Lars Lehnhoff",
+    "Josef M\u00FCller",
+    "Nyota N'ynagasongwa",
+    "Herr Grahms",
+    "Frank Montenbruck",
+    "Andreas Hermann",
+    "Jochen Sch\u00FCler"
+  ]
 
-
-    function pageTest(query, method) {
-        return function () {
-            this.s.query(query)
-                .then(invoke(method))
-                .then(invoke('records'))
-                .then(invoke('map', get('name')))
-                .then(_.bind(deepEqual, null, expected))
-                .always(start);
-        }
+  function pageTest(query, method) {
+    return function () {
+      this.s.query(query)
+        .then(invoke(method))
+        .then(invoke('records'))
+        .then(invoke('map', get('name')))
+        .then(_.bind(deepEqual, null, expected))
+        .always(start)
     }
+  }
 
-    module('Paging', window.TestCase);
+  module('Paging', window.TestCase)
 
-    asyncTest('Can page forwards', 1, pageTest(from0, 'next'));
+  asyncTest('Can page forwards', 1, pageTest(from0, 'next'))
 
-    asyncTest('Can page backwards', 1, pageTest(from20, 'previous'));
+  asyncTest('Can page backwards', 1, pageTest(from20, 'previous'))
 
-})();
+})()

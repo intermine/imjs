@@ -4,52 +4,52 @@ Fixture = require './lib/fixture'
 
 describe 'Service', ->
 
-    {service} = new Fixture()
+  {service} = new Fixture()
 
-    describe '#fetchLists()', ->
+  describe '#fetchLists()', ->
 
-        @beforeAll prepare -> service.fetchLists()
+    @beforeAll prepare -> service.fetchLists()
 
-        it 'should find at least one list', eventually (lists) ->
-            lists.length.should.be.above 0
+    it 'should find at least one list', eventually (lists) ->
+      lists.length.should.be.above 0
 
-        it 'should contain "My-Favourite-Employees"', eventually (lists) ->
-            (l.name for l in lists).should.include 'My-Favourite-Employees'
+    it 'should contain "My-Favourite-Employees"', eventually (lists) ->
+      (l.name for l in lists).should.include 'My-Favourite-Employees'
 
 
-    describe '#fetchLists (lists) ->', ->
+  describe '#fetchLists (lists) ->', ->
 
-        it 'should find "My-Favourite-Employees"', (done) ->
-            promise = service.fetchLists (lists) ->
-                (l.name for l in lists).should.include 'My-Favourite-Employees'
-                done()
-            promise.fail done
+    it 'should find "My-Favourite-Employees"', (done) ->
+      promise = service.fetchLists (lists) ->
+        (l.name for l in lists).should.include 'My-Favourite-Employees'
+        done()
+      promise.fail done
 
-    describe '#fetchList()', ->
+  describe '#fetchList()', ->
 
-        @beforeAll prepare -> service.fetchList 'My-Favourite-Employees'
+    @beforeAll prepare -> service.fetchList 'My-Favourite-Employees'
 
-        it 'should find that list', eventually (list) ->
-            should.exist list
+    it 'should find that list', eventually (list) ->
+      should.exist list
 
-        it 'should find the right list', eventually (list) ->
-            list.name.should.equal 'My-Favourite-Employees'
+    it 'should find the right list', eventually (list) ->
+      list.name.should.equal 'My-Favourite-Employees'
 
-        it 'should have 4 members', eventually (list) ->
-            list.size.should.equal 4
+    it 'should have 4 members', eventually (list) ->
+      list.size.should.equal 4
 
-        it 'should contain David', eventually (list) ->
-            list.contents().then (members) ->
-                (m.name for m in members).should.include 'David Brent'
+    it 'should contain David', eventually (list) ->
+      list.contents().then (members) ->
+        (m.name for m in members).should.include 'David Brent'
 
-    describe '#fetchList (list) ->', ->
+  describe '#fetchList (list) ->', ->
 
-        it 'should find "My-Favourite-Employees"', (done) ->
-            promise = service.fetchList 'My-Favourite-Employees', (list) ->
-                should.exist list
-                list.name.should.equal 'My-Favourite-Employees'
-                list.size.should.equal 4
-                done()
+    it 'should find "My-Favourite-Employees"', (done) ->
+      promise = service.fetchList 'My-Favourite-Employees', (list) ->
+        should.exist list
+        list.name.should.equal 'My-Favourite-Employees'
+        list.size.should.equal 4
+        done()
 
-            promise.fail done
+      promise.fail done
 

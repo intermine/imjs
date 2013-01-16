@@ -6,51 +6,60 @@ Fixture = require './lib/fixture'
 
 describe 'Query#appendToList', ->
 
-    {service, olderEmployees, youngerEmployees} = new Fixture()
-    name = 'temp-olders-append-to-list-target'
-    tags = ['js', 'node', 'testing', 'mocha', 'append-to-list']
-    clearList = clear service, name
+  {service, olderEmployees, youngerEmployees} = new Fixture()
+  name = 'temp-olders-append-to-list-target'
+  tags = ['js', 'node', 'testing', 'mocha', 'append-to-list']
+  clearList = clear service, name
 
-    @slow 400
-    
-    @afterAll always clearList
+  @slow 400
+  
+  @afterAll always clearList
 
-    describe 'target: List', ->
+  describe 'target: List', ->
 
-        @beforeAll prepare -> clearList().then -> once(
-                service.count(youngerEmployees),
-                service.count(olderEmployees),
-                service.query(youngerEmployees),
-                service.query(olderEmployees).then((q) -> q.saveAsList {name, tags})
-            ).then (yc, oc, yq, ol) -> Deferred ->
-                yq.appendToList(ol).fail(@reject).done (al) => @resolve(yc, oc, ol, al)
+    @beforeAll prepare -> clearList().then -> once(
+      service.count(youngerEmployees),
+      service.count(olderEmployees),
+      service.query(youngerEmployees),
+      service.query(olderEmployees).then((q) -> q.saveAsList {name, tags})
+    ).then (yc, oc, yq, ol) -> Deferred ->
+      yq.appendToList(ol).fail(@reject).done (al) => @resolve(yc, oc, ol, al)
 
-        it 'should actually add items to the list', eventually (yc, oc, list) ->
-            list.size.should.be.above oc
+    it 'should actually add items to the list', eventually (yc, oc, list) ->
+      list.size.should.be.above oc
 
-        it 'should in fact add all the youngsters', eventually (yc, oc, list) ->
-            list.size.should.equal yc + oc
+    it 'should in fact add all the youngsters', eventually (yc, oc, list) ->
+      list.size.should.equal yc + oc
 
-        it 'should keep the input and output lists in sync', eventually (_..., orig, appended) ->
-            orig.size.should.equal appended.size
+    it 'should keep the input and output lists in sync', eventually (_..., orig, appended) ->
+      orig.size.should.equal appended.size
 
-    describe 'target: String', ->
+  describe 'target: String', ->
 
-        @beforeAll prepare -> clearList().then -> once(
-                service.count(youngerEmployees),
-                service.count(olderEmployees),
-                service.query(youngerEmployees),
-                service.query(olderEmployees).then((q) -> q.saveAsList {name, tags})
-            ).then (yc, oc, yq, ol) -> Deferred ->
-                yq.appendToList(name).fail(@reject).done (al) => @resolve(yc, oc, ol, al)
+    @beforeAll prepare -> clearList().then -> once(
+      service.count(youngerEmployees),
+      service.count(olderEmployees),
+      service.query(youngerEmployees),
+      service.query(olderEmployees).then((q) -> q.saveAsList {name, tags})
+    ).then (yc, oc, yq, ol) -> Deferred ->
+      yq.appendToList(name).fail(@reject).done (al) => @resolve(yc, oc, ol, al)
 
-        it 'should actually add items to the list', eventually (yc, oc, _, list) ->
-            list.size.should.be.above oc
+    it 'should have appropriate values to start with -yc', eventually (yc) ->
+      yc.should.equal 85
 
-        it 'should in fact add all the youngsters', eventually (yc, oc, _, list) ->
-            list.size.should.equal yc + oc
+    it 'should have appropriate values to start with -oc', eventually (_, oc) ->
+      oc.should.equal 46
 
-        it 'should not have kept the input and output lists in sync', eventually (yc, oc, orig, appended) ->
-            orig.size.should.equal oc
-            appended.size.should.equal orig.size + yc
+    it 'should have appropriate values to start with -oc', eventually (_, __, ol) ->
+      ol.size.should.equal 46
+
+    it 'should actually add items to the list', eventually (yc, oc, _, list) ->
+      list.size.should.be.above oc
+
+    it 'should in fact add all the youngsters', eventually (yc, oc, _, list) ->
+      list.size.should.equal yc + oc
+
+    it 'input and output lists should not be in sync', eventually (yc, oc, orig, appended) ->
+      orig.size.should.equal oc
+      appended.size.should.equal orig.size + yc
 

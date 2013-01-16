@@ -8,132 +8,131 @@ namePrefix = 'temp-testing-list-operations-'
 
 describe 'Service', ->
 
-    @slow 500
+  @slow 500
 
-    {service} = new Fixture()
-    service.errorHandler = ->
+  {service} = new Fixture()
+  service.errorHandler = ->
 
-    describe '#complement()', ->
+  describe '#complement()', ->
 
-        it 'should fail', shouldFail service.complement
+    it 'should fail', shouldFail service.complement
 
-    describe '#complement(opts)', ->
+  describe '#complement(opts)', ->
 
-        opts =
-            from: 'some favs-some unknowns'
-            exclude: 'My-Favourite-Employees'
-            tags: tags
-            name: 'List created from subtraction'
-        expectedMember = 'Brenda'
-        clearUp = clear service, opts.name
+    opts =
+      from: 'some favs-some unknowns'
+      exclude: 'My-Favourite-Employees'
+      tags: tags
+      name: 'List created from subtraction'
+    expectedMember = 'Brenda'
+    clearUp = clear service, opts.name
 
-        @beforeAll prepare -> clearUp().then -> service.complement opts
-        @afterAll always clearUp
+    @beforeAll prepare -> clearUp().then -> service.complement opts
+    @afterAll always clearUp
 
-        it 'should have succeeded', eventually -> true
+    it 'should have succeeded', eventually -> true
 
-        it 'should yield a list', eventually (list) ->
-            should.exist list
+    it 'should yield a list', eventually (list) ->
+      should.exist list
 
-        it 'should have the right name', eventually (list) ->
-            list.name.should.equal opts.name
+    it 'should have the right name', eventually (list) ->
+      list.name.should.equal opts.name
 
-        it 'should have the right number of members', eventually (list) ->
-            list.size.should.equal 2
+    it 'should have the right number of members', eventually (list) ->
+      list.size.should.equal 2
 
-        it 'should have the correct tags', eventually (list) ->
-            list.hasTag(t).should.be.true for t in tags
+    it 'should have the correct tags', eventually (list) ->
+      list.hasTag(t).should.be.true for t in tags
 
-        it "should contain #{expectedMember }", eventually (list) ->
-            list.contents().then deferredTest (members) ->
-                (m.name for m in members).should.include expectedMember
+    it "should contain #{expectedMember }", eventually (list) ->
+      list.contents().then deferredTest (members) ->
+        (m.name for m in members).should.include expectedMember
 
-    describe '#complement(opts) {Array of list names}', ->
+  describe '#complement(opts) {Array of list names}', ->
 
-        opts =
-            from: ['some favs-some unknowns', 'Umlaut holders']
-            exclude: ['My-Favourite-Employees', 'The great unknowns']
-            tags: tags
-            name: 'List created from subtraction of arrays of names'
-        expectedMember = 'Frank Möllers'
-        clearUp = clear service, opts.name
+    opts =
+      from: ['some favs-some unknowns', 'Umlaut holders']
+      exclude: ['My-Favourite-Employees', 'The great unknowns']
+      tags: tags
+      name: 'List created from subtraction of arrays of names'
+    expectedMember = 'Frank Möllers'
+    clearUp = clear service, opts.name
 
-        @beforeAll prepare -> clearUp().then -> service.complement opts
-        @afterAll always clearUp
+    @beforeAll prepare -> clearUp().then -> service.complement opts
+    @afterAll always clearUp
 
-        it 'should have succeeded', eventually -> true
+    it 'should have succeeded', eventually -> true
 
-        it 'should yield a list', eventually (list) ->
-            should.exist list
+    it 'should yield a list', eventually (list) ->
+      should.exist list
 
-        it 'should have the right name', eventually (list) ->
-            list.name.should.equal opts.name
+    it 'should have the right name', eventually (list) ->
+      list.name.should.equal opts.name
 
-        it 'should have the right number of members', eventually (list) ->
-            list.size.should.equal 2
+    it 'should have the right number of members', eventually (list) ->
+      list.size.should.equal 2
 
-        it 'should have the correct tags', eventually (list) ->
-            list.hasTag(t).should.be.true for t in tags
+    it 'should have the correct tags', eventually (list) ->
+      list.hasTag(t).should.be.true for t in tags
 
-        it "should contain #{expectedMember }", eventually (list) ->
-            list.contents().then deferredTest (members) ->
-                (m.name for m in members).should.include expectedMember
+    it "should contain #{expectedMember }", eventually (list) ->
+      list.contents().then deferredTest (members) ->
+        (m.name for m in members).should.include expectedMember
 
-    describe '#complement(opts) {Array of Lists}', ->
+  describe '#complement(opts) {Array of Lists}', ->
 
-        from = ['some favs-some unknowns', 'Umlaut holders']
-        exclude = ['My-Favourite-Employees', 'The great unknowns']
-        opts =
-            tags: tags
-            name: 'List created from subtraction of arrays of names'
-        expectedMember = 'Frank Möllers'
-        clearUp = clear service, opts.name
+    from = ['some favs-some unknowns', 'Umlaut holders']
+    exclude = ['My-Favourite-Employees', 'The great unknowns']
+    opts =
+      tags: tags
+      name: 'List created from subtraction of arrays of names'
+    expectedMember = 'Frank Möllers'
+    clearUp = clear service, opts.name
 
-        @beforeAll prepare -> clearUp()
-            .then( -> service.fetchLists() )
-            .then (lists) ->
-                opts.from = (l for l in lists when l.name in from)
-                opts.exclude = (l for l in lists when l.name in exclude)
-                service.complement opts
-        @afterAll always clearUp
+    setup = (lists) ->
+      opts.from = (l for l in lists when l.name in from)
+      opts.exclude = (l for l in lists when l.name in exclude)
+      service.complement opts
 
-        it 'should have succeeded', eventually -> true
+    @beforeAll prepare -> clearUp().then( -> service.fetchLists() ).then setup
 
-        it 'should yield a list', eventually (list) ->
-            should.exist list
+    @afterAll always clearUp
 
-        it 'should have the right name', eventually (list) ->
-            list.name.should.equal opts.name
+    it 'should have succeeded', eventually -> true
 
-        it 'should have the right number of members', eventually (list) ->
-            list.size.should.equal 2
+    it 'should yield a list', eventually (list) -> should.exist list
 
-        it 'should have the correct tags', eventually (list) ->
-            list.hasTag(t).should.be.true for t in tags
+    it 'should have the right name', eventually (list) -> list.name.should.equal opts.name
 
-        it "should contain #{expectedMember }", eventually (list) ->
-            list.contents().then deferredTest (members) ->
-                (m.name for m in members).should.include expectedMember
+    it 'should have the right number of members', eventually (list) ->
+      list.size.should.equal 2
 
-    describe '#complement(opts, cb)', ->
+    it 'should have the correct tags', eventually (list) ->
+      list.hasTag(t).should.be.true for t in tags
 
-        opts =
-            from: ['some favs-some unknowns', 'Umlaut holders']
-            exclude: ['My-Favourite-Employees', 'The great unknowns']
-            tags: tags
-            name: 'List created from subtraction of arrays of names'
-        clearUp = clear service, opts.name
+    it "should contain #{expectedMember }", eventually (list) ->
+      list.contents().then deferredTest (members) ->
+        (m.name for m in members).should.include expectedMember
 
-        @beforeAll prepare clearUp
-        @afterAll always clearUp
+  describe '#complement(opts, cb)', ->
 
-        it 'should support the callback API', (done) ->
-            promise = @promise.then -> service.complement opts, (list) ->
-                should.exist list
-                list.name.should.equal opts.name
-                list.size.should.equal 2
-                list.hasTag(t).should.be.true for t in tags
-                done()
+    opts =
+      from: ['some favs-some unknowns', 'Umlaut holders']
+      exclude: ['My-Favourite-Employees', 'The great unknowns']
+      tags: tags
+      name: 'List created from subtraction of arrays of names'
+    clearUp = clear service, opts.name
 
-            promise.fail done
+    @beforeAll prepare clearUp
+    @afterAll always clearUp
+
+    it 'should support the callback API', (done) ->
+      promise = @promise.then -> service.complement opts, (list) ->
+        should.exist list
+        list.name.should.equal opts.name
+        list.size.should.equal 2
+        list.hasTag(t).should.be.true for t in tags
+        done()
+
+      promise.fail done
 

@@ -4,25 +4,25 @@ Fixture = require './lib/fixture'
 once = require('underscore.deferred').when
 
 trad =
-    view: ["Employee.name", "Employee.age", "Employee.department.name"]
-    constraints: [
-        {path: "Employee.department.name", op: '=', value: "Sales*"},
-        {path: "Employee.age", op: ">", value: "50"}
-    ]
+  view: ["Employee.name", "Employee.age", "Employee.department.name"]
+  constraints: [
+    {path: "Employee.department.name", op: '=', value: "Sales*"},
+    {path: "Employee.age", op: ">", value: "50"}
+  ]
 
 sqlish =
-    from: "Employee"
-    select: ["name", "age", "department.name"]
-    where:
-        'department.name': 'Sales*'
-        'age': {gt: 50}
+  from: "Employee"
+  select: ["name", "age", "department.name"]
+  where:
+    'department.name': 'Sales*'
+    'age': {gt: 50}
 
 describe 'The equivalence of syntaxes', ->
 
-    {service} = new Fixture()
+  {service} = new Fixture()
 
-    @beforeAll prepare -> once service.query(trad), service.query(sqlish)
+  @beforeAll prepare -> once service.query(trad), service.query(sqlish)
 
-    it 'should mean that both syntaxes produce the same XML', eventually (q1, q2) ->
-        q1.toXML().should.equal q2.toXML()
+  it 'should mean that both syntaxes produce the same XML', eventually (q1, q2) ->
+    q1.toXML().should.equal q2.toXML()
 
