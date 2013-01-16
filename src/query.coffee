@@ -15,14 +15,12 @@ if IS_NODE
   intermine       = __root__
   {_}             = require('underscore')
   {Deferred}  = $ = require('underscore.deferred')
-  _CLONE          = require('clone')
   toQueryString   = require('querystring').stringify
   {partition, fold, take, concatMap, id, get} = require('./util')
 else
   {_, jQuery, intermine} = __root__
   {partition, fold, take, concatMap, id, get} = intermine.funcutils
   {Deferred}  = $ = jQuery
-  _CLONE          = (o) -> jQuery.extend true, {}, o
   toQueryString   = jQuery.param
 
 get_canonical_op = (orig) ->
@@ -288,7 +286,7 @@ class Query
     @trigger('add:view change:views', toAdd)
   
   # Replace the existing select list with the one passed as an argument.
-  select: (views) ->
+  select: (views) =>
     @views = []
     @addToSelect views
     @
@@ -353,6 +351,22 @@ class Query
       pi = @getPathInfo(c.path)
       if pi.isAttribute() then pi.getParent() else pi
     _.uniq viewNodes.concat(constrainedNodes), false, (n) -> n.toPathString()
+
+  isInQuery: (p) ->
+    pi = @getPathInfo p
+    if pi
+      pstr = pi.toPathString()
+      _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
+        p.indexOf(pstr) is 0
+    else
+      true # No model available - for testing return true.
+
+  isRelevant: (path) ->
+    pi = @getPathInfo path
+    pi = pi.getParent() if pi.isAttribute()
+    sought = pi.toString()
+    nodes = @getQueryNodes()
+    return _.any nodes, (n) -> n.toPathString() is sought
 
   # Interpret a path that might end in '*' or '**' as the
   # set of default paths it represent.
@@ -443,7 +457,7 @@ class Query
     @service.post('query/results', req).pipe(parse).done(cont)
 
   clone: (cloneEvents) ->
-    cloned = _CLONE(@)
+    cloned = new Query(@, @service)
     if cloneEvents
       cloned._callbacks = @._callbacks
     else
@@ -577,7 +591,7 @@ class Query
       ''
 
   getJoinXML: () ->
-    strs = for p, s of @joins when (@isRelevant(p) and s is 'OUTER')
+    strs = for p, s of @joins when (@isInQuery(p) and s is 'OUTER')
       "<join path=\"#{ p }\" style=\"OUTER\"/>"
     strs.join ''
 
@@ -590,15 +604,6 @@ class Query
     attrs.name = @name if @name?
     headAttrs = (k + '="' + v + '"' for k, v of attrs when v).join(' ')
     "<query #{headAttrs} >#{ @getJoinXML() }#{ @getConstraintXML() }</query>"
-
-  isRelevant: (p) ->
-    pi = @getPathInfo p
-    if pi
-      pstr = pi.toPathString()
-      _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
-        p.indexOf(pstr) is 0
-    else
-      true # No model available - for testing return true.
 
   fetchCode: (lang, cb) ->
     req =
