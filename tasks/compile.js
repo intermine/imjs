@@ -60,7 +60,8 @@ module.exports = function (grunt) {
     grunt.file.mkdir(dest);
 
     var i = 0, file;
-    for (i = 0; file = files[i]; i++) {
+    for (i = 0; i < files.length; i++) {
+      file = files[i];
       if (file.match(/\.coffee$/)) {
         compileFile(dest, file, finishedWithFile);
       } else {
@@ -72,7 +73,7 @@ module.exports = function (grunt) {
   /**
    * Compile a directory of source files to an output directory.
    */
-  grunt.registerMultiTask('compile', 'Compile source files to js', function() {
+  grunt.registerMultiTask('compile', 'Compile source files to js', function () {
     var opts;
     var log   = grunt.log;
     var done  = this.async();
