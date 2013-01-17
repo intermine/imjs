@@ -4,5 +4,5 @@
     "timeout": 3000,
     "ignoreLeaks": false,
     "ui": "bdd",
-    "reporter": "xunit"
+    "reporter": "dot"
 }
