@@ -116,29 +116,31 @@ module.exports = function (grunt) {
     global.should = require('should')
   })
 
-  grunt.registerTask('-testglob', 'Run some tests', function () {
+  grunt.registerTask('docs', 'Generate API documentation', function () {
     var done = this.async();
-    var glob = grunt.option('grep');
-    var cmd = 'mocha';
-    var args = ['--grep', glob].concat(grunt.file.expandFiles(['test/mocha/*.coffee']));
-    grunt.log.writeln('RUNNING > ' + cmd + ' ' + args.join(' '));
-    var child = require('child_process').spawn(cmd, args);
-    child.stderr.setEncoding('utf8');
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', function (data) {
-      grunt.log.write(data);
-    });
-    child.stderr.on('data', function (data) {
-      grunt.log.write(data);
-    });
+    var cmd = 'codo';
+    var args = ['-n', 'imjs', 'src'];
+    var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'});
     child.on('exit', function (code) {
       done(code === 0);
     });
   });
 
+  grunt.registerTask('test-node', 'Run tests in the nodejs VM', function () {
+    var grep = grunt.option('grep');
+    var reporter = grunt.option('reporter');
+    if (grep) {
+      grunt.config('simplemocha.all.options.grep', grep);
+    }
+    if (reporter) {
+      grunt.config('simplemocha.all.options.reporter', reporter);
+    }
+    grunt.task.run('simplemocha:all');
+  });
+
   grunt.registerTask('build', 'clean:build compile concat min')
   grunt.registerTask('test-browser', 'build clean:qunit buildqunit qunit')
-  grunt.registerTask('test-node', 'build -load-test-globals simplemocha:all')
+  grunt.registerTask('-test-node', 'build -load-test-globals simplemocha:all')
   grunt.registerTask('justtest', 'build -load-test-globals -testglob');
   grunt.registerTask('default', 'lint coffeelint test-node')
 
