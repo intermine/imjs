@@ -29,8 +29,8 @@ describe 'Query', ->
     it 'gets the query to retrieve the next page of results', eventually (nextQuery) ->
       nextQuery.start.should.equal 10
     
-    it 'should fetch the appropriate page of results', eventually (nq) -> nq.records().then (emps) ->
-      (e.name for e in emps).should.eql expected
+    it 'should fetch the appropriate page of results', eventually (nq) ->
+      nq.records().then (emps) -> (e.name for e in emps).should.eql expected
 
   describe '#previous', ->
 
