@@ -561,10 +561,10 @@ class Service
 
   # Fetch the list widgets that are available from this service.
   # @return [Promise<Array<Object>>] A promise to yield a list of widgets.
-  fetchWidgets: (cb) -> REQUIRES_VERSION @, 8, =>
+  fetchWidgets: (cb) => REQUIRES_VERSION @, 8, =>
     _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
-  fetchWidgetMap: (cb) -> REQUIRES_VERSION @, 8, =>
+  fetchWidgetMap: (cb) => REQUIRES_VERSION @, 8, =>
     toMap = fold {}, (m, w) -> m[w.name] = w; m
     (@__wmap__ ?= @fetchWidgets().then(toMap)).done(cb)
 
