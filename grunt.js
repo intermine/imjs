@@ -86,15 +86,6 @@ module.exports = function (grunt) {
         }
       }
     },
-    qunit: { index: ['test/qunit/build/*-qunit.html'] },
-    buildqunit: {
-      unified: false,
-      template: "test/qunit/templates/index.html",
-      dest: "test/qunit/build/<%= idx %>-<%= file %>-qunit.html",
-      tests: ["test/qunit/t/*.js"],
-      setup: ["test/qunit/t/index.js"],
-      tested: ["js/im.js"]
-    },
     clean: {
       qunit: 'test/qunit/build',
       build: 'build'
@@ -104,9 +95,11 @@ module.exports = function (grunt) {
         src: 'test/mocha/*.coffee',
         options: '<json:mocha-opts.json>'
       }
-    }
+    },
+    mocha: { all: {src: ['test/browser/index.html'], run: true } }
   })
 
+  grunt.loadNpmTasks('grunt-mocha')
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-clean')
@@ -139,9 +132,8 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('build', 'clean:build compile concat min')
-  grunt.registerTask('test-browser', 'build clean:qunit buildqunit qunit')
-  grunt.registerTask('-test-node', 'build -load-test-globals simplemocha:all')
   grunt.registerTask('justtest', 'build -load-test-globals -testglob');
-  grunt.registerTask('default', 'lint coffeelint test-node')
+  grunt.registerTask('test', 'test-node mocha');
+  grunt.registerTask('default', 'lint coffeelint test')
 
 }
