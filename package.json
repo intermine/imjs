@@ -34,11 +34,12 @@
     "pretest": "coffee -c -o lib src/*.coffee",
     "prepublish": "coffee -c -o lib src/*.coffee",
     "build-for-browser": "coffee -c -o build src/*.coffee && cat $(cat BUILD_ORDER) > js/im.js",
-    "test": "C=0; T=0; for t in test/node/*.coffee; do T=$(($T + 1)); echo running $t; expresso $t && C=$(($C + 1)) && echo ok; done; test $C = $T && echo aok || echo tests failed"
+    "test": "grunt test"
   },
   "devDependencies": {
     "mocha": "latest",
     "grunt-simple-mocha": ">= 0.2.0, < 0.3.0",
+    "grunt-mocha": ">= 0.1.0, < 0.2.0",
     "should": "latest",
     "coffee-script": "~1.3.3",
     "codo": "~0.3.0",
