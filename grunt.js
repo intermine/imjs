@@ -133,7 +133,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', 'clean:build compile concat min')
   grunt.registerTask('justtest', 'build -load-test-globals -testglob');
-  grunt.registerTask('test', 'test-node mocha');
+  grunt.registerTask('test', 'build test-node mocha');
   grunt.registerTask('default', 'lint coffeelint test')
 
 }
