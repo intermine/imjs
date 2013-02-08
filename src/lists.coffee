@@ -52,7 +52,7 @@ class List
   #
   # @param [String] t The tag this list is meant to have.
   # @return [boolean] true if this list has the certain tag.
-  hasTag: (t) -> t in @tags
+  hasTag: (t) => t in @tags
 
   # Construct a query for data contained in this list.
   #
