@@ -1,10 +1,12 @@
 Fixture = require './lib/fixture'
-{report, eventually} = require './lib/utils'
+{report, eventually, cleanSlate} = require './lib/utils'
 {get} = Fixture.funcutils
 
 describe 'Service#fetchListsContaining', ->
 
   {service} = new Fixture()
+
+  @beforeAll cleanSlate service
 
   describe 'searching for public ids', ->
 
