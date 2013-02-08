@@ -28,7 +28,7 @@ if IS_NODE
 else
   {_, jQuery, intermine} = __root__
   {Deferred} = $ = jQuery
-  to_query_string = jQuery.param
+  to_query_string = (obj) -> jQuery.param(obj, true) # traditional serialization.
   {Model, Query, List, User, IDResolutionJob, funcutils, http} = intermine
 
 {curry, fold, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
@@ -121,7 +121,7 @@ getListFinder = (name) -> (lists) -> Deferred ->
   else
     @reject """List "#{ name }" not found among: #{ lists.map get 'name' }"""
 
-LIST_PIPE = (service) -> _.compose service.fetchList, get 'listName'
+LIST_PIPE = (service, prop = 'listName') -> _.compose service.fetchList, get prop
 TO_NAMES = (xs = []) -> (x.name ? x for x in (if _.isArray(xs) then xs else [xs]))
 
 # The representation of a connection to an InterMine web-service.
@@ -650,14 +650,15 @@ class Service
   # @param [Array<String>|String] ids The identifiers to resolve.
   # @param [(List) ->] cb A function that receives a {List}.
   # @return [Promise<List>] A promise to yield a {List}.
-  createList: (opts, ids, cb = ->) =>
-    adjust = curry _.defaults, token: @token, tags: (opts.tags or []).join(';')
+  createList: (opts = {}, ids = '', cb = ->) =>
+    adjust = curry _.defaults, token: @token, tags: (opts.tags or [])
     req =
       data: if _.isArray(ids) then ids.map((x) -> "\"#{ x }\"").join("\n") else ids
       dataType: 'json'
       url: "#{ @root }lists?#{to_query_string adjust opts}"
       type: 'POST'
       contentType: 'text/plain'
+
     http.doReq(req).pipe(LIST_PIPE @).done(cb)
 
 # Methods for processing items individually.
