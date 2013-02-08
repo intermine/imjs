@@ -96,7 +96,13 @@ module.exports = function (grunt) {
         options: '<json:mocha-opts.json>'
       }
     },
-    mocha: { all: {src: ['test/browser/index.html'], run: true } }
+    mocha: {
+      all: {
+        src: ['test/browser/index.html'],
+        options: { reporter: 'xunit' },
+        run: true 
+      } 
+    }
   })
 
   grunt.loadNpmTasks('grunt-mocha')
@@ -119,6 +125,21 @@ module.exports = function (grunt) {
     });
   });
 
+  grunt.registerTask('mocha-phantomjs', 'Run tests in phantomjs', function () {
+    var done = this.async();
+    var cmd = './node_modules/mocha-phantomjs/bin/mocha-phantomjs';
+    var args = ['test/browser/index.html'];
+    var reporter = grunt.option('reporter');
+    if (reporter) {
+      args.push('-R');
+      args.push(reporter);
+    }
+    var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'});
+    child.on('exit', function (code) {
+      done(code === 0);
+    });
+  });
+
   grunt.registerTask('test-node', 'Run tests in the nodejs VM', function () {
     var grep = grunt.option('grep');
     var reporter = grunt.option('reporter');
@@ -133,7 +154,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', 'clean:build compile concat min')
   grunt.registerTask('justtest', 'build -load-test-globals -testglob');
-  grunt.registerTask('test', 'build test-node mocha');
+  grunt.registerTask('test', 'build test-node mocha-phantomjs');
   grunt.registerTask('default', 'lint coffeelint test')
 
 }

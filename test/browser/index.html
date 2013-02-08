@@ -32,11 +32,8 @@
         <!-- Tests -->
         <script src="acceptance.js"></script>
         <script>
-            if (navigator.userAgent.indexOf('PhantomJS') < 0) {
-                mocha
-                    //.globals(['intermine', 'should', 'jQuery', '$', 'window'])
-                    .run();
-           }
+            if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+            else { mocha.run(); }
         </script>
     </body>
 </html>
