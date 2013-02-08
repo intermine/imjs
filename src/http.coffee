@@ -8,6 +8,7 @@ os                 = require('os')
 {ACCEPT_HEADER}    = require('./constants')
 {error, invoke}    = require('./util')
 {VERSION}          = require('./version')
+util               = require('util')
 
 # The user-agent string we will use to identify ourselves
 USER_AGENT = "node-http/imjs-#{ VERSION } #{os.platform()} (#{os.arch()},#{os.release()})"
@@ -66,7 +67,7 @@ streaming = (ret, opts) -> (resp) ->
 
 # Get a message that explains what went wrong.
 getMsg = ({type, url}, text, e) ->
-  "Could not parse response to #{ type } #{ url }: '#{ text }' (#{ e })"
+  "Could not parse response to #{ type } #{ url }: #{ util.inspect(text) } (#{ e })"
 
 blocking = (ret, opts) -> (resp) ->
   containerBuffer = ''
@@ -74,7 +75,7 @@ blocking = (ret, opts) -> (resp) ->
   resp.on 'data', (chunk) -> containerBuffer += chunk
   resp.on 'error', (e) -> ret.reject(e)
   resp.on 'end', ->
-    if /json/.test opts.data.format
+    if /json/.test(opts.dataType) or /json/.test opts.data.format
       if '' is containerBuffer and resp.statusCode is 200
         # No body, but all-good.
         ret.resolve()
