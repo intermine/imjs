@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
+{cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
 
@@ -8,10 +8,11 @@ namePrefix = 'temp-testing-list-operations-'
 
 describe 'Service', ->
 
-  @slow 500
-
   {service} = new Fixture()
   service.errorHandler = ->
+
+  @slow 500
+  @beforeAll cleanSlate service
 
   describe '#complement()', ->
 
