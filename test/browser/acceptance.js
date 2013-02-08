@@ -1,3 +1,4 @@
+(function($) {
 describe('Acceptance', function() {
 
   var invoke = function(name) {
@@ -8,7 +9,7 @@ describe('Acceptance', function() {
   };
   var Service = intermine.Service;
   var args = {
-    root: "bc:8081/intermine-test",
+    root: "bc:8081/intermine-test-dev",
     token: "test-user-token"
   };
 
@@ -182,4 +183,106 @@ describe('Acceptance', function() {
     });
   });
 
+  describe('List Life-Cycle', function() {
+    var service = new Service(args);
+
+    var clearUp = function(done) {
+      service.fetchLists().then(function(lists) {
+        var gonners = lists.filter(function(l) { return l.hasTag('test') || l.hasTag('imjs') });
+        var promises = gonners.map(function(l) { return l.del() });
+        $.when.apply($, promises).fail(done).done(function() { done() });
+      });
+    };
+    this.beforeAll(clearUp);
+    this.afterAll(clearUp);
+    this.slow(250);
+    describe('Create List via Identifier Upload', function() {
+
+      var TEST_NAME = 'test-list-from-idents';
+
+      this.beforeAll(function(done) {
+        service.fetchList(TEST_NAME).then(function(l) {
+          return l.del();
+        }).always(function() {
+          done();
+        });
+      });
+
+      this.afterAll(function(done) {
+        service.fetchList(TEST_NAME).then(function(l) {
+          return l.del();
+        }).always(function() {
+          done();
+        });
+      });
+
+      it('should have the right name, size, tags', function(done) {
+        var opts = {
+          name: TEST_NAME,
+          type: 'Employee',
+          description: 'A list created to test the upload mechanism',
+          tags: [ 'temp', 'imjs', 'browser' ]
+        };
+        var idents = [
+          'anne, "brenda"',
+          'carol',
+          '"David Brent" Edgar',
+          'rubbishy identifiers',
+          'Fatou'
+        ].join("\n");
+        var test = function(list) {
+          should.exist(list);
+          list.name.should.equal(TEST_NAME);
+          list.size.should.equal(5);
+          opts.tags.forEach(function(t) {
+            expect(t).to.satisfy(list.hasTag);
+          });
+          done();
+        };
+        service.createList(opts, idents).then(test, done);
+      });
+
+    });
+
+    describe('Combine through Intersection', function() {
+
+      var TEST_NAME = 'intersection-test';
+
+      this.beforeAll(function(done) {
+        service.fetchList(TEST_NAME).then(function(l) {
+          return l.del();
+        }).always(function() {
+          done();
+        });
+      });
+
+      it('should have the right name, size, tags, member', function(done) {
+        var options = {
+          name: TEST_NAME,
+          description: 'A list created to test out the intersection operation',
+          lists: ['My-Favourite-Employees', 'some favs-some unknowns-some umlauts'],
+          tags: ['test', 'imjs', 'browser', 'intersect']
+        };
+
+        var test = function(list) {
+          should.exist(list);
+          list.name.should.equal(TEST_NAME);
+          list.size.should.equal(2);
+          options.tags.forEach(function(t) {
+            expect(t).to.satisfy(list.hasTag);
+          });
+          list.contents().then(function(members) {
+            members.map(function(m) { return m.name }).should.include('David Brent');
+          }).then(function() {done()}, done);
+        };
+
+        service.intersect(options).then(test, done);
+      });
+
+    });
+
+
+  });
+
 });
+}).call(this, jQuery);
