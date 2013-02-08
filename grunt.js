@@ -95,17 +95,9 @@ module.exports = function (grunt) {
         src: 'test/mocha/*.coffee',
         options: '<json:mocha-opts.json>'
       }
-    },
-    mocha: {
-      all: {
-        src: ['test/browser/index.html'],
-        options: { reporter: 'xunit' },
-        run: true 
-      } 
     }
   })
 
-  grunt.loadNpmTasks('grunt-mocha')
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-clean')
