@@ -68,6 +68,7 @@ SUBTRACT_PATH = 'lists/subtract'
 WHOAMI_PATH = "user/whoami"
 TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
+PATH_VALUES_PATH = 'path/values'
 
 # The identity function f x = x
 IDENTITY = (x) -> x
@@ -290,15 +291,24 @@ class Service
 
   # Find out how many rows a given query would return when run.
   #
-  # @param [Query|Object] The query to run. If it is not already instantiated
+  # @param [Query|PathInfo|String|Object] The query to run. If it is not already instantiated
   #   as a Query object, it will be, so the JSON definition of a query can be used
-  #   here.
+  #   here. Alternatively a single path argument (as a PathInfo object or as a string) may be used,
+  #   in which cases the count of all unique values for that path will be
+  #   returned.
   # @param [(Number) ->] cb A callback that receives a number. Optional.
-  # @return [Deferred<Number>] A promise to yield a count.
-  count: (q, cb) =>
-    if q.toXML?
+  # @return [Promise<Number>] A promise to yield a count.
+  count: (q, cb = (->)) =>
+    if not q
+      error "Not enough arguments"
+    else if q.toPathString?
+      p = if q.isClass() then q.append('id') else q
+      @pathValues(p, 'count').done(cb)
+    else if q.toXML?
       req = {query: q.toXML(), format: 'jsoncount'}
       @post(QUERY_RESULTS_PATH, req).pipe(get 'count').done(cb)
+    else if _.isString q
+      @fetchModel().pipe(invoke 'makePath', q.replace(/\.\*$/, '.id')).pipe(@count).done(cb)
     else
       @query(q).pipe(@count).done(cb)
 
@@ -328,13 +338,36 @@ class Service
       .done(cb)
 
   # Retrieve information about the currently authenticated user.
-  # @param [(User) ->] A callback the receives a User object.
+  # @param [(User) ->] cb A callback the receives a User object.
   # @return [Promise<User>] A promise to yield a user.
   whoami: (cb) => REQUIRES_VERSION @, 9, =>
     @get(WHOAMI_PATH).pipe(get 'user').pipe((x) => new User(@, x)).done(cb)
 
   # Alias for {Service#whoami}
   fetchUser: (args...) => @whoami args...
+
+  # Retrieve a list of values that a path can have.
+  # This functionality is expected to be of use when developing auto-completion interfaces.
+  # @see {Query#summarise}
+  # @param [.toString|PathInfo] path The path to evaluate.
+  # @param [Object<String, String>] typeConstraints The type constraints on this path.
+  #   (only required if there are any. Default = {}).
+  # @param [(Array<Object>|Number) ->] cb An optional callback.
+  # @return [Promise<Array<Object>, Number>] A promise to return a list of objects with
+  #   two properties ('count' and 'value').
+  values: (path, typeConstraints = {}, cb = (->)) => REQUIRES_VERSION @, 6, =>
+    try
+      @fetchModel().pipe(invoke 'makePath', path, (path.subclasses || typeConstraints))
+                   .pipe(@pathValues)
+                   .done(cb)
+    catch e
+      error e
+
+  pathValues: (path, wanted) =>
+    wanted = 'results' unless wanted is 'count'
+    format = if wanted is 'count' then 'jsoncount' else 'json'
+    req = {format, path: path.toString(), typeConstraints: JSON.stringify(path.subclasses)}
+    @post(PATH_VALUES_PATH, req).pipe(get wanted)
 
   # Perform a request for results that accepts a parameter specifying the
   # page to fetch. Not intended for public consumption.
