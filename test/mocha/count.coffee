@@ -1,19 +1,42 @@
 Fixture = require './lib/fixture'
-{deferredTest, promising} = require './lib/utils'
+{deferredTest, promising, prepare, eventually, shouldFail} = require './lib/utils'
 
-describe 'Service#count', ->
+describe 'Service', ->
 
   {service, olderEmployees, allEmployees} = new Fixture()
 
-  it 'should find around 135 employees', promising service.count(allEmployees), (c) ->
-    c.should.be.above(130).and.below(140)
+  describe '#count()', ->
 
-  it 'should find 46 older employees', promising service.count(olderEmployees), (c) ->
-    c.should.equal 46
+    it 'should fail', shouldFail service.count
 
-  it 'should find 46 older employees with a query object',
-    promising service.query(olderEmployees), (q) ->
-      service.count(q).then deferredTest (c) -> c.should.equal 46
+  describe '#count(path)', ->
+
+    pathCountTest = (path, n, xs) =>
+      describe path, ->
+        @beforeAll prepare -> service.count path
+
+        it "should find #{ n } #{ xs }", eventually (c) ->
+          c.should.equal n
+
+    pathCountTest 'Employee',             132, 'employees'
+    pathCountTest 'Employee.id',          132, 'employees'
+    pathCountTest 'Employee.*',           132, 'employees'
+    pathCountTest 'Employee.fullTime',      2, 'times'
+    pathCountTest 'Department.employees', 132, 'employees'
+    pathCountTest 'Company.name',           7, 'names'
+    pathCountTest 'Company',                7, 'companies'
+
+  describe '#count(query)', ->
+
+    it 'should find 131 rows', promising service.count(allEmployees), (c) ->
+      c.should.equal 131
+
+    it 'should find 46 older employees', promising service.count(olderEmployees), (c) ->
+      c.should.equal 46
+
+    it 'should find 46 older employees with a query object',
+      promising service.query(olderEmployees), (q) ->
+        service.count(q).then deferredTest (c) -> c.should.equal 46
 
 describe 'Query#count', ->
 
