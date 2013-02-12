@@ -66,8 +66,8 @@ streaming = (ret, opts) -> (resp) ->
   ret.resolve iter
 
 # Get a message that explains what went wrong.
-getMsg = ({type, url}, text, e) ->
-  "Could not parse response to #{ type } #{ url }: #{ util.inspect(text) } (#{ e })"
+getMsg = ({type, url}, text, e, code) ->
+  "Could not parse response to #{ type } #{ url }: #{ util.inspect(text) } (#{ code }: #{ e })"
 
 blocking = (ret, opts) -> (resp) ->
   containerBuffer = ''
@@ -90,7 +90,7 @@ blocking = (ret, opts) -> (resp) ->
           if resp.statusCode >= 400
             ret.reject new Error(resp.statusCode)
           else
-            ret.reject new Error(getMsg opts, containerBuffer, e)
+            ret.reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
     else
       if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
         ret.reject new Error(e[2])
