@@ -659,7 +659,7 @@ class Service
   #   identifiers. (optional).
   # @param [->] cb An optional callback.
   # @return [Promise<IDResolutionJob>] A promise to yield a job id.
-  resolveIds: (opts, cb) -> REQUIRES_VERSION @, 10, =>
+  resolveIds: (opts, cb) => REQUIRES_VERSION @, 10, =>
     req =
       data: JSON.stringify(opts)
       dataType: 'json'
