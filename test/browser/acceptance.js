@@ -183,6 +183,34 @@ describe('Acceptance', function() {
     });
   });
 
+  describe('ID Resolution', function() {
+    var service = new Service(args);
+
+    it('can resolve some ids', function(done) {
+      var polls      = 0
+      var expected   = 3
+      var onProgress = function () { polls++ }
+      var check  = function(results) {
+        expect(polls).to.be.above(0);
+        expect(Object.keys(results)).to.have.length(3);
+        done();
+      };
+      var request = {
+        identifiers: ['anne', 'brenda', 'carol'],
+        type: 'Employee'
+      };
+      service.resolveIds(request).then(function(job) {
+        var poll = job.poll();
+        
+        poll.progress(onProgress);
+        poll.done(check);
+        poll.fail(done);
+        poll.always(job.del);
+      });
+
+    });
+  });
+
   describe('List Life-Cycle', function() {
     var service = new Service(args);
 
