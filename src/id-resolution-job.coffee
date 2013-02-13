@@ -27,13 +27,13 @@ class IDResolutionJob
 
   constructor: (@uid, @service) ->
 
-  fetchStatus:       (cb) -> @service.get("ids/#{ @uid }/status").pipe(get 'status').done(cb)
+  fetchStatus:       (cb) => @service.get("ids/#{ @uid }/status").pipe(get 'status').done(cb)
 
-  fetchErrorMessage: (cb) -> @service.get("ids/#{ @uid }/status").pipe(get 'message').done(cb)
+  fetchErrorMessage: (cb) => @service.get("ids/#{ @uid }/status").pipe(get 'message').done(cb)
 
-  fetchResults:      (cb) -> @service.get("ids/#{ @uid }/result").pipe(get 'results').done(cb)
+  fetchResults:      (cb) => @service.get("ids/#{ @uid }/result").pipe(get 'results').done(cb)
 
-  del: (cb) -> @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
+  del: (cb) => @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
 
   poll: (onSuccess, onError, onProgress) ->
     ret = Deferred().done(onSuccess).fail(onError).progress(onProgress)
