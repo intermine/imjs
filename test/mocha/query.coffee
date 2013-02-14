@@ -1,5 +1,7 @@
-{Query} = require '../../src/query'
-{get} = require '../../src/util'
+{TESTMODEL} = require './data/model'
+Fixture = require './lib/fixture'
+{Query, Model} = Fixture
+{get} = Fixture.funcutils
 
 options =
   intermine:
@@ -16,6 +18,8 @@ options =
       'age': {gt: 50}
 
 describe 'Query', ->
+
+  testmodel = new Model TESTMODEL.model
 
   describe 'new', ->
 
@@ -55,6 +59,40 @@ describe 'Query', ->
     qsqlish = new Query options.sqlish
 
     it 'should be synonymous', -> qtrad.toXML().should.equal(qsqlish.toXML())
+
+  describe 'addToSelect(path)', ->
+
+    q = new Query from: 'Employee', select: ['name', 'age']
+    q.model = testmodel
+
+    it 'should add views to the select list', ->
+      q.addToSelect('fullTime')
+      q.isInView( 'Employee.fullTime').should.be.true
+
+  describe 'removeFromSelect(path)', ->
+
+    q = new Query from: 'Employee', select: ['name', 'age', 'fullTime']
+    q.model = testmodel
+
+    it 'should remove views to the select list', ->
+      removals = changes = 0
+      q.on 'remove:view', -> removals++
+      q.bind 'change:views', -> changes++
+
+      q.removeFromSelect('Employee.age')
+      q.isInView('Employee.fullTime').should.be.true
+      q.isInView('fullTime').should.be.true
+      q.isInView('age').should.not.be.true
+      q.isInView('Employee.age').should.not.be.true
+
+      q.removeFromSelect('fullTime')
+      q.isInView('Employee.name').should.be.true
+      q.isInView('name').should.be.true
+      q.isInView('fullTime').should.not.be.true
+      q.isInView('Employee.fullTime').should.not.be.true
+
+      removals.should.equal 2
+      changes.should.equal 2
 
   describe '#clone()', ->
 

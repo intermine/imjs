@@ -1,4 +1,4 @@
-{Service} = require '../../src/service'
+{Service} = require '../../js/main'
 should = require 'should'
 
 describe 'Service', ->

@@ -18,7 +18,7 @@ deferredTest = DT = (test) -> (args...) -> Deferred ->
     catch e
         @reject new Error(e)
 
-after = (promises) -> if promises?.length then $.when(promises) else Deferred -> @resolve()
+after = (promises) -> if promises?.length then $.when.apply($, promises) else Deferred -> @resolve()
 
 report = (done, promise) -> promise.fail(done).done -> done()
 

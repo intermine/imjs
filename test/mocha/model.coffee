@@ -1,6 +1,6 @@
 should     = require 'should'
-{Model}    = require '../../src/model'
-{PathInfo} = require '../../src/path'
+{Model}    = require './lib/fixture'
+{PathInfo} = require '../../build/path'
 
 {TESTMODEL} = require './data/model'
 

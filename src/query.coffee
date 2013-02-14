@@ -47,13 +47,6 @@ CODES = [
 
 decapitate = (x) -> x.substr(x.indexOf('.'))
 
-getListResponseHandler = (service, cb) -> (data) ->
-  cb ?= ->
-  name = data.listName
-  service.fetchLists (ls) ->
-    theList = _.find ls, (l) -> l.name is name
-    cb(theList)
-
 # Constraint XML machinery
 conValStr = (v) -> "<value>#{_.escape v}</value>"
 conAttrs = (c, names) -> ("""#{k}="#{_.escape(v)}" """ for k, v of c when (k in names)).join('')
@@ -332,6 +325,7 @@ class Query
   # this method returns true if any of the views descends from that path.
   isInView: (path) ->
     pi = @getPathInfo(path)
+    throw new Error("Invalid path: #{ path }") unless pi
     if pi.isAttribute()
       return pi.toString() in @views
     else

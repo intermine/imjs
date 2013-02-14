@@ -1,5 +1,7 @@
-{Model} = require '../../src/model'
-{PathInfo} = require '../../src/path'
+lib = if process.env.IMJS_COV then 'build-cov' else 'build'
+
+{Model} = require "../../#{ lib }/model"
+{PathInfo} = require "../../#{ lib }/path"
 
 {TESTMODEL} = require './data/model'
 

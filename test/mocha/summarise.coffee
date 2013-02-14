@@ -1,6 +1,6 @@
 {Deferred} = require 'underscore.deferred'
 Fixture = require './lib/fixture'
-{eventually} = require './lib/utils'
+{prepare, eventually} = require './lib/utils'
 {invoke, get, flatMap} = Fixture.funcutils
 sumCounts = flatMap get 'count'
 
@@ -10,11 +10,8 @@ describe 'Query', ->
 
     {service, olderEmployees} = new Fixture()
 
-    @beforeEach (done) ->
-      @promise = service.query(olderEmployees)
+    @beforeEach prepare -> service.query(olderEmployees)
         .then(invoke 'summarise', 'age')
-        .fail(done)
-        .done -> done()
 
     it 'should have fewer than 21 buckets', eventually (buckets) ->
       buckets.length.should.be.below 21
@@ -31,15 +28,22 @@ describe 'Query', ->
     it 'should have a suitable total', eventually (buckets, stats) ->
       buckets.length.should.be.below stats.uniqueValues
 
+  describe 'American English alias', ->
+
+    {service, olderEmployees} = new Fixture()
+
+    @beforeEach prepare -> service.query(olderEmployees)
+        .then(invoke 'summarize', 'age')
+
+    it 'should include all the results of the query', eventually (buckets) ->
+      sumCounts(buckets).should.equal 46
+
   describe 'summary of string path', ->
 
     {service, olderEmployees} = new Fixture()
 
-    @beforeEach (done) ->
-      @promise = service.query(olderEmployees)
+    @beforeEach prepare -> service.query(olderEmployees)
         .then(invoke 'summarise', 'department.company.name')
-        .fail(done)
-        .done -> done()
 
     it 'should have fewer than 21 buckets', eventually (items) ->
       items.length.should.equal 6

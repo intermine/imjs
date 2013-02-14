@@ -1,6 +1,9 @@
 module.exports = function (grunt) {
   'use strict';
 
+  var path = require('path');
+  var fs = require('fs');
+
   var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
                '<%= grunt.template.today("yyyy-mm-dd") %> */'
 
@@ -95,9 +98,18 @@ module.exports = function (grunt) {
         src: 'test/mocha/*.coffee',
         options: '<json:mocha-opts.json>'
       }
+    },
+    copy: {
+      cdn: {
+        files: {
+          '<%= process.env.CDN %>/js/intermine/imjs/<%= pkg.version %>/': 'js/<%= pkg.version %>/*.js',
+          '<%= process.env.CDN %>/js/intermine/imjs/latest/': 'js/<%= pkg.version %>/*.js'
+        }
+      }
     }
   })
 
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-clean')
@@ -144,6 +156,28 @@ module.exports = function (grunt) {
     grunt.task.run('simplemocha:all');
   });
 
+  grunt.registerTask('-checkcdn', 'Check that the CDN is initialised', function () {
+    var done = this.async();
+    var cdn = process.env.CDN;
+    if (!cdn) {
+      grunt.log.error("No CDN location provided. Please set the CDN environment variable");
+      done(false);
+    }
+    fs.stat(cdn, function (err, stats) {
+      if (err) {
+        grunt.log.error("Problem with CDN location: " + err);
+        done(false);
+      } else if (!stats.isDirectory()) {
+        grunt.log.error("CDN location is not a directory");
+        done(false);
+      } else {
+        grunt.log.writeln("CDN configured as: " + cdn);
+        done();
+      }
+    });
+  });
+
+  grunt.registerTask('cdn', 'default -checkcdn copy:cdn');
   grunt.registerTask('build', 'clean:build compile concat min')
   grunt.registerTask('justtest', 'build -load-test-globals -testglob');
   grunt.registerTask('test', 'build test-node mocha-phantomjs');

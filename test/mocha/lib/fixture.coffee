@@ -1,5 +1,7 @@
-{Service, Query} = require '../../../js/main.js'
-funcutils = require '../../../build/util'
+lib = if process.env.IMJS_COV then 'build-cov' else 'build'
+
+{Service, Query, Model} = require '../../../js/main.js'
+funcutils = require "../../../#{ lib }/util"
 
 args =
     root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'
@@ -31,5 +33,6 @@ class Fixture
 
 Fixture.funcutils = funcutils
 Fixture.Query = Query
+Fixture.Model = Model
 
 module.exports = Fixture

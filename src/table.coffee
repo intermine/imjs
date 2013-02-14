@@ -11,12 +11,7 @@ IS_NODE = typeof exports isnt 'undefined'
 
 __root__ = exports ? (@intermine ?= {})
 
-# Import from the appropriate place depending on whether we are in
-# node.js or in the browser.
-if IS_NODE
-  {set} = require './util'
-else
-  {set} = @intermine.funcutils
+merge = (src, dest) -> dest[k] = v for k, v of src
 
 # The properties we expect the tables to have.
 properties = ['attributes', 'references', 'collections']
@@ -37,9 +32,8 @@ class Table
     @__parents__ = arguments[0]['extends'] # avoiding js keywords
 
     for prop in properties
-      (set @[prop]) @fields
-    for refProp in properties[1..]
-      (set @[refProp]) @fields
+      merge @[prop], @fields
+
     c.isCollection = true for _, c of @collections
 
   # Stringification.
