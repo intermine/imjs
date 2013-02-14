@@ -30,7 +30,7 @@ build:
 
 instrument: build
 	@echo Instrumenting source code.
-	@jscoverage build build-cov
+	@jscoverage --no-highlight build build-cov
 
 docs:
 	codo -n imjs src
