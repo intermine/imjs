@@ -31,9 +31,7 @@
     "tests": "test"
   },
   "scripts": {
-    "pretest": "coffee -c -o lib src/*.coffee",
-    "prepublish": "coffee -c -o lib src/*.coffee",
-    "build-for-browser": "coffee -c -o build src/*.coffee && cat $(cat BUILD_ORDER) > js/im.js",
+    "prepublish": "./node_modules/grunt/bin/grunt build",
     "test": "grunt test"
   },
   "devDependencies": {
