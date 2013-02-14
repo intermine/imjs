@@ -388,7 +388,7 @@ class Service
   doPagedRequest: (q, path, page = {}, format, cb) ->
     if q.toXML?
       req = _.defaults {}, {query: q.toXML(), format: format}, page
-      @post(path, req).pipe(get 'results').done(cb)
+      @post(path, req).pipe((resp) -> success(resp.results, resp)).done(cb)
     else
       @query(q).pipe((query) => @doPagedRequest(query, path, page, format, cb))
 

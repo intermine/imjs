@@ -1,4 +1,5 @@
 Fixture                = require './lib/fixture'
+{prepare, eventually}  = require './lib/utils'
 {invoke, get, flatMap} = Fixture.funcutils
 
 # Helper class to incapsulate the logic for tests on iteration
@@ -41,6 +42,13 @@ describe 'Query', ->
       qPromise = service.query query, (q) ->
         q.rows( test ).then((-> done()), done)
       qPromise.fail(done)
+
+  describe 'yielding the result set', ->
+
+    @beforeAll prepare -> service.rows query
+
+    it 'should also yield the result set', eventually (_, rs) ->
+      rs.wasSuccessful.should.be.true
 
   describe '#eachRow', ->
 
