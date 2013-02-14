@@ -40,7 +40,7 @@ clean:
 	rm -rf build-cov
 	rm -rf build
 	rm -rf doc
-	rm coverage.html
+	rm -f coverage.html
 
 
 .PHONY: test
