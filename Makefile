@@ -24,4 +24,7 @@ instrument:
 	@jscoverage --no-highlight build build-cov
 	@echo Generated instrumented source code.
 
+docs: -init
+	codo -n imjs src
+
 .PHONY: test
