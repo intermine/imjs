@@ -47,6 +47,7 @@
     "coffeelint": ">= 0.5.4",
     "grunt-coffeelint": ">= 0.0.3",
     "grunt-clean": ">= 0.3.0",
-    "grunt-contrib-copy": "~0.3.2"
+    "grunt-contrib-copy": "~0.3.2",
+    "grunt-bump": "0.0.1"
   }
 }
