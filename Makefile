@@ -20,12 +20,16 @@ test-cov: instrument
 	@echo Coverage report generated in coverage.html
 
 xunit: build
+	echo ${PATH}
+	which mocha
+	which mocha-phantomjs
 	mkdir -p test/results
 	mocha --reporter xunit test/mocha/*.coffee > test/results/node.xml
 	mocha-phantomjs test/browser/index.html -R xunit > test/results/browser.xml
 	@echo Generated test reports in test/results
 
 build:
+	which grunt
 	grunt build
 
 instrument: build
