@@ -1,6 +1,11 @@
 (function($) {
 describe('Acceptance', function() {
 
+  // Running against a unwarmed-up db, or doing list operations
+  // can cause things to be slower than desired. That has nothing to
+  // do with this library.
+  this.slow(300);
+
   var invoke = function(name) {
     var args = [].slice.call(arguments, 1);
     return function(obj) {
@@ -223,7 +228,6 @@ describe('Acceptance', function() {
     };
     this.beforeAll(clearUp);
     this.afterAll(clearUp);
-    this.slow(250);
     describe('Create List via Identifier Upload', function() {
 
       var TEST_NAME = 'test-list-from-idents';
