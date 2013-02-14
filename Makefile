@@ -7,7 +7,7 @@
 TASK = default
 REPORTER = spec
 
-export PATH := bin:node_modules/.bin:${PATH}
+export PATH := $(find node_modules -name 'bin' -printf %p:)node_modules/.bin:${PATH}
 
 test:
 	grunt test
