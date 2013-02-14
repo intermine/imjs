@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PROJECT_ROOT=`pwd`
+PATH="$PROJECT_ROOT/bin:$PROJECT_ROOT/node_modules/.bin:$PATH"
+export PATH
