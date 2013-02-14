@@ -2,7 +2,7 @@ TASK = default
 REPORTER = spec
 
 -init:
-	./bin/activate
+	. ./bin/activate
 
 test: -init
 	grunt test
@@ -11,7 +11,7 @@ run: -init
 	grunt $(TASK)
 
 test-cov: -init instrument
-	@IMJS_COV=1 mocha --reporter html-cov test/mocha/*.coffee > coverage.html
+	IMJS_COV=1 mocha --reporter html-cov test/mocha/*.coffee > coverage.html
 	@echo Coverage report generated in coverage.html
 
 build: -init
