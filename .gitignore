@@ -1,5 +1,8 @@
 test/results
+test/browser/acceptance.html
+components
 coverage.html
+test/browser/index.html
 build-cov
 node_modules
 lib/*.js

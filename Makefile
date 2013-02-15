@@ -35,6 +35,15 @@ instrument: build
 docs:
 	codo -n imjs src
 
+browser-deps:
+	bower install
+
+build-static-acceptance:
+	grunt build-static-acceptance-index
+
+build-acceptance-test: browser-deps build
+	grunt build-acceptance-index
+
 clean:
 	rm -rf test/results
 	rm -rf build-cov
@@ -42,7 +51,7 @@ clean:
 	rm -rf doc
 	rm -f coverage.html
 
-jenkins: clean xunit test-cov docs
+jenkins: clean xunit test-cov docs build-static-acceptance
 
 
 .PHONY: test

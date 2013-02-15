@@ -21,7 +21,7 @@ else
   {_, jQuery, intermine} = __root__
   {partition, fold, take, concatMap, id, get} = intermine.funcutils
   {Deferred}  = $ = jQuery
-  toQueryString   = jQuery.param
+  toQueryString   = (obj) -> jQuery.param(obj, true) # Traditional serialization.
 
 get_canonical_op = (orig) ->
   canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
