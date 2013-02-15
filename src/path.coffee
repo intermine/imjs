@@ -99,11 +99,13 @@ class PathInfo
         @model.service.get(path, params).then(get 'display').done (n) => NAMES[@ident] ?= n
     @namePromise.done(cb)
 
-  getChildNodes: () => (@append(fld) for _, fld of (@getEndClass()?.fields or {}))
+  getChildNodes: () => (@append(fld) for name, fld of (@getEndClass()?.fields or {}))
 
   allDescriptors: => [@root].concat(@descriptors)
 
   toString: () -> @allDescriptors().map(get 'name').join('.')
+
+  equals: (other) -> other and other.ident? and @ident is other.ident
 
   #
   # Get the type of this path. If the path represents a class or a reference,
