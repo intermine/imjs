@@ -118,7 +118,47 @@ module.exports = function (grunt) {
 
   grunt.registerTask('-load-test-globals', function () {
     global.should = require('should')
-  })
+  });
+
+  grunt.registerTask(
+    'build-acceptance-index',
+    'Build a index.html page to run acceptance tests', function () {
+    var templ = grunt.file.read('test/browser/template.html', 'utf8');
+    var outf = 'test/browser/index.html';
+    var obj = {
+      mocha: {
+        css: "../../components/mocha/mocha.css",
+        js: "../../components/mocha/mocha.js"
+      },
+      chai: "../../components/chai/chai.js",
+      jquery: "../../components/jquery/jquery.js",
+      underscore: "../../components/underscore/underscore.js",
+      imjs: "../../js/im.js"
+    };
+    var processed = grunt.template.process(templ.toString(), obj);
+    grunt.file.write(outf, processed);
+    grunt.log.writeln('Wrote ' + outf);
+  });
+
+  grunt.registerTask(
+    'build-static-acceptance-index',
+    'Build a index.html page to run acceptance tests', function () {
+    var templ = grunt.file.read('test/browser/template.html', 'utf8');
+    var outf = 'test/browser/acceptance.html';
+    var obj = {
+      mocha: {
+        css: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.css",
+        js: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.js"
+      },
+      chai: "http://chaijs.com/chai.js",
+      jquery: "http://code.jquery.com/jquery-1.9.1.min.js",
+      underscore: "http://cdn.intermine.org/js/underscore.js/1.3.3/underscore-min.js",
+      imjs: "http://ci.intermine.org/job/imjs/lastSuccessfulBuild/artifact/js/im.js"
+    };
+    var processed = grunt.template.process(templ.toString(), obj);
+    grunt.file.write(outf, processed);
+    grunt.log.writeln('Wrote ' + outf);
+  });
 
   grunt.registerTask('docs', 'Generate API documentation', function () {
     var done = this.async();
@@ -130,7 +170,8 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('mocha-phantomjs', 'Run tests in phantomjs', function () {
+  grunt.registerTask('mocha-phantomjs', 'build-acceptance-index -mocha-phantomjs');
+  grunt.registerTask('-mocha-phantomjs', 'Run tests in phantomjs', function () {
     var done = this.async();
     var cmd = './node_modules/mocha-phantomjs/bin/mocha-phantomjs';
     var args = ['test/browser/index.html'];

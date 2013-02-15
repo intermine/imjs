@@ -16,7 +16,9 @@ describe 'PathInfo', ->
       (-> testmodel.makePath 'Department.employees.seniority').should.throw()
 
   describe 'root', ->
-    path = testmodel.makePath 'Employee'
+    path = null
+    
+    @beforeEach -> path = testmodel.makePath 'Employee'
 
     it 'should stringify with toString()', ->
       path.toString().should.equal('Employee')
@@ -41,6 +43,17 @@ describe 'PathInfo', ->
 
       it "should throw if the field doesn't exist", ->
         (-> path.append 'postCode').should.throw()
+
+    describe '#getChildNodes()', ->
+
+      it 'should find 10 child nodes', ->
+        path.getChildNodes().length.should.equal 10
+
+      it 'should find Employee.department', ->
+        (n.toString() for n in path.getChildNodes()).should.include 'Employee.department'
+
+      it 'should produce nodes that can find their parent', ->
+        n.getParent().equals(path).should.be.true for n in path.getChildNodes()
 
     describe '#isRoot()', -> it 'should return true', ->
       path.isRoot().should.be.true
