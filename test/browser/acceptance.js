@@ -13,21 +13,17 @@ describe('Acceptance', function() {
     }
   };
   var Service = intermine.Service;
-  var args = {
-    root: "bc:8081/intermine-test-dev",
-    token: "test-user-token"
-  };
 
   describe('Instantiate service', function() {
     it('Should be able to create a service', function() {
-      should.exist(new Service(args));
+      should.exist(new Service(service_args));
     });
 
   });
 
   describe('Static Resources', function() {
 
-    var service = new Service(args);
+    var service = new Service(service_args);
 
     it('Should be able to get a sensible version', function(done) {
       service.fetchVersion().fail(done).done(function(v) {
@@ -60,7 +56,7 @@ describe('Acceptance', function() {
 
   describe('Data Requests', function() {
 
-    var service = new Service(args);
+    var service = new Service(service_args);
 
     it('Should be able to count the employees', function(done) {
       service.count({select: ['id'], from: 'Employee'}).fail(done).done(function(c) {
@@ -189,7 +185,7 @@ describe('Acceptance', function() {
   });
 
   describe('ID Resolution', function() {
-    var service = new Service(args);
+    var service = new Service(service_args);
 
     it('can resolve some ids', function(done) {
       var polls      = 0
@@ -217,7 +213,7 @@ describe('Acceptance', function() {
   });
 
   describe('List Life-Cycle', function() {
-    var service = new Service(args);
+    var service = new Service(service_args);
 
     var clearUp = function(done) {
       service.fetchLists().then(function(lists) {

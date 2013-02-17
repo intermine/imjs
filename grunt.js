@@ -130,6 +130,10 @@ module.exports = function (grunt) {
         css: "../../components/mocha/mocha.css",
         js: "../../components/mocha/mocha.js"
       },
+      args: {
+        root: "http://localhost:8080/intermine-test",
+        token: "test-user-token"
+      },
       chai: "../../components/chai/chai.js",
       jquery: "../../components/jquery/jquery.js",
       underscore: "../../components/underscore/underscore.js",
@@ -149,6 +153,10 @@ module.exports = function (grunt) {
       mocha: {
         css: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.css",
         js: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.js"
+      },
+      args: {
+        root: grunt.option('root') || "http://demo.intermine.org/intermine-test",
+        token: grunt.option('token') || "test-user-token"
       },
       chai: "http://chaijs.com/chai.js",
       jquery: "http://code.jquery.com/jquery-1.9.1.min.js",
