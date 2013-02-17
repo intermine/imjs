@@ -23,6 +23,13 @@
             var expect = chai.expect;
         </script>
 
+        <script>
+            var service_args = {
+                root: '<%= args.root %>',
+                token: '<%= args.token %>'
+            };
+        </script>
+
         <!-- Library Under Test -->
         <script src="<%= jquery %>"></script>
         <script src="<%= underscore %>"></script>
