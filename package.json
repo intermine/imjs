@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/main",
   "keywords": [
@@ -35,7 +35,7 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "bower": ">=0.7.0",
+    "bower": "latest",
     "mocha": "latest",
     "grunt-simple-mocha": ">= 0.2.0, < 0.3.0",
     "mocha-phantomjs": "latest",
