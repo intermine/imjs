@@ -125,13 +125,15 @@ module.exports = function (grunt) {
     'Build a index.html page to run acceptance tests', function () {
     var templ = grunt.file.read('test/browser/template.html', 'utf8');
     var outf = 'test/browser/index.html';
+    var root = process.env.TESTMODEL_URL
+      || grunt.option('root') || "http://localhost:8080/intermine-test";
     var obj = {
       mocha: {
         css: "../../components/mocha/mocha.css",
         js: "../../components/mocha/mocha.js"
       },
       args: {
-        root: "http://localhost:8080/intermine-test",
+        root: root,
         token: "test-user-token"
       },
       chai: "../../components/chai/chai.js",
@@ -149,13 +151,15 @@ module.exports = function (grunt) {
     'Build a index.html page to run acceptance tests', function () {
     var templ = grunt.file.read('test/browser/template.html', 'utf8');
     var outf = 'test/browser/acceptance.html';
+    var root = process.env.TESTMODEL_URL
+      || grunt.option('root') || "http://localhost:8080/intermine-test";
     var obj = {
       mocha: {
         css: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.css",
         js: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.js"
       },
       args: {
-        root: grunt.option('root') || "http://demo.intermine.org/intermine-test",
+        root: root,
         token: grunt.option('token') || "test-user-token"
       },
       chai: "http://chaijs.com/chai.js",
