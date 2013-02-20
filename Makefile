@@ -20,8 +20,10 @@ test-cov: instrument
 	@echo Coverage report generated in coverage.html
 
 xunit: build
-	mkdir -p test/results
+	bower install
+	bower install mocha chai
 	grunt build-acceptance-index
+	mkdir -p test/results
 	mocha --reporter xunit test/mocha/*.coffee > test/results/node.xml
 	mocha-phantomjs test/browser/index.html -R xunit > test/results/browser.xml
 	@echo Generated test reports in test/results
