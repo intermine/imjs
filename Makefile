@@ -21,6 +21,7 @@ test-cov: instrument
 
 xunit: build
 	mkdir -p test/results
+	grunt build-acceptance-index
 	mocha --reporter xunit test/mocha/*.coffee > test/results/node.xml
 	mocha-phantomjs test/browser/index.html -R xunit > test/results/browser.xml
 	@echo Generated test reports in test/results
