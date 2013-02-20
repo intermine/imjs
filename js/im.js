@@ -1,4 +1,4 @@
-/*! imjs - v2.0.2 - 2013-02-17 */
+/*! imjs - v2.0.2 - 2013-02-20 */
 
 /**
 This library is open source software according to the definition of the
@@ -1228,6 +1228,44 @@ Thu Jun 14 13:18:14 BST 2012
       return this.service.makeRequest('DELETE', 'lists', {
         name: this.name
       }, cb);
+    };
+
+    List.prototype.fetchTags = function(cb) {
+      var _this = this;
+      return this.service.makeRequest('GET', 'list/tags', {
+        name: this.name
+      }).pipe(function(resp) {
+        return resp.tags;
+      }).done(function(tags) {
+        _this.tags = tags;
+        return _this.folders.filter(isFolder).map(getFolderName);
+      }).done(cb);
+    };
+
+    List.prototype.addTags = function(tags, cb) {
+      var _this = this;
+      return this.service.makeRequest('POST', 'list/tags', {
+        name: this.name,
+        tags: tags
+      }).pipe(function(resp) {
+        return resp.tags;
+      }).done(function(tags) {
+        _this.tags = tags;
+        return _this.folders.filter(isFolder).map(getFolderName);
+      }).done(cb);
+    };
+
+    List.prototype.removeTags = function(tags, cb) {
+      var _this = this;
+      return this.service.makeRequest('DELETE', 'list/tags', {
+        name: this.name,
+        tags: tags
+      }).pipe(function(resp) {
+        return resp.tags;
+      }).done(function(tags) {
+        _this.tags = tags;
+        return _this.folders.filter(isFolder).map(getFolderName);
+      }).done(cb);
     };
 
     List.prototype.contents = function(cb) {

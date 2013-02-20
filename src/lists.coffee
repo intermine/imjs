@@ -61,8 +61,44 @@ class List
   # @return [Promise<Query>] A promise to yield a query.
   query: (view = ['*']) -> @service.query select: view, from: @type, where: [[@type, 'IN', @name]]
 
+  # Delete this list on the server. The list should not be subsequently used.
+  #
+  # @param [->] cb An optional callback, called upon successful deletion.
+  # @return [Promise<?>] A promise to delete the list.
   del: (cb) -> @service.makeRequest 'DELETE', 'lists', {@name}, cb
 
+  # Get the current set of tags for this list, and update this object so it reflects the
+  # current state of the server.
+  #
+  # @param [(Array<String>) ->] cb An optional callback
+  # @return [Promise<Array<String>>] A promise to yield a list of tags.
+  fetchTags: (cb) -> @service.makeRequest('GET', 'list/tags', {@name})
+                             .pipe( (resp) -> resp.tags )
+                             .done( (@tags) => @folders.filter(isFolder).map(getFolderName) )
+                             .done( cb )
+
+  # Add the given tags to the current set of tags for this list, and update this object so it
+  # reflects the current state of the server.
+  #
+  # @param [Array<String>] tags The tags to add.
+  # @param [(Array<String>) ->] cb An optional callback
+  # @return [Promise<Array<String>>] A promise to yield a list of tags.
+  addTags: (tags, cb) -> @service.makeRequest('POST', 'list/tags', {@name, tags})
+                             .pipe( (resp) -> resp.tags )
+                             .done( (@tags) => @folders.filter(isFolder).map(getFolderName) )
+                             .done( cb )
+
+  # Remove the given tags from the current set of tags for this list, and update this object so it
+  # reflects the current state of the server.
+  #
+  # @param [Array<String>] tags The tags to remove.
+  # @param [(Array<String>) ->] cb An optional callback
+  # @return [Promise<Array<String>>] A promise to yield a list of tags.
+  removeTags: (tags, cb) -> @service.makeRequest('DELETE', 'list/tags', {@name, tags})
+                             .pipe( (resp) -> resp.tags )
+                             .done( (@tags) => @folders.filter(isFolder).map(getFolderName) )
+                             .done( cb )
+  
   # Get the contents of this list.
   #
   # The dejoin function is used to ensure that all objects in the list are returned, and
@@ -149,6 +185,8 @@ class List
   inviteUserToShare: (recipient, notify = true, cb = (->)) ->
     # TODO - tests
     @service.post(INVITES, list: @name, to: recipient, notify: !!notify).done(cb)
+
+
 
 intermine.List = List
 
