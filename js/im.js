@@ -1,4 +1,4 @@
-/*! imjs - v2.1.0 - 2013-02-20 */
+/*! imjs - v2.1.1 - 2013-02-27 */
 
 /**
 This library is open source software according to the definition of the
@@ -126,7 +126,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.1.0";
+    imjs.VERSION = "2.1.1";
   }
 
 }).call(this);
@@ -1628,7 +1628,7 @@ Thu Jun 14 13:18:14 BST 2012
   };
 
   Query = (function() {
-    var getPaths;
+    var addPI, getPaths;
 
     Query.JOIN_STYLES = ['INNER', 'OUTER'];
 
@@ -1915,6 +1915,8 @@ Thu Jun 14 13:18:14 BST 2012
       return pi;
     };
 
+    Query.prototype.makePath = Query.prototype.getPathInfo;
+
     Query.prototype.getSubclasses = function() {
       return fold({}, (function(a, c) {
         if (c.type != null) {
@@ -1953,6 +1955,27 @@ Thu Jun 14 13:18:14 BST 2012
           return n.toString() === pstr;
         });
       }
+    };
+
+    Query.prototype.isConstrained = function(path, includeAttrs) {
+      var pi, test,
+        _this = this;
+      if (includeAttrs == null) {
+        includeAttrs = false;
+      }
+      pi = this.getPathInfo(path);
+      if (!pi) {
+        throw new Error("Invalid path: " + path);
+      }
+      test = function(c) {
+        return (c.op != null) && c.path === pi.toString();
+      };
+      if ((!pi.isAttribute()) && includeAttrs) {
+        test = function(c) {
+          return (c.op != null) && (c.path === pi.toString() || pi.equals(_this.getPathInfo(c.path).getParent()));
+        };
+      }
+      return _.any(this.constraints, test);
     };
 
     Query.prototype.canHaveMultipleValues = function(path) {
@@ -2069,17 +2092,17 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Query.prototype.makeListQuery = function() {
-      var toRun, vn, _i, _len, _ref2;
+      var n, toRun, _i, _len, _ref2;
       toRun = this.clone();
       if (toRun.views.length !== 1 || toRun.views[0] === null || !toRun.views[0].match(/\.id$/)) {
         toRun.select(['id']);
       }
       _ref2 = this.getViewNodes();
       for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        vn = _ref2[_i];
-        if (!this.isOuterJoined(vn)) {
-          if ((!toRun.isInView(vn)) && (vn.getEndClass().attributes.id != null)) {
-            toRun.addConstraint([vn.append('id'), 'IS NOT NULL']);
+        n = _ref2[_i];
+        if (!this.isOuterJoined(n)) {
+          if (!(toRun.isInView(n || toRun.isConstrained(n))) && (n.getEndClass().fields.id != null)) {
+            toRun.addConstraint([n.append('id'), 'IS NOT NULL']);
           }
         }
       }
@@ -2492,20 +2515,30 @@ Thu Jun 14 13:18:14 BST 2012
       return "" + this.service.root + "query/results?" + (toQueryString(req));
     };
 
+    addPI = function(p) {
+      return p.append('primaryIdentifier').toString();
+    };
+
     Query.prototype.__bio_req = function(types, n) {
-      var olds, toRun,
-        _this = this;
-      toRun = this.clone();
-      olds = toRun.views;
-      toRun.views = take(n)(olds.map(function(v) {
-        return _this.getPathInfo(v).getParent();
-      }).filter(function(p) {
+      var isSuitable, toRun;
+      toRun = this.makeListQuery();
+      isSuitable = function(p) {
         return _.any(types, function(t) {
           return p.isa(t);
         });
-      }).map(function(p) {
-        return p.append('primaryIdentifier').toPathString();
-      }));
+      };
+      toRun.views = take(n)((function() {
+        var _i, _len, _ref2, _results;
+        _ref2 = this.getViewNodes();
+        _results = [];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          n = _ref2[_i];
+          if (isSuitable(n)) {
+            _results.push(addPI(n));
+          }
+        }
+        return _results;
+      }).call(this));
       return {
         query: toRun.toXML(),
         format: 'text'
