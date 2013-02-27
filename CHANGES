@@ -27,4 +27,9 @@
        Added tests for model functions.
        Separated shimming and util-functions.
        Removed functions from the model class that are better supported in PathInfo
+2.1.1  Wed Feb 27 23:39:30 GMT 2013
+       Moved all tests to mocha
+       Added automated build process
+       Added tests for gff3 requests
+       Added isConstrained
 **/
