@@ -125,8 +125,9 @@ module.exports = function (grunt) {
     'Build a index.html page to run acceptance tests', function () {
     var templ = grunt.file.read('test/browser/template.html', 'utf8');
     var outf = 'test/browser/index.html';
-    var root = process.env.TESTMODEL_URL
-      || grunt.option('root') || "http://localhost:8080/intermine-test";
+    var root = process.env.TESTMODEL_URL ||
+      grunt.option('root') ||
+      "http://localhost:8080/intermine-test";
     var obj = {
       mocha: {
         css: "../../components/mocha/mocha.css",
@@ -151,8 +152,9 @@ module.exports = function (grunt) {
     'Build a index.html page to run acceptance tests', function () {
     var templ = grunt.file.read('test/browser/template.html', 'utf8');
     var outf = 'test/browser/acceptance.html';
-    var root = process.env.TESTMODEL_URL
-      || grunt.option('root') || "http://localhost:8080/intermine-test";
+    var root = process.env.TESTMODEL_URL ||
+      grunt.option('root') ||
+      "http://localhost:8080/intermine-test";
     var obj = {
       mocha: {
         css: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.css",
