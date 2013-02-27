@@ -1,4 +1,5 @@
-{Query} = require './lib/fixture'
+{Query} = Fixture = require './lib/fixture'
+{eventually, prepare} = require './lib/utils'
 
 expected = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -83,3 +84,43 @@ describe 'Defining Query constraints', ->
   describe 'using an mapping', constraintsTest mapping
 
   describe 'using a null value', constraintsTest mappingWithNull
+
+describe 'Query', ->
+
+  describe '#isConstrained', ->
+
+    {service} = new Fixture()
+
+    @beforeAll prepare -> service.query
+      from: 'Employee'
+      select: 'name'
+      where:
+        age: 10
+        'department.manager': { isa: 'CEO' }
+        'address.address': 'IS NOT NULL'
+        'department.company': {lookup: '*Hogg'}
+
+    it 'should say that "Employee.age" is constrained', eventually (q) ->
+      q.isConstrained('Employee.age').should.be.true
+
+    it 'should say that "Employee.department.company" is constrained', eventually (q) ->
+      q.isConstrained('Employee.department.company').should.be.true
+
+    it 'should say that "Employee.address.address" is constrained', eventually (q) ->
+      q.isConstrained('Employee.address.address').should.be.true
+
+    it 'should not say that "Employee.address" is constrained', eventually (q) ->
+      q.isConstrained('Employee.address').should.not.be.true
+
+    it 'should not say that "Employee.department.manager" is constrained', eventually (q) ->
+      q.isConstrained('Employee.department.manager').should.not.be.true
+
+    it 'should not say that "Employee.department.company.name" is constrained', eventually (q) ->
+      q.isConstrained('Employee.department.company.name').should.not.be.true
+
+    it 'should not say that "departmentThatRejectedMe.name" is constrained', eventually (q) ->
+      q.isConstrained('Employee.departmentThatRejectedMe.name').should.not.be.true
+
+    it 'should say that and attr of "Employee.address" is constrained', eventually (q) ->
+      q.isConstrained('Employee.address', true).should.be.true
+
