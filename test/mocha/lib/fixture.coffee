@@ -34,5 +34,6 @@ class Fixture
 Fixture.funcutils = funcutils
 Fixture.Query = Query
 Fixture.Model = Model
+Fixture.Service = Service
 
 module.exports = Fixture
