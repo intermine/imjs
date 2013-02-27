@@ -305,6 +305,8 @@ class Query
     pi.displayName = @displayNames[adjusted] if (pi and adjusted of @displayNames)
     return pi
 
+  makePath: Query::getPathInfo
+
   # Get the mapping from path to class-name that is defined by the
   # subtype constraints.
   getSubclasses: () -> fold({}, ((a, c) -> a[c.path] = c.type if c.type?;a)) @constraints
@@ -331,6 +333,25 @@ class Query
     else
       pstr = pi.toString()
       return _.any @getViewNodes(), (n) -> n.toString() is pstr
+
+  # Check to see whether a path is constrained to a value. If the includeAttrs
+  # parameter is true, then this method will return true if any of the attributes
+  # of the class referenced by this path are constrained to a value. Type constraints
+  # are not considered in this analysis.
+  #
+  # @param [String|PathInfo] path The path to check.
+  # @param [boolean] includeAttrs Whether to include attributes.
+  #
+  # @return Whether or not this path is constrained.
+  isConstrained: (path, includeAttrs = false) ->
+    pi = @getPathInfo(path)
+    throw new Error("Invalid path: #{ path }") unless pi
+    test = (c) -> c.op? and c.path is pi.toString()
+
+    if (not pi.isAttribute()) and includeAttrs
+      test = (c) =>
+        c.op? and (c.path is pi.toString() or pi.equals @getPathInfo(c.path).getParent())
+    return _.any @constraints, test
 
   # Return true is the path passed as an argument could possibly
   # represent multiple values (this is true when any of the nodes that
@@ -408,9 +429,9 @@ class Query
     # join constraints; replace these implicit constraints with
     # explicit constraints. This only works with joins on objects that
     # have ids; you will have to handle simple objects yourself.
-    for vn in @getViewNodes() when not @isOuterJoined vn
-      if (not toRun.isInView vn) and vn.getEndClass().attributes.id?
-        toRun.addConstraint [vn.append('id'), 'IS NOT NULL']
+    for n in @getViewNodes() when not @isOuterJoined n
+      if not (toRun.isInView n or toRun.isConstrained n) and n.getEndClass().fields.id?
+        toRun.addConstraint [n.append('id'), 'IS NOT NULL']
 
     return toRun
 
@@ -640,12 +661,15 @@ class Query
       req.token = @service.token
     "#{ @service.root }query/results?#{ toQueryString req }"
 
+  addPI = (p) -> p.append('primaryIdentifier').toString()
+
   __bio_req: (types, n) ->
-    toRun = @clone()
-    olds = toRun.views
-    toRun.views = take(n) (olds.map((v) => @getPathInfo(v).getParent())
-      .filter((p) -> _.any types, (t) -> p.isa(t))
-      .map((p) -> p.append('primaryIdentifier').toPathString()))
+    toRun = @makeListQuery() # ensures changing the view doesn't change results
+
+    isSuitable = (p) -> _.any types, (t) -> p.isa t
+    
+    # Only add the maximum number of suitable nodes to the query to run
+    toRun.views = take(n) (addPI n for n in @getViewNodes() when isSuitable n)
 
     query: toRun.toXML(), format: 'text'
 
@@ -660,10 +684,10 @@ for f in Query.BIO_FORMATS then do (f) ->
   reqMeth = "_#{ f }_req"
   getMeth = "get#{ f.toUpperCase() }"
   uriMeth = getMeth + "URI"
-  Query.prototype[getMeth] = (cb = ->) ->
+  Query::[getMeth] = (cb = ->) ->
     req = @[reqMeth]()
     @service.post('query/results/' + f, req).done cb
-  Query.prototype[uriMeth] = (cb) ->
+  Query::[uriMeth] = (cb) ->
     req = @[reqMeth]()
     if @service?.token? # hard to tell if necessary. Include it.
       req.token = @service.token
