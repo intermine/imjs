@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/main",
   "keywords": [
