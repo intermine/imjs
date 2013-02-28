@@ -32,4 +32,6 @@
        Added automated build process
        Added tests for gff3 requests
        Added isConstrained
+2.1.2  Thu Feb 28 00:57:53 GMT 2013
+       Added support for extra options to bio-requests
 **/

@@ -1,4 +1,4 @@
-/*! imjs - v2.1.1 - 2013-02-27 */
+/*! imjs - v2.1.2 - 2013-02-28 */
 
 /**
 This library is open source software according to the definition of the
@@ -126,7 +126,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.1.1";
+    imjs.VERSION = "2.1.2";
   }
 
 }).call(this);
@@ -2569,18 +2569,54 @@ Thu Jun 14 13:18:14 BST 2012
     reqMeth = "_" + f + "_req";
     getMeth = "get" + (f.toUpperCase());
     uriMeth = getMeth + "URI";
-    Query.prototype[getMeth] = function(cb) {
-      var req;
+    Query.prototype[getMeth] = function(opts, cb) {
+      var req, v, _ref3;
+      if (opts == null) {
+        opts = {};
+      }
       if (cb == null) {
         cb = function() {};
       }
-      req = this[reqMeth]();
+      if (_.isFunction(opts)) {
+        _ref3 = [{}, opts], opts = _ref3[0], cb = _ref3[1];
+      }
+      if ((opts != null ? opts.view : void 0) != null) {
+        opts.view = (function() {
+          var _j, _len1, _ref4, _results;
+          _ref4 = opts.view;
+          _results = [];
+          for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+            v = _ref4[_j];
+            _results.push(this.getPathInfo(v).toString());
+          }
+          return _results;
+        }).call(this);
+      }
+      req = _.extend(this[reqMeth](), opts);
       return this.service.post('query/results/' + f, req).done(cb);
     };
-    return Query.prototype[uriMeth] = function(cb) {
-      var req, _ref3;
-      req = this[reqMeth]();
-      if (((_ref3 = this.service) != null ? _ref3.token : void 0) != null) {
+    return Query.prototype[uriMeth] = function(opts, cb) {
+      var req, v, _ref3;
+      if (opts == null) {
+        opts = {};
+      }
+      if (_.isFunction(opts)) {
+        _ref3 = [{}, opts], opts = _ref3[0], cb = _ref3[1];
+      }
+      if ((opts != null ? opts.view : void 0) != null) {
+        opts.view = (function() {
+          var _j, _len1, _ref4, _results;
+          _ref4 = opts.view;
+          _results = [];
+          for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+            v = _ref4[_j];
+            _results.push(this.getPathInfo(v).toString());
+          }
+          return _results;
+        }).call(this);
+      }
+      req = _.extend(this[reqMeth](), opts);
+      if (this.service.token != null) {
         req.token = this.service.token;
       }
       return "" + this.service.root + "query/results/" + f + "?" + (toQueryString(req));
