@@ -674,7 +674,7 @@ class Query
     query: toRun.toXML(), format: 'text'
 
   _fasta_req: -> @__bio_req ["SequenceFeature", 'Protein'], 1
-  _gff3_req:  -> @__bio_req ['SequenceFeature']
+  _gff3_req: -> @__bio_req ['SequenceFeature']
   _bed_req: Query::_gff3_req
 
 Query.ATTRIBUTE_OPS = _.union Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS
@@ -684,12 +684,18 @@ for f in Query.BIO_FORMATS then do (f) ->
   reqMeth = "_#{ f }_req"
   getMeth = "get#{ f.toUpperCase() }"
   uriMeth = getMeth + "URI"
-  Query::[getMeth] = (cb = ->) ->
-    req = @[reqMeth]()
+  Query::[getMeth] = (opts = {}, cb = ->) ->
+    if _.isFunction opts
+      [opts, cb] = [{}, opts]
+    opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
+    req = _.extend @[reqMeth](), opts
     @service.post('query/results/' + f, req).done cb
-  Query::[uriMeth] = (cb) ->
-    req = @[reqMeth]()
-    if @service?.token? # hard to tell if necessary. Include it.
+  Query::[uriMeth] = (opts = {}, cb) ->
+    if _.isFunction opts
+      [opts, cb] = [{}, opts]
+    opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
+    req = _.extend @[reqMeth](), opts
+    if @service.token? # hard to tell if necessary. Include it.
       req.token = @service.token
     "#{ @service.root }query/results/#{ f }?#{ toQueryString req }"
 
