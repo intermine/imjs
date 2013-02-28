@@ -88,8 +88,10 @@ class PathInfo
       (name is type.name) or (name in @model.getAncestorsOf(type))
 
   getDisplayName: (cb) =>
+    if custom = @displayName
+      return success custom
     @namePromise ?=
-      if cached = (@displayName or NAMES[@ident])
+      if cached = NAMES[@ident]
         success cached
       else if not @model.service?
         error "No service"

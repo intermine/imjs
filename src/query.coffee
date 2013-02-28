@@ -216,7 +216,7 @@ class Query
       constraintLogic: ""
       sortOrder: ""
     properties ?= {}
-    @displayNames = properties.aliases ? {}
+    @displayNames = _.extend {}, (properties.displayNames ? properties.aliases ? {})
   
     @service = service ? {}
     @model = properties.model ? {}
