@@ -9,7 +9,7 @@
         <!-- Dependencies -->
         <script src="<%= jquery %>"></script>
         <script src="<%= underscore %>"></script>
-        <script src="<%= chai %>" type="text/javascript"></script>
+        <script src="<%= expect %>" type="text/javascript"></script>
         <script src="<%= mocha.js %>"></script>
     </head>
     <body>
@@ -20,11 +20,7 @@
         <!-- for local get from components, and do like this for jenkins -->
         <!-- Test Infrastructure -->
         <script>
-        mocha.setup({globals: ['navigator', 'getInterface', 'expect', 'chai', 'intermine'], ui: 'bdd'});
-        </script>
-
-        <script>
-            var expect = chai.expect;
+        mocha.setup({globals: ['navigator', 'getInterface', 'expect', 'intermine'], ui: 'bdd'});
         </script>
 
         <script>

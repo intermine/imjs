@@ -137,7 +137,7 @@ module.exports = function (grunt) {
         root: root,
         token: "test-user-token"
       },
-      chai: "../../components/chai/chai.js",
+      expect: "../../components/expect/expect.js",
       jquery: "../../components/jquery/jquery.js",
       underscore: "../../components/underscore/underscore.js",
       imjs: "../../js/im.js"
@@ -164,7 +164,7 @@ module.exports = function (grunt) {
         root: root,
         token: grunt.option('token') || "test-user-token"
       },
-      chai: "http://chaijs.com/chai.js",
+      expect: "http://cdn.intermine.org/js/expect/latest/expect.js",
       jquery: "http://code.jquery.com/jquery-1.9.1.min.js",
       underscore: "http://cdn.intermine.org/js/underscore.js/1.3.3/underscore-min.js",
       imjs: "http://ci.intermine.org/job/imjs/lastSuccessfulBuild/artifact/js/im.js"
