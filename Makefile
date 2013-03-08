@@ -16,8 +16,9 @@ run:
 	grunt $(TASK)
 
 test-cov: instrument
-	IMJS_COV=1 mocha --reporter html-cov test/mocha/*.coffee > coverage.html; exit 0
-	@echo Coverage report generated in coverage.html
+	mkdir -p coverage
+	IMJS_COV=1 mocha --reporter html-cov test/mocha/*.coffee > coverage/coverage.html; exit 0
+	@echo Coverage report generated in coverage/coverage.html
 
 xunit: build
 	bower install
