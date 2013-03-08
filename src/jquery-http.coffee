@@ -31,7 +31,7 @@ mappingForIE = PUT: 'POST', DELETE: 'GET'
 
 if inIE9
   http.getMethod = (x) -> mappingForIE[x] ? x
-  http.supports = (m) -> x not of mappingForIE
+  http.supports = (m) -> m not of mappingForIE
 else
   http.getMethod = (x) -> x
   http.supports = -> true
