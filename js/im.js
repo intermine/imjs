@@ -1,4 +1,4 @@
-/*! imjs - v2.1.2 - 2013-02-28 */
+/*! imjs - v2.1.4 - 2013-03-08 */
 
 /**
 This library is open source software according to the definition of the
@@ -21,6 +21,7 @@ Thu Jun 14 13:18:14 BST 2012
   // IE8+
   // see: https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest
   if (!$.support.cors && window.XDomainRequest) {
+    console.log("Patching IE x-domain request support");
     var httpRegEx = /^https?:\/\//i;
     var getOrPostRegEx = /^get|post$/i;
     var sameSchemeRegEx = new RegExp('^'+location.protocol, 'i');
@@ -126,7 +127,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.1.2";
+    imjs.VERSION = "2.1.4";
   }
 
 }).call(this);
@@ -159,9 +160,11 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var IS_NODE, _base, _base1, _base2, _ref, _ref1, _ref2, _ref3;
+  var HAS_CONSOLE, IS_NODE, console, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
 
   IS_NODE = typeof exports !== 'undefined';
+
+  HAS_CONSOLE = typeof console !== 'undefined';
 
   if (!IS_NODE) {
     if (Array.prototype.map == null) {
@@ -214,21 +217,35 @@ Thu Jun 14 13:18:14 BST 2012
         return _results;
       };
     }
-    if ((_ref = this.console) == null) {
-      this.console = {
+    if (!HAS_CONSOLE) {
+      console = {
         log: (function() {}),
         error: (function() {}),
         debug: (function() {})
       };
     }
-    if ((_ref1 = (_base = this.console).log) == null) {
-      _base.log = function() {};
+    if ((_ref = console.log) == null) {
+      console.log = function() {};
     }
-    if ((_ref2 = (_base1 = this.console).error) == null) {
-      _base1.error = function() {};
+    if ((_ref1 = console.error) == null) {
+      console.error = function() {};
     }
-    if ((_ref3 = (_base2 = this.console).debug) == null) {
-      _base2.debug = function() {};
+    if ((_ref2 = console.debug) == null) {
+      console.debug = function() {};
+    }
+    if (console.log.apply == null) {
+      _ref3 = ['log', 'error', 'debug'];
+      _fn = function(m) {
+        var oldM;
+        oldM = console[m];
+        return console[m] = function(args) {
+          return oldM(args);
+        };
+      };
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        m = _ref3[_i];
+        _fn(m);
+      }
     }
   }
 
@@ -557,7 +574,7 @@ Thu Jun 14 13:18:14 BST 2012
       return (_ref2 = mappingForIE[x]) != null ? _ref2 : x;
     };
     http.supports = function(m) {
-      return !(x in mappingForIE);
+      return !(m in mappingForIE);
     };
   } else {
     http.getMethod = function(x) {
@@ -1327,8 +1344,8 @@ Thu Jun 14 13:18:14 BST 2012
 
     List.prototype.shareWithUser = function(recipient, cb) {
       return this.service.post(SHARES, {
-        list: this.name,
-        "with": recipient
+        'list': this.name,
+        'with': recipient
       }).done(cb);
     };
 
