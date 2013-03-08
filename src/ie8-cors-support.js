@@ -8,6 +8,7 @@
   // IE8+
   // see: https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest
   if (!$.support.cors && window.XDomainRequest) {
+    console.log("Patching IE x-domain request support");
     var httpRegEx = /^https?:\/\//i;
     var getOrPostRegEx = /^get|post$/i;
     var sameSchemeRegEx = new RegExp('^'+location.protocol, 'i');
