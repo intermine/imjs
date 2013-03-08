@@ -4,7 +4,7 @@ describe('Acceptance', function() {
   // Running against a unwarmed-up db, or doing list operations
   // can cause things to be slower than desired. That has nothing to
   // do with this library.
-  this.slow(300);
+  this.slow(3000);
 
   var invoke = function(name) {
     var args = [].slice.call(arguments, 1);
@@ -16,9 +16,8 @@ describe('Acceptance', function() {
 
   describe('Instantiate service', function() {
     it('Should be able to create a service', function() {
-      should.exist(new Service(service_args));
+      expect(new Service(service_args)).to.exist;
     });
-
   });
 
   describe('Static Resources', function() {
@@ -27,7 +26,7 @@ describe('Acceptance', function() {
 
     it('Should be able to get a sensible version', function(done) {
       service.fetchVersion().fail(done).done(function(v) {
-        v.should.be.above(8);
+        expect(v).to.be.above(8);
         done();
       });
     });
@@ -37,7 +36,7 @@ describe('Acceptance', function() {
 
       it('should be a model', function(done) {
         var test = function(model) {
-          model.should.be.an.instanceOf(intermine.Model);
+          expect(model).to.be.an.instanceOf(intermine.Model);
           done();
         };
         modelResp.then(test, done);
@@ -45,7 +44,7 @@ describe('Acceptance', function() {
 
       it('should answer modelly questions', function(done) {
         var test = function(model) {
-          model.getSubclassesOf('Manager').should.include('CEO');
+          expect(model.getSubclassesOf('Manager')).to.include('CEO');
           done();
         };
         modelResp.then(test, done);
@@ -60,14 +59,14 @@ describe('Acceptance', function() {
 
     it('Should be able to count the employees', function(done) {
       service.count({select: ['id'], from: 'Employee'}).fail(done).done(function(c) {
-        c.should.eql(132);
+        expect(c).to.eql(132);
         done();
       });
     });
 
     it('Should find lists with brenda in them', function(done) {
       var onDone = function(lists) {
-        lists.length.should.eql(2);
+        expect(lists.length).to.eql(2);
         done();
       };
       service.fetchListsContaining({type: 'Employee', publicId: 'Brenda'})
@@ -85,8 +84,8 @@ describe('Acceptance', function() {
     it('Should find the ages of the 46 employees over 50 add up to 2688', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(rows) {
-        rows.length.should.equal(46);
-        rows.mapSum(get(0)).should.eql(2688);
+        expect(rows.length).to.equal(46);
+        expect(rows.mapSum(get(0))).to.eql(2688);
         done();
       };
       service.rows(oldies).then(test, done);
@@ -95,8 +94,8 @@ describe('Acceptance', function() {
     it('Should be able to fetch results as pojos', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(employees) {
-        employees.length.should.equal(46);
-        employees.mapSum(get('age')).should.eql(2688);
+        expect(employees.length).to.equal(46);
+        expect(employees.mapSum(get('age'))).to.eql(2688);
         done();
       };
       service.records(oldies).then(test, done);
@@ -105,10 +104,10 @@ describe('Acceptance', function() {
     it('Should be able to fetch table rows', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(rows) {
-        rows.length.should.equal(46);
-        rows.mapSum(function(row) { return row[0].value; }).should.eql(2688);
+        expect(rows.length).to.equal(46);
+        expect(rows.mapSum(function(row) { return row[0].value; })).to.eql(2688);
         rows.forEach(function(row) {
-          row.map(get('column')).should.include('Employee.age');
+          expect(row.map(get('column'))).to.include('Employee.age');
         });
         done();
       };
@@ -119,11 +118,11 @@ describe('Acceptance', function() {
     it('Should be able to summarise a numeric path', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(summary, stats) {
-        summary.length.should.be.below(21);
-        summary.mapSum(get('count')).should.equal(46);
-        stats.min.should.be.above(49);
-        stats.max.should.be.below(100);
-        stats.uniqueValues.should.be.above(summary.length);
+        expect(summary.length).to.be.below(21);
+        expect(summary.mapSum(get('count'))).to.equal(46);
+        expect(stats.min).to.be.above(49);
+        expect(stats.max).to.be.below(100);
+        expect(stats.uniqueValues).to.be.above(summary.length);
         done();
       };
       service.query(oldies).then(invoke('summarise', 'age')).then(test, done);
@@ -132,8 +131,8 @@ describe('Acceptance', function() {
     it('Should be able to summarise a string path', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(summary, stats) {
-        summary.map(get('item')).should.include('Wernham-Hogg');
-        stats.uniqueValues.should.equal(6);
+        expect(summary.map(get('item'))).to.include('Wernham-Hogg');
+        expect(stats.uniqueValues).to.equal(6);
         done();
       };
       service.query(oldies).then(invoke('summarise', 'department.company.name')).then(test, done);
@@ -141,9 +140,9 @@ describe('Acceptance', function() {
 
     it('should be able to fetch widgets', function(done) {
       var test = function(widgets) {
-        should.exist(widgets);
-        widgets.length.should.be.above(1);
-        widgets.filter(function(w) { return w.name === 'contractor_enrichment' }).length.should.equal(1);
+        expect(widgets).to.exist;
+        expect(widgets.length).to.be.above(1);
+        expect(widgets.filter(function(w) { return w.name === 'contractor_enrichment' }).length).to.equal(1);
         done();
       };
       service.fetchWidgets().then(test, done);
@@ -151,9 +150,9 @@ describe('Acceptance', function() {
 
     it('should be able to fetch widget mapping', function(done) {
       var test = function(widgets) {
-        should.exist(widgets);
-        should.exist(widgets.contractor_enrichment);
-        widgets.contractor_enrichment.widgetType.should.equal('enrichment');
+        expect(widgets).to.exist;
+        expect(widgets.contractor_enrichment).to.exist;
+        expect(widgets.contractor_enrichment.widgetType).to.equal('enrichment');
         done();
       };
       service.fetchWidgetMap().then(test, done);
@@ -166,8 +165,8 @@ describe('Acceptance', function() {
         maxp: 1
       };
       var test = function(results) {
-        results.length.should.equal(1);
-        results[0].identifier.should.equal('Vikram');
+        expect(results.length).to.equal(1);
+        expect(results[0].identifier).to.equal('Vikram');
         done();
       };
       service.enrichment(args).then(test, done);
@@ -189,7 +188,7 @@ describe('Acceptance', function() {
       it('Should support paging forwards via Query#next', function(done) {
         var query = {select: ['Employee.name'], where: { age: { gt: 50 } }, limit: 10, start: 0 };
         var test = function(results) {
-          results.map(function(x) { return x.name }).should.eql(expected);
+          expect(results.map(function(x) { return x.name })).to.eql(expected);
           done();
         };
         service.query(query).then(invoke('next')).then(invoke('records')).then(test, done);
@@ -198,7 +197,7 @@ describe('Acceptance', function() {
       it('Should support paging backwards via Query#previous', function(done) {
         var query = {select: ['Employee.name'], where: { age: { gt: 50 } }, limit: 10, start: 20 };
         var test = function(results) {
-          results.map(function(x) { return x.name }).should.eql(expected);
+          expect(results.map(function(x) { return x.name })).to.eql(expected);
           done();
         };
         service.query(query).then(invoke('previous')).then(invoke('records')).then(test, done);
@@ -281,9 +280,9 @@ describe('Acceptance', function() {
           'Fatou'
         ].join("\n");
         var test = function(list) {
-          should.exist(list);
-          list.name.should.equal(TEST_NAME);
-          list.size.should.equal(5);
+          expect(list).to.exist;
+          expect(list.name).to.equal(TEST_NAME);
+          expect(list.size).to.equal(5);
           opts.tags.forEach(function(t) {
             expect(t).to.satisfy(list.hasTag);
           });
@@ -315,14 +314,14 @@ describe('Acceptance', function() {
         };
 
         var test = function(list) {
-          should.exist(list);
-          list.name.should.equal(TEST_NAME);
-          list.size.should.equal(2);
+          expect(list).to.exist;
+          expect(list.name).to.equal(TEST_NAME);
+          expect(list.size).to.equal(2);
           options.tags.forEach(function(t) {
             expect(t).to.satisfy(list.hasTag);
           });
           list.contents().then(function(members) {
-            members.map(function(m) { return m.name }).should.include('David Brent');
+            expect(members.map(function(m) { return m.name })).to.include('David Brent');
           }).then(function() {done()}, done);
         };
 
