@@ -6,6 +6,11 @@
         <title>IMJS Tests</title>
         <link rel="stylesheet" href="<%= mocha.css %>" type="text/css" media="screen"
               charset="utf-8">
+        <!-- Dependencies -->
+        <script src="<%= jquery %>"></script>
+        <script src="<%= underscore %>"></script>
+        <script src="<%= chai %>" type="text/javascript"></script>
+        <script src="<%= mocha.js %>"></script>
     </head>
     <body>
         <!-- Browser Reporter Requires this Div -->
@@ -14,12 +19,10 @@
         <!-- TODO: Make all this configurable, and build a version for jenkins --> 
         <!-- for local get from components, and do like this for jenkins -->
         <!-- Test Infrastructure -->
-        <script src="<%= mocha.js %>"></script>
         <script>
         mocha.setup({globals: ['navigator', 'getInterface', 'expect', 'chai', 'intermine'], ui: 'bdd'});
         </script>
 
-        <script src="<%= chai %>" type="text/javascript"></script>
         <script>
             var expect = chai.expect;
         </script>
@@ -31,11 +34,6 @@
             };
         </script>
 
-        <!-- Library Under Test -->
-        <script src="<%= jquery %>"></script>
-        <script src="<%= underscore %>"></script>
-
-        <!-- One of these should work. -->
         <script src="<%= imjs %>" type="text/javascript"></script>
 
         <!-- Tests -->
