@@ -9,6 +9,7 @@
 # so don't feel obliged to require it.
 
 IS_NODE = typeof exports isnt 'undefined'
+HAS_CONSOLE = typeof console isnt 'undefined'
 
 unless IS_NODE
 
@@ -31,7 +32,14 @@ unless IS_NODE
       for x, i in @
         f.call((ctx ? @), x, i, @)
 
-  @console ?= {log: (->), error: (->), debug: (->)}
-  @console.log ?= ->
-  @console.error ?= ->
-  @console.debug ?= ->
+  unless HAS_CONSOLE
+    console = {log: (->), error: (->), debug: (->)}
+
+  console.log ?= ->
+  console.error ?= ->
+  console.debug ?= ->
+
+  unless console.log.apply? # Probably in IE here...
+    for m in ['log', 'error', 'debug'] then do (m) ->
+      oldM = console[m]
+      console[m] = (args) -> oldM(args)
