@@ -62,7 +62,6 @@ describe 'GFF3 Queries', ->
       countRecords(gff3).should.equal 5
 
   describe 'with extra attributes', ->
-    service = new Service root: 'beta.flymine.org/beta'
     opts =
       from: 'Gene'
       select: ['symbol']
@@ -70,7 +69,8 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare ->
-      qp = service.query(opts)
+      beta = new Service root: 'beta.flymine.org/beta'
+      qp = beta.query(opts)
       qp.then (q) ->
         statsp = q.summarise('symbol').then (_, stats) -> stats
         gff3p = q.getGFF3 view: ['organism.name', 'length']
