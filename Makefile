@@ -21,7 +21,7 @@ test-cov: instrument
 
 xunit: build
 	bower install
-	bower install mocha chai
+	bower install mocha expect
 	grunt build-acceptance-index
 	mkdir -p test/results
 	mocha --reporter xunit test/mocha/*.coffee > test/results/node.xml
