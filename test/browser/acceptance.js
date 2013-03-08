@@ -74,11 +74,19 @@ describe('Acceptance', function() {
                        .then(onDone, done);
     });
 
+    // Handy helpers for dealing with summing rows in different ways.
+    Array.prototype.mapSum = function(f) {
+      return this.reduce(function(acc, e) { return acc + f(e); }, 0);
+    };
+    var get = function (prop) {
+      return function (obj) { return obj[prop] };
+    };
+
     it('Should find the ages of the 46 employees over 50 add up to 2688', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(rows) {
         rows.length.should.equal(46);
-        rows.reduce(function(acc, row) { return acc + row[0] }, 0).should.eql(2688);
+        rows.mapSum(get(0)).should.eql(2688);
         done();
       };
       service.rows(oldies).then(test, done);
@@ -88,17 +96,31 @@ describe('Acceptance', function() {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(employees) {
         employees.length.should.equal(46);
-        employees.reduce(function(acc, emp) { return acc + emp.age }, 0).should.eql(2688);
+        employees.mapSum(get('age')).should.eql(2688);
         done();
       };
       service.records(oldies).then(test, done);
     });
 
+    it('Should be able to fetch table rows', function(done) {
+      var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
+      var test = function(rows) {
+        rows.length.should.equal(46);
+        rows.mapSum(function(row) { return row[0].value; }).should.eql(2688);
+        rows.forEach(function(row) {
+          row.map(get('column')).should.include('Employee.age');
+        });
+        done();
+      };
+      service.tableRows(oldies).then(test, done);
+    });
+      
+
     it('Should be able to summarise a numeric path', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(summary, stats) {
         summary.length.should.be.below(21);
-        summary.reduce(function(sum, x) { return sum + x.count }, 0).should.equal(46);
+        summary.mapSum(get('count')).should.equal(46);
         stats.min.should.be.above(49);
         stats.max.should.be.below(100);
         stats.uniqueValues.should.be.above(summary.length);
@@ -110,7 +132,7 @@ describe('Acceptance', function() {
     it('Should be able to summarise a string path', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
       var test = function(summary, stats) {
-        summary.map(function(x) { return x.item }).should.include('Wernham-Hogg');
+        summary.map(get('item')).should.include('Wernham-Hogg');
         stats.uniqueValues.should.equal(6);
         done();
       };
