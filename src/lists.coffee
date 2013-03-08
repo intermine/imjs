@@ -173,7 +173,7 @@ class List
   # @return [Promise<>] A promise to share a List.
   shareWithUser: (recipient, cb) ->
     # TODO - tests
-    @service.post(SHARES, list: @name, with: recipient).done(cb)
+    @service.post(SHARES, 'list': @name, 'with': recipient).done(cb)
 
   # Invite a user to share this list.
   #
