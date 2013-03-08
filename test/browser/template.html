@@ -15,11 +15,12 @@
         <!-- for local get from components, and do like this for jenkins -->
         <!-- Test Infrastructure -->
         <script src="<%= mocha.js %>"></script>
-        <script>mocha.setup('bdd');</script>
+        <script>
+        mocha.setup({globals: ['navigator', 'getInterface', 'expect', 'chai', 'intermine'], ui: 'bdd'});
+        </script>
 
         <script src="<%= chai %>" type="text/javascript"></script>
         <script>
-            var should = chai.should();
             var expect = chai.expect;
         </script>
 
