@@ -12,6 +12,7 @@ describe 'Query#appendToList', ->
   clearList = clear service, name
 
   @slow 400
+  @timeout 10000
   
   @afterAll always clearList
 
