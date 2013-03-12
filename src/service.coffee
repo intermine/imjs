@@ -225,6 +225,8 @@ class Service
       method = 'GET'
       url += '?callback=?'
 
+    dataType = if /json/.test(data.format) then 'json' else 'text'
+
     # IE requires that we tunnel DELETE and PUT
     unless http.supports method
       [data.method, method] = [method, http.getMethod(method)]
@@ -237,7 +239,7 @@ class Service
 
     opts =
       data: data,
-      dataType: data.format,
+      dataType: dataType,
       success: cb,
       error: errBack,
       url: url,
