@@ -1,10 +1,10 @@
 [
     "<banner>"
     , "LICENCE"
-    , "src/ie8-cors-support.js"
     , "<file_template:build/version.js>"
-    , "build/constants.js"
     , "build/shiv.js"
+    , "src/ie8-cors-support.js"
+    , "build/constants.js"
     , "build/util.js"
     , "build/jquery-http.js"
     , "build/table.js"
