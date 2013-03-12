@@ -404,6 +404,10 @@ class Query
 
   hasView: (v) -> @views && _.include(@views, @adjustPath(v))
 
+  # Get a promise to yield a count.
+  #
+  # @param [Function<Number>] cont An optional callback.
+  # @return [Promise<Number>] A promise to yield a number representing the number of rows.
   count: (cont) ->
     if @service.count
       @service.count(@, cont)
@@ -444,10 +448,48 @@ class Query
       req.tags = options.tags.join(';')
     @service.post('query/tolist', req).pipe(LIST_PIPE @service).done(cb)
 
+  # Get a summary for a single column in the results.
+  #
+  # A summary consists of rows of summary information, and a statistics object, which
+  # always includes a uniqueValues property, which is the number of different values in the
+  # column.
+  #
+  # @param [String|PathInfo] path The column to summarise.
+  # @param [Number] limit The maximum number of rows to return.
+  # @param [Function] cont An optional callback
+  #
+  # @return [Promise<Array<Object>, Object>] A promise to return a summary.
   summarise: (path, limit, cont) -> @filterSummary(path, '', limit, cont)
 
+  # Get a summary for a single column in the results.
+  #
+  # A summary consists of rows of summary information, and a statistics object, which
+  # always includes a uniqueValues property, which is the number of different values in the
+  # column.
+  #
+  # @param [String|PathInfo] path The column to summarise.
+  # @param [Number] limit The maximum number of rows to return.
+  # @param [Function] cont An optional callback
+  #
+  # @return [Promise<Array<Object>, Object>] A promise to return a summary.
   summarize: (args...) -> @summarise.apply(@, args)
 
+
+  # Get a summary for a single column in the results, filtered by a given value.
+  #
+  # A summary consists of rows of summary information, and a statistics object, which
+  # always includes a uniqueValues property, which is the number of different values in the
+  # column.
+  #
+  # This method also allows the caller to have the server return only items which match
+  # the given filter.
+  #
+  # @param [String|PathInfo] path The column to summarise.
+  # @param [String] term The term to filter by.
+  # @param [Number] limit The maximum number of rows to return.
+  # @param [Function] cont An optional callback
+  #
+  # @return [Promise<Array<Object>, Object>] A promise to return a summary.
   filterSummary: (path, term, limit, cont = (->)) ->
     if _.isFunction(limit)
       [cont, limit] = [limit, null]
@@ -471,6 +513,13 @@ class Query
       @resolve results, stats, data.filteredCount
     @service.post('query/results', req).pipe(parse).done(cont)
 
+  # Get an unconnected, deep clone of this query.
+  #
+  # Any changes to the clone will not affect the original query.
+  #
+  # @param [Boolean] cloneEvents If true, the events for the original query
+  #                              will also be cloned.
+  # @return [Query] A clone of this query.
   clone: (cloneEvents) ->
     cloned = new Query(@, @service)
     if cloneEvents
@@ -479,12 +528,18 @@ class Query
       cloned._callbacks = {}
     return cloned
 
+  # Get the query for the next page of results.
+  #
+  # @return [Query] A query for the next logical page of results.
   next: () ->
     clone = @clone()
     if @maxRows
       clone.start = @start + @maxRows
     clone
 
+  # Get the query for the previous page of results.
+  #
+  # @return [Query] A query for the previous logical page of results.
   previous: () ->
     clone = @clone()
     if @maxRows
