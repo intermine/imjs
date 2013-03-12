@@ -1,4 +1,4 @@
-(function(root) {
+(function(root, undefined) {
   if (typeof jQuery === 'undefined') {
     return null; 
   }
@@ -19,7 +19,7 @@
       this.userOptions = userOptions;
       this.options = options;
       this.userType = (userOptions.dataType||'').toLowerCase();
-      _.bindAll(this);
+      _.bindAll(this); // make sure we can use onLoad
     };
     XDomainTransporter.prototype.constructor = XDomainTransporter;
     XDomainTransporter.prototype.send = function(headers, complete) {
@@ -40,44 +40,51 @@
       xdr.open(this.options.type, this.options.url);
       xdr.send(postData);
     };
+    XDomainTransporter.prototype.respond = function(status, statusText, responses, responseHeaders) {
+      var xdr = this.xdr;
+      xdr.onload = xdr.onerror = xdr.ontimeout = xdr.onprogress = jQuery.noop;
+      delete this.xdr;
+      jQuery.event.trigger('ajaxStop');
+      this.complete(status, statusText, responses, responseHeaders);
+    };
     XDomainTransporter.prototype.abort = function() {
       if (xdr) {
         xdr.abort();
       }
     };
     XDomainTransporter.prototype.onLoad = function() {
-      var xdr = this.xdr;
-      var allResponseHeaders = 'Content-Length: ' + xdr.responseText.length + '\r\nContent-Type: ' + xdr.contentType;
-      var status = {code: 200, message: 'success'};
-      var responses = {text: xdr.responseText};
-      try {
-        if ((this.userType === 'json') || ((this.userType !== 'text') && jsonRegEx.test(xdr.contentType))) {
-          try {
-            responses.json = $.parseJSON(xdr.responseText);
-          } catch (e) {
-            status.code = 500;
-            status.message = 'parseerror';
+        var xdr = this.xdr;
+        var allResponseHeaders = 'Content-Length: ' + xdr.responseText.length + '\r\nContent-Type: ' + xdr.contentType;
+        var status = {code: 200, message: 'success'};
+        var responses = {text: xdr.responseText};
+        try {
+          if ((this.userType === 'json') || ((this.userType !== 'text') && jsonRegEx.test(xdr.contentType))) {
+            try {
+              responses.json = $.parseJSON(xdr.responseText);
+            } catch (e) {
+              status.code = 500;
+              status.message = 'parseerror';
+            }
+          } else if ((this.userType === 'xml') || ((this.userType !== 'text') && xmlRegEx.test(xdr.contentType))) {
+            var doc = new ActiveXObject('Microsoft.XMLDOM');
+            doc.async = false;
+            try {
+              doc.loadXML(xdr.responseText);
+            } catch(e) {
+              doc = undefined;
+            }
+            if (!doc || !doc.documentElement || doc.getElementsByTagName('parsererror').length) {
+              status.code = 500;
+              status.message = 'parseerror';
+              throw 'Invalid XML: ' + xdr.responseText;
+            }
+            responses.xml = doc;
           }
-        } else if ((this.userType === 'xml') || ((this.userType !== 'text') && xmlRegEx.test(xdr.contentType))) {
-          var doc = new ActiveXObject('Microsoft.XMLDOM');
-          doc.async = false;
-          try {
-            doc.loadXML(xdr.responseText);
-          } catch(e) {
-            doc = undefined;
-          }
-          if (!doc || !doc.documentElement || doc.getElementsByTagName('parsererror').length) {
-            status.code = 500;
-            status.message = 'parseerror';
-            throw 'Invalid XML: ' + xdr.responseText;
-          }
-          responses.xml = doc;
+        } catch (parseMessage) {
+          throw parseMessage;
+        } finally {
+          this.complete(status.code, status.message, responses, allResponseHeaders);
         }
-      } catch (parseMessage) {
-        throw parseMessage;
-      } finally {
-        this.complete(status.code, status.message, responses, allResponseHeaders);
-      }
     };
 
     // ajaxTransport exists in jQuery 1.5+
@@ -85,8 +92,8 @@
       // XDomainRequests must be: asynchronous, GET or POST methods, HTTP or HTTPS protocol, and same scheme as calling page
       if (options.crossDomain && options.async && getOrPostRegEx.test(options.type) && httpRegEx.test(userOptions.url) && sameSchemeRegEx.test(userOptions.url)) {
         return new XDomainTransporter(userOptions, options);
-      }
+      } 
     });
-    $.support.cors = true;
+    jQuery.support.cors = true;
   }
 }).call(this, typeof exports === 'undefined' ? this : exports);
