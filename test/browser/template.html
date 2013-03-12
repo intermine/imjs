@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!--[if lt IE 9]>
+            <script src="http://cdn.intermine.org/js/html5shiv/r29/html5.js"></script>
+        <![endif]-->
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta charset="utf-8">
         <title>IMJS Tests</title>
@@ -20,7 +23,9 @@
         <!-- for local get from components, and do like this for jenkins -->
         <!-- Test Infrastructure -->
         <script>
-        mocha.setup({globals: ['navigator', 'getInterface', 'expect', 'intermine'], ui: 'bdd'});
+            mocha.setup({
+                globals: ['navigator', 'getInterface', 'expect', 'JSON', 'intermine'],
+                ui: 'bdd'});
         </script>
 
         <script>
