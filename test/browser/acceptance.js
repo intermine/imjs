@@ -238,12 +238,10 @@ describe('Acceptance', function() {
     var service = new Service(service_args);
 
     var clearUp = function(done) {
-      console.log("Cleaning up...");
       service.fetchLists().then(function(lists) {
         var gonners = lists.filter(function(l) { return l.hasTag('test') || l.hasTag('imjs') });
         var promises = gonners.map(function(l) { return l.del() });
         $.when.apply($, promises).fail(done).done(function() {
-          console.log("Finished cleaning");
           done();
         });
       });
