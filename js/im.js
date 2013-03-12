@@ -1,4 +1,4 @@
-/*! imjs - v2.1.4 - 2013-03-08 */
+/*! imjs - v2.1.5 - 2013-03-12 */
 
 /**
 This library is open source software according to the definition of the
@@ -10,99 +10,6 @@ The copyright is held by InterMine (www.intermine.org) and Alex Kalderimis (alex
 
 Thu Jun 14 13:18:14 BST 2012
 **/
-
-(function(root) {
-  if (typeof jQuery === 'undefined') {
-    return null; 
-  }
-  var $ = jQuery;
-  // jQuery.XDomainRequest.js
-  // Author: Jason Moon - @JSONMOON
-  // IE8+
-  // see: https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest
-  if (!$.support.cors && window.XDomainRequest) {
-    console.log("Patching IE x-domain request support");
-    var httpRegEx = /^https?:\/\//i;
-    var getOrPostRegEx = /^get|post$/i;
-    var sameSchemeRegEx = new RegExp('^'+location.protocol, 'i');
-    var jsonRegEx = /\/json/i;
-    var xmlRegEx = /\/xml/i;
-
-    var XDomainTransporter = function (userOptions, options) {
-      this.userOptions = userOptions;
-      this.options = options;
-      this.userType = (userOptions.dataType||'').toLowerCase();
-      _.bindAll(this);
-    };
-    XDomainTransporter.prototype.constructor = XDomainTransporter;
-    XDomainTransporter.prototype.send = function(headers, complete) {
-      this.xdr = new XDomainRequest();
-      this.complete = complete;
-      var xdr = this.xdr;
-      if (/^\d+$/.test(this.userOptions.timeout)) {
-        xdr.timeout = this.userOptions.timeout;
-      }
-      xdr.ontimeout = function() {
-        complete(500, 'timeout');
-      };
-      xdr.onerror = function() {
-        complete(500, 'error', { text: xdr.responseText });
-      };
-      xdr.onload = this.onLoad;
-      var postData = (this.userOptions.data && $.param(this.userOptions.data)) || '';
-      xdr.open(this.options.type, this.options.url);
-      xdr.send(postData);
-    };
-    XDomainTransporter.prototype.abort = function() {
-      if (xdr) {
-        xdr.abort();
-      }
-    };
-    XDomainTransporter.prototype.onLoad = function() {
-      var xdr = this.xdr;
-      var allResponseHeaders = 'Content-Length: ' + xdr.responseText.length + '\r\nContent-Type: ' + xdr.contentType;
-      var status = {code: 200, message: 'success'};
-      var responses = {text: xdr.responseText};
-      try {
-        if ((this.userType === 'json') || ((this.userType !== 'text') && jsonRegEx.test(xdr.contentType))) {
-          try {
-            responses.json = $.parseJSON(xdr.responseText);
-          } catch (e) {
-            status.code = 500;
-            status.message = 'parseerror';
-          }
-        } else if ((this.userType === 'xml') || ((this.userType !== 'text') && xmlRegEx.test(xdr.contentType))) {
-          var doc = new ActiveXObject('Microsoft.XMLDOM');
-          doc.async = false;
-          try {
-            doc.loadXML(xdr.responseText);
-          } catch(e) {
-            doc = undefined;
-          }
-          if (!doc || !doc.documentElement || doc.getElementsByTagName('parsererror').length) {
-            status.code = 500;
-            status.message = 'parseerror';
-            throw 'Invalid XML: ' + xdr.responseText;
-          }
-          responses.xml = doc;
-        }
-      } catch (parseMessage) {
-        throw parseMessage;
-      } finally {
-        this.complete(status.code, status.message, responses, allResponseHeaders);
-      }
-    };
-
-    // ajaxTransport exists in jQuery 1.5+
-    jQuery.ajaxTransport('text html xml json', function(options, userOptions, jqXHR){
-      // XDomainRequests must be: asynchronous, GET or POST methods, HTTP or HTTPS protocol, and same scheme as calling page
-      if (options.crossDomain && options.async && getOrPostRegEx.test(options.type) && httpRegEx.test(userOptions.url) && sameSchemeRegEx.test(userOptions.url)) {
-        return new XDomainTransporter(userOptions, options);
-      }
-    });
-    $.support.cors = true;
-  }
-}).call(this, typeof exports === 'undefined' ? this : exports);
 
 (function() {
   var IS_NODE, data, fs, imjs, intermine, path, pkg, _ref, _ref1;
@@ -127,46 +34,57 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.1.4";
+    imjs.VERSION = "2.1.5";
   }
 
 }).call(this);
 
 (function() {
-  var IS_NODE, constants, intermine, _ref, _ref1;
-
-  IS_NODE = typeof exports !== 'undefined';
-
-  if (IS_NODE) {
-    constants = exports;
-  } else {
-    intermine = ((_ref = this.intermine) != null ? _ref : this.intermine = {});
-    constants = ((_ref1 = intermine.constants) != null ? _ref1 : intermine.constants = {});
-  }
-
-  constants.ACCEPT_HEADER = {
-    'json': 'application/json',
-    'jsonobjects': 'application/json;type=objects',
-    'jsontable': 'application/json;type=table',
-    'jsonrows': 'application/json;type=rows',
-    'jsoncount': 'application/json;type=count',
-    'jsonp': 'application/javascript',
-    'jsonpobjects': 'application/javascript;type=objects',
-    'jsonptable': 'application/javascript;type=table',
-    'jsonprows': 'application/javascript;type=rows',
-    'jsonpcount': 'application/javascript;type=count'
-  };
-
-}).call(this);
-
-(function() {
-  var HAS_CONSOLE, IS_NODE, console, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
+  var HAS_CONSOLE, HAS_JSON, IS_NODE, NOT_ENUM, hasDontEnumBug, hasOwnProperty, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
 
   IS_NODE = typeof exports !== 'undefined';
 
   HAS_CONSOLE = typeof console !== 'undefined';
 
+  HAS_JSON = typeof JSON !== 'undefined';
+
+  NOT_ENUM = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
+
   if (!IS_NODE) {
+    if (!HAS_JSON) {
+      jQuery.getScript('http://cdn.intermine.org/js/json3/3.2.2/json3.min.js');
+    }
+    if (Object.keys == null) {
+      hasOwnProperty = Object.prototype.hasOwnProperty;
+      hasDontEnumBug = !{
+        toString: null
+      }.propertyIsEnumerable("toString");
+      Object.keys = function(o) {
+        var keys, name, nonEnum, _i, _len;
+        if (typeof o !== "object" && typeof o !== "" || o === null) {
+          throw new TypeError("Object.keys called on a non-object");
+        }
+        keys = (function() {
+          var _results;
+          _results = [];
+          for (name in o) {
+            if (hasOwnProperty.call(o, name)) {
+              _results.push(name);
+            }
+          }
+          return _results;
+        })();
+        if (hasDontEnumBug) {
+          for (_i = 0, _len = NOT_ENUM.length; _i < _len; _i++) {
+            nonEnum = NOT_ENUM[_i];
+            if (hasOwnProperty.call(o, nonEnum)) {
+              keys.push(nonEnum);
+            }
+          }
+        }
+        return keys;
+      };
+    }
     if (Array.prototype.map == null) {
       Array.prototype.map = function(f) {
         var x, _i, _len, _results;
@@ -218,7 +136,7 @@ Thu Jun 14 13:18:14 BST 2012
       };
     }
     if (!HAS_CONSOLE) {
-      console = {
+      this.console = {
         log: (function() {}),
         error: (function() {}),
         debug: (function() {})
@@ -234,6 +152,7 @@ Thu Jun 14 13:18:14 BST 2012
       console.debug = function() {};
     }
     if (console.log.apply == null) {
+      console.log("Your console needs patching.");
       _ref3 = ['log', 'error', 'debug'];
       _fn = function(m) {
         var oldM;
@@ -248,6 +167,133 @@ Thu Jun 14 13:18:14 BST 2012
       }
     }
   }
+
+}).call(this);
+
+(function(root, undefined) {
+  if (typeof jQuery === 'undefined') {
+    return null; 
+  }
+  var $ = jQuery;
+  // jQuery.XDomainRequest.js
+  // Author: Jason Moon - @JSONMOON
+  // IE8+
+  // see: https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest
+  if (!$.support.cors && window.XDomainRequest) {
+    console.log("Patching IE x-domain request support");
+    var httpRegEx = /^https?:\/\//i;
+    var getOrPostRegEx = /^get|post$/i;
+    var sameSchemeRegEx = new RegExp('^'+location.protocol, 'i');
+    var jsonRegEx = /\/json/i;
+    var xmlRegEx = /\/xml/i;
+
+    var XDomainTransporter = function (userOptions, options) {
+      this.userOptions = userOptions;
+      this.options = options;
+      this.userType = (userOptions.dataType||'').toLowerCase();
+      _.bindAll(this); // make sure we can use onLoad
+    };
+    XDomainTransporter.prototype.constructor = XDomainTransporter;
+    XDomainTransporter.prototype.send = function(headers, complete) {
+      this.xdr = new XDomainRequest();
+      this.complete = complete;
+      var xdr = this.xdr;
+      if (/^\d+$/.test(this.userOptions.timeout)) {
+        xdr.timeout = this.userOptions.timeout;
+      }
+      xdr.ontimeout = function() {
+        complete(500, 'timeout');
+      };
+      xdr.onerror = function() {
+        complete(500, 'error', { text: xdr.responseText });
+      };
+      xdr.onload = this.onLoad;
+      var postData = (this.userOptions.data && $.param(this.userOptions.data)) || '';
+      xdr.open(this.options.type, this.options.url);
+      xdr.send(postData);
+    };
+    XDomainTransporter.prototype.respond = function(status, statusText, responses, responseHeaders) {
+      var xdr = this.xdr;
+      xdr.onload = xdr.onerror = xdr.ontimeout = xdr.onprogress = jQuery.noop;
+      delete this.xdr;
+      jQuery.event.trigger('ajaxStop');
+      this.complete(status, statusText, responses, responseHeaders);
+    };
+    XDomainTransporter.prototype.abort = function() {
+      if (xdr) {
+        xdr.abort();
+      }
+    };
+    XDomainTransporter.prototype.onLoad = function() {
+        var xdr = this.xdr;
+        var allResponseHeaders = 'Content-Length: ' + xdr.responseText.length + '\r\nContent-Type: ' + xdr.contentType;
+        var status = {code: 200, message: 'success'};
+        var responses = {text: xdr.responseText};
+        try {
+          if ((this.userType === 'json') || ((this.userType !== 'text') && jsonRegEx.test(xdr.contentType))) {
+            try {
+              responses.json = $.parseJSON(xdr.responseText);
+            } catch (e) {
+              status.code = 500;
+              status.message = 'parseerror';
+            }
+          } else if ((this.userType === 'xml') || ((this.userType !== 'text') && xmlRegEx.test(xdr.contentType))) {
+            var doc = new ActiveXObject('Microsoft.XMLDOM');
+            doc.async = false;
+            try {
+              doc.loadXML(xdr.responseText);
+            } catch(e) {
+              doc = undefined;
+            }
+            if (!doc || !doc.documentElement || doc.getElementsByTagName('parsererror').length) {
+              status.code = 500;
+              status.message = 'parseerror';
+              throw 'Invalid XML: ' + xdr.responseText;
+            }
+            responses.xml = doc;
+          }
+        } catch (parseMessage) {
+          throw parseMessage;
+        } finally {
+          this.complete(status.code, status.message, responses, allResponseHeaders);
+        }
+    };
+
+    // ajaxTransport exists in jQuery 1.5+
+    jQuery.ajaxTransport('text html xml json', function(options, userOptions, jqXHR){
+      // XDomainRequests must be: asynchronous, GET or POST methods, HTTP or HTTPS protocol, and same scheme as calling page
+      if (options.crossDomain && options.async && getOrPostRegEx.test(options.type) && httpRegEx.test(userOptions.url) && sameSchemeRegEx.test(userOptions.url)) {
+        return new XDomainTransporter(userOptions, options);
+      } 
+    });
+    jQuery.support.cors = true;
+  }
+}).call(this, typeof exports === 'undefined' ? this : exports);
+
+(function() {
+  var IS_NODE, constants, intermine, _ref, _ref1;
+
+  IS_NODE = typeof exports !== 'undefined';
+
+  if (IS_NODE) {
+    constants = exports;
+  } else {
+    intermine = ((_ref = this.intermine) != null ? _ref : this.intermine = {});
+    constants = ((_ref1 = intermine.constants) != null ? _ref1 : intermine.constants = {});
+  }
+
+  constants.ACCEPT_HEADER = {
+    'json': 'application/json',
+    'jsonobjects': 'application/json;type=objects',
+    'jsontable': 'application/json;type=table',
+    'jsonrows': 'application/json;type=rows',
+    'jsoncount': 'application/json;type=count',
+    'jsonp': 'application/javascript',
+    'jsonpobjects': 'application/javascript;type=objects',
+    'jsonptable': 'application/javascript;type=table',
+    'jsonprows': 'application/javascript;type=rows',
+    'jsonpcount': 'application/javascript;type=count'
+  };
 
 }).call(this);
 
@@ -2926,7 +2972,7 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Service.prototype.makeRequest = function(method, path, data, cb, indiv) {
-      var errBack, opts, url, _ref, _ref1;
+      var dataType, errBack, opts, url, _ref, _ref1;
       if (method == null) {
         method = 'GET';
       }
@@ -2966,6 +3012,7 @@ Thu Jun 14 13:18:14 BST 2012
         method = 'GET';
         url += '?callback=?';
       }
+      dataType = /json/.test(data.format) ? 'json' : 'text';
       if (!http.supports(method)) {
         _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
       }
@@ -2974,7 +3021,7 @@ Thu Jun 14 13:18:14 BST 2012
       }
       opts = {
         data: data,
-        dataType: data.format,
+        dataType: dataType,
         success: cb,
         error: errBack,
         url: url,
