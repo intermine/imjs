@@ -7,6 +7,8 @@ args =
     root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'
     token: 'test-user-token'
 
+console.log "Testing against #{ args.root }" if process.env.DEBUG
+
 class Fixture
 
     constructor: ->
