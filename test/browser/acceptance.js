@@ -19,6 +19,7 @@ describe('Acceptance', function() {
   // can cause things to be slower than desired. That has nothing to
   // do with this library.
   this.slow(3000);
+  this.timeout(10000);
 
   var Service = intermine.Service;
 
@@ -237,14 +238,19 @@ describe('Acceptance', function() {
     var service = new Service(service_args);
 
     var clearUp = function(done) {
+      console.log("Cleaning up...");
       service.fetchLists().then(function(lists) {
         var gonners = lists.filter(function(l) { return l.hasTag('test') || l.hasTag('imjs') });
         var promises = gonners.map(function(l) { return l.del() });
-        $.when.apply($, promises).fail(done).done(function() { done() });
+        $.when.apply($, promises).fail(done).done(function() {
+          console.log("Finished cleaning");
+          done();
+        });
       });
     };
     this.beforeAll(clearUp);
     this.afterAll(clearUp);
+
     describe('Create List via Identifier Upload', function() {
 
       var TEST_NAME = 'test-list-from-idents';
@@ -257,20 +263,12 @@ describe('Acceptance', function() {
         });
       });
 
-      this.afterAll(function(done) {
-        service.fetchList(TEST_NAME).then(function(l) {
-          return l.del();
-        }).always(function() {
-          done();
-        });
-      });
-
       it('should have the right name, size, tags', function(done) {
         var opts = {
           name: TEST_NAME,
           type: 'Employee',
           description: 'A list created to test the upload mechanism',
-          tags: [ 'temp', 'imjs', 'browser' ]
+          tags: [ 'temp', 'imjs', 'browser', 'test' ]
         };
         var idents = [
           'anne, "brenda"',
@@ -296,14 +294,6 @@ describe('Acceptance', function() {
     describe('Combine through Intersection', function() {
 
       var TEST_NAME = 'intersection-test';
-
-      this.beforeAll(function(done) {
-        service.fetchList(TEST_NAME).then(function(l) {
-          return l.del();
-        }).always(function() {
-          done();
-        });
-      });
 
       it('should have the right name, size, tags, member', function(done) {
         var options = {
