@@ -10,8 +10,37 @@
 
 IS_NODE = typeof exports isnt 'undefined'
 HAS_CONSOLE = typeof console isnt 'undefined'
+HAS_JSON = typeof JSON isnt 'undefined'
+NOT_ENUM = [
+  'toString',
+  'toLocaleString',
+  'valueOf',
+  'hasOwnProperty',
+  'isPrototypeOf',
+  'propertyIsEnumerable',
+  'constructor'
+]
 
 unless IS_NODE
+
+  unless HAS_JSON
+    # Try and fix this broken browser.
+    jQuery.getScript 'http://cdn.intermine.org/js/json3/3.2.2/json3.min.js'
+
+  unless Object.keys?
+    hasOwnProperty = Object.prototype.hasOwnProperty
+    hasDontEnumBug = not {toString:null}.propertyIsEnumerable "toString"
+
+    Object.keys = (o) ->
+      if (typeof o isnt "object" && typeof o isnt "" || o is null)
+        throw new TypeError("Object.keys called on a non-object")
+
+      keys = (name for name of o when hasOwnProperty.call(o, name))
+     
+      if hasDontEnumBug
+        keys.push(nonEnum) for nonEnum in NOT_ENUM when hasOwnProperty.call(o, nonEnum)
+      
+      keys
 
   unless Array::map?
     Array::map = (f) -> (f x for x in @)
@@ -33,13 +62,14 @@ unless IS_NODE
         f.call((ctx ? @), x, i, @)
 
   unless HAS_CONSOLE
-    console = {log: (->), error: (->), debug: (->)}
+    @console = {log: (->), error: (->), debug: (->)}
 
   console.log ?= ->
   console.error ?= ->
   console.debug ?= ->
 
   unless console.log.apply? # Probably in IE here...
+    console.log("Your console needs patching.")
     for m in ['log', 'error', 'debug'] then do (m) ->
       oldM = console[m]
       console[m] = (args) -> oldM(args)
