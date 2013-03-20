@@ -6,6 +6,7 @@
     , "src/ie8-cors-support.js"
     , "build/constants.js"
     , "build/util.js"
+    , "build/lzw.js"
     , "build/jquery-http.js"
     , "build/table.js"
     , "build/path.js"
