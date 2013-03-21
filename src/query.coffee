@@ -716,6 +716,20 @@ class Query
       req.token = @service.token
     "#{ @service.root }query/results?#{ toQueryString req }"
 
+  # Get a query id for referencing this query in subsequent requests.
+  #
+  # Note that this id represents a snapshot of the query at the time of
+  # the request. Any changes to the query should require a new id to be fetched.
+  #
+  # Duplicate queries posted to the same service will receive the same id back. So go
+  # wild*
+  #
+  # [* do not really go wild]
+  #
+  # @param [->] cb An optional callback function.
+  # @return [Promise<int>] A promise to yield an id.
+  fetchQID: (cb) -> @service.post('queries', query: @toXML()).then((resp) -> resp.id).done(cb)
+
   addPI = (p) -> p.append('primaryIdentifier').toString()
 
   __bio_req: (types, n) ->
