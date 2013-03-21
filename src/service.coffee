@@ -166,7 +166,7 @@ class Service
     @root = @root.replace /ice$/, "ice/"
     @errorHandler ?= DEFAULT_ERROR_HANDLER
     @help ?= 'no.help.available@dev.null'
-    @useCache = !noCache # Peristent processed might not want to cache model, version, etc.
+    @useCache = !noCache # Peristent processes might not want to cache model, version, etc.
     loc = if IS_NODE then '' else location.protocol + '//' + location.host
 
     @getFormat = (intended = 'json') =>
