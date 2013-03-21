@@ -1,4 +1,4 @@
-/*! imjs - v2.1.5 - 2013-03-12 */
+/*! imjs - v2.1.5 - 2013-03-21 */
 
 /**
 This library is open source software according to the definition of the
@@ -558,6 +558,90 @@ Thu Jun 14 13:18:14 BST 2012
       return p.then(f);
     });
     return fld(_.flatten(fns));
+  };
+
+}).call(this);
+
+(function() {
+  var IS_NODE, intermine, __root__, _ref;
+
+  IS_NODE = typeof exports !== 'undefined';
+
+  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+  if (IS_NODE) {
+    intermine = __root__;
+  } else {
+    intermine = __root__.intermine;
+    if (intermine == null) {
+      intermine = __root__.intermine = {};
+    }
+  }
+
+  if ((_ref = intermine.compression) == null) {
+    intermine.compression = {};
+  }
+
+  intermine.compression.LZW = {
+    encode: function(s) {
+      var code, currChar, data, dict, mapped, o, out, phrase, _i, _len;
+      dict = {};
+      data = (s + "").split("");
+      out = [];
+      currChar;
+
+      phrase = data[0];
+      code = 256;
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        currChar = data[_i];
+        currChar = data[i];
+        if (dict[phrase + currChar] != null) {
+          phrase += currChar;
+        } else {
+          out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+          dict[phrase + currChar] = code;
+          code++;
+          phrase = currChar;
+        }
+      }
+      out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+      mapped = (function() {
+        var _j, _len1, _results;
+        _results = [];
+        for (_j = 0, _len1 = out.length; _j < _len1; _j++) {
+          o = out[_j];
+          _results.push(String.fromCharCode(o));
+        }
+        return _results;
+      })();
+      return mapped.join("");
+    },
+    decode: function(s) {
+      var code, currChar, currCode, data, dict, oldPhrase, out, phrase, _i, _len;
+      dict = {};
+      data = (s + "").split("");
+      currChar = data[0];
+      oldPhrase = currChar;
+      out = [currChar];
+      code = 256;
+      phrase;
+
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        currCode = data[_i];
+        currCode = data[i].charCodeAt(0);
+        if (currCode < 256) {
+          phrase = data[i];
+        } else {
+          phrase = dict[currCode] ? dict[currCode] : oldPhrase + currChar;
+        }
+        out.push(phrase);
+        currChar = phrase.charAt(0);
+        dict[code] = oldPhrase + currChar;
+        code++;
+        oldPhrase = phrase;
+      }
+      return out.join("");
+    }
   };
 
 }).call(this);
@@ -2579,6 +2663,14 @@ Thu Jun 14 13:18:14 BST 2012
         req.token = this.service.token;
       }
       return "" + this.service.root + "query/results?" + (toQueryString(req));
+    };
+
+    Query.prototype.fetchQID = function(cb) {
+      return this.service.post('queries', {
+        query: this.toXML()
+      }).then(function(resp) {
+        return resp.id;
+      }).done(cb);
     };
 
     addPI = function(p) {
