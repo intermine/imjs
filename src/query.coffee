@@ -679,7 +679,7 @@ class Query
     req =
       query: @toXML()
       lang: lang
-    @service.get('query/code', req).pipe(@service.VERIFIER).pipe(get 'code').done(cb)
+    @service.post('query/code', req).pipe(@service.VERIFIER).pipe(get 'code').done(cb)
 
   # Save a query to the server, with the name given.
   save: (name, cb) ->
