@@ -2613,7 +2613,7 @@ Thu Jun 14 13:18:14 BST 2012
         query: this.toXML(),
         lang: lang
       };
-      return this.service.get('query/code', req).pipe(this.service.VERIFIER).pipe(get('code')).done(cb);
+      return this.service.post('query/code', req).pipe(this.service.VERIFIER).pipe(get('code')).done(cb);
     };
 
     Query.prototype.save = function(name, cb) {
