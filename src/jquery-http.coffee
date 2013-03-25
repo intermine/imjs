@@ -1,4 +1,4 @@
-{jQuery, intermine, XDomainRequest} = @
+{jQuery, _, intermine, XDomainRequest} = @
 http = (intermine.http ?= {})
 {ACCEPT_HEADER} = intermine.constants
 {get, error} = intermine.funcutils

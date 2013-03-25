@@ -1,4 +1,4 @@
-/*! imjs - v2.2.1 - 2013-03-22 */
+/*! imjs - v2.2.1 - 2013-03-25 */
 
 /**
 This library is open source software according to the definition of the
@@ -647,9 +647,9 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var ACCEPT_HEADER, CHECKING_PIPE, ERROR_PIPE, XDomainRequest, error, get, http, inIE9, intermine, jQuery, mappingForIE, wrapCbs, _ref, _ref1;
+  var ACCEPT_HEADER, CHECKING_PIPE, ERROR_PIPE, XDomainRequest, error, get, http, inIE9, intermine, jQuery, mappingForIE, wrapCbs, _, _ref, _ref1;
 
-  jQuery = this.jQuery, intermine = this.intermine, XDomainRequest = this.XDomainRequest;
+  jQuery = this.jQuery, _ = this._, intermine = this.intermine, XDomainRequest = this.XDomainRequest;
 
   http = ((_ref = intermine.http) != null ? _ref : intermine.http = {});
 
