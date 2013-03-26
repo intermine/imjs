@@ -1,4 +1,4 @@
-/*! imjs - v2.2.1 - 2013-03-25 */
+/*! imjs - v2.2.3 - 2013-03-26 */
 
 /**
 This library is open source software according to the definition of the
@@ -34,7 +34,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.2.1";
+    imjs.VERSION = "2.2.3";
   }
 
 }).call(this);
@@ -141,6 +141,9 @@ Thu Jun 14 13:18:14 BST 2012
         error: (function() {}),
         debug: (function() {})
       };
+      if (typeof window !== "undefined" && window !== null) {
+        window.console = this.console;
+      }
     }
     if ((_ref = console.log) == null) {
       console.log = function() {};
@@ -171,6 +174,8 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function(root, undefined) {
+  var _ = root._,
+      jQuery = root.jQuery;
   if (typeof jQuery === 'undefined') {
     return null; 
   }

@@ -63,6 +63,7 @@ unless IS_NODE
 
   unless HAS_CONSOLE
     @console = {log: (->), error: (->), debug: (->)}
+    window.console = @console if window?
 
   console.log ?= ->
   console.error ?= ->

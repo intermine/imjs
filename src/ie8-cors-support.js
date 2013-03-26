@@ -1,4 +1,6 @@
 (function(root, undefined) {
+  var _ = root._,
+      jQuery = root.jQuery;
   if (typeof jQuery === 'undefined') {
     return null; 
   }
