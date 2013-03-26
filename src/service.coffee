@@ -630,7 +630,7 @@ class Service
   # @param [(Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) => $.when(@fetchModel(), @fetchSummaryFields()).pipe (m, sfs) =>
-    args = _.defaults {}, options, {model: m, summaryFields: sfs}
+    args = _.extend {}, options, {model: m, summaryFields: sfs}
     service = @
     Deferred ->
       @fail(service.errorHandler)
