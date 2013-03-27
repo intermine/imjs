@@ -102,6 +102,9 @@ describe 'Query', ->
     it 'should throw errors if there are duplicate views', ->
       (-> q.addToSelect 'Employee.name').should.throw(/already/)
 
+    it 'should throw errors if the addenda contain duplicates', ->
+      (-> q.addToSelect ['Employee.end', 'Employee.end']).should.throw /already/
+
     it 'should not have added more views', ->
       q.views.length.should.equal 3
 

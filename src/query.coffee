@@ -275,7 +275,7 @@ class Query
   addToSelect: (views) ->
     views = if _.isString(views) then [views] else ( views || [] )
     toAdd = _.flatten [_.map views, _.compose(@expandStar, @adjustPath)]
-    dups = (p for p in toAdd when p in @views)
+    dups = (p for p in toAdd when p in @views or _.indexOf(toAdd, p) isnt _.lastIndexOf(toAdd, p))
     if dups.length
       throw new Error "#{ dups } already in the select list"
     for p in toAdd
