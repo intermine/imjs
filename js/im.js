@@ -1,4 +1,4 @@
-/*! imjs - v2.2.4 - 2013-03-26 */
+/*! imjs - v2.2.4 - 2013-03-27 */
 
 /**
 This library is open source software according to the definition of the
@@ -2020,12 +2020,25 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Query.prototype.addToSelect = function(views) {
-      var p, toAdd, _i, _len, _ref2;
+      var dups, p, toAdd, _i, _len;
       views = _.isString(views) ? [views] : views || [];
-      toAdd = _.map(views, _.compose(this.expandStar, this.adjustPath));
-      _ref2 = _.flatten([toAdd]);
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        p = _ref2[_i];
+      toAdd = _.flatten([_.map(views, _.compose(this.expandStar, this.adjustPath))]);
+      dups = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
+          p = toAdd[_i];
+          if (__indexOf.call(this.views, p) >= 0) {
+            _results.push(p);
+          }
+        }
+        return _results;
+      }).call(this);
+      if (dups.length) {
+        throw new Error("" + dups + " already in the select list");
+      }
+      for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
+        p = toAdd[_i];
         this.views.push(p);
       }
       return this.trigger('add:view change:views', toAdd);

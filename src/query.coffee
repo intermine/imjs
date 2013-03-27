@@ -274,8 +274,12 @@ class Query
   # Add an element to the select list.
   addToSelect: (views) ->
     views = if _.isString(views) then [views] else ( views || [] )
-    toAdd = _.map views, _.compose(@expandStar, @adjustPath)
-    @views.push(p) for p in _.flatten([toAdd])
+    toAdd = _.flatten [_.map views, _.compose(@expandStar, @adjustPath)]
+    dups = (p for p in toAdd when p in @views)
+    if dups.length
+      throw new Error "#{ dups } already in the select list"
+    for p in toAdd
+      @views.push(p)
     @trigger('add:view change:views', toAdd)
   
   # Replace the existing select list with the one passed as an argument.

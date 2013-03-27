@@ -94,6 +94,17 @@ describe 'Query', ->
       removals.should.equal 2
       changes.should.equal 2
 
+  describe '#addToSelect(path)', ->
+
+    q = new Query from: 'Employee', select: ['name', 'age', 'fullTime']
+    q.model = testmodel
+
+    it 'should throw errors if there are duplicate views', ->
+      (-> q.addToSelect 'Employee.name').should.throw(/already/)
+
+    it 'should not have added more views', ->
+      q.views.length.should.equal 3
+
   describe '#clone()', ->
 
     orig = new Query from: 'Employee', select: ['name']
