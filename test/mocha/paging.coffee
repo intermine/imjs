@@ -41,7 +41,7 @@ describe 'Query', ->
 
     @beforeAll prepare -> service.query(olderEmployees).then (q) -> q.previous()
 
-    it 'gets the query to retrieve the next page of results', eventually (previousQuery) ->
+    it 'gets the query to retrieve the previous page of results', eventually (previousQuery) ->
       previousQuery.start.should.equal 10
     
     it 'should fetch the appropriate page of results', eventually (q) -> q.records().then (emps) ->
