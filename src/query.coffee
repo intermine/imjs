@@ -68,6 +68,24 @@ conStr = (c) ->
   else
     simpleConStr(c)
 
+headLess = (path) -> path.replace /^[^\.]+\./, ''
+
+copyCon = (con) ->
+  {path, type, op, value, values, ids, code} = con
+  ids = ids?.slice()
+  values = values?.slice()
+  noUndefVals {path, type, op, value, values, ids, code}
+
+conToJSON = (con) ->
+  copy = copyCon con
+  copy.path = headLess copy.path
+  return copy
+
+noUndefVals = (x) ->
+  for k, v of x
+    delete x[k] unless v?
+  return x
+
 didntRemove = (orig, reduced) ->
   "Did not remove a single constraint. original = #{ orig }, reduced = #{ reduced }"
 
@@ -217,6 +235,10 @@ class Query
       sortOrder: ""
     properties ?= {}
     @displayNames = _.extend {}, (properties.displayNames ? properties.aliases ? {})
+
+    # Copy over name, title, etc
+    for prop in ['name', 'title', 'comment', 'description'] when properties[prop]?
+      @[prop] = properties[prop]
   
     @service = service ? {}
     @model = properties.model ? {}
@@ -639,6 +661,9 @@ class Query
   addConstraint: (constraint) =>
     if _.isArray(constraint)
       constraint = interpretConArray constraint
+    else
+      constraint = copyCon constraint
+
     constraint.path = @adjustPath constraint.path
     unless constraint.type?
       try
@@ -658,7 +683,7 @@ class Query
 
   getSorting: -> ("#{oe.path} #{oe.direction}" for oe in @sortOrder).join(' ')
 
-  getConstraintXML: () ->
+  getConstraintXML: ->
     if @constraints.length
       concatMap(conStr) concatMap(id) partition((c) -> c.type?) @constraints
     else
@@ -678,6 +703,15 @@ class Query
     attrs.name = @name if @name?
     headAttrs = (k + '="' + v + '"' for k, v of attrs when v).join(' ')
     "<query #{headAttrs} >#{ @getJoinXML() }#{ @getConstraintXML() }</query>"
+
+  toJSON: -> noUndefVals {
+    @name, @title, @comment, @description, @constraintLogic,
+    from: @root
+    select: (headLess v for v in @views)
+    orderBy: ({path: headLess(path), direction} for {path, direction} in @sortOrder)
+    joins: (headLess path for path, style of @joins when style is 'OUTER')
+    where: (conToJSON c for c in @constraints)
+  }
 
   fetchCode: (lang, cb) ->
     req =

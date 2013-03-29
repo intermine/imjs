@@ -60,6 +60,52 @@ describe 'Query', ->
 
     it 'should be synonymous', -> qtrad.toXML().should.equal(qsqlish.toXML())
 
+  describe 'toJSON', ->
+
+    q = new Query options.intermine
+
+    asStr = '{"constraintLogic":"","from":"Employee",' +
+      '"select":["name","age","department.name"],"orderBy":[],' +
+      '"joins":[],"where":[{"path":"department.name","op":"=",' +
+      '"value":"Sales*"},{"path":"age","op":">","value":"50"}]}'
+
+    it 'should be what we think', ->
+      q.toJSON().should.eql
+        from: 'Employee'
+        select: ['name', 'age', 'department.name']
+        orderBy: []
+        constraintLogic: ''
+        joins: []
+        where: [
+          {path: "department.name", op: '=', value: "Sales*"},
+          {path: "age", op: ">", value: "50"}
+        ]
+
+    it 'should produce unconnected objects', ->
+      j1 = q.toJSON()
+      j2 = q.toJSON()
+      j1.select.push 'foo'
+      j1.select.should.include 'foo'
+      j2.select.should.not.include 'foo'
+      q.views.should.not.include 'foo'
+
+    it 'should clone the values in multi-value constraints', ->
+      q2 = new Query
+        select: 'Employee.name'
+        where: [ {path: 'name', op: 'ONE OF', values: ['x', 'y', 'z']} ]
+      j = q2.toJSON()
+      j.where[0].values.should.eql ['x', 'y', 'z']
+      j.where[0].values.push 'foo'
+      q2.constraints[0].values.should.not.include 'foo'
+
+    it 'should produce objects suitable as query arguments', ->
+      j = q.toJSON()
+      q2 = new Query j
+      q2.toJSON().should.eql j
+      q2.views.should.include 'Employee.age'
+
+    it 'should then stringify correctly', -> (JSON.stringify q).should.eql asStr
+
   describe 'addToSelect(path)', ->
 
     q = new Query from: 'Employee', select: ['name', 'age']
