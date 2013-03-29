@@ -1,4 +1,4 @@
-/*! imjs - v2.2.6 - 2013-03-27 */
+/*! imjs - v2.3.0 - 2013-03-29 */
 
 /**
 This library is open source software according to the definition of the
@@ -34,7 +34,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.2.6";
+    imjs.VERSION = "2.3.0";
   }
 
 }).call(this);
@@ -1592,7 +1592,7 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conValStr, concatMap, decapitate, didntRemove, f, fold, get, get_canonical_op, id, idConStr, intermine, interpretConArray, interpretConstraint, jQuery, mth, multiConStr, noValueConStr, partition, simpleConStr, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
+  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, jQuery, mth, multiConStr, noUndefVals, noValueConStr, partition, simpleConStr, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice;
@@ -1693,6 +1693,44 @@ Thu Jun 14 13:18:14 BST 2012
     } else {
       return simpleConStr(c);
     }
+  };
+
+  headLess = function(path) {
+    return path.replace(/^[^\.]+\./, '');
+  };
+
+  copyCon = function(con) {
+    var code, ids, op, path, type, value, values;
+    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, ids = con.ids, code = con.code;
+    ids = ids != null ? ids.slice() : void 0;
+    values = values != null ? values.slice() : void 0;
+    return noUndefVals({
+      path: path,
+      type: type,
+      op: op,
+      value: value,
+      values: values,
+      ids: ids,
+      code: code
+    });
+  };
+
+  conToJSON = function(con) {
+    var copy;
+    copy = copyCon(con);
+    copy.path = headLess(copy.path);
+    return copy;
+  };
+
+  noUndefVals = function(x) {
+    var k, v;
+    for (k in x) {
+      v = x[k];
+      if (v == null) {
+        delete x[k];
+      }
+    }
+    return x;
   };
 
   didntRemove = function(orig, reduced) {
@@ -1908,7 +1946,7 @@ Thu Jun 14 13:18:14 BST 2012
 
       this.select = __bind(this.select, this);
 
-      var _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+      var prop, _i, _len, _ref10, _ref11, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
         _this = this;
       _.defaults(this, {
         constraints: [],
@@ -1921,12 +1959,19 @@ Thu Jun 14 13:18:14 BST 2012
         properties = {};
       }
       this.displayNames = _.extend({}, (_ref2 = (_ref3 = properties.displayNames) != null ? _ref3 : properties.aliases) != null ? _ref2 : {});
+      _ref4 = ['name', 'title', 'comment', 'description'];
+      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+        prop = _ref4[_i];
+        if (properties[prop] != null) {
+          this[prop] = properties[prop];
+        }
+      }
       this.service = service != null ? service : {};
-      this.model = (_ref4 = properties.model) != null ? _ref4 : {};
-      this.summaryFields = (_ref5 = properties.summaryFields) != null ? _ref5 : {};
-      this.root = (_ref6 = properties.root) != null ? _ref6 : properties.from;
-      this.maxRows = (_ref7 = (_ref8 = properties.size) != null ? _ref8 : properties.limit) != null ? _ref7 : properties.maxRows;
-      this.start = (_ref9 = (_ref10 = properties.start) != null ? _ref10 : properties.offset) != null ? _ref9 : 0;
+      this.model = (_ref5 = properties.model) != null ? _ref5 : {};
+      this.summaryFields = (_ref6 = properties.summaryFields) != null ? _ref6 : {};
+      this.root = (_ref7 = properties.root) != null ? _ref7 : properties.from;
+      this.maxRows = (_ref8 = (_ref9 = properties.size) != null ? _ref9 : properties.limit) != null ? _ref8 : properties.maxRows;
+      this.start = (_ref10 = (_ref11 = properties.start) != null ? _ref11 : properties.offset) != null ? _ref10 : 0;
       this.select(properties.views || properties.view || properties.select || []);
       this.addConstraints(properties.constraints || properties.where || []);
       this.addJoins(properties.joins || properties.join || []);
@@ -2539,6 +2584,8 @@ Thu Jun 14 13:18:14 BST 2012
     Query.prototype.addConstraint = function(constraint) {
       if (_.isArray(constraint)) {
         constraint = interpretConArray(constraint);
+      } else {
+        constraint = copyCon(constraint);
       }
       constraint.path = this.adjustPath(constraint.path);
       if (constraint.type == null) {
@@ -2623,6 +2670,63 @@ Thu Jun 14 13:18:14 BST 2012
         return _results;
       })()).join(' ');
       return "<query " + headAttrs + " >" + (this.getJoinXML()) + (this.getConstraintXML()) + "</query>";
+    };
+
+    Query.prototype.toJSON = function() {
+      var c, direction, path, style, v;
+      return noUndefVals({
+        name: this.name,
+        title: this.title,
+        comment: this.comment,
+        description: this.description,
+        constraintLogic: this.constraintLogic,
+        from: this.root,
+        select: (function() {
+          var _i, _len, _ref2, _results;
+          _ref2 = this.views;
+          _results = [];
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            v = _ref2[_i];
+            _results.push(headLess(v));
+          }
+          return _results;
+        }).call(this),
+        orderBy: (function() {
+          var _i, _len, _ref2, _ref3, _results;
+          _ref2 = this.sortOrder;
+          _results = [];
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            _ref3 = _ref2[_i], path = _ref3.path, direction = _ref3.direction;
+            _results.push({
+              path: headLess(path),
+              direction: direction
+            });
+          }
+          return _results;
+        }).call(this),
+        joins: (function() {
+          var _ref2, _results;
+          _ref2 = this.joins;
+          _results = [];
+          for (path in _ref2) {
+            style = _ref2[path];
+            if (style === 'OUTER') {
+              _results.push(headLess(path));
+            }
+          }
+          return _results;
+        }).call(this),
+        where: (function() {
+          var _i, _len, _ref2, _results;
+          _ref2 = this.constraints;
+          _results = [];
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            c = _ref2[_i];
+            _results.push(conToJSON(c));
+          }
+          return _results;
+        }).call(this)
+      });
     };
 
     Query.prototype.fetchCode = function(lang, cb) {
