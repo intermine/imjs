@@ -2,7 +2,13 @@
 {funcutils: {invoke}} = require './fixture'
 
 clear = (service, name) -> () -> Deferred ->
-    service.fetchList(name).then(invoke 'del').always(@resolve)
+    eh = service.errorHandler # Fetch list logs errors, which we don't care about.
+    service.errorHandler = ->
+    service.fetchList(name)
+           .then(invoke 'del')
+           .always(-> service.errorHandler = eh)
+           .always(@resolve)
+
 
 cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))

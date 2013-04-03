@@ -38,7 +38,7 @@ RESULTS_METHODS = [
   'records', 'rows', 'table', 'tableRows'
 ]
 
-LIST_PIPE = (service) -> _.compose service.fetchList, get 'listName'
+LIST_PIPE = (service) ->  _.compose service.fetchList, get 'listName'
 
 # The valid codes for a query
 CODES = [
@@ -49,7 +49,7 @@ CODES = [
 decapitate = (x) -> x.substr(x.indexOf('.'))
 
 # Constraint XML machinery
-conValStr = (v) -> "<value>#{_.escape v}</value>"
+conValStr = (v) -> if v? then "<value>#{_.escape v}</value>" else "<nullValue/>"
 conAttrs = (c, names) -> ("""#{k}="#{_.escape(v)}" """ for k, v of c when (k in names)).join('')
 noValueConStr = (c) -> """<constraint #{ conAttrs(c, BASIC_ATTRS) }/>"""
 typeConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'type']) }/>"""
