@@ -31,7 +31,13 @@
         <script>
             var service_args = {
                 root: '<%= args.root %>',
-                token: '<%= args.token %>'
+                token: '<%= args.token %>',
+                errorHandler: function(err) {
+                    if (!window.mochaPhantomJS) {
+                        // Don't log in phantom.
+                        console.error(err);
+                    }
+                }
             };
         </script>
 
