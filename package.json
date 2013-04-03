@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/main",
   "keywords": [
@@ -22,7 +22,8 @@
   "dependencies": {
     "underscore": "stable",
     "underscore.deferred": "0.2.0",
-    "buffered-response": "latest"
+    "buffered-response": "latest",
+    "xmldom": "~0.1.15"
   },
   "engines": {
     "node": ">= 0.8.0"
