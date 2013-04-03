@@ -8,6 +8,7 @@
     , "build/util.js"
     , "build/lzw.js"
     , "build/jquery-http.js"
+    , "build/xml.js"
     , "build/table.js"
     , "build/path.js"
     , "build/model.js"
