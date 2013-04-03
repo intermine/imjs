@@ -20,7 +20,7 @@ else
 # @param [->] f The function to curry.
 # @param args the arguments to curry.
 # @return a curried function.
-root.curry = (f, args...) -> (rest...) -> f.apply(null, args.concat(rest))
+root.curry = curry = (f, args...) -> (rest...) -> f.apply(null, args.concat(rest))
 
 # Helper for transforming an error into a rejection.
 # @param e The error.
@@ -32,7 +32,7 @@ root.error = (e) -> Deferred( -> @reject new Error(e) ).promise()
 # @return [Promise<args...>] A promise to resolve with the resolution.
 root.success = success = (args...) -> Deferred( -> @resolve args... ).promise()
 
-root.fold = fold = (init, f) -> (xs) ->
+root.fold = fold = (f) -> (init, xs) ->
   if xs.reduce? # arrays
     xs.reduce f, init
   else # objects
@@ -43,15 +43,18 @@ root.fold = fold = (init, f) -> (xs) ->
 
 root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
 
+# Curried version of filtering
+root.filter = (f) -> (xs) -> (x for x in xs when f x)
+
 # Until I can find a nicer name for this...
 # Basically a mapping over an object, taking a
 # function of the form (oldk, oldv) -> [newk, newv]
-root.omap = (f) -> (xs) ->
-  merger = (a, oldk, oldv) ->
+root.omap = (f) ->
+  merger = fold (a, oldk, oldv) ->
     [newk, newv] = f oldk, oldv
     a[newk] = newv
     return a
-  (root.fold {}, merger) xs
+  (xs) -> merger {}, xs
 
 root.copy = root.omap (k, v) -> [k, v]
 
@@ -64,6 +67,12 @@ root.partition = (f) -> (xs) ->
     else
       falses.push x
   [trues, falses]
+
+# The identity function
+#
+# @param x Something
+# @return The self same thing.
+root.id = id = (x) -> x
 
 # Implementation of concatmap.
 #
@@ -91,19 +100,13 @@ root.concatMap = (f) -> (xs) ->
 
 root.flatMap = root.concatMap
 
-root.sum = root.concatMap ->
+root.sum = root.concatMap id
 
 root.AND = (a, b) -> a and b
 
 root.OR = (a, b) -> a or b
 
 root.NOT = (x) -> not x
-
-# The identity function
-#
-# @param x Something
-# @return The self same thing.
-root.id = id = (x) -> x
 
 root.any = (xs, f = id) ->
   for x in xs
@@ -191,6 +194,14 @@ root.dejoin = (q) ->
   return q
 
 # Sequence a series of asynchronous functions.
-root.sequence = (fns...) ->
-  fld = fold success(), (p, f) -> p.then f
-  fld _.flatten fns
+thenFold = fold (p, f) -> p.then f
+
+root.sequence = (fns...) -> thenFold success(), _.flatten fns
+
+pairFold = fold (o, [k, v]) ->
+  if o[k]?
+    throw new Error("Duplicate key: #{ k }")
+  o[k] = v
+  o
+
+root.pairsToObj = (pairs) -> pairFold {}, pairs

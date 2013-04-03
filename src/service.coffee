@@ -31,7 +31,7 @@ else
   to_query_string = (obj) -> jQuery.param(obj, true) # traditional serialization.
   {Model, Query, List, User, IDResolutionJob, funcutils, http} = intermine
 
-{curry, fold, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
+{pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -212,7 +212,7 @@ class Service
     if _.isArray cb
       [cb, errBack] = cb
     if _.isArray data
-      data = _.foldl data, ((m, [k, v]) -> m[k] = v; m), {}
+      data = pairsToObj data
 
     url = @root + path
     errBack ?= @errorHandler
@@ -599,9 +599,11 @@ class Service
   fetchWidgets: (cb) => REQUIRES_VERSION @, 8, =>
     _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
+
+  toMapByName = omap (w) -> [w.name, w]
+
   fetchWidgetMap: (cb) => REQUIRES_VERSION @, 8, =>
-    toMap = fold {}, (m, w) -> m[w.name] = w; m
-    (@__wmap__ ?= @fetchWidgets().then(toMap)).done(cb)
+    (@__wmap__ ?= @fetchWidgets().then(toMapByName)).done(cb)
 
   # Fetch the description of the data model for this service.
   # @return [Promise<Model>] A promise to yield metadata about this service.
@@ -686,7 +688,7 @@ class Service
   # @param [(List) ->] cb A function that receives a {List}.
   # @return [Promise<List>] A promise to yield a {List}.
   createList: (opts = {}, ids = '', cb = ->) =>
-    adjust = curry _.defaults, token: @token, tags: (opts.tags or [])
+    adjust = (x) => _.defaults {@token, tags: (opts.tags or [])}, x
     req =
       data: if _.isArray(ids) then ids.map((x) -> "\"#{ x }\"").join("\n") else ids
       dataType: 'json'

@@ -16,10 +16,11 @@ if IS_NODE
   {_}             = require('underscore')
   {Deferred}  = $ = require('underscore.deferred')
   toQueryString   = require('querystring').stringify
-  {partition, fold, take, concatMap, id, get} = require('./util')
+  intermine.xml   = require('./xml')
+  {pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = require('./util')
 else
   {_, jQuery, intermine} = __root__
-  {partition, fold, take, concatMap, id, get} = intermine.funcutils
+  {pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = intermine.funcutils
   {Deferred}  = $ = jQuery
   toQueryString   = (obj) -> jQuery.param(obj, true) # Traditional serialization.
 
@@ -141,6 +142,12 @@ interpretConArray = (conArgs) ->
       constraint.extraValue = conArgs[2]
   return constraint
 
+stringToSortOrder = (str) ->
+  return [] unless str?
+  parts = str.split /\s+/
+  pathIndices = (x * 2 for x in [0 ... (parts.length / 2)])
+  ([parts[i], parts[i + 1]] for i in pathIndices)
+
 class Query
   @JOIN_STYLES = ['INNER', 'OUTER']
   @BIO_FORMATS = ['gff3', 'fasta', 'bed']
@@ -225,6 +232,35 @@ class Query
         node.callback.apply(node.context || this, args)
 
     this
+
+  qAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment']
+  cAttrs = ['path', 'type', 'op', 'code', 'value', 'ids']
+  toAttrPairs = (el, attrs) -> ([x, el.getAttribute(x)] for x in attrs when el.hasAttribute(x))
+  kids = (el, name) -> (kid for kid in el.getElementsByTagName(name))
+  xmlAttr = (name) -> (el) -> el.getAttribute name
+
+  @fromXML: (xml) ->
+    dom = intermine.xml.parse xml
+    query = (kids(dom, 'query')[0] or kids(dom, 'template')[0])
+    unless query
+      throw new Error("no query in xml")
+
+    pathOf = xmlAttr 'path'
+    styleOf = xmlAttr 'style'
+
+    q = pairsToObj toAttrPairs query, qAttrs
+    q.view = q.view.split /\s+/
+    q.sortOrder = stringToSortOrder q.sortOrder
+    q.joins = (pathOf j for j in kids(query, 'join') when styleOf(j) is 'OUTER')
+    q.constraints = for con in kids(query, 'constraint') then do (con) ->
+      c = pairsToObj toAttrPairs con, cAttrs
+      c.ids = (parseInt(x, 10) for x in c.ids.split(',')) if c.ids?
+      values = kids(con, 'value')
+      if values.length
+        c.values = ((tn.data for tn in v.childNodes).join('') for v in values)
+      c
+
+    return q
 
   constructor: (properties, service) ->
     _.defaults @,
@@ -335,7 +371,8 @@ class Query
 
   # Get the mapping from path to class-name that is defined by the
   # subtype constraints.
-  getSubclasses: () -> fold({}, ((a, c) -> a[c.path] = c.type if c.type?;a)) @constraints
+  scFold = _.compose pairsToObj, (filter get 1), invoke 'map', (c) -> [c.path, c.type]
+  getSubclasses: () -> scFold @constraints
 
   # Get the type of a path.
   getType: (path) -> @getPathInfo(path).getType()
@@ -592,10 +629,13 @@ class Query
     so = input
     if _.isString(input)
       so = {path: input, direction: 'ASC'}
+    else if _.isArray input
+      [path, direction] = input
+      so = {path, direction}
     else if (not input.path?)
-      k = _.keys(input)[0]
-      v = _.values(input)[0]
-      so = {path: k, direction: v}
+      path = _.keys(input)[0]
+      direction = _.values(input)[0]
+      so = {path, direction}
 
     so.path = @adjustPath(so.path)
     so.direction = so.direction.toUpperCase()
@@ -619,7 +659,7 @@ class Query
   orderBy: (oes) ->
     @sortOrder = []
     for oe in oes
-      @addSortOrder(oe)
+      @addSortOrder @_parse_sort_order oe
     @trigger 'set:sortorder', @sortOrder
 
   addJoins: (joins) ->
