@@ -1,36 +1,43 @@
 Fixture              = require './lib/fixture'
-{prepare, eventually, always} = require './lib/utils'
+{needs, prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 once = require('underscore.deferred').when
+{invoke} = Fixture.funcutils
+
+atV = needs 12
 
 describe 'Query', ->
 
+  {service, olderEmployees, allEmployees} = new Fixture()
+
+  meetsReqs = atV service
+  fetchId = (q) -> service.query(q).then invoke 'fetchQID'
+
   describe 'Getting an id', ->
 
-    {service, olderEmployees} = new Fixture()
-
-    @beforeAll prepare -> service.query(olderEmployees).then (q) -> q.fetchQID()
+    @beforeAll meetsReqs -> fetchId olderEmployees
 
     it 'should yield an id', eventually (id) ->
       should.exist id
 
-  describe 'Getting an id for the same query twice', ->
+  describe 'Getting an id for the same query twice, same object', ->
 
-    {service, olderEmployees} = new Fixture()
-
-    @beforeAll prepare -> service.query(olderEmployees).then (q) ->
+    @beforeAll meetsReqs -> service.query(olderEmployees).then (q) ->
       once q.fetchQID(), q.fetchQID()
+
+    it 'should have fetched the same id twice', eventually (a, b) ->
+      a.should.equal b
+
+  describe 'Getting an id for the same query twice, different objects', ->
+
+    @beforeAll meetsReqs -> once fetchId(olderEmployees), fetchId(olderEmployees)
 
     it 'should have fetched the same id twice', eventually (a, b) ->
       a.should.equal b
 
   describe 'Getting an id for a different query should result in a different id', ->
 
-    {service, olderEmployees, allEmployees} = new Fixture()
-
-    promiseId = (query) -> service.query(query).then (q) -> q.fetchQID()
-
-    @beforeAll prepare -> once promiseId(olderEmployees), promiseId(allEmployees)
+    @beforeAll meetsReqs -> once fetchId(olderEmployees), fetchId(allEmployees)
 
     it 'should have fetched two different ids', eventually (a, b) ->
       a.should.not.equal b

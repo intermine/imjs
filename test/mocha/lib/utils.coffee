@@ -1,5 +1,5 @@
 {Deferred} = $ = require 'underscore.deferred'
-{funcutils: {invoke}} = require './fixture'
+{funcutils: {error, invoke}} = require './fixture'
 
 clear = (service, name) -> () -> Deferred ->
     eh = service.errorHandler # Fetch list logs errors, which we don't care about.
@@ -39,6 +39,9 @@ always = (fn) -> (done) -> fn().always -> done()
 shouldFail = (fn) -> (done) -> fn().fail(-> done()).done (args...) ->
     done new Error "Expected failure, got: #{ args }"
 
+needs = (exp) -> (service) -> (fn) -> prepare -> service.fetchVersion().then (actual) ->
+  if actual >= exp then fn service else error "Service at #{ actual }, must be >= #{ exp }"
+
 module.exports = {
   cleanSlate,
   after,
@@ -49,6 +52,7 @@ module.exports = {
   promising,
   prepare,
   always,
-  shouldFail
+  shouldFail,
+  needs
 }
 
