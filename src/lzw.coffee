@@ -9,48 +9,58 @@ else
 
 intermine.compression ?= {}
 
+buildDict = (size) ->
+  dict = {}
+  for i in [0 .. size]
+    dict[String.fromCharCode i] = i
+  dict
+
+buildArray = (size) -> (String.fromCharCode x for x in [0 .. size])
+
+
 intermine.compression.LZW =
 
   encode: (s) ->
-    dict = {}
     data = (s + "").split("")
     out = []
-    currChar
-    phrase = data[0]
-    code = 256
-    for currChar in data
-      currChar=data[i]
-      if dict[phrase + currChar]?
-        phrase += currChar
+    phrase = ''
+    dictSize = 256
+    dict = buildDict dictSize
+
+    for char in data
+      currPhrase = phrase + char
+      if currPhrase of dict
+        phrase = currPhrase
       else
-        out.push if phrase.length > 1 then dict[phrase] else phrase.charCodeAt(0)
-        dict[phrase + currChar] = code
-        code++
-        phrase = currChar
+        out.push dict[phrase]
+        dict[currPhrase] = dictSize++
+        phrase = String(char)
 
-    out.push if phrase.length > 1 then dict[phrase] else phrase.charCodeAt(0)
-    mapped = (String.fromCharCode(o) for o in out)
-    return mapped.join("")
+    if phrase isnt ''
+      out.push dict[phrase]
 
-  decode: (s) ->
-    dict = {}
-    data = (s + "").split("")
-    currChar = data[0]
-    oldPhrase = currChar
-    out = [currChar]
-    code = 256
-    phrase
-    for currCode in data
-      currCode = data[i].charCodeAt(0)
-      if (currCode < 256)
-        phrase = data[i]
+    return out
+
+  decode: (data) ->
+    dictSize = 256
+    dict = buildArray dictSize
+    entry = ''
+    [head, tail...] = data
+    word = String.fromCharCode(head)
+    result = [word]
+
+    for code in tail
+      entry = if dict[code]
+        dict[code]
+      else if code is dictSize
+        word + word.charAt(0)
       else
-        phrase = if dict[currCode] then dict[currCode] else (oldPhrase + currChar)
-      out.push(phrase)
-      currChar = phrase.charAt(0)
-      dict[code] = oldPhrase + currChar
-      code++
-      oldPhrase = phrase
+        throw new Error("Key is #{ code }")
 
-    return out.join("")
+      result.push entry
+
+      dict[dictSize++] = word + entry.charAt(0)
+      word = entry
+
+    result.join('')
 
