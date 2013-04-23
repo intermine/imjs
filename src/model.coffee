@@ -136,7 +136,8 @@ class Model
     b_ancestry = @getAncestorsOf classB
     if classA in b_ancestry
       return classA
-    return intersection(a_ancestry, b_ancestry).shift()
+    # Guard the return with null because null !== undefined
+    return intersection(a_ancestry, b_ancestry).shift() ? null
 
   # Find the common type of a list of classes or class names, or null if there is no
   # one common type.
