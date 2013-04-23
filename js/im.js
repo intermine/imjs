@@ -1,4 +1,4 @@
-/*! imjs - v2.5.0 - 2013-04-03 */
+/*! imjs - v2.5.1 - 2013-04-23 */
 
 /**
 This library is open source software according to the definition of the
@@ -34,7 +34,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.5.0";
+    imjs.VERSION = "2.5.1";
   }
 
 }).call(this);
@@ -597,7 +597,8 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var IS_NODE, intermine, __root__, _ref;
+  var IS_NODE, buildArray, buildDict, intermine, __root__, _ref,
+    __slice = [].slice;
 
   IS_NODE = typeof exports !== 'undefined';
 
@@ -616,65 +617,72 @@ Thu Jun 14 13:18:14 BST 2012
     intermine.compression = {};
   }
 
+  buildDict = function(size) {
+    var dict, i, _i;
+    dict = {};
+    for (i = _i = 0; 0 <= size ? _i <= size : _i >= size; i = 0 <= size ? ++_i : --_i) {
+      dict[String.fromCharCode(i)] = i;
+    }
+    return dict;
+  };
+
+  buildArray = function(size) {
+    var x, _i, _results;
+    _results = [];
+    for (x = _i = 0; 0 <= size ? _i <= size : _i >= size; x = 0 <= size ? ++_i : --_i) {
+      _results.push(String.fromCharCode(x));
+    }
+    return _results;
+  };
+
   intermine.compression.LZW = {
     encode: function(s) {
-      var code, currChar, data, dict, mapped, o, out, phrase, _i, _len;
-      dict = {};
+      var char, currPhrase, data, dict, dictSize, out, phrase, _i, _len;
       data = (s + "").split("");
       out = [];
-      currChar;
-
-      phrase = data[0];
-      code = 256;
+      phrase = '';
+      dictSize = 256;
+      dict = buildDict(dictSize);
       for (_i = 0, _len = data.length; _i < _len; _i++) {
-        currChar = data[_i];
-        currChar = data[i];
-        if (dict[phrase + currChar] != null) {
-          phrase += currChar;
+        char = data[_i];
+        currPhrase = phrase + char;
+        if (currPhrase in dict) {
+          phrase = currPhrase;
         } else {
-          out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-          dict[phrase + currChar] = code;
-          code++;
-          phrase = currChar;
+          out.push(dict[phrase]);
+          dict[currPhrase] = dictSize++;
+          phrase = String(char);
         }
       }
-      out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-      mapped = (function() {
-        var _j, _len1, _results;
-        _results = [];
-        for (_j = 0, _len1 = out.length; _j < _len1; _j++) {
-          o = out[_j];
-          _results.push(String.fromCharCode(o));
-        }
-        return _results;
-      })();
-      return mapped.join("");
+      if (phrase !== '') {
+        out.push(dict[phrase]);
+      }
+      return out;
     },
-    decode: function(s) {
-      var code, currChar, currCode, data, dict, oldPhrase, out, phrase, _i, _len;
-      dict = {};
-      data = (s + "").split("");
-      currChar = data[0];
-      oldPhrase = currChar;
-      out = [currChar];
-      code = 256;
-      phrase;
-
-      for (_i = 0, _len = data.length; _i < _len; _i++) {
-        currCode = data[_i];
-        currCode = data[i].charCodeAt(0);
-        if (currCode < 256) {
-          phrase = data[i];
-        } else {
-          phrase = dict[currCode] ? dict[currCode] : oldPhrase + currChar;
-        }
-        out.push(phrase);
-        currChar = phrase.charAt(0);
-        dict[code] = oldPhrase + currChar;
-        code++;
-        oldPhrase = phrase;
+    decode: function(data) {
+      var code, dict, dictSize, entry, head, result, tail, word, _i, _len;
+      dictSize = 256;
+      dict = buildArray(dictSize);
+      entry = '';
+      head = data[0], tail = 2 <= data.length ? __slice.call(data, 1) : [];
+      word = String.fromCharCode(head);
+      result = [word];
+      for (_i = 0, _len = tail.length; _i < _len; _i++) {
+        code = tail[_i];
+        entry = (function() {
+          if (dict[code]) {
+            return dict[code];
+          } else if (code === dictSize) {
+            return word + word.charAt(0);
+          } else {
+            throw new Error("Key is " + code);
+          }
+        })();
+        result.push(entry);
+        dict[dictSize++] = word + entry.charAt(0);
+        word = entry;
       }
-      return out.join("");
+      return result.join('');
     }
   };
 
@@ -1242,7 +1250,7 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Model.prototype.findSharedAncestor = function(classA, classB) {
-      var a_ancestry, b_ancestry;
+      var a_ancestry, b_ancestry, _ref1;
       if (classB === null || classA === null) {
         return null;
       }
@@ -1257,7 +1265,7 @@ Thu Jun 14 13:18:14 BST 2012
       if (__indexOf.call(b_ancestry, classA) >= 0) {
         return classA;
       }
-      return intersection(a_ancestry, b_ancestry).shift();
+      return (_ref1 = intersection(a_ancestry, b_ancestry).shift()) != null ? _ref1 : null;
     };
 
     Model.prototype.findCommonType = function(xs) {
