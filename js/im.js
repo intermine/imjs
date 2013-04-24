@@ -1,4 +1,4 @@
-/*! imjs - v2.5.1 - 2013-04-23 */
+/*! imjs - v2.6.0 - 2013-04-24 */
 
 /**
 This library is open source software according to the definition of the
@@ -34,7 +34,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.5.1";
+    imjs.VERSION = "2.6.0";
   }
 
 }).call(this);
@@ -1712,6 +1712,9 @@ Thu Jun 14 13:18:14 BST 2012
   CODES = [null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
   decapitate = function(x) {
+    if (x == null) {
+      x = '';
+    }
     return x.substr(x.indexOf('.'));
   };
 
@@ -2000,6 +2003,59 @@ Thu Jun 14 13:18:14 BST 2012
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return this.on.apply(this, args);
+    };
+
+    Query.prototype.off = function(events, callback, context) {
+      var calls, current, ev, last, linkedList, node, remove, _i, _len, _ref2;
+      if (events == null) {
+        this._callbacks = {};
+        return this;
+      }
+      events = events.split(/\s+/);
+      calls = ((_ref2 = this._callbacks) != null ? _ref2 : this._callbacks = {});
+      for (_i = 0, _len = events.length; _i < _len; _i++) {
+        ev = events[_i];
+        if (callback != null) {
+          current = linkedList = calls[ev] || {};
+          last = linkedList.tail;
+          while ((node = current.next) !== last) {
+            remove = (!(context != null) || node.context === context) && (callback === node.callback);
+            if (remove) {
+              current.next = node.next || last;
+              node = current;
+            } else {
+              current = node;
+            }
+          }
+        } else {
+          delete calls[ev];
+        }
+      }
+      return this;
+    };
+
+    Query.prototype.unbind = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return this.off.apply(this, args);
+    };
+
+    Query.prototype.once = function(events, callback, context) {
+      var f,
+        _this = this;
+      f = function() {
+        var args;
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        callback.apply(context, args);
+        return _this.off(events, f);
+      };
+      return this.on(events, f);
+    };
+
+    Query.prototype.emit = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return this.trigger.apply(this, args);
     };
 
     Query.prototype.trigger = function() {
