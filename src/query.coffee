@@ -46,17 +46,66 @@ CODES = [
   'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
 ]
 
-decapitate = (x) -> x.substr(x.indexOf('.'))
+# Return a string with the head cut off.
+#
+# @example
+#   decapitate('Foo.bar.baz') #=> 'bar.baz'
+#
+# @private
+# @param [String] x A path string
+# @return [String] The path without its head.
+decapitate = (x = '') -> x.substr(x.indexOf('.'))
 
 # Constraint XML machinery
+
+# Stringify a constraint value from a multi-value constraint.
+# @private
+# @param [String] v The constraint value.
+# @return [String] An XML serialisation of the value.
 conValStr = (v) -> if v? then "<value>#{_.escape v}</value>" else "<nullValue/>"
+
+# Stringify the attributes for a constraint.
+# @private
+# @param [Constraint] c The constraint to serialise.
+# @param [Array<String>] names The names of properties on the constraint to serialise.
+# @return [String] An serialisation of the constraint's attributes.
 conAttrs = (c, names) -> ("""#{k}="#{_.escape(v)}" """ for k, v of c when (k in names)).join('')
+
+# Stringify a constraint that has no value attribute.
+# @private
+# @param [OperatorConstraint] c The constraint to serialise.
+# @return [String] The XML serialisation of the constraint.
 noValueConStr = (c) -> """<constraint #{ conAttrs(c, BASIC_ATTRS) }/>"""
+
+# Stringify a constraint that restricts an object to a type.
+# @private
+# @param [SubTypeConstraint] c The constraint to serialise.
+# @return [String] The XML serialization of the constraint.
 typeConStr = (c) -> """<constraint #{ conAttrs(c, ['path', 'type']) }/>"""
+
+# Stringify a constraint that has a value.
+# @private
+# @param [ValueConstraint] c The constraint to serialise.
+# @return [String] The XML serialization of the constraint.
 simpleConStr = (c) -> """<constraint #{ conAttrs(c, SIMPLE_ATTRS) }/>"""
+
+# Stringify a constraint that has multiple values.
+# @private
+# @param [MultiValueConstraint] c The constraint to serialise.
+# @return [String] The XML serialization of the constraint.
 multiConStr = (c) ->
   """<constraint #{ conAttrs(c, BASIC_ATTRS) }>#{concatMap(conValStr) c.values}</constraint>"""
+
+# Stringify a constraint that has multiple values.
+# @private
+# @param [IdsContraint] c The constraint to serialise.
+# @return [String] The XML serialization of the constraint.
 idConStr = (c) -> """<constraint #{ conAttrs(c, BASIC_ATTRS) }ids="#{c.ids.join(',')}"/>"""
+
+# Stringify a constraint that has multiple values.
+# @private
+# @param [Constraint] c The constraint to serialise.
+# @return [String] The XML serialization of the constraint.
 conStr = (c) ->
   if c.values?
     multiConStr(c)
@@ -71,22 +120,42 @@ conStr = (c) ->
 
 headLess = (path) -> path.replace /^[^\.]+\./, ''
 
+# Copy a constraint.
+#
+# Produce an identical but unconnected copy of a constraint.
+# @private
+# @param [Constraint] con The constraint to copy.
+# @return [Constraint] An identical copy of the constraint.
 copyCon = (con) ->
   {path, type, op, value, values, ids, code} = con
   ids = ids?.slice()
   values = values?.slice()
   noUndefVals {path, type, op, value, values, ids, code}
 
+# Produce the JSON representation of a constraint.
+#
+# @private
+# @param [Constraint] The constraint to JSONify.
+# @return [Object] The JSON representation.
 conToJSON = (con) ->
   copy = copyCon con
   copy.path = headLess copy.path
   return copy
 
+# Remove all properties of the input object that are undefined.
+# @private
+# @param [Object] The object to strip.
+# @return [Object] The same object as was provided as input.
 noUndefVals = (x) ->
   for k, v of x
     delete x[k] unless v?
   return x
 
+# Get an error message for when we don't manage to remove constraints correctly,
+# @private
+# @param [Array<Constraint>] orig The original set of constraints.
+# @param [Array<Constraint>] reduced The current set of constraints.
+# @return [String] A message explaining this.
 didntRemove = (orig, reduced) ->
   "Did not remove a single constraint. original = #{ orig }, reduced = #{ reduced }"
 
@@ -201,6 +270,15 @@ class Query
   # Lexical function (aka private method), that is by default a no-op
   getPaths = ->
 
+
+  # Bind a callback to an event.
+  #
+  # An implementation of the EventEmitter API, allowing clients to subscribe
+  # to events on {Query}s.
+  # @param [String] events A space separated set of events to subscribe to.
+  # @param [Function] callback The event-handler.
+  # @param [Object] context The context to bind as this for the callback (optional).
+  # @return [Query] This query, for chaining.
   on: (events, callback, context) ->
     events = events.split /\s+/
     calls = (@_callbacks ?= {})
@@ -212,8 +290,80 @@ class Query
       list.tail = tail.next = {}
     this
 
+  # alias for {#on}
   bind: (args...) -> @on.apply(@, args)
 
+  # Remove a particular event handler, or a more general collection.
+  #
+  # @overload off()
+  #   Unbinds all event handlers.
+  #   @return [Query] this query, for chaining.
+  #
+  # @overload off(events)
+  #   Unbinds all event handlers for the given events.
+  #   @param [String] events A space separated set of event names.
+  #   @return [Query] this query, for chaining.
+  #
+  # @overload off(events, handler)
+  #   Unbinds the given handler for the given events.
+  #   @param [String] events A space separated set of event names.
+  #   @param [Function] handler The event handler to unbind.
+  #   @return [Query] this query, for chaining.
+  #
+  # @overload off(events, handler, context)
+  #   Unbinds the given handler from all the given events where is it is bound with
+  #   the given context.
+  #   @param [String] events A space separated set of event names.
+  #   @param [Function] handler The event handler to unbind.
+  #   @param [Object] context The `this` for the handler.
+  #   @return [Query] this query, for chaining.
+  #
+  off: (events, callback , context) ->
+    unless events?
+      @_callbacks = {}
+      return this
+
+    events = events.split /\s+/
+    calls = (@_callbacks ?= {})
+    for ev in events
+      if callback?
+        current = linkedList = (calls[ev] or {})
+        last = linkedList.tail
+        while ((node = current.next) isnt last)
+          remove = (not context? or node.context is context) and (callback is node.callback)
+          if remove
+            current.next = (node.next or last)
+            node = current
+          else
+            current = node
+      else
+        delete calls[ev]
+
+    return this
+
+  # alias for {#off}
+  unbind: (args...) -> @off args...
+
+  # Bind an event to be executed once, and then unbound.
+  #
+  # @param [String] events A space separated set of event names.
+  # @param [Function] callback The event handler.
+  # @param [Object] context The `this` for the event handler.
+  # @return [Query] this query, for chaining.
+  # @see #on
+  once: (events, callback, context) ->
+    f = (args...) =>
+      callback.apply(context, args)
+      @off(events, f)
+    @on(events, f)
+
+  # Alias for {#trigger}
+  emit: (args...) -> @trigger args...
+
+  # Trigger a given set of events.
+  # @param [String] events A space separated set of event names.
+  # @param [Array<Object>] args The arguments to send to the handlers.
+  # @return [Query] this query, for chaining.
   trigger: (events, rest...) ->
     calls = @_callbacks
     unless calls
@@ -239,6 +389,12 @@ class Query
   kids = (el, name) -> (kid for kid in el.getElementsByTagName(name))
   xmlAttr = (name) -> (el) -> el.getAttribute name
 
+  # Load a query from XML.
+  #
+  # @param [String] The serialised PathQuery XML
+  # @return [Object] The JSON representation of the Query, suitable for passing
+  #                  to `new Query(json)`.
+  # @throw Error if there is no query in the XML, or if XML is invalid.
   @fromXML: (xml) ->
     dom = intermine.xml.parse xml
     query = (kids(dom, 'query')[0] or kids(dom, 'template')[0])
@@ -262,6 +418,28 @@ class Query
 
     return q
 
+
+  # Construct a new Query object from a set of properties.
+  #
+  # @param [Object] properties The options that define the query.
+  # @param [Service] The service this query belongs to.
+  #
+  # # All options are optional. Alternative names permitted are separated by bars.
+  # @option properties [Object<String, String>] aliases|displayNames Display names
+  #         to be used for given paths.
+  # @option properties [Model] model The model this query is over.
+  # @option properties [Object<String, Array<String>>] summaryFields The fields to use
+  #         when expanding `*` paths.
+  # @option properties [String] root|from The root of the query (eg. `Gene`).
+  # @option properties [Number] size|limit|maxRows The maximum number of rows to return.
+  # @option properties [Number] start|offset The index of the first row to return.
+  # @option properties [Array<String>] views|view|select The columns to return as output.
+  # @option properties [Array<Constraint>, Object] constraints|where The constraints.
+  # @option properties [Array<String>,Array<Join>] joins|join The outer-joins.
+  # @option properties [Array<String>,Array<SortOrderElement>] sortOrder|orderBy The
+  #         paths to use to determine the sort-order.
+  # @option properties [String] constraintLogic The constraint logic.
+  #
   constructor: (properties, service) ->
     _.defaults @,
       constraints: []
@@ -275,7 +453,7 @@ class Query
     # Copy over name, title, etc
     for prop in ['name', 'title', 'comment', 'description'] when properties[prop]?
       @[prop] = properties[prop]
-  
+
     @service = service ? {}
     @model = properties.model ? {}
     @summaryFields = properties.summaryFields ? {}
@@ -300,6 +478,11 @@ class Query
 
       _.flatten ret.concat others
 
+  # Remove the given paths from the select list.
+  #
+  # @param [Array<String>,Array<PathInfo>,String,PathInfo] The paths to remove from the
+  #        list of selected columns.
+  # @return [Query] This query, for chaining.
   removeFromSelect: (unwanted) ->
     unwanted = if _.isString(unwanted) then [unwanted] else (unwanted || [])
     mapFn = _.compose(@expandStar, @adjustPath)
@@ -339,7 +522,7 @@ class Query
     for p in toAdd
       @views.push(p)
     @trigger('add:view change:views', toAdd)
-  
+
   # Replace the existing select list with the one passed as an argument.
   select: (views) =>
     @views = []
@@ -677,7 +860,7 @@ class Query
       throw new Error "Invalid join style: #{ join.style }"
     @joins[join.path] = join.style
     @trigger 'set:join', join.path, join.style
-      
+
   setJoinStyle: (path, style = 'OUTER') ->
     path = @adjustPath(path)
     style = style.toUpperCase()
@@ -814,7 +997,7 @@ class Query
     toRun = @makeListQuery() # ensures changing the view doesn't change results
 
     isSuitable = (p) -> _.any types, (t) -> p.isa t
-    
+
     # Only add the maximum number of suitable nodes to the query to run
     toRun.views = take(n) (addPI n for n in @getViewNodes() when isSuitable n)
 
