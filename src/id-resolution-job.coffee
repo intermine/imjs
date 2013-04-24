@@ -34,7 +34,18 @@ class IDResolutionJob
   fetchResults:      (cb) => @service.get("ids/#{ @uid }/result").pipe(get 'results').done(cb)
 
   del: (cb) => @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
-
+ 
+  # Poll the service until the results are available.
+  #
+  # @example Poll a job
+  #   job.poll().then (results) -> handle results
+  #
+  # @param [Function] onSuccess The success handler (optional)
+  # @param [Function] onError The error handler for if the job fails (optional).
+  # @param [Function] onProgress The progress handler to receive status updates.
+  #
+  # @return [Promise<Object>] A promise to yield the results.
+  # @see Service#resolveIds
   poll: (onSuccess, onError, onProgress) ->
     ret = Deferred().done(onSuccess).fail(onError).progress(onProgress)
     resp = @fetchStatus()
