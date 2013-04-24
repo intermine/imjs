@@ -37,7 +37,13 @@ instrument: build
 	@jscoverage --no-highlight build build-cov
 
 docs:
-	codo -n imjs src
+	codo \
+		--name imjs \
+		--title 'InterMine Client Library Documentation' \
+		--private \
+		src \
+		- \
+		LICENCE
 
 browser-deps:
 	bower install
