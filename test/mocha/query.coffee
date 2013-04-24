@@ -173,4 +173,36 @@ describe 'Query', ->
       y.should.equal 1
       n.should.equal 0
 
+  describe '#off', ->
+
+    n = 0
+    f = -> n++
+    g = -> n++
+
+    @beforeAll ->
+      q = new Query()
+      q.on 'add:constraint', f
+      q.on 'add:constraint', g
+      q.addConstraint path: 'Foo.bar', op: 'IS NULL'
+      q.off 'add:constraint', f
+      q.addConstraint path: 'Foo.baz', op: 'IS NULL'
+      q.off 'add:constraint'
+      q.addConstraint path: 'Foo.fop', op: 'IS NULL'
+
+    it 'should have fired three events in total', ->
+      n.should.equal 3
+
+  describe '#once', ->
+
+    n = 0
+    f = -> n++
+
+    @beforeAll ->
+      q = new Query()
+      q.once 'add:constraint', f
+      q.addConstraint path: 'Foo.bar', op: 'IS NULL'
+      q.addConstraint path: 'Foo.baz', op: 'IS NULL'
+
+    it 'should have fired once in total', ->
+      n.should.equal 1
 
