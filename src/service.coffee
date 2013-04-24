@@ -145,7 +145,7 @@ class Service
   # @option options [String] root The base URL of the webservice (required). This
   #   is typically of the form "http://HOST/PATH", eg: "http://www.flymine.org/query"
   # @option options [String] token An authentication token (optional)
-  # @option options [(err) ->] A function that handles errors. (optional)
+  # @option options [(err) ->] errorHandler A function that handles errors. (optional)
   #   If any errors occur when making HTTP calls to the server, the errors will
   #   be logged by this global error handler, which by default logs to the console.
   #   This can be changed by passing an alternative error handler, such as (->) to
@@ -179,13 +179,13 @@ class Service
 
   # Convenience method for making basic POST requests.
   # @param [String] path The endpoint to post to.
-  # @param [Object<String, String>|Array<[String, String]>] data parameters to send (optional)
+  # @param [Object<String, String>, Array<[String, String]>] data parameters to send (optional)
   # @return [Promise<Object>] A promise to yield a response object.
   post: (path, data = {}) -> @makeRequest 'POST', path, data
 
   # Convenience method for making basic GET requests.
   # @param [String] path The endpoint to get from.
-  # @param [Object<String, String>|Array<[String, String]>] data parameters to send (optional)
+  # @param [Object<String, String>, Array<[String, String]>] data parameters to send (optional)
   # @return [Promise<Object>] A promise to yield a response object.
   get: (path, data) -> @makeRequest 'GET', path, data
 
@@ -199,7 +199,7 @@ class Service
   # @param [String] method The HTTP method to use (one of GET, POST, PUT, DELETE).
   # @param [String] path The path fragment of the endpoint to use. The service's root
   #   will be prepended to obtain the full URI.
-  # @param [Object|Array] data The parameters to send to the service.
+  # @param [Object,Array] data The parameters to send to the service.
   # @param [(data) ->] cb A function that will be called on the results when received.
   # @param [boolean] indiv A flag determinig whether to treat the results as a single block,
   #   or whether to yield individual results to the cb item by item. This only makes sense
