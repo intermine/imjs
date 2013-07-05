@@ -1,4 +1,4 @@
-/*! imjs - v2.6.0 - 2013-04-24 */
+/*! imjs - v2.6.0 - 2013-07-05 */
 
 /**
 This library is open source software according to the definition of the
@@ -1781,8 +1781,8 @@ Thu Jun 14 13:18:14 BST 2012
   };
 
   copyCon = function(con) {
-    var code, ids, op, path, type, value, values;
-    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, ids = con.ids, code = con.code;
+    var code, extraValue, ids, op, path, type, value, values;
+    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, extraValue = con.extraValue, ids = con.ids, code = con.code;
     ids = ids != null ? ids.slice() : void 0;
     values = values != null ? values.slice() : void 0;
     return noUndefVals({
@@ -1791,6 +1791,7 @@ Thu Jun 14 13:18:14 BST 2012
       op: op,
       value: value,
       values: values,
+      extraValue: extraValue,
       ids: ids,
       code: code
     });
