@@ -22,11 +22,11 @@ describe 'GFF3 Queries', ->
     @beforeAll prepare -> service.query(opts).then (q) ->
       q.summarise('symbol').then (_, stats) -> $.when stats, q.getGFF3()
 
-    it 'should find only one gene, due to the pathways', eventually (stats, gff3) ->
-      stats.uniqueValues.should.equal 1
+    it 'should find only two genes, due to the pathways', eventually (stats, gff3) ->
+      stats.uniqueValues.should.equal 2
 
-    it 'should find only one gff3 record, due to the pathways', eventually (stats, gff3) ->
-      countRecords(gff3).should.equal 1
+    it 'should find only two gff3 record, due to the pathways', eventually (stats, gff3) ->
+      countRecords(gff3).should.equal 2
 
   describe 'outer joined', ->
     opts =

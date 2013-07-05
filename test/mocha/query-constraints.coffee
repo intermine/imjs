@@ -6,7 +6,8 @@ expected = [
   {path: 'Employee.name', op: '=', value: 'methuselah'},
   {path: 'Employee.age', op: '>', value: 1000},
   {path: 'Employee.end', op: 'IS NULL'},
-  {path: 'Employee.department.name', op: 'ONE OF', values: ['Sales', 'Accounting']}
+  {path: 'Employee.department.name', op: 'ONE OF', values: ['Sales', 'Accounting']},
+  {path: 'Employee.address', op: 'LOOKUP', value: 'Springfield', extraValue: 'Illinois'}
 ]
 
 headless = [
@@ -14,7 +15,8 @@ headless = [
   {path: 'name', op: '=', value: 'methuselah'},
   {path: 'age', op: '>', value: 1000},
   {path: 'end', op: 'IS NULL'},
-  {path: 'department.name', op: 'ONE OF', values: ['Sales', 'Accounting']}
+  {path: 'department.name', op: 'ONE OF', values: ['Sales', 'Accounting']},
+  {path: 'address', op: 'LOOKUP', value: 'Springfield', extraValue: 'Illinois'}
 ]
 
 arrays = [
@@ -22,7 +24,8 @@ arrays = [
   ['name', '=', 'methuselah'],
   ['age', '>', 1000],
   ['end', 'IS NULL'],
-  ['department.name', 'ONE OF', ['Sales', 'Accounting']]
+  ['department.name', 'ONE OF', ['Sales', 'Accounting']],
+  ['address', 'LOOKUP', 'Springfield', 'Illinois']
 ]
 
 operatorAliases = [
@@ -30,7 +33,8 @@ operatorAliases = [
   ['name', 'eq', 'methuselah'],
   ['age', 'gt', 1000],
   ['end', 'is null'],
-  ['department.name', 'one of', ['Sales', 'Accounting']]
+  ['department.name', 'one of', ['Sales', 'Accounting']],
+  ['address', 'lookup', 'Springfield', 'Illinois']
 ]
 
 mapping =
@@ -39,6 +43,7 @@ mapping =
   age: {gt: 1000}
   end: 'is null'
   'department.name': ['Sales', 'Accounting']
+  address: {lookup: 'Springfield', extraValue: 'Illinois'}
 
 mappingWithNull =
   'department.manager': {isa: 'CEO'}
@@ -46,6 +51,7 @@ mappingWithNull =
   age: {gt: 1000}
   end: null
   'department.name': ['Sales', 'Accounting']
+  address: {lookup: 'Springfield', extraValue: 'Illinois'}
 
 constraintsTest = (input) -> () ->
 

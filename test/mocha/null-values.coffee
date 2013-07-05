@@ -7,7 +7,7 @@ should = require 'should'
 serviceIs13 = (service) -> service.fetchVersion().then (v) ->
   if v >= 13 then success(service) else error('Service must be at version 13')
 
-describe 'Query', ->
+describe.skip 'Query', ->
 
   describe 'summary of a path with nulls', ->
 
