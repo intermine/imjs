@@ -127,10 +127,10 @@ headLess = (path) -> path.replace /^[^\.]+\./, ''
 # @param [Constraint] con The constraint to copy.
 # @return [Constraint] An identical copy of the constraint.
 copyCon = (con) ->
-  {path, type, op, value, values, ids, code} = con
+  {path, type, op, value, values, extraValue, ids, code} = con
   ids = ids?.slice()
   values = values?.slice()
-  noUndefVals {path, type, op, value, values, ids, code}
+  noUndefVals {path, type, op, value, values, extraValue, ids, code}
 
 # Produce the JSON representation of a constraint.
 #
