@@ -9,11 +9,9 @@ SYNOPSIS
 <!-- Execute scripts in the synopsis with test/check-synopsis.sh -->
 ```javascript
 // Find and print all the exons associated with eve in D. melanogaster
-var util      = require('util');
+
+// If running in node.js, the following line will be necessary:
 var intermine = require('imjs');
-var printf    = function(fmt) { return function (args) {
-  console.log(util.format.apply(null, [fmt].concat(args)));
-}};
 
 var flymine   = new intermine.Service({root: 'www.flymine.org/query'});
 var query     = {
@@ -30,8 +28,10 @@ var query     = {
 };
 
 flymine.rows(query).then(function(rows) {
-  console.log(util.format('Found %d exons:', rows.length));
-  rows.forEach(printf('[%s] %s:%d..%d'));
+  console.log("No. of exons: " + rows.length);
+  rows.forEach(function printRow(row) {
+    console.log("[" + row[0] + "] " + row[1] + ":" + row[2] + ".." + row[3]);
+  });
 });
 ```
 
