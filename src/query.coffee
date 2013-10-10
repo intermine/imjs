@@ -229,8 +229,9 @@ class Query
 
   @OP_DICT =
     '=' : '='
-    '==': '='
+    '==': '=='
     'eq': '='
+    'eqq': '=='
     '!=': '!='
     'ne': '!='
     '>' : '>'
@@ -269,7 +270,6 @@ class Query
 
   # Lexical function (aka private method), that is by default a no-op
   getPaths = ->
-
 
   # Bind a callback to an event.
   #

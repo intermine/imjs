@@ -69,7 +69,7 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare ->
-      beta = new Service root: 'beta.flymine.org/beta'
+      beta = new Service root: 'www.flymine.org/query'
       qp = beta.query(opts)
       qp.then (q) ->
         statsp = q.summarise('symbol').then (_, stats) -> stats

@@ -94,7 +94,7 @@ class Model
   #            \  /  \   |
   #             K     L  M
   #
-  # The list of ancestors of J will be [H, I, D, E, A, F, G, B, C]
+  # The list of ancestors of K will be [H, I, D, E, A, F, G, B, C]
   #
   # @param [String|Table] cls The class whose ancestry is to be retrieved.
   # @return [Array<String>] A list of names of classes this class inherits from.

@@ -1,4 +1,4 @@
-/*! imjs - v2.6.2 - 2013-07-23 */
+/*! imjs - v2.7.0 - 2013-10-10 */
 
 /**
 This library is open source software according to the definition of the
@@ -34,7 +34,7 @@ Thu Jun 14 13:18:14 BST 2012
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.6.2";
+    imjs.VERSION = "2.7.0";
   }
 
 }).call(this);
@@ -1945,8 +1945,9 @@ Thu Jun 14 13:18:14 BST 2012
 
     Query.OP_DICT = {
       '=': '=',
-      '==': '=',
+      '==': '==',
       'eq': '=',
+      'eqq': '==',
       '!=': '!=',
       'ne': '!=',
       '>': '>',
