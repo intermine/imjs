@@ -86,4 +86,35 @@ describe 'Service', ->
       resPromise = service.rows query, test
       resPromise.fail(done).done -> done()
 
+  describe '#eachRow()', ->
+
+    it 'can run a query and yield each row', (done) ->
+      {check, count} = new Counter 46, 2688, done
+      service.query(query).then (q) -> service.eachRow q, {}, count, check, done
+
+    it 'can run a query and yield each row, and does not need a page', (done) ->
+      {check, count} = new Counter 46, 2688, done
+      service.query(query).then (q) -> service.eachRow q, count, check, done
+
+    it 'accepts a query options object and can run it as it would a query, callbacks', (done) ->
+      {check, count} = new Counter 46, 2688, done
+      service.eachRow(query, {}, count, check, done)
+
+    it 'accepts a query options object and can run it as it would a query, callbacks, no page',
+      (done) ->
+        {check, count} = new Counter 46, 2688, done
+        service.eachRow(query, count, check, done)
+
+    it 'accepts a query options object and can run it as it would a query, callback', (done) ->
+      {check, count} = new Counter 46, 2688, done
+      service.eachRow(query, count).then (br) ->
+        br.error done
+        br.done check
+
+    it 'accepts a query options object and can run it as it would a query, promise', (done) ->
+      {check, count} = new Counter 46, 2688, done
+      service.eachRow(query).then (br) ->
+        br.each count
+        br.error done
+        br.done check
 

@@ -99,8 +99,8 @@ blocking = (ret, opts) -> (resp) ->
 
 exports.iterReq = (method, path, format) ->
   (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
-    if arguments.length is 2 and _.isFunction page
-      [doThis, page] = [page, {}]
+    if _.isFunction(page)
+      [page, doThis, onErr, onEnd] = [{}, page, doThis, onErr]
     req = _.extend {format}, page, query: q.toXML()
     @makeRequest(method, path, req, null, true)
       .fail(onErr)

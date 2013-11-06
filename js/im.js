@@ -1,4 +1,4 @@
-/*! imjs - v2.7.0 - 2013-10-10 */
+/*! imjs - v2.7.0 - 2013-11-06 */
 
 /**
 This library is open source software according to the definition of the
@@ -3909,11 +3909,35 @@ Thu Jun 14 13:18:14 BST 2012
 
   })();
 
-  Service.prototype.rowByRow = http.iterReq('POST', QUERY_RESULTS_PATH, 'json');
+  Service.prototype.rowByRow = function() {
+    var args, f, q,
+      _this = this;
+    q = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    f = http.iterReq('POST', QUERY_RESULTS_PATH, 'json');
+    if (q.toXML != null) {
+      return f.apply(this, arguments);
+    } else {
+      return this.query(arguments[0]).then(function(query) {
+        return _this.rowByRow.apply(_this, [query].concat(__slice.call(args)));
+      });
+    }
+  };
 
   Service.prototype.eachRow = Service.prototype.rowByRow;
 
-  Service.prototype.recordByRecord = http.iterReq('POST', QUERY_RESULTS_PATH, 'jsonobjects');
+  Service.prototype.recordByRecord = function() {
+    var args, f, q,
+      _this = this;
+    q = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    f = http.iterReq('POST', QUERY_RESULTS_PATH, 'jsonobjects');
+    if (q.toXML != null) {
+      return f.apply(this, arguments);
+    } else {
+      return this.query(arguments[0]).then(function(query) {
+        return _this.recordByRecord.apply(_this, [query].concat(__slice.call(args)));
+      });
+    }
+  };
 
   Service.prototype.eachRecord = Service.prototype.recordByRecord;
 

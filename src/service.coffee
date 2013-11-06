@@ -714,7 +714,13 @@ class Service
 #   been received (optional).
 # @return [Promise<BufferedReader<Array<Object>>>] a promise to
 #   yield an iterator over the rows.
-Service::rowByRow = http.iterReq 'POST', QUERY_RESULTS_PATH, 'json'
+Service::rowByRow = (q, args...) ->
+  f = http.iterReq 'POST', QUERY_RESULTS_PATH, 'json'
+  if q.toXML?
+    f.apply this, arguments
+  else
+    @query(arguments[0]).then (query) => @rowByRow query, args...
+    
 # Alias for {Service#rowByRow}
 Service::eachRow = Service::rowByRow
 
@@ -734,7 +740,14 @@ Service::eachRow = Service::rowByRow
 #   been received (optional).
 # @return [Promise<BufferedReader<Object>>] a promise to
 #   yield an iterator over the results.
-Service::recordByRecord = http.iterReq 'POST', QUERY_RESULTS_PATH, 'jsonobjects'
+Service::recordByRecord = (q, args...) ->
+  f = http.iterReq 'POST', QUERY_RESULTS_PATH, 'jsonobjects'
+  if q.toXML?
+    f.apply this, arguments
+  else
+    @query(arguments[0]).then (query) => @recordByRecord query, args...
+  
+  
 # Alias for {Service#recordByRecord}
 Service::eachRecord = Service::recordByRecord
 
