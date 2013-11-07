@@ -1,4 +1,4 @@
-/*! imjs - v2.8.0 - 2013-11-06 */
+/*! imjs - v2.8.0 - 2013-11-07 */
 
 /**
 This library is open source software according to the definition of the
@@ -3644,12 +3644,18 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Service.prototype.doPagedRequest = function(q, path, page, format, cb) {
-      var req,
+      var req, _ref,
         _this = this;
       if (page == null) {
         page = {};
       }
+      if (cb == null) {
+        cb = (function() {});
+      }
       if (q.toXML != null) {
+        if (_.isFunction(page)) {
+          _ref = [page, {}], cb = _ref[0], page = _ref[1];
+        }
         req = _.defaults({}, {
           query: q.toXML(),
           format: format

@@ -18,9 +18,10 @@ class Counter
 SLOW = 100
 sumRows = flatMap get 0
 
-test = (rows) ->
+test = (done) -> (rows) ->
   rows.should.have.lengthOf(46)
   sumRows(rows).should.equal(2688)
+  done()
 
 describe 'Query', ->
 
@@ -36,12 +37,10 @@ describe 'Query', ->
   describe '#rows()', ->
 
     it 'should return 46 rows, with a sum of 2688', (done) ->
-      service.query(query).then(invoke 'rows').then(test, done).done(-> done())
+      service.query(query).then(invoke 'rows').then test(done), done
 
     it 'should return 46 rows, with a sum of 2688, and work with callbacks', (done) ->
-      qPromise = service.query query, (q) ->
-        q.rows( test ).then((-> done()), done)
-      qPromise.fail(done)
+      service.query(query).then(invoke 'rows', test(done)).fail done
 
   describe 'yielding the result set', ->
 
@@ -80,11 +79,11 @@ describe 'Service', ->
   describe '#rows()', ->
 
     it 'accepts a query options object, and can run it as it would a query', (done) ->
-      service.rows(query).then(test, done).always -> done()
+      service.rows(query).then(test(done), done).fail done
       
     it 'accepts a query options object, and can run it, accepting callbacks', (done) ->
-      resPromise = service.rows query, test
-      resPromise.fail(done).done -> done()
+      resPromise = service.rows query, test(done)
+      resPromise.fail done
 
   describe '#eachRow()', ->
 

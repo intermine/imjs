@@ -387,8 +387,9 @@ class Service
   # @param [->] cb A call-back to which results will be yielded. (optional).
   #
   # @return [Promise<Array<?>>] A promise to yield results.
-  doPagedRequest: (q, path, page = {}, format, cb) ->
+  doPagedRequest: (q, path, page = {}, format, cb = (->)) ->
     if q.toXML?
+      [cb, page] = [page, {}] if _.isFunction page
       req = _.defaults {}, {query: q.toXML(), format: format}, page
       @post(path, req).pipe((resp) -> success(resp.results, resp)).done(cb)
     else
