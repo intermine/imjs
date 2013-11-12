@@ -668,14 +668,12 @@ class Service
   # @return [Promise<IDResolutionJob>] A promise to yield a job id.
   resolveIds: (opts, cb) => REQUIRES_VERSION @, 10, =>
     req =
+      type: 'POST'
+      url: @root + 'ids'
+      contentType: 'application/json'
       data: JSON.stringify(opts)
       dataType: 'json'
-      url: @root + 'ids'
-      type: 'POST'
-      contentType: 'application/json'
     @doReq(req).pipe(get 'uid').pipe(IDResolutionJob.create @).done(cb)
-
-
 
   # Create a new list through the identifier upload service.
   #

@@ -217,8 +217,9 @@
           return function(results) {
             expect(polls).to.be.above(0);
             if (version >= 16) {
-              expect(Object.keys(results)).to.have.length(6);
-              expect(Object.keys(results).to.include('MATCH'));
+              var keys = Object.keys(results);
+              expect(keys).to.have.length(6);
+              expect(keys).to.contain('MATCH');
             } else {
               expect(Object.keys(results)).to.have.length(3);
             }
@@ -231,7 +232,7 @@
           type: 'Employee'
         };
         var versionP = service.fetchVersion();
-        var resolutionP = service.resolveIds();
+        var resolutionP = service.resolveIds(request);
         $.when(versionP, resolutionP).then(function(v, job) {
           var poll = job.poll();
           

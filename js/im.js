@@ -3854,11 +3854,11 @@ Thu Jun 14 13:18:14 BST 2012
       return REQUIRES_VERSION(this, 10, function() {
         var req;
         req = {
-          data: JSON.stringify(opts),
-          dataType: 'json',
-          url: _this.root + 'ids',
           type: 'POST',
-          contentType: 'application/json'
+          url: _this.root + 'ids',
+          contentType: 'application/json',
+          data: JSON.stringify(opts),
+          dataType: 'json'
         };
         return _this.doReq(req).pipe(get('uid')).pipe(IDResolutionJob.create(_this)).done(cb);
       });
