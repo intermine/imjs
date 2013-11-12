@@ -114,10 +114,21 @@ module.exports = function (grunt) {
     CDN: process.env.CDN,
     copy: {
       cdn: {
-        files: {
-          '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>/': 'js/<%= pkg.version %>/*.js',
-          '<%= CDN %>/js/intermine/imjs/latest/': 'js/<%= pkg.version %>/*.js'
-        }
+        files: [{
+          expand: true,
+          cwd: 'js/<%= pkg.version %>',
+          src: ['*.js'],
+          filter: 'isFile',
+          flatten: true,
+          dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>/'
+        }, {
+          expand: true,
+          cwd: 'js/<%= pkg.version %>',
+          src: ['*.js'],
+          filter: 'isFile',
+          flatten: true,
+          dest: '<%= CDN %>/js/intermine/imjs/latest/'
+        }]
       }
     }
   })
