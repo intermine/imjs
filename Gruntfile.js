@@ -111,11 +111,12 @@ module.exports = function (grunt) {
         pushTo: 'origin'
       }
     },
+    CDN: process.env.CDN,
     copy: {
       cdn: {
         files: {
-          '<%= process.env.CDN %>/js/intermine/imjs/<%= pkg.version %>/': 'js/<%= pkg.version %>/*.js',
-          '<%= process.env.CDN %>/js/intermine/imjs/latest/': 'js/<%= pkg.version %>/*.js'
+          '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>/': 'js/<%= pkg.version %>/*.js',
+          '<%= CDN %>/js/intermine/imjs/latest/': 'js/<%= pkg.version %>/*.js'
         }
       }
     }
@@ -216,7 +217,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('-checkcdn', 'Check that the CDN is initialised', function () {
     var done = this.async();
-    var cdn = process.env.CDN;
+    var cdn = grunt.config('CDN');
     if (!cdn) {
       grunt.log.error("No CDN location provided. Please set the CDN environment variable");
       done(false);
