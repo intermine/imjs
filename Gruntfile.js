@@ -107,7 +107,7 @@ module.exports = function (grunt) {
     },
     bump: {
       options: {
-        files: ['package.json', 'component.json'],
+        files: ['package.json', 'bower.json'],
         pushTo: 'origin'
       }
     },
