@@ -213,20 +213,30 @@
         var polls      = 0
         var expected   = 3
         var onProgress = function () { polls++ }
-        var check  = function(results) {
-          expect(polls).to.be.above(0);
-          expect(Object.keys(results)).to.have.length(3);
-          done();
+        var check  = function(version) {
+          return function(results) {
+            expect(polls).to.be.above(0);
+            if (version >= 16) {
+              expect(Object.keys(results)).to.have.length(6);
+              expect(Object.keys(results).to.include('MATCH'));
+            } else {
+              expect(Object.keys(results)).to.have.length(3);
+            }
+
+            done();
+          };
         };
         var request = {
           identifiers: ['anne', 'brenda', 'carol'],
           type: 'Employee'
         };
-        service.resolveIds(request).then(function(job) {
+        var versionP = service.fetchVersion();
+        var resolutionP = service.resolveIds();
+        $.when(versionP, resolutionP).then(function(v, job) {
           var poll = job.poll();
           
           poll.progress(onProgress);
-          poll.done(check);
+          poll.done(check(v));
           poll.fail(done);
           poll.always(job.del);
         });

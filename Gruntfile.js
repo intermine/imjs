@@ -102,6 +102,9 @@ module.exports = function (grunt) {
         options: grunt.file.readJSON('mocha-opts.json')
       }
     },
+    mocha_phantomjs: {
+      all: ['test/browser/index.html']
+    },
     copy: {
       cdn: {
         files: {
@@ -120,6 +123,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-contrib-clean')
+  grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {
@@ -190,22 +194,7 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('mocha-phantomjs', ['build-acceptance-index', '-mocha-phantomjs']);
-  grunt.registerTask('-mocha-phantomjs', 'Run tests in phantomjs', function () {
-    var done = this.async();
-    var cmd = './node_modules/mocha-phantomjs/bin/mocha-phantomjs';
-    var args = ['test/browser/index.html'];
-    var reporter = grunt.option('reporter');
-    if (reporter) {
-      args.push('-R');
-      args.push(reporter);
-    }
-    var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'});
-    child.on('exit', function (code) {
-      grunt.log.writeln(code);
-      done(code === 0);
-    });
-  });
+  grunt.registerTask('phantomjs', ['build-acceptance-index', 'mocha_phantomjs']);
 
   grunt.registerTask('test-node', 'Run tests in the nodejs VM', function () {
     var grep = grunt.option('grep');
@@ -243,7 +232,7 @@ module.exports = function (grunt) {
   grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn']);
   grunt.registerTask('build', ['clean:build', 'compile', 'concat', 'uglify'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob']);
-  grunt.registerTask('test', ['build', 'test-node', 'mocha-phantomjs']);
+  grunt.registerTask('test', ['build', 'test-node', 'phantomjs']);
   grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])
 
 }
