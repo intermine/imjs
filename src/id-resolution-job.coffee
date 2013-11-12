@@ -21,7 +21,27 @@ else
   {intermine} = __root__
   {funcutils} = intermine
 
-{get} = funcutils
+{get, fold} = funcutils
+
+class CategoryResults
+
+  constructor: (results) ->
+    @[k] = v for own k, v of results
+
+  goodMatchIds: -> @MATCH.map get 'id'
+
+  allMatchIds: ->
+    combineIds = fold (res, issueSet) => res.concat @[issueSet]?.matches?.map(get 'id') ? []
+    combineIds @goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']
+
+class IdResults
+
+  constructor: (results) ->
+    @[k] = v for own k, v of results
+
+  goodMatchIds: -> (id for id in @allMatchIds when @[id].foo)
+
+  allMatchIds: -> (k for own k of @)
 
 class IDResolutionJob
 
@@ -31,7 +51,11 @@ class IDResolutionJob
 
   fetchErrorMessage: (cb) => @service.get("ids/#{ @uid }/status").pipe(get 'message').done(cb)
 
-  fetchResults:      (cb) => @service.get("ids/#{ @uid }/result").pipe(get 'results').done(cb)
+  fetchResults:      (cb) =>
+    gettingRes = @service.get("ids/#{ @uid }/result").pipe(get 'results')
+    gettingVer = @service.fetchVersion()
+    gettingVer.then (v) -> gettingRes.then (results) ->
+      if v >= 16 then new CategoryResults(results) else new IdResults(results)
 
   del: (cb) => @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
  
@@ -57,6 +81,8 @@ class IDResolutionJob
         when 'ERROR' then @fetchErrorMessage().then(ret.reject, ret.reject)
         else @poll ret.resolve, ret.reject, ret.notify
     return ret.promise()
+
+IDResolutionJob::wait = IDResolutionJob::poll
 
 IDResolutionJob.create = (service) -> (uid) -> new IDResolutionJob(uid, service)
 

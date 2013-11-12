@@ -33,6 +33,10 @@ root.error = (e) -> Deferred( -> @reject new Error(e) ).promise()
 root.success = success = (args...) -> Deferred( -> @resolve args... ).promise()
 
 root.fold = fold = (f) -> (init, xs) ->
+  if arguments.length is 1
+    xs = (init?.slice() or init)
+    init = (xs?.shift() or {})
+  throw new Error("xs is null") unless xs?
   if xs.reduce? # arrays
     xs.reduce f, init
   else # objects

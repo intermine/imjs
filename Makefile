@@ -5,6 +5,7 @@
 # Thu Feb 14 16:29:54 GMT 2013
 
 TASK = default
+GREP = *
 REPORTER = spec
 
 export PATH := $(shell find node_modules -name 'bin' -printf %p:)node_modules/.bin:${PATH}
@@ -14,6 +15,9 @@ test:
 
 run:
 	grunt $(TASK)
+
+test-only:
+	grunt test --grep "$(GREP)"
 
 test-cov: instrument
 	mkdir -p coverage

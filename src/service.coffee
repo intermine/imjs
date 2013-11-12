@@ -359,19 +359,25 @@ class Service
   # @param [(Array<Object>|Number) ->] cb An optional callback.
   # @return [Promise<Array<Object>, Number>] A promise to return a list of objects with
   #   two properties ('count' and 'value').
-  values: (path, typeConstraints = {}, cb = (->)) => REQUIRES_VERSION @, 6, =>
+  pathValues: (path, typeConstraints = {}, cb = (->)) => REQUIRES_VERSION @, 6, =>
+    if _.isString(typeConstraints)
+      wanted = typeConstraints
+      typeConstraints = {}
+
+    wanted = 'results' unless wanted is 'count'
+
+    _pathValues = (path) =>
+      format = if wanted is 'count' then 'jsoncount' else 'json'
+      req = {format, path: path.toString(), typeConstraints: JSON.stringify(path.subclasses)}
+      @post(PATH_VALUES_PATH, req).pipe(get wanted)
+
     try
       @fetchModel().pipe(invoke 'makePath', path, (path.subclasses || typeConstraints))
-                   .pipe(@pathValues)
+                   .pipe(_pathValues)
                    .done(cb)
     catch e
       error e
 
-  pathValues: (path, wanted) =>
-    wanted = 'results' unless wanted is 'count'
-    format = if wanted is 'count' then 'jsoncount' else 'json'
-    req = {format, path: path.toString(), typeConstraints: JSON.stringify(path.subclasses)}
-    @post(PATH_VALUES_PATH, req).pipe(get wanted)
 
   # Perform a request for results that accepts a parameter specifying the
   # page to fetch. Not intended for public consumption.
@@ -438,6 +444,28 @@ class Service
   #
   # @return [Promise<Array<Array<Object>>] A promise to yield results.
   rows: (q, page, cb) => @doPagedRequest(q, QUERY_RESULTS_PATH, page, 'json', cb)
+
+  # Get a page of values.
+  #
+  # @param [Query|Object|PathInfo|String] q The query to request results for.
+  #        If a PathInfo object or a String, then the pathValues method
+  #        will be run instead (backward compatibility). Otherwise the first
+  #        argument will be treated as a query as per the {Service#rows} method.
+  # @param [Object] opts Either a page, or options for pathValues.
+  # @param [->] cb A call-back to which results will be yielded. (optional).
+  #
+  # @return [Promise<<Array<Object>] A promise to yield results.
+  values: (q, opts, cb = (->)) =>
+    if not q?
+      error "No query term supplied"
+    else if q.descriptors? or _.isString q
+      @pathValues(q, opts, cb)
+    else
+      @query(q).then (query) => # Lift to query, check and then run.
+        if query.views.length isnt 1
+          error "Expected one column, got #{ q.views.length }"
+        else
+          @rows(query, opts).then(invoke 'map', get 0).done(cb)
 
   # Get a page of results suitable for building the cells in a table.
   #

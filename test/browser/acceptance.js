@@ -212,8 +212,21 @@
       it('can resolve some ids', function(done) {
         var polls      = 0
         var expected   = 3
-        var onProgress = function () { polls++ }
-        var check  = function(version) {
+        var request = { type: 'Employee', identifiers: ['anne', 'brenda', 'carol'] };
+
+        $.when(service.fetchVersion(), service.resolveIds(request)).then(testJob).fail(done);
+        
+        function testJob (v, job) {
+          var poll = job.poll();
+          
+          poll.progress(onProgress);
+          poll.done(check(v));
+          poll.fail(done);
+          poll.always(job.del);
+        }
+
+        function check (version) {
+          console.log("Testing ID resolution service @" + version);
           return function(results) {
             expect(polls).to.be.above(0);
             if (version >= 16) {
@@ -226,22 +239,8 @@
 
             done();
           };
-        };
-        var request = {
-          identifiers: ['anne', 'brenda', 'carol'],
-          type: 'Employee'
-        };
-        var versionP = service.fetchVersion();
-        var resolutionP = service.resolveIds(request);
-        $.when(versionP, resolutionP).then(function(v, job) {
-          var poll = job.poll();
-          
-          poll.progress(onProgress);
-          poll.done(check(v));
-          poll.fail(done);
-          poll.always(job.del);
-        }).fail(done);
-
+        }
+        function onProgress () { polls++ }
       });
     });
 

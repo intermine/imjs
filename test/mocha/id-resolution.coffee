@@ -1,6 +1,6 @@
 Fixture = require './lib/fixture'
 {cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
-{get, invoke} = Fixture.funcutils
+{fold, get, invoke} = Fixture.funcutils
 should = require 'should'
 
 describe 'Service', ->
@@ -22,11 +22,18 @@ describe 'Service', ->
 
     it 'should get resolved', eventually (job) -> job.poll()
 
-    it 'should find four employees', eventually (job) ->
+    it 'should find four employees', eventually (job, version) ->
       job.poll().then deferredTest (results) ->
-        Object.keys(results).length.should.equal 6
-        Object.keys(results).should.include 'MATCH'
-        Object.keys(results.MATCH).length.should.equal 4
+        results.allMatchIds().length.should.equal 4
+
+    it 'should find four employee ids, which can be used', eventually (job) ->
+      sumAges = (results) ->
+        console.log results.allMatchIds()
+        q = select: ['Employee.age'], where: {id: results.allMatchIds()}
+        service.values(q).then fold (a, b) -> a + b
+
+      job.wait().then(sumAges).then deferredTest (total) -> total.should.equal 215
+
 
   describe '#resolveIds(caseSensitiveJob)', ->
 
@@ -41,7 +48,5 @@ describe 'Service', ->
 
     it 'should find three employees', eventually (job) ->
       job.poll().then deferredTest (results) ->
-        Object.keys(results).length.should.equal 6
-        Object.keys(results).should.include 'MATCH'
-        Object.keys(results.MATCH).length.should.equal 3
+        results.allMatchIds().length.should.equal 3
 

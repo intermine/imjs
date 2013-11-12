@@ -323,6 +323,13 @@ Thu Jun 14 13:18:14 BST 2012
   root.fold = fold = function(f) {
     return function(init, xs) {
       var k, ret, v;
+      if (arguments.length === 1) {
+        xs = (init != null ? init.slice() : void 0) || init;
+        init = (xs != null ? xs.shift() : void 0) || {};
+      }
+      if (xs == null) {
+        throw new Error("xs is null");
+      }
       if (xs.reduce != null) {
         return xs.reduce(f, init);
       } else {
@@ -1561,7 +1568,8 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var Deferred, IDResolutionJob, IS_NODE, funcutils, get, intermine, __root__,
+  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, fold, funcutils, get, intermine, __root__,
+    __hasProp = {}.hasOwnProperty,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   IS_NODE = typeof exports !== 'undefined';
@@ -1578,7 +1586,74 @@ Thu Jun 14 13:18:14 BST 2012
     funcutils = intermine.funcutils;
   }
 
-  get = funcutils.get;
+  get = funcutils.get, fold = funcutils.fold;
+
+  CategoryResults = (function() {
+
+    function CategoryResults(results) {
+      var k, v;
+      for (k in results) {
+        if (!__hasProp.call(results, k)) continue;
+        v = results[k];
+        this[k] = v;
+      }
+    }
+
+    CategoryResults.prototype.goodMatchIds = function() {
+      return this.MATCH.map(get('id'));
+    };
+
+    CategoryResults.prototype.allMatchIds = function() {
+      var combineIds,
+        _this = this;
+      combineIds = fold(function(res, issueSet) {
+        var _ref, _ref1, _ref2;
+        return res.concat((_ref = (_ref1 = _this[issueSet]) != null ? (_ref2 = _ref1.matches) != null ? _ref2.map(get('id')) : void 0 : void 0) != null ? _ref : []);
+      });
+      return combineIds(this.goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']);
+    };
+
+    return CategoryResults;
+
+  })();
+
+  IdResults = (function() {
+
+    function IdResults(results) {
+      var k, v;
+      for (k in results) {
+        if (!__hasProp.call(results, k)) continue;
+        v = results[k];
+        this[k] = v;
+      }
+    }
+
+    IdResults.prototype.goodMatchIds = function() {
+      var id, _i, _len, _ref, _results;
+      _ref = this.allMatchIds;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        id = _ref[_i];
+        if (this[id].foo) {
+          _results.push(id);
+        }
+      }
+      return _results;
+    };
+
+    IdResults.prototype.allMatchIds = function() {
+      var k, _results;
+      _results = [];
+      for (k in this) {
+        if (!__hasProp.call(this, k)) continue;
+        _results.push(k);
+      }
+      return _results;
+    };
+
+    return IdResults;
+
+  })();
 
   IDResolutionJob = (function() {
 
@@ -1604,7 +1679,18 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     IDResolutionJob.prototype.fetchResults = function(cb) {
-      return this.service.get("ids/" + this.uid + "/result").pipe(get('results')).done(cb);
+      var gettingRes, gettingVer;
+      gettingRes = this.service.get("ids/" + this.uid + "/result").pipe(get('results'));
+      gettingVer = this.service.fetchVersion();
+      return gettingVer.then(function(v) {
+        return gettingRes.then(function(results) {
+          if (v >= 16) {
+            return new CategoryResults(results);
+          } else {
+            return new IdResults(results);
+          }
+        });
+      });
     };
 
     IDResolutionJob.prototype.del = function(cb) {
@@ -1634,6 +1720,8 @@ Thu Jun 14 13:18:14 BST 2012
     return IDResolutionJob;
 
   })();
+
+  IDResolutionJob.prototype.wait = IDResolutionJob.prototype.poll;
 
   IDResolutionJob.create = function(service) {
     return function(uid) {
@@ -3375,6 +3463,8 @@ Thu Jun 14 13:18:14 BST 2012
 
       this.tableRows = __bind(this.tableRows, this);
 
+      this.values = __bind(this.values, this);
+
       this.rows = __bind(this.rows, this);
 
       this.records = __bind(this.records, this);
@@ -3382,8 +3472,6 @@ Thu Jun 14 13:18:14 BST 2012
       this.table = __bind(this.table, this);
 
       this.pathValues = __bind(this.pathValues, this);
-
-      this.values = __bind(this.values, this);
 
       this.fetchUser = __bind(this.fetchUser, this);
 
@@ -3595,7 +3683,7 @@ Thu Jun 14 13:18:14 BST 2012
       return this.whoami.apply(this, args);
     };
 
-    Service.prototype.values = function(path, typeConstraints, cb) {
+    Service.prototype.pathValues = function(path, typeConstraints, cb) {
       var _this = this;
       if (typeConstraints == null) {
         typeConstraints = {};
@@ -3604,26 +3692,30 @@ Thu Jun 14 13:18:14 BST 2012
         cb = (function() {});
       }
       return REQUIRES_VERSION(this, 6, function() {
+        var wanted, _pathValues;
+        if (_.isString(typeConstraints)) {
+          wanted = typeConstraints;
+          typeConstraints = {};
+        }
+        if (wanted !== 'count') {
+          wanted = 'results';
+        }
+        _pathValues = function(path) {
+          var format, req;
+          format = wanted === 'count' ? 'jsoncount' : 'json';
+          req = {
+            format: format,
+            path: path.toString(),
+            typeConstraints: JSON.stringify(path.subclasses)
+          };
+          return _this.post(PATH_VALUES_PATH, req).pipe(get(wanted));
+        };
         try {
-          return _this.fetchModel().pipe(invoke('makePath', path, path.subclasses || typeConstraints)).pipe(_this.pathValues).done(cb);
+          return _this.fetchModel().pipe(invoke('makePath', path, path.subclasses || typeConstraints)).pipe(_pathValues).done(cb);
         } catch (e) {
           return error(e);
         }
       });
-    };
-
-    Service.prototype.pathValues = function(path, wanted) {
-      var format, req;
-      if (wanted !== 'count') {
-        wanted = 'results';
-      }
-      format = wanted === 'count' ? 'jsoncount' : 'json';
-      req = {
-        format: format,
-        path: path.toString(),
-        typeConstraints: JSON.stringify(path.subclasses)
-      };
-      return this.post(PATH_VALUES_PATH, req).pipe(get(wanted));
     };
 
     Service.prototype.doPagedRequest = function(q, path, page, format, cb) {
@@ -3663,6 +3755,26 @@ Thu Jun 14 13:18:14 BST 2012
 
     Service.prototype.rows = function(q, page, cb) {
       return this.doPagedRequest(q, QUERY_RESULTS_PATH, page, 'json', cb);
+    };
+
+    Service.prototype.values = function(q, opts, cb) {
+      var _this = this;
+      if (cb == null) {
+        cb = (function() {});
+      }
+      if (!(q != null)) {
+        return error("No query term supplied");
+      } else if ((q.descriptors != null) || _.isString(q)) {
+        return this.pathValues(q, opts, cb);
+      } else {
+        return this.query(q).then(function(query) {
+          if (query.views.length !== 1) {
+            return error("Expected one column, got " + q.views.length);
+          } else {
+            return _this.rows(query, opts).then(invoke('map', get(0))).done(cb);
+          }
+        });
+      }
     };
 
     Service.prototype.tableRows = function(q, page, cb) {
