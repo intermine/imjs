@@ -105,6 +105,12 @@ module.exports = function (grunt) {
     mocha_phantomjs: {
       all: ['test/browser/index.html']
     },
+    bump: {
+      options: {
+        files: ['package.json', 'component.json'],
+        pushTo: 'origin'
+      }
+    },
     copy: {
       cdn: {
         files: {
