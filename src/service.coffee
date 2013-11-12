@@ -139,6 +139,8 @@ TO_NAMES = (xs = []) -> (x.name ? x for x in (if _.isArray(xs) then xs else [xs]
 #
 class Service
 
+  doReq: http.doReq
+
   # Construct a new connection to a service.
   #
   # @param [Object] options The configuration information used by the service
@@ -245,7 +247,7 @@ class Service
       url: url,
       type: method
 
-    return http.doReq(opts, indiv)
+    return @doReq(opts, indiv)
 
 
   # Get the results of using a list enrichment widget to calculate
@@ -671,7 +673,9 @@ class Service
       url: @root + 'ids'
       type: 'POST'
       contentType: 'application/json'
-    http.doReq(req).pipe(get 'uid').pipe(IDResolutionJob.create @).done(cb)
+    @doReq(req).pipe(get 'uid').pipe(IDResolutionJob.create @).done(cb)
+
+
 
   # Create a new list through the identifier upload service.
   #
@@ -697,7 +701,7 @@ class Service
       type: 'POST'
       contentType: 'text/plain'
 
-    http.doReq(req).pipe(LIST_PIPE @).done(cb)
+    @doReq(req).pipe(LIST_PIPE @).done(cb)
 
 # Methods for processing items individually.
 

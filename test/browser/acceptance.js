@@ -239,7 +239,7 @@
           poll.done(check(v));
           poll.fail(done);
           poll.always(job.del);
-        });
+        }).fail(done);
 
       });
     });

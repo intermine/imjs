@@ -60,4 +60,8 @@ http.iterReq = (method, path, fmt) -> (q, page = {}, doThis = (->), onErr = (->)
 http.doReq = (opts) ->
   errBack = (opts.error or @errorHandler)
   opts.error = _.compose errBack, ERROR_PIPE
-  jQuery.ajax(opts).pipe(CHECKING_PIPE).fail(errBack)
+  def = jQuery.Deferred ->
+    resp = jQuery.ajax opts
+    resp.then => @resolve arguments...
+    resp.fail => @reject ERROR_PIPE.apply(null, arguments)
+  def.promise()

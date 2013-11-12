@@ -777,10 +777,21 @@ Thu Jun 14 13:18:14 BST 2012
   };
 
   http.doReq = function(opts) {
-    var errBack;
+    var def, errBack;
     errBack = opts.error || this.errorHandler;
     opts.error = _.compose(errBack, ERROR_PIPE);
-    return jQuery.ajax(opts).pipe(CHECKING_PIPE).fail(errBack);
+    def = jQuery.Deferred(function() {
+      var resp,
+        _this = this;
+      resp = jQuery.ajax(opts);
+      resp.then(function() {
+        return _this.resolve.apply(_this, arguments);
+      });
+      return resp.fail(function() {
+        return _this.reject(ERROR_PIPE.apply(null, arguments));
+      });
+    });
+    return def.promise();
   };
 
 }).call(this);
@@ -3334,6 +3345,8 @@ Thu Jun 14 13:18:14 BST 2012
   Service = (function() {
     var toMapByName;
 
+    Service.prototype.doReq = http.doReq;
+
     function Service(_arg) {
       var loc, noCache, _ref, _ref1,
         _this = this;
@@ -3477,7 +3490,7 @@ Thu Jun 14 13:18:14 BST 2012
         url: url,
         type: method
       };
-      return http.doReq(opts, indiv);
+      return this.doReq(opts, indiv);
     };
 
     Service.prototype.enrichment = function(opts, cb) {
@@ -3847,7 +3860,7 @@ Thu Jun 14 13:18:14 BST 2012
           type: 'POST',
           contentType: 'application/json'
         };
-        return http.doReq(req).pipe(get('uid')).pipe(IDResolutionJob.create(_this)).done(cb);
+        return _this.doReq(req).pipe(get('uid')).pipe(IDResolutionJob.create(_this)).done(cb);
       });
     };
 
@@ -3878,7 +3891,7 @@ Thu Jun 14 13:18:14 BST 2012
         type: 'POST',
         contentType: 'text/plain'
       };
-      return http.doReq(req).pipe(LIST_PIPE(this)).done(cb);
+      return this.doReq(req).pipe(LIST_PIPE(this)).done(cb);
     };
 
     return Service;
