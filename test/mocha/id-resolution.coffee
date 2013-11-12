@@ -23,7 +23,10 @@ describe 'Service', ->
     it 'should get resolved', eventually (job) -> job.poll()
 
     it 'should find four employees', eventually (job) ->
-      job.poll().then deferredTest (results) -> Object.keys(results).length.should.equal 4
+      job.poll().then deferredTest (results) ->
+        Object.keys(results).length.should.equal 6
+        Object.keys(results).should.include 'MATCH'
+        Object.keys(results.MATCH).length.should.equal 4
 
   describe '#resolveIds(caseSensitiveJob)', ->
 
@@ -37,5 +40,8 @@ describe 'Service', ->
     it 'should get resolved', eventually (job) -> job.poll()
 
     it 'should find three employees', eventually (job) ->
-      job.poll().then deferredTest (results) -> Object.keys(results).length.should.equal 3
+      job.poll().then deferredTest (results) ->
+        Object.keys(results).length.should.equal 6
+        Object.keys(results).should.include 'MATCH'
+        Object.keys(results.MATCH).length.should.equal 3
 

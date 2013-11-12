@@ -40,32 +40,30 @@ module.exports = function (grunt) {
     });
   };
 
-  var compile = function (src, dest, cb) {
-    var files     = grunt.file.expandFiles([src]);
-    var fileCount = files.length;
-    var successes = 0;
+  var compile = function (files, dest, cb) {
+    var fileCount = files.length, successes = 0, i = 0, file;
 
     if (fileCount < 1) {
-      return cb(new Error("No files matched '" + src + "'"));
+      return cb(new Error("No source files found."));
     }
 
-    var finishedWithFile = function (error) {
-      successes += 1;
-      if (error || successes >= fileCount) {
-        cb(error);
-      }
-    };
 
     // Ensure that the destination exists.
     grunt.file.mkdir(dest);
 
-    var i = 0, file;
     for (i = 0; i < files.length; i++) {
       file = files[i];
       if (file.match(/\.coffee$/)) {
         compileFile(dest, file, finishedWithFile);
       } else {
         finishedWithFile()
+      }
+    }
+
+    function finishedWithFile (error) {
+      successes += 1;
+      if (error || successes >= fileCount) {
+        cb(error);
       }
     }
   };
@@ -75,18 +73,18 @@ module.exports = function (grunt) {
    */
   grunt.registerMultiTask('compile', 'Compile source files to js', function () {
     var opts;
-    var log   = grunt.log;
-    var done  = this.async();
-    var src   = this.data.src;
-    var dest  = this.data.dest;
+    var log     = grunt.log;
+    var done    = this.async();
+    var sources = this.filesSrc;
+    var dest    = this.data.dest;
 
-    if (src && dest) {
-      compile(src, dest, function (err) {
+    if (sources && dest) {
+      compile(sources, dest, function (err) {
         if (err) {
           log.error("Compilation failed: " + (err.stack || err));
           done(false);
         } else {
-          log.ok('done: compiled coffee-script files in ' + src + ' to ' + dest + '.');
+          log.ok('done: compiled ' + sources.length + ' coffee-script files to ' + dest + '.');
           done(true);
         }
       });

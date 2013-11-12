@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/main",
   "keywords": [
@@ -32,22 +32,25 @@
     "tests": "test"
   },
   "scripts": {
-    "prepublish": "./node_modules/grunt/bin/grunt build",
+    "prepublish": "make",
     "test": "grunt test"
   },
   "devDependencies": {
     "bower": "latest",
     "mocha": "latest",
-    "grunt-simple-mocha": ">= 0.2.0, < 0.3.0",
+    "grunt-simple-mocha": "~0.4.0",
     "mocha-phantomjs": "latest",
     "should": "latest",
     "coffee-script": "~1.3.3",
     "codo": "~1.6.0",
-    "grunt": ">= 0.3.17, < 0.4.0",
-    "coffeelint": ">= 0.5.4",
-    "grunt-coffeelint": ">= 0.0.3",
-    "grunt-clean": ">= 0.3.0",
-    "grunt-contrib-copy": "~0.3.1",
-    "grunt-bump": "0.0.1"
+    "grunt-cli": "~0.1.11",
+    "grunt": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-bump": "0.0.11",
+    "grunt-coffeelint": "0.0.7",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-jshint": "~0.7.1"
   }
 }
