@@ -99,7 +99,7 @@ module.exports = function (grunt) {
     simplemocha: {
       all: {
         src: 'test/mocha/*.coffee',
-        options: '<json:mocha-opts.json>'
+        options: grunt.file.readJSON('mocha-opts.json')
       }
     },
     copy: {
@@ -148,7 +148,7 @@ module.exports = function (grunt) {
       underscore: "../../components/underscore/underscore.js",
       imjs: "../../js/im.js"
     };
-    var processed = grunt.template.process(templ.toString(), obj);
+    var processed = grunt.template.process(templ.toString(), {data: obj});
     grunt.file.write(outf, processed);
     grunt.log.writeln('Wrote ' + outf);
   });
@@ -175,7 +175,7 @@ module.exports = function (grunt) {
       underscore: "http://cdn.intermine.org/js/underscore.js/1.3.3/underscore-min.js",
       imjs: "http://ci.intermine.org/job/imjs/lastSuccessfulBuild/artifact/js/im.js"
     };
-    var processed = grunt.template.process(templ.toString(), obj);
+    var processed = grunt.template.process(templ.toString(), {data: obj});
     grunt.file.write(outf, processed);
     grunt.log.writeln('Wrote ' + outf);
   });
@@ -190,7 +190,7 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('mocha-phantomjs', 'build-acceptance-index -mocha-phantomjs');
+  grunt.registerTask('mocha-phantomjs', ['build-acceptance-index', '-mocha-phantomjs']);
   grunt.registerTask('-mocha-phantomjs', 'Run tests in phantomjs', function () {
     var done = this.async();
     var cmd = './node_modules/mocha-phantomjs/bin/mocha-phantomjs';
@@ -202,6 +202,7 @@ module.exports = function (grunt) {
     }
     var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'});
     child.on('exit', function (code) {
+      grunt.log.writeln(code);
       done(code === 0);
     });
   });
