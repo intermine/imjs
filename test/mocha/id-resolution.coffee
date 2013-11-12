@@ -28,7 +28,6 @@ describe 'Service', ->
 
     it 'should find four employee ids, which can be used', eventually (job) ->
       sumAges = (results) ->
-        console.log results.allMatchIds()
         q = select: ['Employee.age'], where: {id: results.allMatchIds()}
         service.values(q).then fold (a, b) -> a + b
 
