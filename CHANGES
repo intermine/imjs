@@ -37,4 +37,6 @@
 2.9.0  Tue Nov 12 12:04:45 GMT 2013
        Changes to ID resolution service (bug fixes, and API support)
        More flexible Service#values method, now supporting queries.
+2.9.1  Fri Nov 15 13:55:17 GMT 2013
+       Fixes for updated ID resolution service.
 **/
