@@ -95,7 +95,7 @@ describe 'Service', ->
     it 'should find one unresolved identifier', eventually (job) ->
       job.wait().then deferredTest (results) ->
         results.unresolved.length.should.equal 1
-        results.stats.notFound.should.equal 1
+        results.stats.identifiers.notFound.should.equal 1
 
     it 'should find four employee ids, which can be used', eventually (job) ->
       sumAges = (results) ->
@@ -114,15 +114,19 @@ describe 'Service', ->
 
     it 'should get resolved', eventually (job) -> job.wait()
 
-    it 'should find several employees', eventually (job) ->
+    it 'should find several employees:all', eventually (job) ->
       job.poll().then deferredTest (results) ->
-        results.stats.allMatchedObjects.should.equal 18
-        results.stats.issueObjects.should.equal 18
+        results.stats.objects.all.should.equal 18
+    it 'should find several employees:issues', eventually (job) ->
+      job.poll().then deferredTest (results) ->
+        results.stats.objects.issues.should.equal 18
+    it 'should find several employees:allMatchIds', eventually (job) ->
+      job.poll().then deferredTest (results) ->
         results.allMatchIds().length.should.equal 18
 
     it 'should find zero good employees', eventually (job) ->
       job.poll().then deferredTest (results) ->
-        results.stats.matchedObjects.should.equal 0
+        results.stats.objects.matches.should.equal 0
         results.goodMatchIds().length.should.equal 0
 
   describe '#resolveIds(caseSensitiveJob)', ->
