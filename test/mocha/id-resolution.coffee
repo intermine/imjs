@@ -1,7 +1,69 @@
 Fixture = require './lib/fixture'
+idresolution = require '../../src/id-resolution-job'
+fs = require 'fs'
 {cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {fold, get, invoke} = Fixture.funcutils
 should = require 'should'
+
+describe 'IdResults', ->
+
+  fixture = fs.readFileSync "#{ __dirname }/data/old-id-resolution-format.json", 'utf8'
+  data = JSON.parse fixture
+  result = new idresolution.IdResults data
+  n = Object.keys(data).length
+
+  it 'should have several matches', ->
+
+    result.getMatches().length.should.equal n
+    result.getMatchIds().length.should.equal n
+    result.allMatchIds().length.should.equal n
+
+  it 'should have fewer good matches', ->
+    result.goodMatchIds().length.should.be.below n
+    result.getMatches('MATCH').length.should.be.below n
+    result.getMatchIds('MATCH').length.should.be.below n
+    result.getMatches('MATCH').length.should.be.above 0
+    result.getMatchIds('MATCH').length.should.be.above 0
+    result.goodMatchIds().length.should.be.above 0
+
+  for issue in ['DUPLICATE', 'OTHER', 'TYPE_CONVERTED']
+    it "should have some #{ issue.toLowerCase() }s", ->
+      result.getMatches(issue).length.should.be.above 0
+      result.getMatchIds(issue).length.should.be.above 0
+      result.getMatches(issue).length.should.be.below n
+      result.getMatchIds(issue).length.should.be.below n
+      result.getMatchIds(issue).length.should.not.equal result.goodMatchIds().length
+
+###
+describe 'CategoryResults', ->
+
+  fixture = fs.readFileSync "#{ __dirname }/data/category-id-resolution-format.json", 'utf8'
+  data = JSON.parse fixture
+  result = new idresolution.CategoryResults data
+  n = Object.keys(data).length
+
+  it 'should have several matches', ->
+
+    result.getMatches().length.should.equal n
+    result.getMatchIds().length.should.equal n
+    result.allMatchIds().length.should.equal n
+
+  it 'should have fewer good matches', ->
+    result.goodMatchIds().length.should.be.below n
+    result.getMatches('MATCH').length.should.be.below n
+    result.getMatchIds('MATCH').length.should.be.below n
+    result.getMatches('MATCH').length.should.be.above 0
+    result.getMatchIds('MATCH').length.should.be.above 0
+    result.goodMatchIds().length.should.be.above 0
+
+  for issue in ['DUPLICATE', 'OTHER', 'TYPE_CONVERTED']
+    it "should have some #{ issue.toLowerCase() }s", ->
+      result.getMatches(issue).length.should.be.above 0
+      result.getMatchIds(issue).length.should.be.above 0
+      result.getMatches(issue).length.should.be.below n
+      result.getMatchIds(issue).length.should.be.below n
+      result.getMatchIds(issue).length.should.not.equal result.goodMatchIds().length
+###
 
 describe 'Service', ->
 

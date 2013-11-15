@@ -21,7 +21,7 @@ else
   {intermine} = __root__
   {funcutils} = intermine
 
-{get, fold, concatMap} = funcutils
+{id, get, fold, concatMap} = funcutils
 
 class CategoryResults
 
@@ -44,9 +44,17 @@ class IdResults
   constructor: (results) ->
     @[k] = v for own k, v of results
 
-  goodMatchIds: -> (id for id in @allMatchIds when @[id].foo)
+  flatten = concatMap id
+  getReasons = (match) -> flatten (vals for k, vals of match.identifiers)
+  isGood = (match, k) -> not k? or k in getReasons match
 
-  allMatchIds: -> (k for own k of @)
+  getMatches: (k) -> (match for own id, match of @ when isGood match, k)
+
+  getMatchIds: (k) -> (id for own id, match of @ when isGood match, k)
+
+  goodMatchIds: -> @getMatchIds 'MATCH'
+
+  allMatchIds: -> @getMatchIds()
 
 class IDResolutionJob
 
@@ -92,3 +100,5 @@ IDResolutionJob::wait = IDResolutionJob::poll
 IDResolutionJob.create = (service) -> (uid) -> new IDResolutionJob(uid, service)
 
 intermine.IDResolutionJob = IDResolutionJob
+intermine.CategoryResults = CategoryResults
+intermine.IdResults = IdResults
