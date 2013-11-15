@@ -231,8 +231,9 @@
             expect(polls).to.be.above(0);
             if (version >= 16) {
               var keys = Object.keys(results);
-              expect(keys).to.have.length(6);
-              expect(keys).to.contain('MATCH');
+              expect(keys).to.have.length(3);
+              expect(keys).to.contain('matches');
+              expect(results.stats.matchedObjects).to.equal(3);
             } else {
               expect(Object.keys(results)).to.have.length(3);
             }

@@ -20,11 +20,20 @@ describe 'Service', ->
 
     it 'should produce a job', eventually should.exist
 
-    it 'should get resolved', eventually (job) -> job.poll()
+    it 'should get resolved', eventually (job) -> job.wait()
 
-    it 'should find four employees', eventually (job, version) ->
+    it 'should find four employees', eventually (job) ->
       job.poll().then deferredTest (results) ->
         results.allMatchIds().length.should.equal 4
+
+    it 'should find four good employees', eventually (job) ->
+      job.poll().then deferredTest (results) ->
+        results.goodMatchIds().length.should.equal 4
+
+    it 'should find one unresolved identifier', eventually (job) ->
+      job.wait().then deferredTest (results) ->
+        results.unresolved.length.should.equal 1
+        results.stats.notFound.should.equal 1
 
     it 'should find four employee ids, which can be used', eventually (job) ->
       sumAges = (results) ->
@@ -33,6 +42,26 @@ describe 'Service', ->
 
       job.wait().then(sumAges).then deferredTest (total) -> total.should.equal 215
 
+  describe '#resolveIds(convertedTypes)', ->
+
+    identifiers = ['Sales']
+    @beforeAll prepare -> service.resolveIds({identifiers, type})
+    @afterAll  (done) -> @promise.then(invoke 'del').always -> done()
+
+    it 'should produce a job', eventually should.exist
+
+    it 'should get resolved', eventually (job) -> job.wait()
+
+    it 'should find several employees', eventually (job) ->
+      job.poll().then deferredTest (results) ->
+        results.stats.allMatchedObjects.should.equal 18
+        results.stats.issueObjects.should.equal 18
+        results.allMatchIds().length.should.equal 18
+
+    it 'should find zero good employees', eventually (job) ->
+      job.poll().then deferredTest (results) ->
+        results.stats.matchedObjects.should.equal 0
+        results.goodMatchIds().length.should.equal 0
 
   describe '#resolveIds(caseSensitiveJob)', ->
 

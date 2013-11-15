@@ -21,17 +21,22 @@ else
   {intermine} = __root__
   {funcutils} = intermine
 
-{get, fold} = funcutils
+{get, fold, concatMap} = funcutils
 
 class CategoryResults
 
-  constructor: (results) ->
-    @[k] = v for own k, v of results
+  constructor: (results) -> @[k] = v for own k, v of results
 
-  goodMatchIds: -> @MATCH.map get 'id'
+  getIssueMatches = concatMap get 'matches'
+
+  getMatches: (k) -> if k is 'MATCH' then @matches[k] else (getIssueMatches @matches[k]) ? []
+
+  getMatchIds: (k) -> if k? then (@getMatches(k).map get 'id') else @allMatchIds()
+
+  goodMatchIds: -> @getMatchIds 'MATCH'
 
   allMatchIds: ->
-    combineIds = fold (res, issueSet) => res.concat @[issueSet]?.matches?.map(get 'id') ? []
+    combineIds = fold (res, issueSet) => res.concat @getMatchIds issueSet
     combineIds @goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']
 
 class IdResults

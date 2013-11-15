@@ -1568,7 +1568,7 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, fold, funcutils, get, intermine, __root__,
+  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, concatMap, fold, funcutils, get, intermine, __root__,
     __hasProp = {}.hasOwnProperty,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1586,9 +1586,10 @@ Thu Jun 14 13:18:14 BST 2012
     funcutils = intermine.funcutils;
   }
 
-  get = funcutils.get, fold = funcutils.fold;
+  get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
 
   CategoryResults = (function() {
+    var getIssueMatches;
 
     function CategoryResults(results) {
       var k, v;
@@ -1599,16 +1600,34 @@ Thu Jun 14 13:18:14 BST 2012
       }
     }
 
+    getIssueMatches = concatMap(get('matches'));
+
+    CategoryResults.prototype.getMatches = function(k) {
+      var _ref;
+      if (k === 'MATCH') {
+        return this.matches[k];
+      } else {
+        return (_ref = getIssueMatches(this.matches[k])) != null ? _ref : [];
+      }
+    };
+
+    CategoryResults.prototype.getMatchIds = function(k) {
+      if (k != null) {
+        return this.getMatches(k).map(get('id'));
+      } else {
+        return this.allMatchIds();
+      }
+    };
+
     CategoryResults.prototype.goodMatchIds = function() {
-      return this.MATCH.map(get('id'));
+      return this.getMatchIds('MATCH');
     };
 
     CategoryResults.prototype.allMatchIds = function() {
       var combineIds,
         _this = this;
       combineIds = fold(function(res, issueSet) {
-        var _ref, _ref1, _ref2;
-        return res.concat((_ref = (_ref1 = _this[issueSet]) != null ? (_ref2 = _ref1.matches) != null ? _ref2.map(get('id')) : void 0 : void 0) != null ? _ref : []);
+        return res.concat(_this.getMatchIds(issueSet));
       });
       return combineIds(this.goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']);
     };
