@@ -1568,8 +1568,9 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, concatMap, fold, funcutils, get, intermine, __root__,
+  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, concatMap, fold, funcutils, get, id, intermine, __root__,
     __hasProp = {}.hasOwnProperty,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   IS_NODE = typeof exports !== 'undefined';
@@ -1586,7 +1587,7 @@ Thu Jun 14 13:18:14 BST 2012
     funcutils = intermine.funcutils;
   }
 
-  get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
+  id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
 
   CategoryResults = (function() {
     var getIssueMatches;
@@ -1637,6 +1638,7 @@ Thu Jun 14 13:18:14 BST 2012
   })();
 
   IdResults = (function() {
+    var flatten, getReasons, isGood;
 
     function IdResults(results) {
       var k, v;
@@ -1647,27 +1649,58 @@ Thu Jun 14 13:18:14 BST 2012
       }
     }
 
-    IdResults.prototype.goodMatchIds = function() {
-      var id, _i, _len, _ref, _results;
-      _ref = this.allMatchIds;
+    flatten = concatMap(id);
+
+    getReasons = function(match) {
+      var k, vals;
+      return flatten((function() {
+        var _ref, _results;
+        _ref = match.identifiers;
+        _results = [];
+        for (k in _ref) {
+          vals = _ref[k];
+          _results.push(vals);
+        }
+        return _results;
+      })());
+    };
+
+    isGood = function(match, k) {
+      return !(k != null) || __indexOf.call(getReasons(match), k) >= 0;
+    };
+
+    IdResults.prototype.getMatches = function(k) {
+      var match, _results;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        id = _ref[_i];
-        if (this[id].foo) {
+      for (id in this) {
+        if (!__hasProp.call(this, id)) continue;
+        match = this[id];
+        if (isGood(match, k)) {
+          _results.push(match);
+        }
+      }
+      return _results;
+    };
+
+    IdResults.prototype.getMatchIds = function(k) {
+      var match, _results;
+      _results = [];
+      for (id in this) {
+        if (!__hasProp.call(this, id)) continue;
+        match = this[id];
+        if (isGood(match, k)) {
           _results.push(id);
         }
       }
       return _results;
     };
 
+    IdResults.prototype.goodMatchIds = function() {
+      return this.getMatchIds('MATCH');
+    };
+
     IdResults.prototype.allMatchIds = function() {
-      var k, _results;
-      _results = [];
-      for (k in this) {
-        if (!__hasProp.call(this, k)) continue;
-        _results.push(k);
-      }
-      return _results;
+      return this.getMatchIds();
     };
 
     return IdResults;
@@ -1749,6 +1782,10 @@ Thu Jun 14 13:18:14 BST 2012
   };
 
   intermine.IDResolutionJob = IDResolutionJob;
+
+  intermine.CategoryResults = CategoryResults;
+
+  intermine.IdResults = IdResults;
 
 }).call(this);
 
