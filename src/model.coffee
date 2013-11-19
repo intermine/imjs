@@ -7,25 +7,12 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-IS_NODE = typeof exports isnt 'undefined'
-
-__root__ = exports ? this
-
-# Import from the appropriate place depending on whether we are in
-# node.js or in the browser.
-if IS_NODE
-  intermine       = __root__
-  {_}             = require 'underscore'
-  {Deferred}  = $ = require 'underscore.deferred'
-  {Table}         = require './table'
-  {PathInfo}      = require './path'
-  {omap}          = require('./util')
-else
-  {_} = __root__
-  {Deferred} = $  = __root__.jQuery
-  intermine       = (__root__.intermine ?= {})
-  {Table, PathInfo} = intermine
-  {omap}          = intermine.funcutils
+{_}             = require 'underscore'
+{Deferred}  = $ = require 'underscore.deferred'
+{Table}         = require './table'
+{PathInfo}      = require './path'
+{error, omap}   = require('./util')
+intermine = exports
 
 # Either mocha or should is breaking the reference to _
 {flatten, intersection} = _
@@ -149,7 +136,14 @@ Model::makePath = Model::getPathInfo
 Model::findCommonTypeOfMultipleClasses = Model::findCommonType # API preserving alias.
 
 # Static constructor.
-Model.load = (data) -> new Model(data)
+Model.load = (data) -> 
+  try
+    debugger
+    new Model(data)
+  catch err
+    console.error "Error loading model", err
+    error "Could not load model: #{ err }"
+
 
 Model.INTEGRAL_TYPES = ["int", "Integer", "long", "Long"]
 Model.FRACTIONAL_TYPES = ["double", "Double", "float", "Float"]

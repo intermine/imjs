@@ -69,33 +69,33 @@ streaming = (ret, opts) -> (resp) ->
 getMsg = ({type, url}, text, e, code) ->
   "Could not parse response to #{ type } #{ url }: #{ util.inspect(text) } (#{ code }: #{ e })"
 
-blocking = (ret, opts) -> (resp) ->
+blocking = (deferred, opts) -> (resp) ->
   containerBuffer = ''
-  ret.done(opts.success)
+  deferred.done(opts.success)
   resp.on 'data', (chunk) -> containerBuffer += chunk
-  resp.on 'error', (e) -> ret.reject(e)
+  resp.on 'error', (e) -> deferred.reject(e)
   resp.on 'end', ->
     if /json/.test(opts.dataType) or /json/.test opts.data.format
       if '' is containerBuffer and resp.statusCode is 200
         # No body, but all-good.
-        ret.resolve()
+        deferred.resolve()
       else
         try
           parsed = JSON.parse containerBuffer
           if err = parsed.error
-            ret.reject new Error(err)
+            deferred.reject new Error(err)
           else
-            ret.resolve parsed
+            deferred.resolve parsed
         catch e
           if resp.statusCode >= 400
-            ret.reject new Error(resp.statusCode)
+            deferred.reject new Error(resp.statusCode)
           else
-            ret.reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
+            deferred.reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
     else
       if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
-        ret.reject new Error(e[2])
+        deferred.reject new Error(e[2])
       else
-        ret.resolve containerBuffer
+        deferred.resolve containerBuffer
 
 exports.iterReq = (method, path, format) ->
   (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
@@ -108,7 +108,11 @@ exports.iterReq = (method, path, format) ->
       .done(invoke 'error', onErr)
       .done(invoke 'done', onEnd)
 
-exports.doReq = (opts, iter) -> Deferred ->
+promise = (body) ->
+  def = new Deferred body
+  return def.promise()
+
+exports.doReq = (opts, iter) -> promise ->
   @fail opts.error
   @done opts.success
   if _.isString opts.data
@@ -129,7 +133,8 @@ exports.doReq = (opts, iter) -> Deferred ->
     url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
     url.headers['Content-Length'] = postdata.length
 
-  req = http.request url, (if iter then streaming else blocking) @, opts
+  handler = if iter then streaming else blocking
+  req = http.request url, handler @, opts
 
   req.on 'error', @reject
 

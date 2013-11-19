@@ -2,18 +2,10 @@
 # exports object (if we are in node) or onto the global
 # intermine.funcutils namespace
 
-IS_NODE = typeof exports isnt 'undefined'
-root = exports ? this
+{Deferred} = require 'underscore.deferred'
+{_} = require 'underscore'
 
-if IS_NODE
-  {Deferred} = require 'underscore.deferred'
-  {_} = require 'underscore'
-else
-  {Deferred} = root.jQuery
-  {_} = root
-  root.intermine ?= {}
-  root.intermine.funcutils ?= {}
-  root = root.intermine.funcutils
+root = exports
 
 # Simply because this is a whole load cleaner and less ugly than
 # calls to `_.bind(f, null, arg1, arg2, ...)`.

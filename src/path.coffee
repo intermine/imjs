@@ -9,19 +9,10 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-IS_NODE = typeof exports isnt 'undefined'
-__root__ = exports ? this
-
-if IS_NODE
-  intermine       = __root__
-  {_}             = require 'underscore'
-  {Deferred}  = $ = require 'underscore.deferred'
-  utils           = require('./util')
-else
-  {_}            = __root__
-  {Deferred} = $ = __root__.jQuery
-  intermine      = __root__.intermine
-  utils          = intermine.funcutils
+intermine       = exports
+{_}             = require 'underscore'
+{Deferred}  = $ = require 'underscore.deferred'
+utils           = require('./util')
 
 {concatMap, get, any, set, copy, success, error} = utils
 

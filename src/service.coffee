@@ -8,28 +8,22 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 #
-IS_NODE = typeof exports isnt 'undefined'
-__root__ = exports ? this
 
 # Import from the appropriate place depending on whether
 # if we are in node.js or in the browser.
-if IS_NODE
-  {_}            = require('underscore')
-  {Deferred}     = $ = require('underscore.deferred')
-  {Model}        = require('./model')
-  {Query}        = require('./query')
-  {List}         = require('./lists')
-  {User}         = require('./user')
-  {IDResolutionJob} = require('./id-resolution-job')
-  funcutils      = require('./util')
-  to_query_string    = require('querystring').stringify
-  http           = require('./http')
-  intermine = exports
-else
-  {_, jQuery, intermine} = __root__
-  {Deferred} = $ = jQuery
-  to_query_string = (obj) -> jQuery.param(obj, true) # traditional serialization.
-  {Model, Query, List, User, IDResolutionJob, funcutils, http} = intermine
+{_}            = require('underscore')
+{Deferred}     = $ = require('underscore.deferred')
+{Model}        = require('./model')
+{Query}        = require('./query')
+{List}         = require('./lists')
+{User}         = require('./user')
+{IDResolutionJob} = require('./id-resolution-job')
+version      = require('./version')
+funcutils      = require('./util')
+to_query_string    = require('querystring').stringify
+http           = require('./http')
+
+intermine = exports
 
 {pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
 
@@ -84,11 +78,8 @@ SUFFIX = "/service/"
 
 # BY DEFAULT, LOG ERRORS TO THE CONSOLE.
 DEFAULT_ERROR_HANDLER = (e) ->
-  if IS_NODE and e.stack?
-    console.error e.stack
-  else
-    args = if (e?.stack) then [e.stack] else arguments
-    (console.error || console.log)?.apply(console, args) if console?
+  f = console.error ? console.log
+  f e
 
 # A private helper for a repeated pattern where
 # we only fetch a piece of information if it is not
@@ -169,14 +160,8 @@ class Service
     @errorHandler ?= DEFAULT_ERROR_HANDLER
     @help ?= 'no.help.available@dev.null'
     @useCache = !noCache # Peristent processes might not want to cache model, version, etc.
-    loc = if IS_NODE then '' else location.protocol + '//' + location.host
 
     @getFormat = (intended = 'json') =>
-      unless /jsonp/.test intended # already JSON-P
-        unless IS_NODE || jQuery.support.cors # not necessary
-          unless loc.substring(0, @root.length) is @root # Not X-Domain
-            return intended.replace 'json', 'jsonp'
-
       return intended
 
   # Convenience method for making basic POST requests.
@@ -639,9 +624,13 @@ class Service
   # Fetch the description of the data model for this service.
   # @return [Promise<Model>] A promise to yield metadata about this service.
   fetchModel: (cb) ->
-    _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
+
+    return _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
+      .done((m) -> console.log "GOT MODEL", m)
       .pipe(Model.load)
+      .done((m) -> console.log "INSTANTIATED MODEL", m)
       .pipe(set service: @)
+      .done((m) -> console.log "SET SERVICE ON MODEL", m)
       .done(cb)
 
   # Fetch the configured summary-fields.
@@ -811,4 +800,7 @@ Service.connect = (opts = {}) -> new Service(opts)
 
 # Export the Service class to the world
 intermine.Service = Service
+intermine.Model = Model
+intermine.Query = Query
+intermine.imjs = version
 

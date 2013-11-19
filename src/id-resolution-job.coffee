@@ -9,17 +9,9 @@
 # and browsers.
 #
 
-IS_NODE = typeof exports isnt 'undefined'
-__root__ = exports ? this
-
-if IS_NODE
-  {Deferred} = require('underscore.deferred')
-  funcutils = require './util'
-  intermine = __root__
-else
-  {Deferred} = __root__.jQuery
-  {intermine} = __root__
-  {funcutils} = intermine
+{Deferred} = require('underscore.deferred')
+funcutils = require './util'
+intermine = exports
 
 {get, fold} = funcutils
 

@@ -7,10 +7,6 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-IS_NODE = typeof exports isnt 'undefined'
-
-__root__ = exports ? (@intermine ?= {})
-
 merge = (src, dest) -> dest[k] = v for k, v of src
 
 # The properties we expect the tables to have.
@@ -46,5 +42,5 @@ class Table
   # @return [Array<String>] A copy of the direct inheritance list.
   parents: () -> (@__parents__ ? []).slice()
 
-__root__.Table = Table
+exports.Table = Table
 

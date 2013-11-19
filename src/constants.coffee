@@ -1,12 +1,6 @@
 # Values that are required to be available to
 # multiple parts of the application.
-IS_NODE = typeof exports isnt 'undefined'
-
-if IS_NODE
-  constants = exports
-else
-  intermine = (@intermine ?= {})
-  constants = (intermine.constants ?= {})
+constants = exports
 
 # The Accept headers that correspond to each data-type.
 constants.ACCEPT_HEADER =

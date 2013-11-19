@@ -8,21 +8,12 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-IS_NODE = typeof exports isnt 'undefined'
-__root__ = exports ? this
-
-if IS_NODE
-  intermine       = __root__
-  {_}             = require('underscore')
-  {Deferred}  = $ = require('underscore.deferred')
-  toQueryString   = require('querystring').stringify
-  intermine.xml   = require('./xml')
-  {pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = require('./util')
-else
-  {_, jQuery, intermine} = __root__
-  {pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = intermine.funcutils
-  {Deferred}  = $ = jQuery
-  toQueryString   = (obj) -> jQuery.param(obj, true) # Traditional serialization.
+intermine       = exports
+{_}             = require('underscore')
+{Deferred}  = $ = require('underscore.deferred')
+toQueryString   = require('querystring').stringify
+intermine.xml   = require('./xml')
+{pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = require('./util')
 
 get_canonical_op = (orig) ->
   canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null

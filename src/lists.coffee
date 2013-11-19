@@ -7,16 +7,9 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-IS_NODE = typeof exports isnt 'undefined'
-__root__ = exports ? this
-
-if IS_NODE
-  {_} = require 'underscore'
-  funcutils = require './util'
-  intermine = __root__
-else
-  {_, intermine}  = __root__
-  {funcutils}     = intermine
+{_} = require 'underscore'
+funcutils = require './util'
+intermine = exports
 
 {get, invoke, REQUIRES_VERSION, set, dejoin} = funcutils
 
@@ -185,8 +178,6 @@ class List
   inviteUserToShare: (recipient, notify = true, cb = (->)) ->
     # TODO - tests
     @service.post(INVITES, list: @name, to: recipient, notify: !!notify).done(cb)
-
-
 
 intermine.List = List
 

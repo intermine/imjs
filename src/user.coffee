@@ -6,19 +6,10 @@
 #
 # @author: Alex Kalderimis
 
-IS_NODE = typeof exports isnt 'undefined'
-__root__ = exports ? this
-
-if IS_NODE
-  {Deferred} = require 'underscore.deferred'
-  {_}        = require 'underscore'
-  {error}    = require './util'
-  intermine  = __root__
-else
-  {_}        = __root__
-  {Deferred} = __root__.jQuery
-  intermine  = __root__.intermine
-  {error}    = intermine.funcutils
+{Deferred} = require 'underscore.deferred'
+{_}        = require 'underscore'
+{error}    = require './util'
+intermine  = exports
 
 # Simple utility to take the returned value from manageUserPreferences and
 # update the preferences property on this object.
