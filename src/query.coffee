@@ -623,10 +623,10 @@ class Query
     pi = @getPathInfo p
     if pi
       pstr = pi.toPathString()
-      _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
-        p.indexOf(pstr) is 0
-    else
-      true # No model available - for testing return true.
+      for p in @views.concat(c.path for c in @constraints when not c.type?)
+        return true if 0 is p.indexOf pstr
+      return false
+    return true # No model available - for testing return true.
 
   isRelevant: (path) ->
     pi = @getPathInfo path
@@ -913,7 +913,7 @@ class Query
   getSorting: -> ("#{oe.path} #{oe.direction}" for oe in @sortOrder).join(' ')
 
   getConstraintXML: ->
-    toSerialise = (c for c in @constraints when not c.type? or @isRelevant(c.path))
+    toSerialise = (c for c in @constraints when not c.type? or @isInQuery(c.path))
     if toSerialise.length
       concatMap(conStr) concatMap(id) partition((c) -> c.type?) toSerialise
     else
@@ -924,7 +924,7 @@ class Query
       "<join path=\"#{ p }\" style=\"OUTER\"/>"
     strs.join ''
 
-  toXML: () ->
+  toXML: ->
     attrs =
       model: @model.name
       view: @views.join(' ')

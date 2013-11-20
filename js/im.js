@@ -1,4 +1,4 @@
-/*! imjs - v2.10.0 - 2013-11-20 */
+/*! imjs - v2.10.1 - 2013-11-20 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.0";
+    imjs.VERSION = "2.10.1";
   }
 
 }).call(this);
@@ -2652,16 +2652,31 @@
     };
 
     Query.prototype.isInQuery = function(p) {
-      var pi, pstr;
+      var c, pi, pstr, _i, _len, _ref2;
       pi = this.getPathInfo(p);
       if (pi) {
         pstr = pi.toPathString();
-        return _.any(_.union(this.views, _.pluck(this.constraints, 'path')), function(p) {
-          return p.indexOf(pstr) === 0;
-        });
-      } else {
-        return true;
+        _ref2 = this.views.concat((function() {
+          var _j, _len, _ref2, _results;
+          _ref2 = this.constraints;
+          _results = [];
+          for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+            c = _ref2[_j];
+            if (!(c.type != null)) {
+              _results.push(c.path);
+            }
+          }
+          return _results;
+        }).call(this));
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          p = _ref2[_i];
+          if (0 === p.indexOf(pstr)) {
+            return true;
+          }
+        }
+        return false;
       }
+      return true;
     };
 
     Query.prototype.isRelevant = function(path) {
@@ -3072,7 +3087,7 @@
         _results = [];
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           c = _ref2[_i];
-          if (!(c.type != null) || this.isRelevant(c.path)) {
+          if (!(c.type != null) || this.isInQuery(c.path)) {
             _results.push(c);
           }
         }

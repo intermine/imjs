@@ -10,7 +10,7 @@ describe 'Query#select', ->
     q = new Query
       model: new Model TESTMODEL.model
       root: 'Employee'
-      select: ['name', 'department.manager.name']
+      select: ['name', 'department.manager.company.name']
       where:
         'department.manager': {isa: 'CEO'}
 
@@ -22,6 +22,16 @@ describe 'Query#select', ->
   it 'means that we can resolve paths correctly', ->
     {name} = q.getType 'department.manager'
     name.should.eql 'CEO'
+
+  it 'agrees that department.managers are in the query', ->
+    q.isInQuery(q.constraints[0].path).should.be.true
+
+  it 'agrees that department.managers are not relevant', ->
+    q.isRelevant(q.constraints[0].path).should.not.be.true
+
+  it 'emits the type constraints in XML', ->
+    xml = q.toXML()
+    xml.should.match /CEO/
 
   it 'doesn\'t stop working when we make the constraint irrelevant', ->
     q.select ['name', 'age']

@@ -15,8 +15,6 @@ module.exports = function (grunt) {
     }
   }
 
-  grunt.log.writeln(banner);
-
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     concat: {
