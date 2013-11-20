@@ -217,6 +217,12 @@ stringToSortOrder = (str) ->
   pathIndices = (x * 2 for x in [0 ... (parts.length / 2)])
   ([parts[i], parts[i + 1]] for i in pathIndices)
 
+removeIrrelevantSortOrders = ->
+  oldOrder = @sortOrder
+  @sortOrder = (oe for oe in oldOrder when @isRelevant oe.path)
+  if oldOrder.length isnt @sortOrder.length
+    @trigger 'change:sortorder change:orderby', @sortOrder.slice()
+
 class Query
   @JOIN_STYLES = ['INNER', 'OUTER']
   @BIO_FORMATS = ['gff3', 'fasta', 'bed']
@@ -478,11 +484,7 @@ class Query
 
       _.flatten ret.concat others
 
-    @on 'change:views', =>
-      oldOrder = @sortOrder
-      @sortOrder = (oe for oe in oldOrder when @isRelevant oe.path)
-      if oldOrder.length isnt @sortOrder.length
-        @trigger 'change:sortorder change:orderby', @sortOrder.slice()
+    @on 'change:views', removeIrrelevantSortOrders, @
 
   # Remove the given paths from the select list.
   #
@@ -774,10 +776,11 @@ class Query
   # @return [Query] A clone of this query.
   clone: (cloneEvents) ->
     cloned = new Query(@, @service)
+    cloned._callbacks ?= {}
     if cloneEvents
-      cloned._callbacks = @._callbacks
-    else
-      cloned._callbacks = {}
+      for own k, v of @_callbacks
+        cloned._callbacks[k] = v
+      cloned.off('change:views', removeIrrelevantSortOrders, this)
     return cloned
 
   # Get the query for the next page of results.

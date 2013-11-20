@@ -1,4 +1,4 @@
-/*! imjs - v2.10.2 - 2013-11-20 */
+/*! imjs - v2.10.3 - 2013-11-20 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.2";
+    imjs.VERSION = "2.10.3";
   }
 
 }).call(this);
@@ -1815,10 +1815,11 @@
 }).call(this);
 
 (function() {
-  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, jQuery, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
+  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, jQuery, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __slice = [].slice;
+    __slice = [].slice,
+    __hasProp = {}.hasOwnProperty;
 
   IS_NODE = typeof exports !== 'undefined';
 
@@ -2072,6 +2073,25 @@
       _results.push([parts[i], parts[i + 1]]);
     }
     return _results;
+  };
+
+  removeIrrelevantSortOrders = function() {
+    var oe, oldOrder;
+    oldOrder = this.sortOrder;
+    this.sortOrder = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = oldOrder.length; _i < _len; _i++) {
+        oe = oldOrder[_i];
+        if (this.isRelevant(oe.path)) {
+          _results.push(oe);
+        }
+      }
+      return _results;
+    }).call(this);
+    if (oldOrder.length !== this.sortOrder.length) {
+      return this.trigger('change:sortorder change:orderby', this.sortOrder.slice());
+    }
   };
 
   Query = (function() {
@@ -2403,24 +2423,7 @@
         }));
         return _.flatten(ret.concat(others));
       };
-      this.on('change:views', function() {
-        var oe, oldOrder;
-        oldOrder = _this.sortOrder;
-        _this.sortOrder = (function() {
-          var _j, _len1, _results;
-          _results = [];
-          for (_j = 0, _len1 = oldOrder.length; _j < _len1; _j++) {
-            oe = oldOrder[_j];
-            if (this.isRelevant(oe.path)) {
-              _results.push(oe);
-            }
-          }
-          return _results;
-        }).call(_this);
-        if (oldOrder.length !== _this.sortOrder.length) {
-          return _this.trigger('change:sortorder change:orderby', _this.sortOrder.slice());
-        }
-      });
+      this.on('change:views', removeIrrelevantSortOrders, this);
     }
 
     Query.prototype.removeFromSelect = function(unwanted) {
@@ -2841,12 +2844,19 @@
     };
 
     Query.prototype.clone = function(cloneEvents) {
-      var cloned;
+      var cloned, k, v, _ref2, _ref3;
       cloned = new Query(this, this.service);
-      if (cloneEvents) {
-        cloned._callbacks = this._callbacks;
-      } else {
+      if ((_ref2 = cloned._callbacks) == null) {
         cloned._callbacks = {};
+      }
+      if (cloneEvents) {
+        _ref3 = this._callbacks;
+        for (k in _ref3) {
+          if (!__hasProp.call(_ref3, k)) continue;
+          v = _ref3[k];
+          cloned._callbacks[k] = v;
+        }
+        cloned.off('change:views', removeIrrelevantSortOrders, this);
       }
       return cloned;
     };

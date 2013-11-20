@@ -26,3 +26,23 @@ describe 'Query#select', ->
     path.should.eql 'Employee.age'
     direction.should.eql 'ASC'
     q.sortOrder.length.should.eql 1
+
+  it 'should also update the sort order when changing the select list when cloned', ->
+    p = q.clone()
+
+    [{path, direction}] = p.sortOrder
+    path.should.eql 'Employee.department.name'
+    direction.should.eql 'ASC'
+    p.sortOrder.length.should.eql 2
+
+    p.select ['name', 'address.address']
+
+    [{path, direction}] = q.sortOrder
+    path.should.eql 'Employee.department.name'
+    direction.should.eql 'ASC'
+    q.sortOrder.length.should.eql 2
+
+    [{path, direction}] = p.sortOrder
+    path.should.eql 'Employee.age'
+    direction.should.eql 'ASC'
+    p.sortOrder.length.should.eql 1

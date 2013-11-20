@@ -261,6 +261,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn']);
+  grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit']);
   grunt.registerTask('build', ['clean:build', 'compile', 'concat', 'uglify'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob']);
   grunt.registerTask('test', ['build', 'test-node', 'phantomjs']);
