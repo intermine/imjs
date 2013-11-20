@@ -1,4 +1,4 @@
-/*! imjs - v2.10.1 - 2013-11-20 */
+/*! imjs - v2.10.2 - 2013-11-20 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.1";
+    imjs.VERSION = "2.10.2";
   }
 
 }).call(this);
@@ -2418,7 +2418,7 @@
           return _results;
         }).call(_this);
         if (oldOrder.length !== _this.sortOrder.length) {
-          return _this.trigger('change:sortOrder change:orderBy', _this.sortOrder.slice());
+          return _this.trigger('change:sortorder change:orderby', _this.sortOrder.slice());
         }
       });
     }
@@ -2686,7 +2686,7 @@
         pi = pi.getParent();
       }
       sought = pi.toString();
-      nodes = this.getQueryNodes();
+      nodes = this.getViewNodes();
       return _.any(nodes, function(n) {
         return n.toPathString() === sought;
       });
@@ -2959,7 +2959,7 @@
         oe = oes[_i];
         this.addSortOrder(this._parse_sort_order(oe));
       }
-      return this.trigger('set:sortorder', this.sortOrder);
+      return this.trigger('set:sortorder change:sortorder', this.sortOrder);
     };
 
     Query.prototype.addJoins = function(joins) {

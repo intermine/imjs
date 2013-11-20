@@ -482,7 +482,7 @@ class Query
       oldOrder = @sortOrder
       @sortOrder = (oe for oe in oldOrder when @isRelevant oe.path)
       if oldOrder.length isnt @sortOrder.length
-        @trigger 'change:sortOrder change:orderBy', @sortOrder.slice()
+        @trigger 'change:sortorder change:orderby', @sortOrder.slice()
 
   # Remove the given paths from the select list.
   #
@@ -632,7 +632,7 @@ class Query
     pi = @getPathInfo path
     pi = pi.getParent() if pi.isAttribute()
     sought = pi.toString()
-    nodes = @getQueryNodes()
+    nodes = @getViewNodes()
     return _.any nodes, (n) -> n.toPathString() is sought
 
   # Interpret a path that might end in '*' or '**' as the
@@ -849,7 +849,7 @@ class Query
     @sortOrder = []
     for oe in oes
       @addSortOrder @_parse_sort_order oe
-    @trigger 'set:sortorder', @sortOrder
+    @trigger 'set:sortorder change:sortorder', @sortOrder
 
   addJoins: (joins) ->
     if _.isArray(joins)

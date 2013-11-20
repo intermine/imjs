@@ -10,6 +10,6 @@ describe 'Query#makeListQuery', ->
   it 'should leave us with more constraints', eventually (lq) ->
     lq.constraints.length.should.be.above 1
 
-  it 'should still find Employee.address relevant', eventually (lq) ->
-    lq.isRelevant('address').should.be.true
+  it 'should still thinl Employee.address is in the query', eventually (lq) ->
+    lq.isInQuery('address').should.be.true
 
