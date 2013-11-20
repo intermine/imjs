@@ -1,7 +1,5 @@
 [
-    "<banner>"
-    , "LICENCE"
-    , "<file_template:build/version.js>"
+    "build/version.js"
     , "build/shiv.js"
     , "src/ie8-cors-support.js"
     , "build/constants.js"

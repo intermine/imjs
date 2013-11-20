@@ -3,20 +3,34 @@ module.exports = function (grunt) {
 
   var path = require('path');
   var fs = require('fs');
-
   var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-               '<%= grunt.template.today("yyyy-mm-dd") %> */'
+                  '<%= grunt.template.today("yyyy-mm-dd") %> */\n' +
+                  grunt.file.read('LICENCE');
+
+  function processBuildFile (src, filepath) {
+    if (filepath === 'build/version.js') { // please tell me there is a saner way to do this.
+      return grunt.template.process(src);
+    } else {
+      return src;
+    }
+  }
+
+  grunt.log.writeln(banner);
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    meta: { banner: banner },
     concat: {
+      options: {
+        banner: banner,
+        nonull: true,
+        process: processBuildFile
+      },
       latest: {
         src: grunt.file.readJSON('build-order.json'),
-        dest: 'js/im.js'
+        dest: 'js/im.js',
       },
       "in-version-dir": {
-        src: '<json:build-order.json>',
+        src: grunt.file.readJSON('build-order.json'),
         dest: 'js/<%= pkg.version %>/im.js'
       }
     },
