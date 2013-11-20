@@ -39,4 +39,9 @@
        More flexible Service#values method, now supporting queries.
 2.9.1  Fri Nov 15 13:55:17 GMT 2013
        Fixes for updated ID resolution service.
+2.10.0 Wed Nov 20 16:55:33 GMT 2013
+       Keep the query valid when after view changes:
+        * Strip irrelevant sort-orders
+        * Do not serialise irrelevent type constraints
+        * Type constraints no longer contribute to notions of relevance.
 **/

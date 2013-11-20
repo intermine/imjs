@@ -478,6 +478,12 @@ class Query
 
       _.flatten ret.concat others
 
+    @on 'change:views', =>
+      oldOrder = @sortOrder
+      @sortOrder = (oe for oe in oldOrder when @isRelevant oe.path)
+      if oldOrder.length isnt @sortOrder.length
+        @trigger 'change:sortOrder change:orderBy', @sortOrder.slice()
+
   # Remove the given paths from the select list.
   #
   # @param [Array<String>,Array<PathInfo>,String,PathInfo] The paths to remove from the
@@ -608,10 +614,10 @@ class Query
   # or the constraints.
   getQueryNodes: () ->
     viewNodes = @getViewNodes()
-    constrainedNodes = _.map @constraints, (c) =>
+    constrainedNodes = for c in @constraints when not c.type?
       pi = @getPathInfo(c.path)
       if pi.isAttribute() then pi.getParent() else pi
-    _.uniq viewNodes.concat(constrainedNodes), false, (n) -> n.toPathString()
+    _.uniq viewNodes.concat(constrainedNodes), false, String
 
   isInQuery: (p) ->
     pi = @getPathInfo p
@@ -907,8 +913,9 @@ class Query
   getSorting: -> ("#{oe.path} #{oe.direction}" for oe in @sortOrder).join(' ')
 
   getConstraintXML: ->
-    if @constraints.length
-      concatMap(conStr) concatMap(id) partition((c) -> c.type?) @constraints
+    toSerialise = (c for c in @constraints when not c.type? or @isRelevant(c.path))
+    if toSerialise.length
+      concatMap(conStr) concatMap(id) partition((c) -> c.type?) toSerialise
     else
       ''
 
