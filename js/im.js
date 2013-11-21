@@ -1,4 +1,4 @@
-/*! imjs - v2.10.3 - 2013-11-20 */
+/*! imjs - v2.10.4 - 2013-11-21 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.3";
+    imjs.VERSION = "2.10.4";
   }
 
 }).call(this);
@@ -727,12 +727,20 @@
     });
   };
 
-  ERROR_PIPE = function(xhr, textStatus, e) {
-    try {
-      return JSON.parse(xhr.responseText).error;
-    } catch (e) {
-      return textStatus;
+  ERROR_PIPE = function(f) {
+    if (f == null) {
+      f = (function() {});
     }
+    return function(xhr, textStatus, e) {
+      if ((xhr != null ? xhr.status : void 0) === 0) {
+        return;
+      }
+      try {
+        return f(JSON.parse(xhr.responseText).error);
+      } catch (e) {
+        return f(textStatus);
+      }
+    };
   };
 
   inIE9 = XDomainRequest != null;
@@ -811,7 +819,7 @@
   http.doReq = function(opts) {
     var def, errBack;
     errBack = opts.error || this.errorHandler;
-    opts.error = _.compose(errBack, ERROR_PIPE);
+    opts.error = ERROR_PIPE(errBack);
     def = jQuery.Deferred(function() {
       var resp,
         _this = this;
@@ -819,9 +827,9 @@
       resp.then(function() {
         return _this.resolve.apply(_this, arguments);
       });
-      return resp.fail(function() {
-        return _this.reject(ERROR_PIPE.apply(null, arguments));
-      });
+      return resp.fail(ERROR_PIPE(function(err) {
+        return _this.reject(err);
+      }));
     });
     return def.promise();
   };
