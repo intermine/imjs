@@ -106,7 +106,11 @@ module.exports = function (grunt) {
     },
     clean: {
       qunit: ['test/qunit/build'],
-      build: ['build']
+      build: ['build'],
+      cdnlinks: {
+        src: ['<%= CDN %>/js/intermine/imjs/latest', '<%= CDN %>/js/intermine/imjs/<%= pkg.version.replace(/\\d+$/, "x") %>'],
+        options: {force: true}
+      }
     },
     simplemocha: {
       all: {
@@ -134,14 +138,21 @@ module.exports = function (grunt) {
           filter: 'isFile',
           flatten: true,
           dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>/'
-        }, {
-          expand: true,
-          cwd: 'js/<%= pkg.version %>',
-          src: ['*.js'],
-          filter: 'isFile',
-          flatten: true,
-          dest: '<%= CDN %>/js/intermine/imjs/latest/'
         }]
+      }
+    },
+    symlink: {
+      options: {
+        overwrite: true,
+        force: true
+      },
+      latest: {
+        src: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>',
+        dest: '<%= CDN %>/js/intermine/imjs/latest'
+      },
+      group: {
+        src: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>',
+        dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version.replace(/\\d+$/, "x") %>'
       }
     }
   })
@@ -155,6 +166,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
+  grunt.loadNpmTasks('grunt-contrib-symlink');
   grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {
@@ -260,7 +272,7 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn']);
+  grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink']);
   grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit']);
   grunt.registerTask('build', ['clean:build', 'compile', 'concat', 'uglify'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob']);
