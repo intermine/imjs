@@ -23,6 +23,8 @@ else
 
 {id, get, fold, concatMap} = funcutils
 
+ONE_MINUTE = 60 * 1000
+
 class CategoryResults
 
   constructor: (results) -> @[k] = v for own k, v of results
@@ -71,6 +73,8 @@ class IDResolutionJob
       if v >= 16 then new CategoryResults(results) else new IdResults(results)
 
   del: (cb) => @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
+
+  decay: 50 # ms
  
   # Poll the service until the results are available.
   #
@@ -87,12 +91,14 @@ class IDResolutionJob
     ret = Deferred().done(onSuccess).fail(onError).progress(onProgress)
     resp = @fetchStatus()
     resp.fail ret.reject
+    backOff = @decay
+    @decay = Math.min ONE_MINUTE, backOff * 2
     resp.done (status) =>
       ret.notify(status)
       switch status
         when 'SUCCESS' then @fetchResults().then(ret.resolve, ret.reject)
         when 'ERROR' then @fetchErrorMessage().then(ret.reject, ret.reject)
-        else @poll ret.resolve, ret.reject, ret.notify
+        else setTimeout (=> @poll ret.resolve, ret.reject, ret.notify), backOff
     return ret.promise()
 
 IDResolutionJob::wait = IDResolutionJob::poll

@@ -1,4 +1,4 @@
-/*! imjs - v2.10.5 - 2013-11-21 */
+/*! imjs - v2.10.6 - 2013-11-22 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.5";
+    imjs.VERSION = "2.10.6";
   }
 
 }).call(this);
@@ -1601,7 +1601,7 @@
 }).call(this);
 
 (function() {
-  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, concatMap, fold, funcutils, get, id, intermine, __root__,
+  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, ONE_MINUTE, concatMap, fold, funcutils, get, id, intermine, __root__,
     __hasProp = {}.hasOwnProperty,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -1621,6 +1621,8 @@
   }
 
   id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
+
+  ONE_MINUTE = 60 * 1000;
 
   CategoryResults = (function() {
     var getIssueMatches;
@@ -1782,12 +1784,16 @@
       return this.service.makeRequest('DELETE', "ids/" + this.uid, {}, cb);
     };
 
+    IDResolutionJob.prototype.decay = 50;
+
     IDResolutionJob.prototype.poll = function(onSuccess, onError, onProgress) {
-      var resp, ret,
+      var backOff, resp, ret,
         _this = this;
       ret = Deferred().done(onSuccess).fail(onError).progress(onProgress);
       resp = this.fetchStatus();
       resp.fail(ret.reject);
+      backOff = this.decay;
+      this.decay = Math.min(ONE_MINUTE, backOff * 2);
       resp.done(function(status) {
         ret.notify(status);
         switch (status) {
@@ -1796,7 +1802,9 @@
           case 'ERROR':
             return _this.fetchErrorMessage().then(ret.reject, ret.reject);
           default:
-            return _this.poll(ret.resolve, ret.reject, ret.notify);
+            return setTimeout((function() {
+              return _this.poll(ret.resolve, ret.reject, ret.notify);
+            }), backOff);
         }
       });
       return ret.promise();
