@@ -144,3 +144,7 @@ describe 'Service', ->
       job.poll().then deferredTest (results) ->
         results.allMatchIds().length.should.equal 3
 
+    it 'should increase its backoff on each poll', eventually (job) ->
+      job.poll().then deferredTest (results) ->
+        job.decay.should.be.above 50
+
