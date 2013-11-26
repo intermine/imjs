@@ -142,6 +142,17 @@ module.exports = function (grunt) {
         }]
       }
     },
+    browserify: {
+      dist: {
+        files: {
+          'dist/im.js': ['build/service.js']
+        },
+        options: {
+          debug: true,
+          standalone: 'intermine'
+        }
+      }
+    },
     symlink: {
       options: {
         overwrite: true,
@@ -168,6 +179,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks('grunt-contrib-symlink');
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {

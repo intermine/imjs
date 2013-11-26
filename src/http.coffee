@@ -4,14 +4,13 @@
 http               = require('http')
 URL                = require('url')
 qs                 = require('querystring')
-os                 = require('os')
 {ACCEPT_HEADER}    = require('./constants')
 {error, invoke}    = require('./util')
 {VERSION}          = require('./version')
 util               = require('util')
 
 # The user-agent string we will use to identify ourselves
-USER_AGENT = "node-http/imjs-#{ VERSION } #{os.platform()} (#{os.arch()},#{os.release()})"
+USER_AGENT = "node-http/imjs-#{ VERSION }"
 
 # Pattern to match optional trailing commas
 PESKY_COMMA = /,\s*$/
