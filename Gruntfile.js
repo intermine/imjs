@@ -3,20 +3,32 @@ module.exports = function (grunt) {
 
   var path = require('path');
   var fs = require('fs');
-
   var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-               '<%= grunt.template.today("yyyy-mm-dd") %> */'
+                  '<%= grunt.template.today("yyyy-mm-dd") %> */\n' +
+                  grunt.file.read('LICENCE');
+
+  function processBuildFile (src, filepath) {
+    if (filepath === 'build/version.js') { // please tell me there is a saner way to do this.
+      return grunt.template.process(src);
+    } else {
+      return src;
+    }
+  }
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    meta: { banner: banner },
     concat: {
+      options: {
+        banner: banner,
+        nonull: true,
+        process: processBuildFile
+      },
       latest: {
         src: grunt.file.readJSON('build-order.json'),
-        dest: 'js/im.js'
+        dest: 'js/im.js',
       },
       "in-version-dir": {
-        src: '<json:build-order.json>',
+        src: grunt.file.readJSON('build-order.json'),
         dest: 'js/<%= pkg.version %>/im.js'
       }
     },
@@ -94,7 +106,11 @@ module.exports = function (grunt) {
     },
     clean: {
       qunit: ['test/qunit/build'],
-      build: ['build']
+      build: ['build'],
+      cdnlinks: {
+        src: ['<%= CDN %>/js/intermine/imjs/latest', '<%= CDN %>/js/intermine/imjs/<%= pkg.version.replace(/\\d+$/, "x") %>'],
+        options: {force: true}
+      }
     },
     simplemocha: {
       all: {
@@ -108,6 +124,8 @@ module.exports = function (grunt) {
     bump: {
       options: {
         files: ['package.json', 'bower.json'],
+        commitFiles: ['-a'],
+        updateConfigs: ['pkg'],
         pushTo: 'origin'
       }
     },
@@ -121,14 +139,21 @@ module.exports = function (grunt) {
           filter: 'isFile',
           flatten: true,
           dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>/'
-        }, {
-          expand: true,
-          cwd: 'js/<%= pkg.version %>',
-          src: ['*.js'],
-          filter: 'isFile',
-          flatten: true,
-          dest: '<%= CDN %>/js/intermine/imjs/latest/'
         }]
+      }
+    },
+    symlink: {
+      options: {
+        overwrite: true,
+        force: true
+      },
+      latest: {
+        src: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>',
+        dest: '<%= CDN %>/js/intermine/imjs/latest'
+      },
+      group: {
+        src: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>',
+        dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version.replace(/\\d+$/, "x") %>'
       }
     }
   })
@@ -142,6 +167,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
+  grunt.loadNpmTasks('grunt-contrib-symlink');
   grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {
@@ -247,7 +273,8 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn']);
+  grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink']);
+  grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit']);
   grunt.registerTask('build', ['clean:build', 'compile', 'concat', 'uglify'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob']);
   grunt.registerTask('test', ['build', 'test-node', 'phantomjs']);

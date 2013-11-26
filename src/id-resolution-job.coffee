@@ -13,17 +13,24 @@
 funcutils = require './util'
 intermine = exports
 
-{get, fold} = funcutils
+{id, get, fold, concatMap} = funcutils
+
+ONE_MINUTE = 60 * 1000
 
 class CategoryResults
 
-  constructor: (results) ->
-    @[k] = v for own k, v of results
+  constructor: (results) -> @[k] = v for own k, v of results
 
-  goodMatchIds: -> @MATCH.map get 'id'
+  getIssueMatches = concatMap get 'matches'
+
+  getMatches: (k) -> if k is 'MATCH' then @matches[k] else (getIssueMatches @matches[k]) ? []
+
+  getMatchIds: (k) -> if k? then (@getMatches(k).map get 'id') else @allMatchIds()
+
+  goodMatchIds: -> @getMatchIds 'MATCH'
 
   allMatchIds: ->
-    combineIds = fold (res, issueSet) => res.concat @[issueSet]?.matches?.map(get 'id') ? []
+    combineIds = fold (res, issueSet) => res.concat @getMatchIds issueSet
     combineIds @goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']
 
 class IdResults
@@ -31,9 +38,17 @@ class IdResults
   constructor: (results) ->
     @[k] = v for own k, v of results
 
-  goodMatchIds: -> (id for id in @allMatchIds when @[id].foo)
+  flatten = concatMap id
+  getReasons = (match) -> flatten (vals for k, vals of match.identifiers)
+  isGood = (match, k) -> not k? or k in getReasons match
 
-  allMatchIds: -> (k for own k of @)
+  getMatches: (k) -> (match for own id, match of @ when isGood match, k)
+
+  getMatchIds: (k) -> (id for own id, match of @ when isGood match, k)
+
+  goodMatchIds: -> @getMatchIds 'MATCH'
+
+  allMatchIds: -> @getMatchIds()
 
 class IDResolutionJob
 
@@ -50,6 +65,8 @@ class IDResolutionJob
       if v >= 16 then new CategoryResults(results) else new IdResults(results)
 
   del: (cb) => @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
+
+  decay: 50 # ms
  
   # Poll the service until the results are available.
   #
@@ -66,12 +83,14 @@ class IDResolutionJob
     ret = Deferred().done(onSuccess).fail(onError).progress(onProgress)
     resp = @fetchStatus()
     resp.fail ret.reject
+    backOff = @decay
+    @decay = Math.min ONE_MINUTE, backOff * 2
     resp.done (status) =>
       ret.notify(status)
       switch status
         when 'SUCCESS' then @fetchResults().then(ret.resolve, ret.reject)
         when 'ERROR' then @fetchErrorMessage().then(ret.reject, ret.reject)
-        else @poll ret.resolve, ret.reject, ret.notify
+        else setTimeout (=> @poll ret.resolve, ret.reject, ret.notify), backOff
     return ret.promise()
 
 IDResolutionJob::wait = IDResolutionJob::poll
@@ -79,3 +98,5 @@ IDResolutionJob::wait = IDResolutionJob::poll
 IDResolutionJob.create = (service) -> (uid) -> new IDResolutionJob(uid, service)
 
 intermine.IDResolutionJob = IDResolutionJob
+intermine.CategoryResults = CategoryResults
+intermine.IdResults = IdResults

@@ -1,13 +1,38 @@
-/**
-This library is open source software according to the definition of the
-GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
-included with this software. All use of this software is covered according to
-the terms of the LGPLv3.
+/*! imjs - v2.10.6 - 2013-11-22 */
 
-The copyright is held by InterMine (www.intermine.org) and Alex Kalderimis (alex@intermine.org).
+// This library is open source software according to the definition of the
+// GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
+// included with this software. All use of this software is covered according to
+// the terms of the LGPLv3.
+// 
+// The copyright is held by InterMine (www.intermine.org) and Alex Kalderimis (alex@intermine.org).
+(function() {
+  var IS_NODE, data, fs, imjs, intermine, path, pkg, _ref, _ref1;
 
-Thu Jun 14 13:18:14 BST 2012
-**/
+  IS_NODE = typeof exports !== 'undefined';
+
+  if (IS_NODE) {
+    imjs = exports;
+  } else {
+    intermine = ((_ref = this.intermine) != null ? _ref : this.intermine = {});
+    imjs = ((_ref1 = intermine.imjs) != null ? _ref1 : intermine.imjs = {});
+  }
+
+  imjs.VERSION = "unknown";
+
+  if (IS_NODE) {
+    fs = require('fs');
+    path = require('path');
+    if (process.mainModule != null) {
+      data = fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8');
+      pkg = JSON.parse(data);
+      imjs.VERSION = pkg.version;
+    }
+  } else {
+    imjs.VERSION = "2.10.6";
+  }
+
+}).call(this);
 
 (function() {
   var HAS_CONSOLE, HAS_JSON, IS_NODE, NOT_ENUM, hasDontEnumBug, hasOwnProperty, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
@@ -702,12 +727,20 @@ Thu Jun 14 13:18:14 BST 2012
     });
   };
 
-  ERROR_PIPE = function(xhr, textStatus, e) {
-    try {
-      return JSON.parse(xhr.responseText).error;
-    } catch (e) {
-      return textStatus;
+  ERROR_PIPE = function(f) {
+    if (f == null) {
+      f = (function() {});
     }
+    return function(xhr, textStatus, e) {
+      if ((xhr != null ? xhr.status : void 0) === 0) {
+        return;
+      }
+      try {
+        return f(JSON.parse(xhr.responseText).error);
+      } catch (e) {
+        return f(textStatus);
+      }
+    };
   };
 
   inIE9 = XDomainRequest != null;
@@ -786,7 +819,7 @@ Thu Jun 14 13:18:14 BST 2012
   http.doReq = function(opts) {
     var def, errBack;
     errBack = opts.error || this.errorHandler;
-    opts.error = _.compose(errBack, ERROR_PIPE);
+    opts.error = ERROR_PIPE(errBack);
     def = jQuery.Deferred(function() {
       var resp,
         _this = this;
@@ -794,9 +827,9 @@ Thu Jun 14 13:18:14 BST 2012
       resp.then(function() {
         return _this.resolve.apply(_this, arguments);
       });
-      return resp.fail(function() {
-        return _this.reject(ERROR_PIPE.apply(null, arguments));
-      });
+      return resp.fail(ERROR_PIPE(function(err) {
+        return _this.reject(err);
+      }));
     });
     return def.promise();
   };
@@ -1568,8 +1601,9 @@ Thu Jun 14 13:18:14 BST 2012
 }).call(this);
 
 (function() {
-  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, fold, funcutils, get, intermine, __root__,
+  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, ONE_MINUTE, concatMap, fold, funcutils, get, id, intermine, __root__,
     __hasProp = {}.hasOwnProperty,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   IS_NODE = typeof exports !== 'undefined';
@@ -1586,9 +1620,12 @@ Thu Jun 14 13:18:14 BST 2012
     funcutils = intermine.funcutils;
   }
 
-  get = funcutils.get, fold = funcutils.fold;
+  id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
+
+  ONE_MINUTE = 60 * 1000;
 
   CategoryResults = (function() {
+    var getIssueMatches;
 
     function CategoryResults(results) {
       var k, v;
@@ -1599,16 +1636,34 @@ Thu Jun 14 13:18:14 BST 2012
       }
     }
 
+    getIssueMatches = concatMap(get('matches'));
+
+    CategoryResults.prototype.getMatches = function(k) {
+      var _ref;
+      if (k === 'MATCH') {
+        return this.matches[k];
+      } else {
+        return (_ref = getIssueMatches(this.matches[k])) != null ? _ref : [];
+      }
+    };
+
+    CategoryResults.prototype.getMatchIds = function(k) {
+      if (k != null) {
+        return this.getMatches(k).map(get('id'));
+      } else {
+        return this.allMatchIds();
+      }
+    };
+
     CategoryResults.prototype.goodMatchIds = function() {
-      return this.MATCH.map(get('id'));
+      return this.getMatchIds('MATCH');
     };
 
     CategoryResults.prototype.allMatchIds = function() {
       var combineIds,
         _this = this;
       combineIds = fold(function(res, issueSet) {
-        var _ref, _ref1, _ref2;
-        return res.concat((_ref = (_ref1 = _this[issueSet]) != null ? (_ref2 = _ref1.matches) != null ? _ref2.map(get('id')) : void 0 : void 0) != null ? _ref : []);
+        return res.concat(_this.getMatchIds(issueSet));
       });
       return combineIds(this.goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']);
     };
@@ -1618,6 +1673,7 @@ Thu Jun 14 13:18:14 BST 2012
   })();
 
   IdResults = (function() {
+    var flatten, getReasons, isGood;
 
     function IdResults(results) {
       var k, v;
@@ -1628,27 +1684,58 @@ Thu Jun 14 13:18:14 BST 2012
       }
     }
 
-    IdResults.prototype.goodMatchIds = function() {
-      var id, _i, _len, _ref, _results;
-      _ref = this.allMatchIds;
+    flatten = concatMap(id);
+
+    getReasons = function(match) {
+      var k, vals;
+      return flatten((function() {
+        var _ref, _results;
+        _ref = match.identifiers;
+        _results = [];
+        for (k in _ref) {
+          vals = _ref[k];
+          _results.push(vals);
+        }
+        return _results;
+      })());
+    };
+
+    isGood = function(match, k) {
+      return !(k != null) || __indexOf.call(getReasons(match), k) >= 0;
+    };
+
+    IdResults.prototype.getMatches = function(k) {
+      var match, _results;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        id = _ref[_i];
-        if (this[id].foo) {
+      for (id in this) {
+        if (!__hasProp.call(this, id)) continue;
+        match = this[id];
+        if (isGood(match, k)) {
+          _results.push(match);
+        }
+      }
+      return _results;
+    };
+
+    IdResults.prototype.getMatchIds = function(k) {
+      var match, _results;
+      _results = [];
+      for (id in this) {
+        if (!__hasProp.call(this, id)) continue;
+        match = this[id];
+        if (isGood(match, k)) {
           _results.push(id);
         }
       }
       return _results;
     };
 
+    IdResults.prototype.goodMatchIds = function() {
+      return this.getMatchIds('MATCH');
+    };
+
     IdResults.prototype.allMatchIds = function() {
-      var k, _results;
-      _results = [];
-      for (k in this) {
-        if (!__hasProp.call(this, k)) continue;
-        _results.push(k);
-      }
-      return _results;
+      return this.getMatchIds();
     };
 
     return IdResults;
@@ -1697,12 +1784,16 @@ Thu Jun 14 13:18:14 BST 2012
       return this.service.makeRequest('DELETE', "ids/" + this.uid, {}, cb);
     };
 
+    IDResolutionJob.prototype.decay = 50;
+
     IDResolutionJob.prototype.poll = function(onSuccess, onError, onProgress) {
-      var resp, ret,
+      var backOff, resp, ret,
         _this = this;
       ret = Deferred().done(onSuccess).fail(onError).progress(onProgress);
       resp = this.fetchStatus();
       resp.fail(ret.reject);
+      backOff = this.decay;
+      this.decay = Math.min(ONE_MINUTE, backOff * 2);
       resp.done(function(status) {
         ret.notify(status);
         switch (status) {
@@ -1711,7 +1802,9 @@ Thu Jun 14 13:18:14 BST 2012
           case 'ERROR':
             return _this.fetchErrorMessage().then(ret.reject, ret.reject);
           default:
-            return _this.poll(ret.resolve, ret.reject, ret.notify);
+            return setTimeout((function() {
+              return _this.poll(ret.resolve, ret.reject, ret.notify);
+            }), backOff);
         }
       });
       return ret.promise();
@@ -1731,13 +1824,18 @@ Thu Jun 14 13:18:14 BST 2012
 
   intermine.IDResolutionJob = IDResolutionJob;
 
+  intermine.CategoryResults = CategoryResults;
+
+  intermine.IdResults = IdResults;
+
 }).call(this);
 
 (function() {
-  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, jQuery, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
+  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, jQuery, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __slice = [].slice;
+    __slice = [].slice,
+    __hasProp = {}.hasOwnProperty;
 
   IS_NODE = typeof exports !== 'undefined';
 
@@ -1991,6 +2089,25 @@ Thu Jun 14 13:18:14 BST 2012
       _results.push([parts[i], parts[i + 1]]);
     }
     return _results;
+  };
+
+  removeIrrelevantSortOrders = function() {
+    var oe, oldOrder;
+    oldOrder = this.sortOrder;
+    this.sortOrder = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = oldOrder.length; _i < _len; _i++) {
+        oe = oldOrder[_i];
+        if (this.isRelevant(oe.path)) {
+          _results.push(oe);
+        }
+      }
+      return _results;
+    }).call(this);
+    if (oldOrder.length !== this.sortOrder.length) {
+      return this.trigger('change:sortorder change:orderby', this.sortOrder.slice());
+    }
   };
 
   Query = (function() {
@@ -2322,6 +2439,7 @@ Thu Jun 14 13:18:14 BST 2012
         }));
         return _.flatten(ret.concat(others));
       };
+      this.on('change:views', removeIrrelevantSortOrders, this);
     }
 
     Query.prototype.removeFromSelect = function(unwanted) {
@@ -2529,34 +2647,55 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Query.prototype.getQueryNodes = function() {
-      var constrainedNodes, viewNodes,
-        _this = this;
+      var c, constrainedNodes, pi, viewNodes;
       viewNodes = this.getViewNodes();
-      constrainedNodes = _.map(this.constraints, function(c) {
-        var pi;
-        pi = _this.getPathInfo(c.path);
-        if (pi.isAttribute()) {
-          return pi.getParent();
-        } else {
-          return pi;
+      constrainedNodes = (function() {
+        var _i, _len, _ref2, _results;
+        _ref2 = this.constraints;
+        _results = [];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          c = _ref2[_i];
+          if (!(!(c.type != null))) {
+            continue;
+          }
+          pi = this.getPathInfo(c.path);
+          if (pi.isAttribute()) {
+            _results.push(pi.getParent());
+          } else {
+            _results.push(pi);
+          }
         }
-      });
-      return _.uniq(viewNodes.concat(constrainedNodes), false, function(n) {
-        return n.toPathString();
-      });
+        return _results;
+      }).call(this);
+      return _.uniq(viewNodes.concat(constrainedNodes), false, String);
     };
 
     Query.prototype.isInQuery = function(p) {
-      var pi, pstr;
+      var c, pi, pstr, _i, _len, _ref2;
       pi = this.getPathInfo(p);
       if (pi) {
         pstr = pi.toPathString();
-        return _.any(_.union(this.views, _.pluck(this.constraints, 'path')), function(p) {
-          return p.indexOf(pstr) === 0;
-        });
-      } else {
-        return true;
+        _ref2 = this.views.concat((function() {
+          var _j, _len, _ref2, _results;
+          _ref2 = this.constraints;
+          _results = [];
+          for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+            c = _ref2[_j];
+            if (!(c.type != null)) {
+              _results.push(c.path);
+            }
+          }
+          return _results;
+        }).call(this));
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          p = _ref2[_i];
+          if (0 === p.indexOf(pstr)) {
+            return true;
+          }
+        }
+        return false;
       }
+      return true;
     };
 
     Query.prototype.isRelevant = function(path) {
@@ -2566,7 +2705,7 @@ Thu Jun 14 13:18:14 BST 2012
         pi = pi.getParent();
       }
       sought = pi.toString();
-      nodes = this.getQueryNodes();
+      nodes = this.getViewNodes();
       return _.any(nodes, function(n) {
         return n.toPathString() === sought;
       });
@@ -2721,12 +2860,19 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Query.prototype.clone = function(cloneEvents) {
-      var cloned;
+      var cloned, k, v, _ref2, _ref3;
       cloned = new Query(this, this.service);
-      if (cloneEvents) {
-        cloned._callbacks = this._callbacks;
-      } else {
+      if ((_ref2 = cloned._callbacks) == null) {
         cloned._callbacks = {};
+      }
+      if (cloneEvents) {
+        _ref3 = this._callbacks;
+        for (k in _ref3) {
+          if (!__hasProp.call(_ref3, k)) continue;
+          v = _ref3[k];
+          cloned._callbacks[k] = v;
+        }
+        cloned.off('change:views', removeIrrelevantSortOrders, this);
       }
       return cloned;
     };
@@ -2839,7 +2985,7 @@ Thu Jun 14 13:18:14 BST 2012
         oe = oes[_i];
         this.addSortOrder(this._parse_sort_order(oe));
       }
-      return this.trigger('set:sortorder', this.sortOrder);
+      return this.trigger('set:sortorder change:sortorder', this.sortOrder);
     };
 
     Query.prototype.addJoins = function(joins) {
@@ -2960,10 +3106,23 @@ Thu Jun 14 13:18:14 BST 2012
     };
 
     Query.prototype.getConstraintXML = function() {
-      if (this.constraints.length) {
+      var c, toSerialise;
+      toSerialise = (function() {
+        var _i, _len, _ref2, _results;
+        _ref2 = this.constraints;
+        _results = [];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          c = _ref2[_i];
+          if (!(c.type != null) || this.isInQuery(c.path)) {
+            _results.push(c);
+          }
+        }
+        return _results;
+      }).call(this);
+      if (toSerialise.length) {
         return concatMap(conStr)(concatMap(id)(partition(function(c) {
           return c.type != null;
-        })(this.constraints)));
+        })(toSerialise)));
       } else {
         return '';
       }

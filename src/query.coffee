@@ -208,6 +208,12 @@ stringToSortOrder = (str) ->
   pathIndices = (x * 2 for x in [0 ... (parts.length / 2)])
   ([parts[i], parts[i + 1]] for i in pathIndices)
 
+removeIrrelevantSortOrders = ->
+  oldOrder = @sortOrder
+  @sortOrder = (oe for oe in oldOrder when @isRelevant oe.path)
+  if oldOrder.length isnt @sortOrder.length
+    @trigger 'change:sortorder change:orderby', @sortOrder.slice()
+
 class Query
   @JOIN_STYLES = ['INNER', 'OUTER']
   @BIO_FORMATS = ['gff3', 'fasta', 'bed']
@@ -469,6 +475,8 @@ class Query
 
       _.flatten ret.concat others
 
+    @on 'change:views', removeIrrelevantSortOrders, @
+
   # Remove the given paths from the select list.
   #
   # @param [Array<String>,Array<PathInfo>,String,PathInfo] The paths to remove from the
@@ -599,25 +607,25 @@ class Query
   # or the constraints.
   getQueryNodes: () ->
     viewNodes = @getViewNodes()
-    constrainedNodes = _.map @constraints, (c) =>
+    constrainedNodes = for c in @constraints when not c.type?
       pi = @getPathInfo(c.path)
       if pi.isAttribute() then pi.getParent() else pi
-    _.uniq viewNodes.concat(constrainedNodes), false, (n) -> n.toPathString()
+    _.uniq viewNodes.concat(constrainedNodes), false, String
 
   isInQuery: (p) ->
     pi = @getPathInfo p
     if pi
       pstr = pi.toPathString()
-      _.any _.union(@views, _.pluck(@constraints, 'path')), (p) ->
-        p.indexOf(pstr) is 0
-    else
-      true # No model available - for testing return true.
+      for p in @views.concat(c.path for c in @constraints when not c.type?)
+        return true if 0 is p.indexOf pstr
+      return false
+    return true # No model available - for testing return true.
 
   isRelevant: (path) ->
     pi = @getPathInfo path
     pi = pi.getParent() if pi.isAttribute()
     sought = pi.toString()
-    nodes = @getQueryNodes()
+    nodes = @getViewNodes()
     return _.any nodes, (n) -> n.toPathString() is sought
 
   # Interpret a path that might end in '*' or '**' as the
@@ -759,10 +767,11 @@ class Query
   # @return [Query] A clone of this query.
   clone: (cloneEvents) ->
     cloned = new Query(@, @service)
+    cloned._callbacks ?= {}
     if cloneEvents
-      cloned._callbacks = @._callbacks
-    else
-      cloned._callbacks = {}
+      for own k, v of @_callbacks
+        cloned._callbacks[k] = v
+      cloned.off('change:views', removeIrrelevantSortOrders, this)
     return cloned
 
   # Get the query for the next page of results.
@@ -834,7 +843,7 @@ class Query
     @sortOrder = []
     for oe in oes
       @addSortOrder @_parse_sort_order oe
-    @trigger 'set:sortorder', @sortOrder
+    @trigger 'set:sortorder change:sortorder', @sortOrder
 
   addJoins: (joins) ->
     if _.isArray(joins)
@@ -898,8 +907,9 @@ class Query
   getSorting: -> ("#{oe.path} #{oe.direction}" for oe in @sortOrder).join(' ')
 
   getConstraintXML: ->
-    if @constraints.length
-      concatMap(conStr) concatMap(id) partition((c) -> c.type?) @constraints
+    toSerialise = (c for c in @constraints when not c.type? or @isInQuery(c.path))
+    if toSerialise.length
+      concatMap(conStr) concatMap(id) partition((c) -> c.type?) toSerialise
     else
       ''
 
@@ -908,7 +918,7 @@ class Query
       "<join path=\"#{ p }\" style=\"OUTER\"/>"
     strs.join ''
 
-  toXML: () ->
+  toXML: ->
     attrs =
       model: @model.name
       view: @views.join(' ')

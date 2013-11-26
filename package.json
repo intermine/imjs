@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "2.9.0",
+  "version": "2.10.6",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/main",
   "keywords": [
@@ -53,6 +53,7 @@
     "grunt-contrib-jshint": "~0.7.1",
     "grunt-mocha-phantomjs": "~0.3.1",
     "browserify": "~2.35.4",
-    "coffeeify": "~0.5.2"
+    "coffeeify": "~0.5.2",
+    "grunt-contrib-symlink": "~0.2.0"
   }
 }

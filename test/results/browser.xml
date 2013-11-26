@@ -1,0 +1,25 @@
+Cleaning up...
+Finished cleaning
+Cleaning up...
+Finished cleaning
+<testsuite name="Mocha Tests" tests="19" failures="0" errors="0" skip="0" timestamp="Tue, 12 Mar 2013 18:34:44 GMT" time="2.806">
+<testcase classname="Acceptance Instantiate service" name="Should be able to create a service" time="0.001"/>
+<testcase classname="Acceptance Static Resources" name="Should be able to get a sensible version" time="0.004"/>
+<testcase classname="Acceptance Static Resources Data Model" name="should be a model" time="0.001"/>
+<testcase classname="Acceptance Static Resources Data Model" name="should answer modelly questions" time="0.002"/>
+<testcase classname="Acceptance Data Requests" name="Should be able to count the employees" time="0.056"/>
+<testcase classname="Acceptance Data Requests" name="Should find lists with brenda in them" time="0.013"/>
+<testcase classname="Acceptance Data Requests" name="Should find the ages of the 46 employees over 50 add up to 2688" time="0.048"/>
+<testcase classname="Acceptance Data Requests" name="Should be able to fetch results as pojos" time="0.051"/>
+<testcase classname="Acceptance Data Requests" name="Should be able to fetch table rows" time="0.08"/>
+<testcase classname="Acceptance Data Requests" name="Should be able to summarise a numeric path" time="0.051"/>
+<testcase classname="Acceptance Data Requests" name="Should be able to summarise a string path" time="0.047"/>
+<testcase classname="Acceptance Data Requests" name="should be able to fetch widgets" time="0.006"/>
+<testcase classname="Acceptance Data Requests" name="should be able to fetch widget mapping" time="0.003"/>
+<testcase classname="Acceptance Data Requests" name="should be able to perform an enrichment calculation" time="0.009"/>
+<testcase classname="Acceptance Data Requests Paging" name="Should support paging forwards via Query#next" time="0.047"/>
+<testcase classname="Acceptance Data Requests Paging" name="Should support paging backwards via Query#previous" time="0.046"/>
+<testcase classname="Acceptance ID Resolution" name="can resolve some ids" time="0.055"/>
+<testcase classname="Acceptance List Life-Cycle Create List via Identifier Upload" name="should have the right name, size, tags" time="0.207"/>
+<testcase classname="Acceptance List Life-Cycle Combine through Intersection" name="should have the right name, size, tags, member" time="0.241"/>
+</testsuite>

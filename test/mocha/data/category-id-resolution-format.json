@@ -1,0 +1,160 @@
+{
+    "MATCH": [
+        {
+            "id": 1016298,
+            "summary": {
+                "organism.name": "Drosophila melanogaster",
+                "primaryIdentifier": "FBgn0011655",
+                "symbol": "Med",
+                "class": "Gene",
+                "secondaryIdentifier": "CG1775"
+            },
+            "input": [
+                "CG1775"
+            ]
+        },
+        {
+            "id": 1006919,
+            "summary": {
+                "organism.name": "Drosophila melanogaster",
+                "primaryIdentifier": "FBgn0000606",
+                "symbol": "eve",
+                "class": "Gene",
+                "secondaryIdentifier": "CG2328"
+            },
+            "input": [
+                "eve"
+            ]
+        }
+    ],
+    "TYPE_CONVERTED": [
+        {
+            "input": "TWIST_DROME",
+            "matches": [
+                {
+                    "id": 1138955,
+                    "summary": {
+                        "organism.name": "Drosophila melanogaster",
+                        "primaryIdentifier": "FBgn0003900",
+                        "symbol": "twi",
+                        "class": "Gene",
+                        "secondaryIdentifier": "CG2956"
+                    },
+                    "from": {
+                        "id": 1138956,
+                        "summary": {
+                            "primaryAccession": "P10627",
+                            "organism.name": "Drosophila melanogaster",
+                            "primaryIdentifier": "TWIST_DROME",
+                            "class": "Protein"
+                        }
+                    }
+                }
+            ],
+            "reason": "searching key fields for all types found by converting from x"
+        }
+    ],
+    "OTHER": [
+        {
+            "input": "FBgn0001251",
+            "matches": [
+                {
+                    "id": 1030089,
+                    "summary": {
+                        "organism.name": "Drosophila melanogaster",
+                        "primaryIdentifier": "FBgn0001325",
+                        "symbol": "Kr",
+                        "class": "Gene",
+                        "secondaryIdentifier": "CG3340"
+                    }
+                }
+            ],
+            "reason": "searching synonyms for all types"
+        }
+    ],
+    "WILDCARD": [
+        
+    ],
+    "DUPLICATE": [
+        {
+            "input": "bar",
+            "matches": [
+                {
+                    "id": 1035317,
+                    "summary": {
+                        "organism.name": "Drosophila melanogaster",
+                        "primaryIdentifier": "FBgn0004854",
+                        "symbol": "B-H2",
+                        "class": "Gene",
+                        "secondaryIdentifier": "CG5488"
+                    }
+                },
+                {
+                    "id": 1039019,
+                    "summary": {
+                        "organism.name": "Drosophila melanogaster",
+                        "primaryIdentifier": "FBgn0004644",
+                        "symbol": "hh",
+                        "class": "Gene",
+                        "secondaryIdentifier": "CG4637"
+                    }
+                },
+                {
+                    "id": 1079951,
+                    "summary": {
+                        "organism.name": "Drosophila melanogaster",
+                        "primaryIdentifier": "FBgn0011758",
+                        "symbol": "B-H1",
+                        "class": "Gene",
+                        "secondaryIdentifier": "CG5529"
+                    }
+                },
+                {
+                    "id": 7010462,
+                    "summary": {
+                        "organism.name": "Drosophila ananassae",
+                        "primaryIdentifier": "FBgn0012114",
+                        "symbol": "Dana\\B-H1",
+                        "class": "Gene",
+                        "secondaryIdentifier": "GF22335"
+                    }
+                },
+                {
+                    "id": 16178218,
+                    "summary": {
+                        "organism.name": "Homo sapiens",
+                        "primaryIdentifier": "9971",
+                        "symbol": "NR1H4",
+                        "class": "Gene",
+                        "secondaryIdentifier": null
+                    }
+                },
+                {
+                    "id": 16183610,
+                    "summary": {
+                        "organism.name": "Homo sapiens",
+                        "primaryIdentifier": "51283",
+                        "symbol": "BFAR",
+                        "class": "Gene",
+                        "secondaryIdentifier": null
+                    }
+                },
+                {
+                    "id": 16187632,
+                    "summary": {
+                        "organism.name": "Homo sapiens",
+                        "primaryIdentifier": "154",
+                        "symbol": "ADRB2",
+                        "class": "Gene",
+                        "secondaryIdentifier": null
+                    }
+                }
+            ],
+            "reason": "searching synonyms for all types"
+        }
+    ],
+    "UNRESOLVED": [
+        "zen*",
+        "foo"
+    ]
+}

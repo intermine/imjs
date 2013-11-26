@@ -1,0 +1,449 @@
+<testsuite name="Mocha Tests" tests="449" failures="0" errors="0" skip="2" timestamp="Tue, 12 Mar 2013 18:34:41 GMT" time="10.104">
+<testcase classname="Query#appendToList target: List" name="should actually add items to the list" time="0.001"/>
+<testcase classname="Query#appendToList target: List" name="should in fact add all the youngsters" time="0"/>
+<testcase classname="Query#appendToList target: List" name="should keep the input and output lists in sync" time="0.001"/>
+<testcase classname="Query#appendToList target: String" name="should have appropriate values to start with -yc" time="0"/>
+<testcase classname="Query#appendToList target: String" name="should have appropriate values to start with -oc" time="0.001"/>
+<testcase classname="Query#appendToList target: String" name="should have appropriate values to start with -oc" time="0"/>
+<testcase classname="Query#appendToList target: String" name="should actually add items to the list" time="0"/>
+<testcase classname="Query#appendToList target: String" name="should in fact add all the youngsters" time="0"/>
+<testcase classname="Query#appendToList target: String" name="input and output lists should not be in sync" time="0"/>
+<testcase classname="GFF3 Queries implicitly constrained" name="should find only one gene, due to the pathways" time="0.001"/>
+<testcase classname="GFF3 Queries implicitly constrained" name="should find only one gff3 record, due to the pathways" time="0"/>
+<testcase classname="GFF3 Queries outer joined" name="should find 5 genes" time="0.001"/>
+<testcase classname="GFF3 Queries outer joined" name="should find 5 gff3 records" time="0.001"/>
+<testcase classname="GFF3 Queries unconstrained" name="should find all genes" time="0"/>
+<testcase classname="GFF3 Queries unconstrained" name="should find 5 gff3 records" time="0"/>
+<testcase classname="GFF3 Queries with extra attributes" name="should find all genes" time="0"/>
+<testcase classname="GFF3 Queries with extra attributes" name="should find 5 gff3 records" time="0.001"/>
+<testcase classname="GFF3 Queries with extra attributes" name="the records should have the extra attributes" time="0"/>
+<testcase classname="GFF3 Queries with exons" name="should find all genes" time="0"/>
+<testcase classname="GFF3 Queries with exons" name="should find more than 5 gff3 records" time="0.001"/>
+<testcase classname="Query#clone" name="should have several views in q" time="0.001"/>
+<testcase classname="Query#clone" name="should have more views in clone" time="0"/>
+<testcase classname="Service #count()" name="should fail" time="0"/>
+<testcase classname="Service #count(path) Employee" name="should find 132 employees" time="0"/>
+<testcase classname="Service #count(path) Employee.id" name="should find 132 employees" time="0"/>
+<testcase classname="Service #count(path) Employee.*" name="should find 132 employees" time="0"/>
+<testcase classname="Service #count(path) Employee.fullTime" name="should find 2 times" time="0.001"/>
+<testcase classname="Service #count(path) Department.employees" name="should find 132 employees" time="0.001"/>
+<testcase classname="Service #count(path) Company.name" name="should find 7 names" time="0"/>
+<testcase classname="Service #count(path) Company" name="should find 7 companies" time="0.001"/>
+<testcase classname="Service #count(query)" name="should find 131 rows" time="0"/>
+<testcase classname="Service #count(query)" name="should find 46 older employees" time="0.001"/>
+<testcase classname="Service #count(query)" name="should find 46 older employees with a query object" time="0.011"/>
+<testcase classname="Query#count" name="should find around 135 employees" time="0.011"/>
+<testcase classname="Query#count" name="should find 46 older employees" time="0.009"/>
+<testcase classname="Service #fetchWidgets" name="gets a list of the available widgets" time="0"/>
+<testcase classname="Service #fetchWidgetMap" name="gets a mapping from name to widget" time="0"/>
+<testcase classname="Service #enrichment" name="performs an enrichment calculation" time="0"/>
+<testcase classname="Query #enrichment" name="performs an enrichment calculation" time="0"/>
+<testcase classname="Service#findById Looking for David using the promises API" name="should find someone with the right name" time="0"/>
+<testcase classname="Service#findById Looking for David using the promises API" name="should find someone in the right department" time="0"/>
+<testcase classname="Service#findById Looking for David using the promises API" name="should find someone 41 years of age" time="0"/>
+<testcase classname="Service#findById Looking for David using the promises API" name="should find a full-time worker" time="0.001"/>
+<testcase classname="Service#findById Looking for David using the promises API" name="should find a manager" time="0"/>
+<testcase classname="Service#findById Looking for David using the call-back API" name="should find someone with the right name and age." time="0.009"/>
+<testcase classname="Service#findById Looking for B1" name="should find someone with the right name" time="0"/>
+<testcase classname="Service#findById Looking for B1" name="should find someone in the right department" time="0"/>
+<testcase classname="Service#findById Looking for B1" name="should find someone 40 years of age" time="0"/>
+<testcase classname="Service#findById Looking for B1" name="should find a full-time worker" time="0"/>
+<testcase classname="Service#findById Looking for B1" name="should find a manager" time="0"/>
+<testcase classname="Query #getOuterJoin(path)" name="should find the outer join of department" time="0.001"/>
+<testcase classname="Query #getOuterJoin(path)" name="should find the outer join of department.name" time="0"/>
+<testcase classname="Query #getOuterJoin(path)" name="should find the outer join of department.manager" time="0"/>
+<testcase classname="Query #getOuterJoin(path)" name="should find the outer join of department.manager.name" time="0"/>
+<testcase classname="Query #getOuterJoin(path)" name="should not find any outer join for address" time="0"/>
+<testcase classname="Query ID constraints" name="should fetch the 46 older employees" time="0"/>
+<testcase classname="Query ID constraints" name="should contain information about David" time="0"/>
+<testcase classname="Service #resolveIds()" name="should fail" time="0.002"/>
+<testcase classname="Service #resolveIds(job)" name="should produce a job" time="0"/>
+<testcase classname="Service #resolveIds(job)" name="should get resolved" time="0.008"/>
+<testcase classname="Service #resolveIds(job)" name="should find four employees" time="0.003"/>
+<testcase classname="Service #resolveIds(caseSensitiveJob)" name="should produce a job" time="0"/>
+<testcase classname="Service #resolveIds(caseSensitiveJob)" name="should get resolved" time="0.005"/>
+<testcase classname="Service #resolveIds(caseSensitiveJob)" name="should find three employees" time="0.005"/>
+<testcase classname="Relevance of joins a query with irrelevant joins" name="should not include the irrelvant join in the output XML" time="0.001"/>
+<testcase classname="Relevance of joins a query with irrelevant joins" name="should still have those joins though" time="0"/>
+<testcase classname="Relevance of joins a query with relevant joins" name="should not include the irrelvant join in the output XML" time="0"/>
+<testcase classname="Relevance of joins a query with relevant joins" name="should still have those joins though" time="0"/>
+<testcase classname="Service #complement()" name="should fail" time="0.005"/>
+<testcase classname="Service #complement(opts)" name="should have succeeded" time="0"/>
+<testcase classname="Service #complement(opts)" name="should yield a list" time="0.001"/>
+<testcase classname="Service #complement(opts)" name="should have the right name" time="0"/>
+<testcase classname="Service #complement(opts)" name="should have the right number of members" time="0"/>
+<testcase classname="Service #complement(opts)" name="should have the correct tags" time="0"/>
+<testcase classname="Service #complement(opts)" name="should contain Brenda" time="0.014"/>
+<testcase classname="Service #complement(opts) {Array of list names}" name="should have succeeded" time="0.001"/>
+<testcase classname="Service #complement(opts) {Array of list names}" name="should yield a list" time="0"/>
+<testcase classname="Service #complement(opts) {Array of list names}" name="should have the right name" time="0"/>
+<testcase classname="Service #complement(opts) {Array of list names}" name="should have the right number of members" time="0"/>
+<testcase classname="Service #complement(opts) {Array of list names}" name="should have the correct tags" time="0"/>
+<testcase classname="Service #complement(opts) {Array of list names}" name="should contain Frank Möllers" time="0.014"/>
+<testcase classname="Service #complement(opts) {Array of Lists}" name="should have succeeded" time="0"/>
+<testcase classname="Service #complement(opts) {Array of Lists}" name="should yield a list" time="0"/>
+<testcase classname="Service #complement(opts) {Array of Lists}" name="should have the right name" time="0.001"/>
+<testcase classname="Service #complement(opts) {Array of Lists}" name="should have the right number of members" time="0"/>
+<testcase classname="Service #complement(opts) {Array of Lists}" name="should have the correct tags" time="0"/>
+<testcase classname="Service #complement(opts) {Array of Lists}" name="should contain Frank Möllers" time="0.014"/>
+<testcase classname="Service #complement(opts, cb)" name="should support the callback API" time="0.183"/>
+<testcase classname="List #copy()" name="should produce a copy" time="0"/>
+<testcase classname="List #copy()" name="should have the same number of members" time="0"/>
+<testcase classname="List #copy()" name="should have a different name" time="0.003"/>
+<testcase classname="List #copy({tags})" name="should produce a copy" time="0"/>
+<testcase classname="List #copy({tags})" name="should have the same number of members" time="0"/>
+<testcase classname="List #copy({tags})" name="should have a different name" time="0"/>
+<testcase classname="List #copy({tags})" name="should have all the tags we added" time="0"/>
+<testcase classname="List #copy({name, tags})" name="should produce a copy" time="0"/>
+<testcase classname="List #copy({name, tags})" name="should have the same number of members" time="0.001"/>
+<testcase classname="List #copy({name, tags})" name="should have a different name" time="0"/>
+<testcase classname="List #copy({name, tags})" name="should have all the tags we added" time="0"/>
+<testcase classname="List #copy({name, tags})" name="should in fact have the name we gave it" time="0"/>
+<testcase classname="List #copy(name)" name="should produce a copy" time="0"/>
+<testcase classname="List #copy(name)" name="should have the same number of members" time="0"/>
+<testcase classname="List #copy(name)" name="should have a different name" time="0"/>
+<testcase classname="List #copy(name)" name="should in fact have the name we gave it" time="0"/>
+<testcase classname="List #copy(name, cb)" name="should make a list with the right name and size" time="0.064"/>
+<testcase classname="List #copy({name, tags}, cb)" name="should make a list with the right name and size" time="0.227"/>
+<testcase classname="List #copy(cb)" name="should make a list with the right name and size" time="0.087"/>
+<testcase classname="List Operations a list created by intersect" name="should have 2 members" time="0"/>
+<testcase classname="List Operations a list created by intersect" name="should be called temp-testing-list-operations-intersect" time="0"/>
+<testcase classname="List Operations a list created by intersect" name="should contain David Brent" time="0.012"/>
+<testcase classname="List Operations a list created by intersect" name="should have the test tags" time="0.001"/>
+<testcase classname="List Operations a list created by union" name="should have 6 members" time="0"/>
+<testcase classname="List Operations a list created by union" name="should be called temp-testing-list-operations-union" time="0.001"/>
+<testcase classname="List Operations a list created by union" name="should contain David Brent" time="0.019"/>
+<testcase classname="List Operations a list created by union" name="should have the test tags" time="0"/>
+<testcase classname="List Operations a list created by merge" name="should have 6 members" time="0"/>
+<testcase classname="List Operations a list created by merge" name="should be called temp-testing-list-operations-merge" time="0"/>
+<testcase classname="List Operations a list created by merge" name="should contain David Brent" time="0.015"/>
+<testcase classname="List Operations a list created by merge" name="should have the test tags" time="0"/>
+<testcase classname="List Operations a list created by diff" name="should have 4 members" time="0"/>
+<testcase classname="List Operations a list created by diff" name="should be called temp-testing-list-operations-diff" time="0.001"/>
+<testcase classname="List Operations a list created by diff" name="should contain Brenda" time="0.013"/>
+<testcase classname="List Operations a list created by diff" name="should have the test tags" time="0"/>
+<testcase classname="List #rename(name)" name="should exist" time="0"/>
+<testcase classname="List #rename(name)" name="should be called temp-renamed" time="0"/>
+<testcase classname="List #rename(name)" name="should have 4 members" time="0"/>
+<testcase classname="List #rename(name, cb)" name="should support the callback API" time="0.342"/>
+<testcase classname="List #fetchTags()" name="should start by finding no tags" time="0"/>
+<testcase classname="List #addTags(tags)" name="should yield three tags" time="0"/>
+<testcase classname="List #addTags(tags)" name="should yield the tags themselves" time="0"/>
+<testcase classname="List #addTags(tags)" name="should have updated the list itself" time="0"/>
+<testcase classname="List #fetchTags() after update" name="should yield three tags" time="0.001"/>
+<testcase classname="List #fetchTags() after update" name="should yield the tags themselves" time="0"/>
+<testcase classname="List #fetchTags() after update" name="should have updated the list itself" time="0"/>
+<testcase classname="List #removeTags(tags)" name="should yield three tags" time="0"/>
+<testcase classname="List #removeTags(tags)" name="should yield the tags themselves" time="0"/>
+<testcase classname="List #removeTags(tags)" name="should no longer include the removed tag" time="0.001"/>
+<testcase classname="Service #createList()" name="should fail" time="0.004"/>
+<testcase classname="Service #createList(opts, ids)" name="should have succeeded" time="0"/>
+<testcase classname="Service #createList(opts, ids)" name="should yield a list" time="0"/>
+<testcase classname="Service #createList(opts, ids)" name="should have the right name" time="0"/>
+<testcase classname="Service #createList(opts, ids)" name="should have the right number of members" time="0"/>
+<testcase classname="Service #createList(opts, ids)" name="should have the right tags" time="0"/>
+<testcase classname="Service#fetchListsContaining searching for public ids" name="should find the right number of lists" time="0"/>
+<testcase classname="Service#fetchListsContaining searching for public ids" name="should find &quot;the great unknowns&quot;" time="0"/>
+<testcase classname="Service#fetchListsContaining searching for internal ids" name="should find the right number of lists" time="0"/>
+<testcase classname="Service#fetchListsContaining searching for internal ids" name="should find &quot;My-Favourite-Employees&quot;" time="0"/>
+<testcase classname="Service #fetchLists()" name="should find at least one list" time="0"/>
+<testcase classname="Service #fetchLists()" name="should contain &quot;My-Favourite-Employees&quot;" time="0"/>
+<testcase classname="Service #fetchLists (lists) -&gt;" name="should find &quot;My-Favourite-Employees&quot;" time="0.005"/>
+<testcase classname="Service #fetchList()" name="should find that list" time="0"/>
+<testcase classname="Service #fetchList()" name="should find the right list" time="0"/>
+<testcase classname="Service #fetchList()" name="should have 4 members" time="0"/>
+<testcase classname="Service #fetchList()" name="should contain David" time="0.014"/>
+<testcase classname="Service #fetchList (list) -&gt;" name="should find &quot;My-Favourite-Employees&quot;" time="0.006"/>
+<testcase classname="Query#makeListQuery" name="should leave us with more constraints" time="0.001"/>
+<testcase classname="Query#makeListQuery" name="should still find Employee.address relevant" time="0"/>
+<testcase classname="Model new" name="returns a Model" time="0"/>
+<testcase classname="Model new" name="should have classes" time="0"/>
+<testcase classname="Model #getSubclassesOf" name="should find that CEO is one of the subclasses of Manager" time="0.001"/>
+<testcase classname="Model #getSubclassesOf" name="should find that CEO is one of the subclasses of HasAddress" time="0"/>
+<testcase classname="Model #getSubclassesOf" name="should find that CEO is one of the subclasses of Employable" time="0"/>
+<testcase classname="Model #getSubclassesOf" name="should find all the classes that are things" time="0"/>
+<testcase classname="Model #getSubclassesOf" name="should find that Addresses are not per se Employable" time="0"/>
+<testcase classname="Model #findCommonType" name="should determine that the common class of a class is itself" time="0"/>
+<testcase classname="Model #findCommonType" name="should say the common class of two examples of the same class is that class" time="0"/>
+<testcase classname="Model #findCommonType" name="should say the common type of a class and its super-type is the super-type" time="0"/>
+<testcase classname="Model #findCommonType" name="should say the common type of a class and one of its sub-types is the super-type" time="0"/>
+<testcase classname="Model #findCommonType" name="should return a non-existent value for incompatible classes" time="0"/>
+<testcase classname="Model #findCommonType" name="should return the mutual super class of compatible classes" time="0"/>
+<testcase classname="Model #findCommonType" name="should handle more than two classes" time="0"/>
+<testcase classname="Model #findCommonType" name="should determine that the set of all things are things" time="0.001"/>
+<testcase classname="Model #getPathInfo" name="should be able to make a path" time="0"/>
+<testcase classname="Model NUMERIC_TYPES" name="should include whole number types" time="0"/>
+<testcase classname="Model NUMERIC_TYPES" name="should include fractional types" time="0"/>
+<testcase classname="Query one of constraints count" name="should find 36 rows" time="0"/>
+<testcase classname="Query one of constraints results" name="should only find employees in sales and accounting" time="0.001"/>
+<testcase classname="Query one of constraints results" name="should find David" time="0"/>
+<testcase classname="Query #next" name="gets the query to retrieve the next page of results" time="0"/>
+<testcase classname="Query #next" name="should fetch the appropriate page of results" time="0.01"/>
+<testcase classname="Query #previous" name="gets the query to retrieve the next page of results" time="0"/>
+<testcase classname="Query #previous" name="should fetch the appropriate page of results" time="0.009"/>
+<testcase classname="Service #values()" name="should fail" time="0.002"/>
+<testcase classname="Service #values(&quot;Foo.bar&quot;)" name="should fail" time="0.001"/>
+<testcase classname="Service #values(&quot;Company.name&quot;)" name="should get a list of seven values" time="0"/>
+<testcase classname="Service #values(&quot;Company.name&quot;)" name="should include Wernham-Hogg" time="0"/>
+<testcase classname="Service #values(Path(&quot;Company.name&quot;))" name="should get a list of seven values" time="0.001"/>
+<testcase classname="Service #values(Path(&quot;Company.name&quot;))" name="should include Wernham-Hogg" time="0"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;)" name="should get a list of 132 values" time="0"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;)" name="should include David-Brent" time="0.001"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;)" name="should get a list of 132 values" time="0"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;)" name="should include David-Brent" time="0"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;, {&quot;Department.employees&quot;: &quot;CEO&quot;})" name="should get a list of six values" time="0"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;, {&quot;Department.employees&quot;: &quot;CEO&quot;})" name="should not include David-Brent" time="0"/>
+<testcase classname="Service #values(&quot;Department.employees.name&quot;, {&quot;Department.employees&quot;: &quot;CEO&quot;})" name="should include B'wah Hah Hah" time="0.001"/>
+<testcase classname="Service #values(Path(&quot;Department.employees.name&quot;, {&quot;Department.employees&quot;: &quot;CEO&quot;}))" name="should get a list of six values" time="0"/>
+<testcase classname="Service #values(Path(&quot;Department.employees.name&quot;, {&quot;Department.employees&quot;: &quot;CEO&quot;}))" name="should not include David-Brent" time="0"/>
+<testcase classname="Service #values(Path(&quot;Department.employees.name&quot;, {&quot;Department.employees&quot;: &quot;CEO&quot;}))" name="should include B'wah Hah Hah" time="0"/>
+<testcase classname="PathInfo Illegal paths" name="should be detected upon creation" time="0"/>
+<testcase classname="PathInfo root" name="should stringify with toString()" time="0"/>
+<testcase classname="PathInfo root" name="should stringify with toPathString()" time="0"/>
+<testcase classname="PathInfo root" name="should stringify with string concatenation" time="0"/>
+<testcase classname="PathInfo root #getType()" name="should report an appropriate type" time="0"/>
+<testcase classname="PathInfo root #containsCollection()" name="should not contain a collection" time="0"/>
+<testcase classname="PathInfo root #getParent()" name="should throw an error" time="0"/>
+<testcase classname="PathInfo root #append(field)" name="should return a new child path" time="0"/>
+<testcase classname="PathInfo root #append(field)" name="should throw if the field doesn't exist" time="0.001"/>
+<testcase classname="PathInfo root #getChildNodes()" name="should find 10 child nodes" time="0"/>
+<testcase classname="PathInfo root #getChildNodes()" name="should find Employee.department" time="0.001"/>
+<testcase classname="PathInfo root #getChildNodes()" name="should produce nodes that can find their parent" time="0"/>
+<testcase classname="PathInfo root #isRoot()" name="should return true" time="0"/>
+<testcase classname="PathInfo root #isAttribute()" name="should return false" time="0"/>
+<testcase classname="PathInfo root #isReference" name="should return false" time="0"/>
+<testcase classname="PathInfo root #isCollection" name="should return false" time="0"/>
+<testcase classname="PathInfo root #isClass" name="should return true" time="0"/>
+<testcase classname="PathInfo root #isa(type)" name="should say it is an Employee" time="0"/>
+<testcase classname="PathInfo root #isa(type)" name="should say it is a Thing" time="0"/>
+<testcase classname="PathInfo root #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo root #isa(type)" name="should not say it is an int" time="0"/>
+<testcase classname="PathInfo Simple attribute" name="should stringify with toString()" time="0"/>
+<testcase classname="PathInfo Simple attribute" name="should stringify with toPathString()" time="0"/>
+<testcase classname="PathInfo Simple attribute" name="should stringify with string concatenation" time="0.001"/>
+<testcase classname="PathInfo Simple attribute #getType()" name="should report an appropriate type" time="0"/>
+<testcase classname="PathInfo Simple attribute #containsCollection()" name="should not contain a collection" time="0"/>
+<testcase classname="PathInfo Simple attribute #getParent()" name="should have a parent of the right type" time="0"/>
+<testcase classname="PathInfo Simple attribute #append(field)" name="should throw an error" time="0"/>
+<testcase classname="PathInfo Simple attribute #isRoot()" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple attribute #isAttribute()" name="should return true" time="0"/>
+<testcase classname="PathInfo Simple attribute #isReference" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple attribute #isCollection" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple attribute #isClass" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple attribute #isa(type)" name="should not say it is an Employee" time="0"/>
+<testcase classname="PathInfo Simple attribute #isa(type)" name="should not say it is a Thing" time="0"/>
+<testcase classname="PathInfo Simple attribute #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo Simple attribute #isa(type)" name="should say it is an int" time="0"/>
+<testcase classname="PathInfo Simple reference" name="should stringify with toString()" time="0"/>
+<testcase classname="PathInfo Simple reference" name="should stringify with toPathString()" time="0"/>
+<testcase classname="PathInfo Simple reference" name="should stringify with string concatenation" time="0"/>
+<testcase classname="PathInfo Simple reference #getType()" name="should report an appropriate type" time="0.001"/>
+<testcase classname="PathInfo Simple reference #containsCollection()" name="should not contain a collection" time="0"/>
+<testcase classname="PathInfo Simple reference #getParent()" name="should have a parent of the right type" time="0"/>
+<testcase classname="PathInfo Simple reference #append(field)" name="should return the appropriate child path" time="0"/>
+<testcase classname="PathInfo Simple reference #append(field)" name="should throw if the field doesn't exist" time="0"/>
+<testcase classname="PathInfo Simple reference #isRoot()" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple reference #isAttribute()" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple reference #isReference" name="should return true" time="0"/>
+<testcase classname="PathInfo Simple reference #isCollection" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple reference #isClass" name="should return true" time="0"/>
+<testcase classname="PathInfo Simple reference #isa(type)" name="should not say it is an Employee" time="0"/>
+<testcase classname="PathInfo Simple reference #isa(type)" name="should say it is a Thing" time="0"/>
+<testcase classname="PathInfo Simple reference #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo Simple reference #isa(type)" name="should not say it is an int" time="0"/>
+<testcase classname="PathInfo Simple collection" name="should stringify with toString()" time="0"/>
+<testcase classname="PathInfo Simple collection" name="should stringify with toPathString()" time="0"/>
+<testcase classname="PathInfo Simple collection" name="should stringify with string concatenation" time="0"/>
+<testcase classname="PathInfo Simple collection #getType()" name="should report an appropriate type" time="0"/>
+<testcase classname="PathInfo Simple collection #containsCollection()" name="should contain a collection" time="0"/>
+<testcase classname="PathInfo Simple collection #getParent()" name="should have a parent of the right type" time="0"/>
+<testcase classname="PathInfo Simple collection #append(field)" name="should return the appropriate child path" time="0"/>
+<testcase classname="PathInfo Simple collection #append(field)" name="should throw if the field doesn't exist" time="0"/>
+<testcase classname="PathInfo Simple collection #isRoot()" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple collection #isAttribute()" name="should return false" time="0"/>
+<testcase classname="PathInfo Simple collection #isReference" name="should return true" time="0"/>
+<testcase classname="PathInfo Simple collection #isCollection" name="should return true" time="0"/>
+<testcase classname="PathInfo Simple collection #isClass" name="should return true" time="0"/>
+<testcase classname="PathInfo Simple collection #isa(type)" name="should say it is an Employee" time="0"/>
+<testcase classname="PathInfo Simple collection #isa(type)" name="should say it is a Thing" time="0"/>
+<testcase classname="PathInfo Simple collection #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo Simple collection #isa(type)" name="should not say it is an int" time="0"/>
+<testcase classname="PathInfo Subclassed path #getType()" name="should report the subclass" time="0"/>
+<testcase classname="PathInfo Subclassed path #containsCollection()" name="should contain a collection" time="0"/>
+<testcase classname="PathInfo Subclassed path #getParent()" name="should have a parent of the right type" time="0"/>
+<testcase classname="PathInfo Subclassed path #append(field)" name="should return the appropriate child path" time="0"/>
+<testcase classname="PathInfo Subclassed path #append(field)" name="should throw if the field doesn't exist" time="0"/>
+<testcase classname="PathInfo Subclassed path #isRoot()" name="should return false" time="0"/>
+<testcase classname="PathInfo Subclassed path #isAttribute()" name="should return false" time="0"/>
+<testcase classname="PathInfo Subclassed path #isReference" name="should return true" time="0"/>
+<testcase classname="PathInfo Subclassed path #isCollection" name="should return true" time="0"/>
+<testcase classname="PathInfo Subclassed path #isClass" name="should return true" time="0"/>
+<testcase classname="PathInfo Subclassed path #isa(type)" name="should say it is an Employee" time="0"/>
+<testcase classname="PathInfo Subclassed path #isa(type)" name="should say it is a Thing" time="0"/>
+<testcase classname="PathInfo Subclassed path #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo Subclassed path #isa(type)" name="should not say it is an int" time="0"/>
+<testcase classname="PathInfo Long reference chain" name="should stringify with toString()" time="0"/>
+<testcase classname="PathInfo Long reference chain" name="should stringify with toPathString()" time="0"/>
+<testcase classname="PathInfo Long reference chain" name="should stringify with string concatenation" time="0"/>
+<testcase classname="PathInfo Long reference chain #getType()" name="should report an appropriate type" time="0"/>
+<testcase classname="PathInfo Long reference chain #containsCollection()" name="should not contain a collection" time="0"/>
+<testcase classname="PathInfo Long reference chain #getParent()" name="should have a parent of the right type" time="0"/>
+<testcase classname="PathInfo Long reference chain #append(field)" name="should return the appropriate child path" time="0"/>
+<testcase classname="PathInfo Long reference chain #append(field)" name="should throw if the field doesn't exist" time="0"/>
+<testcase classname="PathInfo Long reference chain #isRoot()" name="should return false" time="0"/>
+<testcase classname="PathInfo Long reference chain #isAttribute()" name="should return false" time="0"/>
+<testcase classname="PathInfo Long reference chain #isReference" name="should return true" time="0"/>
+<testcase classname="PathInfo Long reference chain #isCollection" name="should return false" time="0"/>
+<testcase classname="PathInfo Long reference chain #isClass" name="should return true" time="0"/>
+<testcase classname="PathInfo Long reference chain #isa(type)" name="should not say it is an Employee" time="0"/>
+<testcase classname="PathInfo Long reference chain #isa(type)" name="should say it is a Thing" time="0"/>
+<testcase classname="PathInfo Long reference chain #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo Long reference chain #isa(type)" name="should not say it is an int" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain" name="should stringify with toString()" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain" name="should stringify with toPathString()" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain" name="should stringify with string concatenation" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #getType()" name="should report an appropriate type" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #containsCollection()" name="should contain a collection" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #getParent()" name="should have a parent of the right type" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #append(field)" name="should return the appropriate child path" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #append(field)" name="should throw if the field doesn't exist" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isRoot()" name="should return false" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isAttribute()" name="should return false" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isReference" name="should return true" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isCollection" name="should return false" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isClass" name="should return true" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isa(type)" name="should not say it is an Employee" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isa(type)" name="should say it is a Thing" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isa(type)" name="should not say it is a Department" time="0"/>
+<testcase classname="PathInfo Long reference with collection chain #isa(type)" name="should not say it is an int" time="0"/>
+<testcase classname="Defining Query constraints using the internal verbose format" name="should work using the constraints key" time="0"/>
+<testcase classname="Defining Query constraints using the internal verbose format" name="should work using the where key" time="0"/>
+<testcase classname="Defining Query constraints using the internal verbose format" name="should be able to add them one by one using #addConstraint" time="0"/>
+<testcase classname="Defining Query constraints using the internal verbose format" name="should be able to add them all at once using #addConstraints" time="0"/>
+<testcase classname="Defining Query constraints using headless paths" name="should work using the constraints key" time="0"/>
+<testcase classname="Defining Query constraints using headless paths" name="should work using the where key" time="0"/>
+<testcase classname="Defining Query constraints using headless paths" name="should be able to add them one by one using #addConstraint" time="0"/>
+<testcase classname="Defining Query constraints using headless paths" name="should be able to add them all at once using #addConstraints" time="0.001"/>
+<testcase classname="Defining Query constraints using array encoding" name="should work using the constraints key" time="0"/>
+<testcase classname="Defining Query constraints using array encoding" name="should work using the where key" time="0"/>
+<testcase classname="Defining Query constraints using array encoding" name="should be able to add them one by one using #addConstraint" time="0"/>
+<testcase classname="Defining Query constraints using array encoding" name="should be able to add them all at once using #addConstraints" time="0"/>
+<testcase classname="Defining Query constraints using operator aliases" name="should work using the constraints key" time="0"/>
+<testcase classname="Defining Query constraints using operator aliases" name="should work using the where key" time="0"/>
+<testcase classname="Defining Query constraints using operator aliases" name="should be able to add them one by one using #addConstraint" time="0"/>
+<testcase classname="Defining Query constraints using operator aliases" name="should be able to add them all at once using #addConstraints" time="0"/>
+<testcase classname="Defining Query constraints using an mapping" name="should work using the constraints key" time="0"/>
+<testcase classname="Defining Query constraints using an mapping" name="should work using the where key" time="0.001"/>
+<testcase classname="Defining Query constraints using an mapping" name="should be able to add them one by one using #addConstraint" time="0"/>
+<testcase classname="Defining Query constraints using an mapping" name="should be able to add them all at once using #addConstraints" time="0"/>
+<testcase classname="Defining Query constraints using a null value" name="should work using the constraints key" time="0"/>
+<testcase classname="Defining Query constraints using a null value" name="should work using the where key" time="0"/>
+<testcase classname="Defining Query constraints using a null value" name="should be able to add them one by one using #addConstraint" time="0"/>
+<testcase classname="Defining Query constraints using a null value" name="should be able to add them all at once using #addConstraints" time="0.001"/>
+<testcase classname="Query #isConstrained" name="should say that &quot;Employee.age&quot; is constrained" time="0"/>
+<testcase classname="Query #isConstrained" name="should say that &quot;Employee.department.company&quot; is constrained" time="0.001"/>
+<testcase classname="Query #isConstrained" name="should say that &quot;Employee.address.address&quot; is constrained" time="0"/>
+<testcase classname="Query #isConstrained" name="should not say that &quot;Employee.address&quot; is constrained" time="0"/>
+<testcase classname="Query #isConstrained" name="should not say that &quot;Employee.department.manager&quot; is constrained" time="0"/>
+<testcase classname="Query #isConstrained" name="should not say that &quot;Employee.department.company.name&quot; is constrained" time="0"/>
+<testcase classname="Query #isConstrained" name="should not say that &quot;departmentThatRejectedMe.name&quot; is constrained" time="0"/>
+<testcase classname="Query #isConstrained" name="should say that and attr of &quot;Employee.address&quot; is constrained" time="0.001"/>
+<testcase classname="Query#isRelevant" name="should find Employee.address relevant" time="0"/>
+<testcase classname="Query#isRelevant" name="should find Employee.age relevant" time="0.001"/>
+<testcase classname="Query#isRelevant" name="should find Employee.end relevant" time="0.001"/>
+<testcase classname="Query#isRelevant" name="should find Employee.department.manager relevant" time="0"/>
+<testcase classname="Query#isRelevant" name="should not find Employee.department.company.CEO relevant" time="0"/>
+<testcase classname="The equivalence of syntaxes" name="should mean that both syntaxes produce the same XML" time="0"/>
+<testcase classname="Query#saveAsList saving older employees" name="should exist" time="0.001"/>
+<testcase classname="Query#saveAsList saving older employees" name="should be called 'temp-olders-from-query'" time="0"/>
+<testcase classname="Query#saveAsList saving older employees" name="should contain as many members as the count suggests" time="0"/>
+<testcase classname="Query#saveAsList saving older employees" name="should be marked for death" time="0"/>
+<testcase classname="Query#saveAsList saving younger employees" name="should exist" time="0"/>
+<testcase classname="Query#saveAsList saving younger employees" name="should be called 'temp-youngers-from-query'" time="0"/>
+<testcase classname="Query#saveAsList saving younger employees" name="should contain as many members as the count suggests" time="0"/>
+<testcase classname="Query#saveAsList saving younger employees" name="should be marked for death" time="0"/>
+<testcase classname="Query running a subclass query" name="should find six ceos who work in departments" time="0"/>
+<testcase classname="Query running a multi-type query" name="ceos + contractors should = union" time="0"/>
+<testcase classname="Query running a multi-type query" name="should find 15 contractors or ceos" time="0"/>
+<testcase classname="Query new" name="should make a new query" time="0"/>
+<testcase classname="Query new" name="should set the root based on the &quot;root&quot; option" time="0"/>
+<testcase classname="Query new" name="should set the root based on the &quot;from&quot; option" time="0"/>
+<testcase classname="Query handles intermine options" name="can interpret views" time="0"/>
+<testcase classname="Query handles intermine options" name="can derive root" time="0"/>
+<testcase classname="Query handles intermine options" name="can interpret constraints" time="0"/>
+<testcase classname="Query handles sqlish options" name="can interpret views" time="0"/>
+<testcase classname="Query handles sqlish options" name="can derive root" time="0"/>
+<testcase classname="Query handles sqlish options" name="can interpret constraints" time="0"/>
+<testcase classname="Query Query syntaxes" name="should be synonymous" time="0"/>
+<testcase classname="Query addToSelect(path)" name="should add views to the select list" time="0.001"/>
+<testcase classname="Query removeFromSelect(path)" name="should remove views to the select list" time="0"/>
+<testcase classname="Query #clone()" name="should produce unconnected clones" time="0"/>
+<testcase classname="Query #clone()" name="cloning should not include events by default" time="0"/>
+<testcase classname="Service#search using the promise API to look for everything" name="should find at least 100 things" time="0"/>
+<testcase classname="Service#search using the promise API to look for everything" name="should find some banks" time="0"/>
+<testcase classname="Service#search using the promise API to look for David" name="should find david and his department" time="0"/>
+<testcase classname="Service#search using the promise API to look for David" name="should find one department" time="0"/>
+<testcase classname="Service#search using the promise API to look for David" name="should find one manager" time="0"/>
+<testcase classname="Service#search using the promise API to look for David, with a request object" name="should find david and his department" time="0"/>
+<testcase classname="Service#search using the promise API to look for David, with a request object" name="should find one department" time="0"/>
+<testcase classname="Service#search using the promise API to look for David, with a request object" name="should find one manager" time="0"/>
+<testcase classname="Service#search using the promise API searcing by a specific type" name="should find one department" time="0"/>
+<testcase classname="Service #records" name="promises to return a list of employee records" time="0"/>
+<testcase classname="Query #records" name="promises to return a list of employee records" time="0.001"/>
+<testcase classname="Query #eachRecord" name="promises to return an iterator over the employees" time="0.02"/>
+<testcase classname="Query #removeConstraint(con)" name="should be able to remove a constraint" time="0"/>
+<testcase classname="Query #rows()" name="should return 46 rows, with a sum of 2688" time="0.008"/>
+<testcase classname="Query #rows()" name="should return 46 rows, with a sum of 2688, and work with callbacks" time="0.006"/>
+<testcase classname="Query yielding the result set" name="should also yield the result set" time="0.001"/>
+<testcase classname="Query #eachRow" name="should allow iteration per item" time="0.006"/>
+<testcase classname="Query #eachRow" name="should allow iteration per item with a single callback" time="0.007"/>
+<testcase classname="Query #eachRow" name="should allow iteration with promises" time="0.009"/>
+<testcase classname="Service #rows()" name="accepts a query options object, and can run it as it would a query" time="0.009"/>
+<testcase classname="Service #rows()" name="accepts a query options object, and can run it, accepting callbacks" time="0.007"/>
+<testcase classname="Static service properties: the version" name="should return a usable value" time="0"/>
+<testcase classname="Static service properties: the version" name="should resolve successfully" time="0"/>
+<testcase classname="Static service properties: the version" name="should yield a positive value" time="0"/>
+<testcase classname="Static service properties: the version" name="should support callbacks" time="0"/>
+<testcase classname="Static service properties: the model" name="should return a usable value" time="0"/>
+<testcase classname="Static service properties: the model" name="should resolve successfully" time="0"/>
+<testcase classname="Static service properties: the model" name="should have the classes property" time="0"/>
+<testcase classname="Static service properties: the model" name="should have a positive number of classes" time="0"/>
+<testcase classname="Static service properties: the model" name="should support callbacks" time="0"/>
+<testcase classname="Static service properties: the summary fields" name="should return a usable value" time="0"/>
+<testcase classname="Static service properties: the summary fields" name="should resolve successfully" time="0"/>
+<testcase classname="Static service properties: the summary fields" name="should have fields for Employee" time="0"/>
+<testcase classname="Static service properties: the summary fields" name="should have the expected fields for Employee" time="0"/>
+<testcase classname="Static service properties: the summary fields" name="should support callbacks" time="0"/>
+<testcase classname="Service new Service" name="should make a new service" time="0"/>
+<testcase classname="Service new Service" name="should require a root property" time="0"/>
+<testcase classname="Service new Service" name="should not alter complete root urls" time="0"/>
+<testcase classname="Service new Service" name="should ensure root urls have a trailing slash" time="0"/>
+<testcase classname="Service new Service" name="should deal with minimal root urls" time="0"/>
+<testcase classname="Service .connect" name="should serve as an alias for &quot;new Service&quot;" time="0"/>
+<testcase classname="Query summary of numeric path" name="should have fewer than 21 buckets" time="0"/>
+<testcase classname="Query summary of numeric path" name="should include all the results of the query" time="0"/>
+<testcase classname="Query summary of numeric path" name="should have a suitable max value" time="0"/>
+<testcase classname="Query summary of numeric path" name="should have a suitable min value" time="0"/>
+<testcase classname="Query summary of numeric path" name="should have a suitable total" time="0"/>
+<testcase classname="Query American English alias" name="should include all the results of the query" time="0"/>
+<testcase classname="Query summary of string path" name="should have fewer than 21 buckets" time="0"/>
+<testcase classname="Query summary of string path" name="should include all the results of the query" time="0"/>
+<testcase classname="Query summary of string path" name="should contain the company names as the bucket labels" time="0"/>
+<testcase classname="Query summary of string path" name="should have a suitable total" time="0"/>
+<testcase classname="Table" name="should stringify correctly" time="0"/>
+<testcase classname="Table" name="should know about its parents" time="0"/>
+<testcase classname="User: single preference management #setPreference(key: val)" name="should have the right prefs set" time="0"/>
+<testcase classname="User: single preference management #setPreference(key, val)" name="should have the right prefs set" time="0"/>
+<testcase classname="User: single preference management #setPreference([[key, val]])" name="should have the right prefs set" time="0"/>
+<testcase classname="User: single preference management #clearPreference(key)" name="should have the right prefs set" time="0"/>
+<testcase classname="User: multiple preference management #setPreferences({a: val1, b: val2})" name="should have both preferences set" time="0"/>
+<testcase classname="User: multiple preference management #setPreferences([[a, val1], [b, val2]])" name="should have both preferences set" time="0"/>
+<testcase classname="Service #whoami()" name="should yield a user" time="0"/>
+<testcase classname="Service #whoami()" name="should yield the representation of the test user" time="0.001"/>
+<testcase classname="Service #whoami(cb)" name="should support the callback API" time="0.001"/>
+<testcase classname="Service #fetchUser()" name="should yield a user" time="0"/>
+<testcase classname="Service #fetchUser()" name="should yield the representation of the test user" time="0"/>
+<testcase classname="Query #select(['*'])" name="should expand stars to the summary fields" time="0"/>
+<testcase classname="Query #select(['*'])" name="should expand double stars to all fields" time="0"/>
+<testcase classname="Query #select(['*'])" name="should be able to expand paths ending in a star" time="0.003"/>
+</testsuite>

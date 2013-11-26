@@ -20,11 +20,12 @@ CHECKING_PIPE = (response) -> jQuery.Deferred ->
     @reject response.error, response
 
 # Process the errors returned from the webservice.
-ERROR_PIPE = (xhr, textStatus, e) ->
+ERROR_PIPE = (f = (->)) -> (xhr, textStatus, e) ->
+  return if xhr?.status is 0 # Aborted
   try
-    JSON.parse(xhr.responseText).error
+    f JSON.parse(xhr.responseText).error
   catch e
-    textStatus
+    f textStatus
 
 inIE9 = XDomainRequest?
 mappingForIE = PUT: 'POST', DELETE: 'GET'
@@ -57,11 +58,13 @@ http.iterReq = (method, path, fmt) -> (q, page = {}, doThis = (->), onErr = (->)
     .done(doThis)
     .done(onEnd)
 
+# Very thin wrapper around ajax, just to ensure errors are handled
+# correctly.
 http.doReq = (opts) ->
   errBack = (opts.error or @errorHandler)
-  opts.error = _.compose errBack, ERROR_PIPE
+  opts.error = ERROR_PIPE errBack
   def = jQuery.Deferred ->
     resp = jQuery.ajax opts
     resp.then => @resolve arguments...
-    resp.fail => @reject ERROR_PIPE.apply(null, arguments)
+    resp.fail ERROR_PIPE (err) => @reject err
   def.promise()
