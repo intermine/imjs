@@ -1,5 +1,5 @@
 {Service} = require './lib/fixture'
-$ = require 'underscore.deferred'
+RSVP = require 'rsvp'
 {prepare, eventually} = require './lib/utils'
 
 countRecords = (gff3) ->
@@ -20,12 +20,12 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      q.summarise('symbol').then (_, stats) -> $.when stats, q.getGFF3()
+      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
-    it 'should find only two genes, due to the pathways', eventually (stats, gff3) ->
+    it 'should find only two genes, due to the pathways', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 2
 
-    it 'should find only two gff3 record, due to the pathways', eventually (stats, gff3) ->
+    it 'should find only two gff3 record, due to the pathways', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal 2
 
   describe 'outer joined', ->
@@ -37,12 +37,12 @@ describe 'GFF3 Queries', ->
       joins: ['pathways']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      q.summarise('symbol').then (_, stats) -> $.when stats, q.getGFF3()
+      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
-    it 'should find 5 genes', eventually (stats, gff3) ->
+    it 'should find 5 genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
 
-    it 'should find 5 gff3 records', eventually (stats, gff3) ->
+    it 'should find 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal 5
 
   describe 'unconstrained', ->
@@ -53,12 +53,12 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      q.summarise('symbol').then (_, stats) -> $.when stats, q.getGFF3()
+      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
-    it 'should find all genes', eventually (stats, gff3) ->
+    it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
 
-    it 'should find 5 gff3 records', eventually (stats, gff3) ->
+    it 'should find 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal 5
 
   describe 'with extra attributes', ->
@@ -71,18 +71,17 @@ describe 'GFF3 Queries', ->
     @beforeAll prepare ->
       beta = new Service root: 'www.flymine.org/query'
       qp = beta.query(opts)
-      qp.then (q) ->
-        statsp = q.summarise('symbol').then (_, stats) -> stats
-        gff3p = q.getGFF3 view: ['organism.name', 'length']
-        $.when statsp, gff3p
+      statsp = qp.then (q) -> q.summarise('symbol').then ({stats}) -> stats
+      gff3p = qp.then (q) -> q.getGFF3 view: ['organism.name', 'length']
+      RSVP.all [statsp, gff3p]
 
-    it 'should find all genes', eventually (stats, gff3) ->
+    it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
 
-    it 'should find 5 gff3 records', eventually (stats, gff3) ->
+    it 'should find 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal 5
 
-    it 'the records should have the extra attributes', eventually (stats, gff3) ->
+    it 'the records should have the extra attributes', eventually ([stats, gff3]) ->
       for line in gff3.split("\n") when line.length and not /^#/.test line
         col9 = line.split(/\t/)[8]
         col9.should.match /organism.name/
@@ -97,12 +96,12 @@ describe 'GFF3 Queries', ->
       joins: ['exons']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      q.summarise('symbol').then (_, stats) -> $.when stats, q.getGFF3()
+      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
-    it 'should find all genes', eventually (stats, gff3) ->
+    it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
 
-    it 'should find more than 5 gff3 records', eventually (stats, gff3) ->
+    it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.be.above 5
 
 

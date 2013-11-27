@@ -7,15 +7,12 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-RSVP = require 'rsvp'
 {Table}         = require './table'
 {PathInfo}      = require './path'
-{flatten, first, error, omap}   = require('./util')
+{flatten, find, error, omap}   = require('./util')
 intermine = exports
 
 # Either mocha or should is breaking the reference to _
-
-{flatten, intersection} = _
 
 # Lift classes to Tables
 liftToTable = omap (k, v) -> [k, new Table(v)]
@@ -123,8 +120,8 @@ class Model
     b_ancestry = @getAncestorsOf classB
     if classA in b_ancestry
       return classA
-    # Guard the return with null because null !== undefined
-    return intersection(a_ancestry, b_ancestry).shift() ? null
+    firstCommon = find a_ancestry, (a) -> a in b_ancestry
+    return firstCommon
 
   # Find the common type of a list of classes or class names, or null if there is no
   # one common type.
@@ -138,11 +135,9 @@ Model::findCommonTypeOfMultipleClasses = Model::findCommonType # API preserving 
 # Static constructor.
 Model.load = (data) ->
   try
-    new Model(data)
-  catch err
-    console.error "Error loading model", err
-    error "Could not load model: #{ err }"
-
+    new Model data
+  catch e
+    throw new Error("Error loading model: #{ e }")
 
 Model.INTEGRAL_TYPES = ["int", "Integer", "long", "Long"]
 Model.FRACTIONAL_TYPES = ["double", "Double", "float", "Float"]

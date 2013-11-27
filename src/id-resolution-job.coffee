@@ -9,11 +9,11 @@
 # and browsers.
 #
 
-{Deferred} = require('underscore.deferred')
+{defer}   = require 'rsvp'
 funcutils = require './util'
 intermine = exports
 
-{id, get, fold, concatMap} = funcutils
+{withCB, id, get, fold, concatMap} = funcutils
 
 ONE_MINUTE = 60 * 1000
 
@@ -54,12 +54,12 @@ class IDResolutionJob
 
   constructor: (@uid, @service) ->
 
-  fetchStatus:       (cb) => @service.get("ids/#{ @uid }/status").pipe(get 'status').done(cb)
+  fetchStatus:       (cb) => withCB cb, @service.get("ids/#{ @uid }/status").then(get 'status')
 
-  fetchErrorMessage: (cb) => @service.get("ids/#{ @uid }/status").pipe(get 'message').done(cb)
+  fetchErrorMessage: (cb) => withCB cb, @service.get("ids/#{ @uid }/status").then(get 'message')
 
   fetchResults:      (cb) =>
-    gettingRes = @service.get("ids/#{ @uid }/result").pipe(get 'results')
+    gettingRes = @service.get("ids/#{ @uid }/result").then(get 'results')
     gettingVer = @service.fetchVersion()
     gettingVer.then (v) -> gettingRes.then (results) ->
       if v >= 16 then new CategoryResults(results) else new IdResults(results)
@@ -80,18 +80,20 @@ class IDResolutionJob
   # @return [Promise<Object>] A promise to yield the results.
   # @see Service#resolveIds
   poll: (onSuccess, onError, onProgress) ->
-    ret = Deferred().done(onSuccess).fail(onError).progress(onProgress)
+    {promise, resolve, reject} = defer "id-resolution"
+    promise.then onSuccess, onError
+    notify = onProgress ? (->)
     resp = @fetchStatus()
-    resp.fail ret.reject
+    resp.fail reject
     backOff = @decay
-    @decay = Math.min ONE_MINUTE, backOff * 2
-    resp.done (status) =>
-      ret.notify(status)
+    @decay = Math.min ONE_MINUTE, backOff * 1.25
+    resp.then (status) =>
+      notify(status)
       switch status
-        when 'SUCCESS' then @fetchResults().then(ret.resolve, ret.reject)
-        when 'ERROR' then @fetchErrorMessage().then(ret.reject, ret.reject)
-        else setTimeout (=> @poll ret.resolve, ret.reject, ret.notify), backOff
-    return ret.promise()
+        when 'SUCCESS' then @fetchResults().then(resolve, reject)
+        when 'ERROR' then @fetchErrorMessage().then(reject, reject)
+        else setTimeout (=> @poll resolve, reject, notify), backOff
+    return promise
 
 IDResolutionJob::wait = IDResolutionJob::poll
 

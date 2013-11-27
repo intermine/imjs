@@ -1,32 +1,34 @@
-{Deferred} = $ = require 'underscore.deferred'
+{Promise} = RSVP = require 'rsvp'
 {funcutils: {error, invoke}} = require './fixture'
 
-clear = (service, name) -> () -> Deferred ->
+clear = (service, name) -> () -> new Promise (resolve, reject) ->
     eh = service.errorHandler # Fetch list logs errors, which we don't care about.
     service.errorHandler = ->
+    replaceErrorHandler = ->
+      service.errorHandler = eh
+      resolve()
     service.fetchList(name)
            .then(invoke 'del')
-           .always(-> service.errorHandler = eh)
-           .always(@resolve)
+           .then(replaceErrorHandler, replaceErrorHandler)
 
 
 cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))
 
-deferredTest = DT = (test) -> (args...) -> Deferred ->
+deferredTest = DT = (test) -> (args...) -> new Promise (resolve, reject) ->
     try
         ret = test args...
-        if ret and ret.then and ret.fail and ret.done
-            ret.fail @reject
-            ret.done @resolve
+        if ret and ret.then and ret.fail
+            ret.then resolve, reject
         else
-            @resolve ret
+            resolve ret
     catch e
-        @reject new Error(e)
+        reject e
 
-after = (promises) -> if promises?.length then $.when.apply($, promises) else Deferred -> @resolve()
+after = (promises) ->
+  if promises?.length then RSVP.all(promises) else RSVP.resolve()
 
-report = (done, promise) -> promise.fail(done).done -> done()
+report = (done, promise) -> promise.then (-> done()), done
 
 eventually = (test) -> (done) -> report done, @promise.then DT test
 
@@ -34,10 +36,12 @@ promising = (p, test) -> (done) -> report done, p.then DT test
 
 prepare = (promiser) -> (done) -> report done, @promise = promiser()
 
-always = (fn) -> (done) -> fn().always -> done()
+always = (fn) -> (done) -> fn().then (-> done()), (-> done())
 
-shouldFail = (fn) -> (done) -> fn().fail(-> done()).done (args...) ->
-    done new Error "Expected failure, got: #{ args }"
+shouldFail = (fn) -> (done) ->
+  onErr = -> done()
+  onSucc = (args...) -> done new Error "Expected failure, got: [#{ args.join(', ') }]"
+  fn().then onSucc, onErr
 
 needs = (exp) -> (service) -> (fn) -> prepare -> service.fetchVersion().then (actual) ->
   if actual >= exp then fn service else error "Service at #{ actual }, must be >= #{ exp }"

@@ -9,20 +9,20 @@
 # and browsers.
 #
 
-{Promise}      = require('rsvp')
+{Promise} = RSVP = require('rsvp')
 {Model}        = require('./model')
 {Query}        = require('./query')
 {List}         = require('./lists')
 {User}         = require('./user')
 {IDResolutionJob} = require('./id-resolution-job')
 version      = require('./version')
-funcutils      = require('./util')
+utils        = require('./util')
 to_query_string    = require('querystring').stringify
 http           = require('./http')
 
 intermine = exports
 
-{merge, pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
+{withCB, merge, pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -94,7 +94,7 @@ _get_or_fetch = (propName, store, path, key, cb) ->
     success(value)
   else
     @get(path).then(get key).then (x) => store[@root] = x
-  withCallback cb, prop
+  withCB cb, prop
 
 # A private helper that produces a function that will read
 # through an array of Lists, and find the first one with the
@@ -105,13 +105,13 @@ _get_or_fetch = (propName, store, path, key, cb) ->
 # @return [([List]) -> Deferred.<List>] A function from an array of
 #   List objects to a promise to return a List.
 getListFinder = (name) -> (lists) -> new Promise (resolve, reject) ->
-  if list = (_.find lists, (l) -> l.name is name)
+  if list = (utils.find lists, (l) -> l.name is name)
     resolve list
   else
     reject """List "#{ name }" not found among: #{ lists.map get 'name' }"""
 
-LIST_PIPE = (service, prop = 'listName') -> _.compose service.fetchList, get prop
-TO_NAMES = (xs = []) -> (x.name ? x for x in (if _.isArray(xs) then xs else [xs]))
+LIST_PIPE = (service, prop = 'listName') -> utils.compose service.fetchList, get prop
+TO_NAMES = (xs = []) -> (x.name ? x for x in (if utils.isArray(xs) then xs else [xs]))
 
 # The representation of a connection to an InterMine web-service.
 #
@@ -153,10 +153,10 @@ class Service
       @root = DEFAULT_PROTOCOL + @root
     if !HAS_SUFFIX.test @root
       @root = @root + SUFFIX
-    @root = @root.replace /ice$/, "ice/"
+    @root = @root.replace /ice$/, "ice/" # Ensure trailing slash.
     @errorHandler ?= DEFAULT_ERROR_HANDLER
     @help ?= 'no.help.available@dev.null'
-    @useCache = !noCache # Peristent processes might not want to cache model, version, etc.
+    @useCache = not noCache # Peristent processes might not want to cache model, version, etc.
 
     @getFormat = (intended = 'json') =>
       return intended
@@ -193,9 +193,9 @@ class Service
   #
   # @return [Promise<Object>] A promise to yield a response object.
   makeRequest: (method = 'GET', path = '', data = {}, cb = (->), indiv = false) ->
-    if _.isArray cb
+    if utils.isArray cb
       [cb, errBack] = cb
-    if _.isArray data
+    if utils.isArray data
       data = pairsToObj data
 
     url = @root + path
@@ -247,9 +247,8 @@ class Service
   # @param [->] cb A function to call with the results when they have been received (optional).
   # @return [Promise<Array<Object>>] A promise to get results.
   enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
-    @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05, correction: 'Holm-Bonferroni')
-      .then(get 'results')
-      .done(cb)
+    req = merge {maxp: 0.05, correction: 'Holm-Bonferroni'}, opts
+    withCB cb, @get(ENRICHMENT_PATH, req).then get 'results'
 
   # Search for items in the database by any term or facet.
   #
@@ -259,21 +258,23 @@ class Service
   # each object. To further explore the dataset, the user will
   # want to construct more sophisticated queries. See {Query}.
   #
+  # The yielded result has a results property and a facets property.
+  #
   # @param [Object] options A collection of parameters.
   # @param [(Array.<Object>, Object, Object) ->] An optional call-back function.
   # @option options [String] q The term to search by.
   # @option options [Object<String, String>] facets A set of facet constraints.
-  # @return [Promise<Array, Object, Object>] A promise to search the database.
+  # @return [Promise<Object>] A promise to search the database.
   search: (options = {}, cb = (->)) -> REQUIRES_VERSION @, 9, =>
-    [cb, options] = [options, {}] if _.isFunction options
-    options = {q: options} if _.isString options
-    req = _.defaults {}, options, {q: ''}
-    delete req.facets # bad, but underscore 1.4.2 isn't common yet, so we can't use omit.
-    if options.facets
-      for k, v of options.facets
+    [cb, options] = [options, {}] if utils.isFunction options
+    if typeof options is 'string'
+      req = q: options
+    else
+      req = q: options.q
+      for own k, v of options when k isnt 'q'
         req["facet_#{ k }"] = v
-    parse = (response) -> success response.results, response.facets
-    @post(QUICKSEARCH_PATH, req).then(parse).done(cb)
+
+    withCB cb, @post(QUICKSEARCH_PATH, req)
 
   # Find out how many rows a given query would return when run.
   #
@@ -285,18 +286,18 @@ class Service
   # @param [(Number) ->] cb A callback that receives a number. Optional.
   # @return [Promise<Number>] A promise to yield a count.
   count: (q, cb = (->)) =>
-    if not q
+    withCB cb, if not q
       error "Not enough arguments"
     else if q.toPathString?
       p = if q.isClass() then q.append('id') else q
-      @pathValues(p, 'count').done(cb)
+      @pathValues(p, 'count')
     else if q.toXML?
       req = {query: q.toXML(), format: 'jsoncount'}
-      @post(QUERY_RESULTS_PATH, req).then(get 'count').done(cb)
-    else if _.isString q
-      @fetchModel().then(invoke 'makePath', q.replace(/\.\*$/, '.id')).then(@count).done(cb)
+      @post(QUERY_RESULTS_PATH, req).then(get 'count')
+    else if typeof q is 'string'
+      @fetchModel().then(invoke 'makePath', q.replace(/\.\*$/, '.id')).then(@count)
     else
-      @query(q).then(@count).done(cb)
+      @query(q).then(@count)
 
   # Retrieve a representation of a specific object.
   # @param [String] type The type of the object to find (eg: Gene)
@@ -304,11 +305,10 @@ class Service
   # @param [(obj) ->] A callback that receives an object. (optional).
   # @return [Promise<Object>] A promise to yield an object.
   findById: (type, id, cb) =>
-    @query(from: type, select: ['**'], where: {id: id})
+    withCB cb, @query(from: type, select: ['**'], where: {id: id})
       .then(dejoin)
       .then(invoke 'records')
       .then(get 0)
-      .done(cb)
 
   # Find all the objects in the database that match the search term.
   # @param [String] type The type of the object to find (eg: Gene)
@@ -316,18 +316,18 @@ class Service
   #   comma separated sub-terms. eg: "eve, zen, bib, r, H"
   # @param [(Array<Object>) ->] cb A callback that receives an Array of objects. (optional).
   # @return [Promise<Array<Object>>] A promise to yield an array of objects.
-  # TODO: add support for extra-values
-  find: (type, term, cb) ->
-    @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term]])
+  find: (type, term, context, cb) ->
+    if utils.isFunction extraValue
+      [extraValue, cb] = [null, extraValue]
+    withCB cb, @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term, context]])
       .then(dejoin)
       .then(invoke 'records')
-      .done(cb)
 
   # Retrieve information about the currently authenticated user.
   # @param [(User) ->] cb A callback the receives a User object.
   # @return [Promise<User>] A promise to yield a user.
   whoami: (cb) => REQUIRES_VERSION @, 9, =>
-    @get(WHOAMI_PATH).then(get 'user').then((x) => new User(@, x)).done(cb)
+    withCB cb, @get(WHOAMI_PATH).then(get 'user').then((x) => new User(@, x))
 
   # Alias for {Service#whoami}
   fetchUser: (args...) => @whoami args...
@@ -342,7 +342,7 @@ class Service
   # @return [Promise<Array<Object>, Number>] A promise to return a list of objects with
   #   two properties ('count' and 'value').
   pathValues: (path, typeConstraints = {}, cb = (->)) => REQUIRES_VERSION @, 6, =>
-    if _.isString(typeConstraints)
+    if typeof typeConstraints is 'string'
       wanted = typeConstraints
       typeConstraints = {}
 
@@ -354,9 +354,8 @@ class Service
       @post(PATH_VALUES_PATH, req).then(get wanted)
 
     try
-      @fetchModel().then(invoke 'makePath', path, (path.subclasses || typeConstraints))
+      withCB cb, @fetchModel().then(invoke 'makePath', path, (path.subclasses ? typeConstraints))
                    .then(_pathValues)
-                   .done(cb)
     catch e
       error e
 
@@ -379,9 +378,11 @@ class Service
   # @return [Promise<Array<?>>] A promise to yield results.
   doPagedRequest: (q, path, page = {}, format, cb = (->)) ->
     if q.toXML?
-      [cb, page] = [page, {}] if _.isFunction page
-      req = _.defaults {}, {query: q.toXML(), format: format}, page
-      @post(path, req).then((resp) -> success(resp.results, resp)).done(cb)
+      [cb, page] = [page, {}] if utils.isFunction page
+      req = merge page, query: q.toXML(), format: format
+      @post(path, req).then (resp) ->
+        cb(resp.results, resp)
+        return resp.results
     else
       @query(q).then((query) => @doPagedRequest(query, path, page, format, cb))
 
@@ -438,16 +439,16 @@ class Service
   #
   # @return [Promise<<Array<Object>] A promise to yield results.
   values: (q, opts, cb = (->)) =>
-    if not q?
+    withCB cb, if not q?
       error "No query term supplied"
-    else if q.descriptors? or _.isString q
-      @pathValues(q, opts, cb)
+    else if q.descriptors? or typeof q is 'string'
+      @pathValues(q, opts)
     else
       @query(q).then (query) => # Lift to query, check and then run.
         if query.views.length isnt 1
           error "Expected one column, got #{ q.views.length }"
         else
-          @rows(query, opts).then(invoke 'map', get 0).done(cb)
+          @rows(query, opts).then(invoke 'map', get 0)
 
   # Get a page of results suitable for building the cells in a table.
   #
@@ -482,11 +483,11 @@ class Service
   # @param [(Array<List>) ->] cb A callback (optional).
   # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
   findLists: (name = '', cb = (->)) => @fetchVersion().then (v) =>
-    if name and v < 13
+    withCB cb, if name and v < 13
       error "Finding lists by name on the server requires version 13. This is only #{ v }"
     else
       fn = (ls) => (new List(data, @) for data in ls)
-      @get(LISTS_PATH, {name}).then(get 'lists').then(fn).done(cb)
+      @get(LISTS_PATH, {name}).then(get 'lists').then(fn)
 
   # Get a list by name.
   #
@@ -494,10 +495,10 @@ class Service
   # @param [->] cb A callback function (optional).
   # @return [Promise<List>] A promise to yield a {List}.
   fetchList: (name, cb) => @fetchVersion().then (v) =>
-    if v < 13
-      @findLists().then(getListFinder(name)).done(cb)
+    withCB cb, if v < 13
+      @findLists().then(getListFinder(name))
     else
-      @findLists(name).then(get 0).done(cb)
+      @findLists(name).then(get 0)
 
   # Get the lists that contain the given object.
   #
@@ -513,7 +514,7 @@ class Service
   # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
   fetchListsContaining: (opts, cb) =>
     fn = (xs) => (new List(x, @) for x in xs)
-    @get(WITH_OBJ_PATH, opts).then(get 'lists').then(fn).done(cb)
+    withCB cb, @get(WITH_OBJ_PATH, opts).then(get 'lists').then(fn)
 
   # Combine two or more lists using the given operation.
   #
@@ -527,11 +528,12 @@ class Service
   # @param [(List) ->] cb A callback function. (optional).
   # @return [Promise<List>] A promise to yield a {List} object.
   combineLists: (operation, options, cb) ->
-    req = _.pick options, 'name', 'description'
-    req.description ?= "#{ operation } of #{ options.lists.join(', ') }"
-    req.tags = (options.tags or []).join(';')
-    req.lists = (options.lists or []).join(';')
-    @get(LIST_OPERATION_PATHS[operation], req).then(LIST_PIPE @).done(cb)
+    {name, lists, tags, description} = merge {lists: [], tags: []}, options
+    req = {name, description}
+    req.description ?= "#{ operation } of #{ lists.join(', ') }"
+    req.tags = tags.join(';')
+    req.lists = lists.join(';')
+    withCB cb, @get(LIST_OPERATION_PATHS[operation], req).then(LIST_PIPE @)
 
   # Combine two or more lists through a union operation.
   #
@@ -600,7 +602,7 @@ class Service
     description ?= defaultDesc()
     tags ?= []
     req = {name, description, tags, lists, references}
-    @post(SUBTRACT_PATH, req).then(LIST_PIPE @).done(cb)
+    withCB cb, @post(SUBTRACT_PATH, req).then(LIST_PIPE @)
 
   # The following methods fetch resources that can be considered
   # stable - they are not expected to change between releases of
@@ -612,20 +614,17 @@ class Service
   fetchWidgets: (cb) => REQUIRES_VERSION @, 8, =>
     _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
-
   toMapByName = omap (w) -> [w.name, w]
 
   fetchWidgetMap: (cb) => REQUIRES_VERSION @, 8, =>
-    (@__wmap__ ?= @fetchWidgets().then(toMapByName)).done(cb)
+    withCB cb, (@__wmap__ ?= @fetchWidgets().then toMapByName)
 
   # Fetch the description of the data model for this service.
   # @return [Promise<Model>] A promise to yield metadata about this service.
   fetchModel: (cb) ->
-
-    return _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
+    withCB cb, _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
       .then(Model.load)
       .then(set service: @)
-      .done(cb)
 
   # Fetch the configured summary-fields.
   # The summary fields describe which fields should be used to summarise each class.
@@ -646,8 +645,8 @@ class Service
   # @param [(Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) =>
-    When.join(@fetchModel(), @fetchSummaryFields())
-        .then ([m, sfs, s]) => new Query (merge options, model: m, summaryFields: sfs), @
+    withCB cb, RSVP.hash(model: @fetchModel(), summaryFields: @fetchSummaryFields())
+                   .then (deps) => new Query (merge options, deps), this
 
   # Perform operations on a user's preferences.
   #
@@ -656,8 +655,8 @@ class Service
   # @param [Object] data The parameters for this request.
   # @return [Promise<Object>] A promise to yield the user's preferences
   #   following the update.
-  manageUserPreferences: (method, data) -> REQUIRES_VERSION @, 11, =>
-    @makeRequest(method, PREF_PATH, data).then(get 'preferences')
+  manageUserPreferences: (method, data, cb) -> REQUIRES_VERSION @, 11, =>
+    withCB cb, @makeRequest(method, PREF_PATH, data).then(get 'preferences')
 
   # Submit an ID resolution job.
   # @param [Object] opts The parameters to the id resolution service.
@@ -677,7 +676,7 @@ class Service
       contentType: 'application/json'
       data: JSON.stringify(opts)
       dataType: 'json'
-    @doReq(req).then(get 'uid').then(IDResolutionJob.create @).done(cb)
+    withCB cb, @doReq(req).then(get 'uid').then(IDResolutionJob.create @)
 
   # Create a new list through the identifier upload service.
   #
@@ -695,15 +694,15 @@ class Service
   # @param [(List) ->] cb A function that receives a {List}.
   # @return [Promise<List>] A promise to yield a {List}.
   createList: (opts = {}, ids = '', cb = ->) =>
-    adjust = (x) => _.defaults {@token, tags: (opts.tags or [])}, x
+    adjust = (x) => merge x, {@token, tags: (opts.tags or [])}
     req =
-      data: if _.isArray(ids) then ids.map((x) -> "\"#{ x }\"").join("\n") else ids
+      data: if utils.isArray(ids) then ids.map((x) -> "\"#{ x }\"").join("\n") else ids
       dataType: 'json'
       url: "#{ @root }lists?#{to_query_string adjust opts}"
       type: 'POST'
       contentType: 'text/plain'
 
-    @doReq(req).then(LIST_PIPE @).done(cb)
+    withCB cb, @doReq(req).then(LIST_PIPE @)
 
 # Methods for processing items individually.
 
@@ -726,7 +725,7 @@ Service::rowByRow = (q, args...) ->
   if q.toXML?
     f.apply this, arguments
   else
-    @query(arguments[0]).then (query) => @rowByRow query, args...
+    @query(q).then (query) => @rowByRow query, args...
     
 # Alias for {Service#rowByRow}
 Service::eachRow = Service::rowByRow
@@ -752,7 +751,7 @@ Service::recordByRecord = (q, args...) ->
   if q.toXML?
     f.apply this, arguments
   else
-    @query(arguments[0]).then (query) => @recordByRecord query, args...
+    @query(q).then (query) => @recordByRecord query, args...
   
   
 # Alias for {Service#recordByRecord}

@@ -1,44 +1,48 @@
 Fixture              = require './lib/fixture'
 {needs, prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
-once = require('underscore.deferred').when
+RSVP                 = require 'rsvp'
 {invoke} = Fixture.funcutils
+
+once = (promises...) -> RSVP.all(promises)
 
 atV = needs 12
 
 describe 'Query', ->
 
-  {service, olderEmployees, allEmployees} = new Fixture()
+  describe 'qids', ->
 
-  meetsReqs = atV service
-  fetchId = (q) -> service.query(q).then invoke 'fetchQID'
+    {service, olderEmployees, allEmployees} = new Fixture()
 
-  describe 'Getting an id', ->
+    meetsReqs = atV service
+    fetchId = (q) -> service.query(q).then invoke 'fetchQID'
 
-    @beforeAll meetsReqs -> fetchId olderEmployees
+    describe 'Getting an id', ->
 
-    it 'should yield an id', eventually (id) ->
-      should.exist id
+      @beforeAll meetsReqs -> fetchId olderEmployees
 
-  describe 'Getting an id for the same query twice, same object', ->
+      it 'should yield an id', eventually (id) ->
+        should.exist id
 
-    @beforeAll meetsReqs -> service.query(olderEmployees).then (q) ->
-      once q.fetchQID(), q.fetchQID()
+    describe 'Getting an id for the same query twice, same object', ->
 
-    it 'should have fetched the same id twice', eventually (a, b) ->
-      a.should.equal b
+      @beforeAll meetsReqs -> service.query(olderEmployees).then (q) ->
+        once q.fetchQID(), q.fetchQID()
 
-  describe 'Getting an id for the same query twice, different objects', ->
+      it 'should have fetched the same id twice', eventually ([a, b]) ->
+        a.should.equal b
 
-    @beforeAll meetsReqs -> once fetchId(olderEmployees), fetchId(olderEmployees)
+    describe 'Getting an id for the same query twice, different objects', ->
 
-    it 'should have fetched the same id twice', eventually (a, b) ->
-      a.should.equal b
+      @beforeAll meetsReqs -> once fetchId(olderEmployees), fetchId(olderEmployees)
 
-  describe 'Getting an id for a different query should result in a different id', ->
+      it 'should have fetched the same id twice', eventually ([a, b]) ->
+        a.should.equal b
 
-    @beforeAll meetsReqs -> once fetchId(olderEmployees), fetchId(allEmployees)
+    describe 'Getting an id for a different query should result in a different id', ->
 
-    it 'should have fetched two different ids', eventually (a, b) ->
-      a.should.not.equal b
+      @beforeAll meetsReqs -> once fetchId(olderEmployees), fetchId(allEmployees)
+
+      it 'should have fetched two different ids', eventually ([a, b]) ->
+        a.should.not.equal b
 

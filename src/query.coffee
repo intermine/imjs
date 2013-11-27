@@ -9,14 +9,15 @@
 # and browsers.
 
 intermine       = exports
-{_}             = require('underscore')
-{Deferred}  = $ = require('underscore.deferred')
+{Promise}       = require 'rsvp'
 toQueryString   = require('querystring').stringify
 intermine.xml   = require('./xml')
-{pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = require('./util')
+utils           = require './util'
+
+{withCB, merge, pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = utils
 
 get_canonical_op = (orig) ->
-  canonical = if _.isString(orig) then Query.OP_DICT[orig.toLowerCase()] else null
+  canonical = if orig?.toLowerCase? then Query.OP_DICT[orig.toLowerCase()] else null
   unless canonical
     throw new Error "Illegal constraint operator: #{ orig }"
   canonical
@@ -29,7 +30,7 @@ RESULTS_METHODS = [
   'records', 'rows', 'table', 'tableRows'
 ]
 
-LIST_PIPE = (service) ->  _.compose service.fetchList, get 'listName'
+LIST_PIPE = (service) -> utils.compose service.fetchList, get 'listName'
 
 # The valid codes for a query
 CODES = [
@@ -53,14 +54,15 @@ decapitate = (x = '') -> x.substr(x.indexOf('.'))
 # @private
 # @param [String] v The constraint value.
 # @return [String] An XML serialisation of the value.
-conValStr = (v) -> if v? then "<value>#{_.escape v}</value>" else "<nullValue/>"
+conValStr = (v) -> if v? then "<value>#{utils.escape v}</value>" else "<nullValue/>"
 
 # Stringify the attributes for a constraint.
 # @private
 # @param [Constraint] c The constraint to serialise.
 # @param [Array<String>] names The names of properties on the constraint to serialise.
 # @return [String] An serialisation of the constraint's attributes.
-conAttrs = (c, names) -> ("""#{k}="#{_.escape(v)}" """ for k, v of c when (k in names)).join('')
+conAttrs = (c, names) ->
+  ("""#{k}="#{utils.escape(v)}" """ for k, v of c when (k in names)).join('')
 
 # Stringify a constraint that has no value attribute.
 # @private
@@ -154,10 +156,10 @@ interpretConstraint = (path, con) ->
   constraint = {path}
   if con is null
     constraint.op = 'IS NULL'
-  else if _.isArray(con)
+  else if utils.isArray con
     constraint.op = 'ONE OF'
     constraint.values = con
-  else if _.isString(con) or _.isNumber(con)
+  else if typeof con in ['string', 'number']
     if con.toUpperCase?() in Query.NULL_OPS
       constraint.op = con
     else
@@ -166,7 +168,7 @@ interpretConstraint = (path, con) ->
   else
     keys = (k for k, x of con)
     if 'isa' in keys
-      if _.isArray(con.isa)
+      if utils.isArray(con.isa)
         constraint.op = k
         constraint.values = con.isa
       else
@@ -176,7 +178,7 @@ interpretConstraint = (path, con) ->
         constraint.extraValue = con.extraValue
       for k, v of con when (k isnt 'extraValue')
         constraint.op = k
-        if _.isArray(v)
+        if utils.isArray(v)
           constraint.values = v
         else
           constraint.value = v
@@ -194,7 +196,7 @@ interpretConArray = (conArgs) ->
   else if conArgs.length >= 2
     constraint.op = conArgs[0]
     v = conArgs[1]
-    if _.isArray(v)
+    if utils.isArray(v)
       constraint.values = v
     else
       constraint.value = v
@@ -386,7 +388,7 @@ class Query
   kids = (el, name) -> (kid for kid in el.getElementsByTagName(name))
   xmlAttr = (name) -> (el) -> el.getAttribute name
 
-  # Load a query from XML.
+  # Load the first query found in the XML.
   #
   # @param [String] The serialised PathQuery XML
   # @return [Object] The JSON representation of the Query, suitable for passing
@@ -415,6 +417,15 @@ class Query
 
     return q
 
+  constraints: []
+  views: []
+  joins: {}
+  constraintLogic: ''
+  sortOrder: ''
+  name: null
+  title: null
+  comment: null
+  description: null
 
   # Construct a new Query object from a set of properties.
   #
@@ -438,14 +449,12 @@ class Query
   # @option properties [String] constraintLogic The constraint logic.
   #
   constructor: (properties, service) ->
-    _.defaults @,
-      constraints: []
-      views: []
-      joins: {}
-      constraintLogic: ""
-      sortOrder: ""
     properties ?= {}
-    @displayNames = _.extend {}, (properties.displayNames ? properties.aliases ? {})
+    # Fresh containers collection properties.
+    @constraints = []
+    @views = []
+    @joins = {}
+    @displayNames = utils.copy (properties.displayNames ? properties.aliases ? {})
 
     # Copy over name, title, etc
     for prop in ['name', 'title', 'comment', 'description'] when properties[prop]?
@@ -469,11 +478,13 @@ class Query
     getPaths = (root, depth) =>
       cd = @getPathInfo(root).getEndClass()
       ret = [root]
-      others = unless ( cd and depth > 0 ) then [] else
-        _.flatten _.map cd.fields, (r) =>
-          getPaths "#{root}.#{r.name}", depth - 1
+      subPaths = concatMap (r) -> getPaths "#{ root }.#{ r.name }", depth - 1
+      others = if ( cd and depth > 0 )
+        subPaths (field for name, field of cd.fields)
+      else
+        []
 
-      _.flatten ret.concat others
+      ret.concat others
 
     @on 'change:views', removeIrrelevantSortOrders, @
 
@@ -482,10 +493,10 @@ class Query
   # @param [Array<String>,Array<PathInfo>,String,PathInfo] The paths to remove from the
   #        list of selected columns.
   # @return [Query] This query, for chaining.
-  removeFromSelect: (unwanted) ->
-    unwanted = if _.isString(unwanted) then [unwanted] else (unwanted || [])
-    mapFn = _.compose(@expandStar, @adjustPath)
-    unwanted = _.flatten (mapFn uw for uw in unwanted)
+  removeFromSelect: (unwanted = []) ->
+    unwanted = utils.stringList unwanted
+    mapFn = utils.compose(@expandStar, @adjustPath)
+    unwanted = utils.flatten (mapFn uw for uw in unwanted)
     @sortOrder = (so for so in @sortOrder when not (so.path in unwanted))
     @views = (v for v in @views when not (v in unwanted))
     @trigger('remove:view', unwanted)
@@ -509,23 +520,31 @@ class Query
     @constraints = reduced
     unless silent
       @trigger 'change:constraints'
-      @trigger 'removed:constraints', _.difference(orig, reduced)
+      @trigger 'removed:constraints', utils.difference(orig, reduced)
 
   # Add an element to the select list.
-  addToSelect: (views) ->
-    views = if _.isString(views) then [views] else ( views || [] )
-    toAdd = _.flatten [_.map views, _.compose(@expandStar, @adjustPath)]
-    dups = (p for p in toAdd when p in @views or _.indexOf(toAdd, p) isnt _.lastIndexOf(toAdd, p))
+  addToSelect: (views = []) ->
+    views = utils.stringList views
+    mapFn = utils.compose @expandStar, @adjustPath
+    toAdd = utils.flatten (mapFn v for v in views)
+    dups = (p for p in toAdd when p in @views)
     if dups.length
       throw new Error "#{ dups } already in the select list"
-    for p in toAdd
-      @views.push(p)
+    dups = (p for p in toAdd when (x for x in toAdd when x is p).length > 1)
+    if dups.length
+      throw new Error "#{ dups } specified multiple times as arguments to addToSelect"
+    @views.push toAdd...
     @trigger('add:view change:views', toAdd)
 
   # Replace the existing select list with the one passed as an argument.
   select: (views) =>
-    @views = []
-    @addToSelect views
+    oldViews = @views.slice()
+    try
+      @views = []
+      @addToSelect views
+    catch e
+      @views = oldViews
+      utils.error e
     @
 
   # Interpret an argument as resolve the canonical path it refers to.
@@ -553,8 +572,9 @@ class Query
 
   # Get the mapping from path to class-name that is defined by the
   # subtype constraints.
-  scFold = _.compose pairsToObj, (filter get 1), invoke 'map', (c) -> [c.path, c.type]
-  getSubclasses: () -> scFold @constraints
+  toPathAndType = (c) -> [c.path, c.type]
+  scFold = utils.compose pairsToObj, utils.map(toPathAndType), filter get 'type'
+  getSubclasses: -> scFold @constraints
 
   # Get the type of a path.
   getType: (path) -> @getPathInfo(path).getType()
@@ -563,7 +583,7 @@ class Query
   # representing the class or reference that the attributes selected in the view belong to.
   getViewNodes: ->
     toParentNode = (v) => @getPathInfo(v).getParent()
-    _.uniq(_.map(@views, toParentNode), false, (n) -> n.toPathString())
+    utils.uniqBy String, (toParentNode p for p in @views)
 
   # Check to see whether a path is in the view. This method responds correctly
   # whether the argument is a full path string, a headless path string, or a
@@ -577,7 +597,7 @@ class Query
       return pi.toString() in @views
     else
       pstr = pi.toString()
-      return _.any @getViewNodes(), (n) -> n.toString() is pstr
+      return utils.any @getViewNodes(), (n) -> n.toString() is pstr
 
   # Check to see whether a path is constrained to a value. If the includeAttrs
   # parameter is true, then this method will return true if any of the attributes
@@ -596,7 +616,7 @@ class Query
     if (not pi.isAttribute()) and includeAttrs
       test = (c) =>
         c.op? and (c.path is pi.toString() or pi.equals @getPathInfo(c.path).getParent())
-    return _.any @constraints, test
+    return utils.any @constraints, test
 
   # Return true is the path passed as an argument could possibly
   # represent multiple values (this is true when any of the nodes that
@@ -610,7 +630,7 @@ class Query
     constrainedNodes = for c in @constraints when not c.type?
       pi = @getPathInfo(c.path)
       if pi.isAttribute() then pi.getParent() else pi
-    _.uniq viewNodes.concat(constrainedNodes), false, String
+    utils.uniqBy String, viewNodes.concat(constrainedNodes)
 
   isInQuery: (p) ->
     pi = @getPathInfo p
@@ -626,7 +646,7 @@ class Query
     pi = pi.getParent() if pi.isAttribute()
     sought = pi.toString()
     nodes = @getViewNodes()
-    return _.any nodes, (n) -> n.toPathString() is sought
+    return utils.any nodes, (n) -> n.toPathString() is sought
 
   # Interpret a path that might end in '*' or '**' as the
   # set of default paths it represent.
@@ -637,17 +657,18 @@ class Query
       cd = @getType(pathStem)
       if /\.\*$/.test(path)
         if cd and @summaryFields[cd.name]
-          fn = _.compose expand, decapitate
+          fn = utils.compose expand, decapitate
           return (fn n for n in @summaryFields[cd.name] when (not @hasView(n)))
-      if /\.\*\*$/.test(path)
-        fn = _.compose(expand, (a) -> '.' + a.name)
-        return _.uniq(_.union(@expandStar(pathStem + '.*'), _.map(cd.attributes, fn)))
+      else if /\.\*\*$/.test(path)
+        starViews = @expandStar(pathStem + '.*')
+        attrViews = (expand ".#{ name }" for name of cd.attributes)
+        return utils.uniqBy id, starViews.concat(attrViews)
 
     return path
 
   isOuterJoin: (p) -> @joins[@adjustPath(p)] is 'OUTER'
 
-  hasView: (v) -> @views && _.include(@views, @adjustPath(v))
+  hasView: (v) -> @views and @adjustPath(v) in @views
 
   # Get a promise to yield a count.
   #
@@ -660,18 +681,19 @@ class Query
       throw new Error("This query has no service with count functionality attached.")
 
   appendToList: (target, cb) ->
-    name = if (target && target.name) then target.name else '' + target
+    name = if (target?.name) then target.name else String target
     toRun = @makeListQuery()
     req =
       listName: name
       query: toRun.toXML()
     updateTarget = if (target?.name) then ((list) -> target.size = list.size) else (->)
+    processor = LIST_PIPE @service
 
-    @service.post('query/append/tolist', req).pipe(LIST_PIPE @service).done(cb, updateTarget)
+    withCB updateTarget, cb, @service.post('query/append/tolist', req).then processor
 
   makeListQuery: ->
     toRun = @clone()
-    if toRun.views.length != 1 || toRun.views[0] is null || !toRun.views[0].match(/\.id$/)
+    if toRun.views.length != 1 or toRun.views[0] is null or !toRun.views[0].match(/\.id$/)
       toRun.select(['id'])
 
     # Ensure we aren't changing the query by removing implicit
@@ -686,12 +708,12 @@ class Query
 
   saveAsList: (options, cb) ->
     toRun = @makeListQuery()
-    req = _.clone(options)
-    req.listName = req.listName || req.name
+    req = utils.copy options
+    req.listName = (req.listName or req.name)
     req.query = toRun.toXML()
     if (options.tags)
       req.tags = options.tags.join(';')
-    @service.post('query/tolist', req).pipe(LIST_PIPE @service).done(cb)
+    withCB cb, @service.post('query/tolist', req).then LIST_PIPE @service
 
   # Get a summary for a single column in the results.
   #
@@ -719,6 +741,15 @@ class Query
   # @return [Promise<Array<Object>, Object>] A promise to return a summary.
   summarize: (args...) -> @summarise.apply(@, args)
 
+  parseSummary = (data) ->
+    isNumeric = data.results[0]?.max?
+    # Ideally it would be nice to avoid this ridiculous step, but we get bigInts back.
+    for r in data.results
+      r.count = parseInt(r.count, 10)
+    stats = uniqueValues: data.uniqueValues, filteredCount: data.filteredCount
+    stats = merge stats, data.results[0] if isNumeric
+    data.stats = stats
+    return data
 
   # Get a summary for a single column in the results, filtered by a given value.
   #
@@ -736,12 +767,12 @@ class Query
   #
   # @return [Promise<Array<Object>, Object>] A promise to return a summary.
   filterSummary: (path, term, limit, cont = (->)) ->
-    if _.isFunction(limit)
+    if utils.isFunction(limit)
       [cont, limit] = [limit, null]
 
     path = @adjustPath(path)
     toRun = @clone()
-    unless _.include(toRun.views, path)
+    unless path in toRun.views
       toRun.views.push(path)
     req =
       query: toRun.toXML()
@@ -750,13 +781,7 @@ class Query
 
     req.size = limit if limit
     req.filterTerm = term if term
-    parse = (data) -> Deferred ->
-      # Ideally it would be nice to avoid this ridiculous step
-      results = data.results.map (x) -> x.count = parseInt(x.count, 10); x
-      stats = {uniqueValues: data.uniqueValues}
-      _.extend(stats, results[0]) if (results[0]?.max?)
-      @resolve results, stats, data.filteredCount
-    @service.post('query/results', req).pipe(parse).done(cont)
+    withCB cont, @service.post('query/results', req).then parseSummary
 
   # Get an unconnected, deep clone of this query.
   #
@@ -801,23 +826,24 @@ class Query
 
   isOuterJoined: (path) ->
     path = @adjustPath(path)
-    _.any(@joins, (d, p) -> d is 'OUTER' and path.indexOf(p) is 0)
+    for jp, dir of @joins when dir is 'OUTER' and path.indexOf(jp) is 0
+      return true
+    return false
 
   getOuterJoin: (path) ->
     path = @adjustPath(path)
-    joinPaths = _.sortBy(_.keys(@joins), get 'length').reverse()
-    _.find(joinPaths, (p) => @joins[p] is 'OUTER' and path.indexOf(p) is 0)
+    joinPaths = (k for k of @joins).sort (a, b) -> b.length - a.length
+    utils.find(joinPaths, (p) => @joins[p] is 'OUTER' and path.indexOf(p) is 0)
 
   _parse_sort_order: (input) ->
     so = input
-    if _.isString(input)
+    if typeof input is 'string'
       so = {path: input, direction: 'ASC'}
-    else if _.isArray input
+    else if utils.isArray input
       [path, direction] = input
       so = {path, direction}
     else if (not input.path?)
-      path = _.keys(input)[0]
-      direction = _.values(input)[0]
+      [path, direction] = [k, v] for k, v of input
       so = {path, direction}
 
     so.path = @adjustPath(so.path)
@@ -846,13 +872,13 @@ class Query
     @trigger 'set:sortorder change:sortorder', @sortOrder
 
   addJoins: (joins) ->
-    if _.isArray(joins)
+    if utils.isArray(joins)
       @addJoin(j) for j in joins
     else
       (@addJoin {path: k, style: v}) for k, v of joins
 
   addJoin: (join) ->
-    if _.isString(join)
+    if typeof join is 'string'
       join = {path: join, style: 'OUTER'}
     join.path = @adjustPath(join.path)
     join.style = join.style?.toUpperCase() ? join.style
@@ -871,7 +897,7 @@ class Query
 
   addConstraints: (constraints) ->
     @__silent__ = true
-    if _.isArray(constraints)
+    if utils.isArray(constraints)
       @addConstraint(c) for c in constraints
     else
       for path, con of constraints then do (path, con) =>
@@ -882,7 +908,7 @@ class Query
     @trigger 'change:constraints'
 
   addConstraint: (constraint) =>
-    if _.isArray(constraint)
+    if utils.isArray(constraint)
       constraint = interpretConArray constraint
     else
       constraint = copyCon constraint
@@ -941,7 +967,7 @@ class Query
     req =
       query: @toXML()
       lang: lang
-    @service.post('query/code', req).pipe(@service.VERIFIER).pipe(get 'code').done(cb)
+    withCB cb, @service.post('query/code', req).then(@service.VERIFIER).then(get 'code')
 
   # Save a query to the server, with the name given.
   save: (name, cb) ->
@@ -952,10 +978,8 @@ class Query
       url: @service.root + 'query'
       type: 'POST'
       dataType: 'json'
-    @service.doReq(req)
-      .pipe(@service.VERIFIER)
-      .pipe(get 'name')
-      .done(cb, (name) => @name = name)
+    setName = (name) => @name = name
+    withCB cb, setName, @service.doReq(req).then(@service.VERIFIER).then(get 'name')
 
   # TODO: saveAsTemplate()
 
@@ -990,14 +1014,15 @@ class Query
   #
   # @param [->] cb An optional callback function.
   # @return [Promise<int>] A promise to yield an id.
-  fetchQID: (cb) -> @service.post('queries', query: @toXML()).then((resp) -> resp.id).done(cb)
+  fetchQID: (cb) ->
+    withCB cb, @service.post('queries', query: @toXML()).then get 'id'
 
   addPI = (p) -> p.append('primaryIdentifier').toString()
 
   __bio_req: (types, n) ->
     toRun = @makeListQuery() # ensures changing the view doesn't change results
 
-    isSuitable = (p) -> _.any types, (t) -> p.isa t
+    isSuitable = (p) -> utils.any types, (t) -> p.isa t
 
     # Only add the maximum number of suitable nodes to the query to run
     toRun.views = take(n) (addPI n for n in @getViewNodes() when isSuitable n)
@@ -1008,24 +1033,26 @@ class Query
   _gff3_req: -> @__bio_req ['SequenceFeature']
   _bed_req: Query::_gff3_req
 
-Query.ATTRIBUTE_OPS = _.union Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS
-Query.REFERENCE_OPS = _.union Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS
+union = fold (xs, ys) -> xs.concat ys
+
+Query.ATTRIBUTE_OPS = union [Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS]
+Query.REFERENCE_OPS = union [Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS]
 
 for f in Query.BIO_FORMATS then do (f) ->
   reqMeth = "_#{ f }_req"
   getMeth = "get#{ f.toUpperCase() }"
   uriMeth = getMeth + "URI"
   Query::[getMeth] = (opts = {}, cb = ->) ->
-    if _.isFunction opts
+    if utils.isFunction opts
       [opts, cb] = [{}, opts]
     opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
-    req = _.extend @[reqMeth](), opts
-    @service.post('query/results/' + f, req).done cb
+    req = merge @[reqMeth](), opts
+    withCB cb, @service.post 'query/results/' + f, req
   Query::[uriMeth] = (opts = {}, cb) ->
-    if _.isFunction opts
+    if utils.isFunction opts
       [opts, cb] = [{}, opts]
     opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
-    req = _.extend @[reqMeth](), opts
+    req = merge @[reqMeth](), opts
     if @service.token? # hard to tell if necessary. Include it.
       req.token = @service.token
     "#{ @service.root }query/results/#{ f }?#{ toQueryString req }"
@@ -1034,10 +1061,10 @@ _get_data_fetcher = (server_fn) -> (page, cbs...) ->
   if @service[server_fn]
     if not page?
       page = {}
-    else if _.isFunction page
+    else if utils.isFunction page
       page = {}
       cbs = (x for x in arguments)
-    _.defaults page, {start: @start, size: @maxRows}
+    page = merge {start: @start, size: @maxRows}, page
     return @service[server_fn](@, page, cbs...)
   else
     throw new Error("Service does not provide '#{ server_fn }'.")

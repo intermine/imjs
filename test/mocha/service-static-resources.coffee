@@ -6,13 +6,12 @@ should = require 'should'
 
 is_usable = (value) -> () ->
   should.exist value
-  value.should.have.property 'done'
   value.should.have.property 'fail'
   value.should.have.property 'then'
 
 resolves = (promise) -> (done) ->
   promise.fail done
-  promise.done ->
+  promise.then ->
     true.should.be.ok
     done()
 
@@ -29,12 +28,16 @@ describe 'Static service properties:', ->
     it 'should resolve successfully', resolves promise
 
     it 'should yield a positive value', (done) ->
-      promise.done (v) -> v.should.be.above 0
-      promise.always -> done()
+      promise.then (v) ->
+        v.should.be.above 0
+        done()
+      promise.fail done
 
     it 'should support callbacks', (done) ->
-      p = service.fetchVersion (v) -> v.should.be.above 0
-      p.always -> done()
+      p = service.fetchVersion (v) ->
+        v.should.be.above 0
+        done()
+      p.fail done
 
   describe 'the model', ->
 
@@ -45,17 +48,22 @@ describe 'Static service properties:', ->
     it 'should resolve successfully', resolves promise
 
     it 'should have the classes property', (done) ->
-      promise.done (m) -> m.should.have.property 'classes'
-      promise.always -> done()
+      promise.then (m) ->
+        m.should.have.property 'classes'
+        done()
+      promise.fail done
 
     it 'should have a positive number of classes', (done) ->
-      promise.done (m) -> (v for _, v of m.classes).length.should.be.ok
-      promise.always -> done()
+      promise.fail done
+      promise.then (m) ->
+        (v for _, v of m.classes).length.should.be.ok
+        done()
 
     it 'should support callbacks', (done) ->
       p = service.fetchModel (m) ->
         m.should.have.property 'classes'
-      p.always -> done()
+        done()
+      p.fail done
 
   describe 'the summary fields', ->
 
@@ -75,15 +83,20 @@ describe 'Static service properties:', ->
     it 'should resolve successfully', resolves promise
 
     it 'should have fields for Employee', (done) ->
-      promise.done (sfs) -> sfs.should.have.property 'Employee'
-      promise.always(-> done())
+      promise.fail done
+      promise.then (sfs) ->
+        sfs.should.have.property 'Employee'
+        done()
 
     it 'should have the expected fields for Employee', (done) ->
-      promise.done (sfs) -> sfs.Employee.should.eql expected
-      promise.always(-> done())
+      promise.fail done
+      promise.then (sfs) ->
+        sfs.Employee.should.eql expected
+        done()
 
     it 'should support callbacks', (done) ->
+      promise.fail done
       p = service.fetchSummaryFields (sfs) ->
         sfs.should.have.property 'Employee'
-      p.always -> done()
+        done()
 

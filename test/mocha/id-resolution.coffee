@@ -65,6 +65,10 @@ describe 'CategoryResults', ->
       result.getMatchIds(issue).length.should.not.equal result.goodMatchIds().length
 ###
 
+cleanUp = (done) ->
+  pass = -> done()
+  @promise.then(invoke 'del').then pass, pass
+
 describe 'Service', ->
 
   type = 'Employee'
@@ -78,7 +82,7 @@ describe 'Service', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
     @beforeAll prepare -> service.resolveIds({identifiers, type})
-    @afterAll  (done) -> @promise.then(invoke 'del').always -> done()
+    @afterAll cleanUp
 
     it 'should produce a job', eventually should.exist
 
@@ -108,7 +112,7 @@ describe 'Service', ->
 
     identifiers = ['Sales']
     @beforeAll prepare -> service.resolveIds({identifiers, type})
-    @afterAll  (done) -> @promise.then(invoke 'del').always -> done()
+    @afterAll cleanUp
 
     it 'should produce a job', eventually should.exist
 
@@ -134,7 +138,7 @@ describe 'Service', ->
     identifiers = ['anne', 'Brenda', 'Carol', 'Foo Bar', 'Fatou']
     caseSensitive = true
     @beforeAll prepare -> service.resolveIds({identifiers, type, caseSensitive})
-    @afterAll  (done) -> @promise.then(invoke 'del').always -> done()
+    @afterAll cleanUp
 
     it 'should produce a job', eventually should.exist
 

@@ -27,7 +27,10 @@ root.success = success = (args...) -> new Promise (resolve) -> resolve args...
 # @param f The callback
 # @param p The promise
 # @return [Promise] The promise
-root.withCallback = (f, p) -> p.then(f); p
+root.withCB = (fs..., p) ->
+  for f in fs
+    p.then f
+  p
 
 root.fold = fold = (f) -> (init, xs) ->
   if arguments.length is 1
@@ -46,6 +49,47 @@ root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
 
 # Curried version of filtering
 root.filter = (f) -> (xs) -> (x for x in xs when f x)
+
+root.uniqBy = (f, xs) ->
+  keys = []
+  values = []
+  for x in xs
+    k = f x
+    unless k in keys
+      keys.push k
+      values.push x
+  values
+
+root.any = (xs, f) ->
+  for x in xs
+    return true if f x
+  return false
+
+root.find = (xs, f) ->
+  for x in xs
+    return x if f x
+  return null
+
+# Test for arrayishness, either directly or by duck-typing
+isArray = (Array.isArray ? (xs) -> xs?.splice? and xs?.push? and xs?.pop? and xs?.slice?)
+root.isArray = isArray
+
+root.isFunction = if (typeof /./ isnt 'function')
+  (f) -> typeof f is 'function'
+else
+  (f) -> f? and f.call? and f.apply? and f.toString() is '[object Function]'
+
+entities =
+  '&': '&amp;'
+  '<': '&lt;'
+  '>': '&gt;'
+  '"': '&quot;'
+  "'": '&#x27;'
+
+# XML escaping
+root.escape = (str) ->
+  return '' if not str?
+  String(str).replace /[&<>"']/g, (entity) -> entities[entity]
 
 # Until I can find a nicer name for this...
 # Basically a mapping over an object, taking a
@@ -90,18 +134,36 @@ root.concatMap = (f) -> (xs) ->
     fx = f x
     ret = if ret is undefined
       fx
-    else if typeof fx in ['string', 'number']
+    else if typeof ret is 'number'
       ret + fx
-    else if fx.slice?
+    else if ret.concat?
       ret.concat(fx)
     else
       ret[k] = v for k, v of fx
       ret
   ret
 
+root.map = (f) -> invoke 'map', f
+
+comp = fold (f, g) -> (args...) -> f g args...
+
+root.compose = (fs...) -> comp fs
+
 root.flatMap = root.concatMap
 
-root.flatten = null # TODO
+root.difference = (xs, remove) -> (x for x in xs when not x in remove)
+
+root.stringList = (x) -> if typeof x is 'string' then [x] else x
+
+root.flatten = flatten = (xs...) ->
+  ret = []
+  for x in xs
+    if isArray(x)
+      for xx in flatten.apply(null, x)
+        ret.push xx
+    else
+      ret.push x
+  ret
 
 root.sum = root.concatMap id
 
@@ -133,7 +195,7 @@ root.any = (xs, f = id) ->
 # @param [String] name The name of a method
 # @param [Array] args An optional argument list, passed as varargs
 # @return [(obj) -> ?] A function that invokes a named method.
-root.invoke = (name, args...) -> (obj) ->
+root.invoke = invoke = (name, args...) -> (obj) ->
   if obj[name]?.apply
     obj[name].apply(obj, args)
   else

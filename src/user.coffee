@@ -6,16 +6,13 @@
 #
 # @author: Alex Kalderimis
 
-{Deferred} = require 'underscore.deferred'
-{_}        = require 'underscore'
-{error}    = require './util'
+{withCB, error}    = require './util'
 intermine  = exports
 
 # Simple utility to take the returned value from manageUserPreferences and
 # update the preferences property on this object.
 do_pref_req = (user, data, method) ->
-  user.service.manageUserPreferences(method, data)
-    .done (prefs) -> user.preferences = prefs
+  user.service.manageUserPreferences(method, data).then (prefs) -> user.preferences = prefs
 
 # A representation of the user we are logged in as.
 class User
@@ -38,13 +35,13 @@ class User
   # @param [String] value The value to set.
   # @return [Deferred] a promise to set a preference.
   setPreference: (key, value) =>
-    if _.isString(key)
+    if typeof key is 'string'
       data = {}
       data[key] = value
     else if not value?
       data = key
     else
-      error "Incorrect arguments to setPreference"
+      return error "Incorrect arguments to setPreference"
     @setPreferences(data)
 
   # Set one or more preferences, provided as an object.
@@ -58,7 +55,6 @@ class User
   clearPreferences: () => do_pref_req @, {}, 'DELETE'
 
   refresh: () => do_pref_req @, {}, 'GET'
-
 
 intermine.User = User
 

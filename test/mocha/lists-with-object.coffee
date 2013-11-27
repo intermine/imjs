@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{report, eventually, cleanSlate} = require './lib/utils'
+{prepare, report, eventually, cleanSlate} = require './lib/utils'
 {get} = Fixture.funcutils
 
 describe 'Service#fetchListsContaining', ->
@@ -10,11 +10,9 @@ describe 'Service#fetchListsContaining', ->
 
   describe 'searching for public ids', ->
 
-    @beforeAll (done) ->
-      @promise = service.fetchListsContaining
+    @beforeAll prepare -> service.fetchListsContaining
         type: 'Employee'
         publicId: 'Brenda'
-      @promise.fail(done).done -> done()
 
     it 'should find the right number of lists', eventually (ls) ->
       ls.length.should.equal 2
@@ -24,11 +22,11 @@ describe 'Service#fetchListsContaining', ->
 
   describe 'searching for internal ids', ->
 
-    @beforeAll (done) ->
+    @beforeAll prepare ->
       q = select: ['Employee.id'], where: {name: 'David Brent'}
-      report done, @promise = service.rows(q)
-        .then(get 0).then(get 0)
-        .then (id) -> service.fetchListsContaining {id}
+      service.values(q)
+             .then(get 0)
+             .then (id) -> service.fetchListsContaining {id}
 
     it 'should find the right number of lists', eventually (ls) ->
       ls.length.should.equal 3

@@ -10,11 +10,9 @@
 # and browsers.
 
 intermine       = exports
-{_}             = require 'underscore'
-{Deferred}  = $ = require 'underscore.deferred'
 utils           = require('./util')
 
-{concatMap, get, any, set, copy, success, error} = utils
+{withCB, concatMap, get, any, set, copy, success, error} = utils
 
 NAMES = {}
 PARSED = {}
@@ -30,7 +28,7 @@ makeKey = (model, path, subclasses) ->
 class PathInfo
 
   constructor: ({ @root, @model, @descriptors, @subclasses, @displayName, @ident}) ->
-    @end = _.last @descriptors
+    @end = @descriptors[@descriptors.length - 1]
     @ident ?= makeKey(@model, @, @subclasses)
 
   isRoot: () => @descriptors.length is 0
@@ -53,20 +51,20 @@ class PathInfo
     data =
       root: @root
       model: @model
-      descriptors: _.initial(@descriptors)
+      descriptors: @descriptors.slice(0, @descriptors.length - 1)
       subclasses: @subclasses
     return new PathInfo(data)
 
   append: (attr) =>
     if @isAttribute()
-      throw new Error("#{ @ } is an attribute.")
-    fld = if (_.isString attr) then @getType().fields[attr] else attr
+      throw new Error("#{ this } is an attribute.")
+    fld = if (typeof attr is 'string') then @getType().fields[attr] else attr
     unless fld?
       throw new Error("#{ attr } is not a field of #{ @getType() }")
     data =
       root: @root
       model: @model
-      descriptors: @descriptors.concat(fld)
+      descriptors: @descriptors.concat([fld])
       subclasses: @subclasses
     return new PathInfo(data)
 
@@ -89,8 +87,8 @@ class PathInfo
       else
         path = 'model' + (concatMap (d) -> '/' + d.name) @allDescriptors()
         params = (set format: 'json') copy @subclasses
-        @model.service.get(path, params).then(get 'display').done (n) => NAMES[@ident] ?= n
-    @namePromise.done(cb)
+        @model.service.get(path, params).then(get 'display').then (n) => NAMES[@ident] ?= n
+    withCB cb, @namePromise
 
   getChildNodes: () => (@append(fld) for name, fld of (@getEndClass()?.fields or {}))
 

@@ -42,33 +42,33 @@ describe 'Service', ->
 
     it 'can yield each employee', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> service.eachRecord q, {}, count, check, done
+      service.query(query).then (q) -> service.eachRecord q, {}, count, done, check
 
     it 'can yield each employee, without needing a page', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> service.eachRecord q, count, check, done
+      service.query(query).then (q) -> service.eachRecord q, count, done, check
 
     it 'can yield a buffered-reader for employees', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> service.eachRecord(q).then (br) ->
-        br.each count
-        br.done check
-        br.error done
+      service.query(query).then (q) -> service.eachRecord(q).then (stream) ->
+        stream.on 'data', count
+        stream.on 'end', check
+        stream.on 'error', done
 
     it 'can yield each employee, using params', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.eachRecord query, {}, count, check, done
+      service.eachRecord query, {}, count, done, check
 
     it 'can yield each employee, without needing a page, using params', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.eachRecord query, count, check, done
+      service.eachRecord query, count, done, check
 
     it 'can yield a buffered-reader for employees, using params', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.eachRecord(query).then (br) ->
-        br.each count
-        br.done check
-        br.error done
+      service.eachRecord(query).then (stream) ->
+        stream.on 'data', count
+        stream.on 'end', check
+        stream.on 'error', done
 
 
 describe 'Query', ->
@@ -89,13 +89,13 @@ describe 'Query', ->
   describe '#eachRecord', ->
 
     it 'promises to return an iterator over the employees', (done) ->
-      service.query(olderEmployees).then( (q) -> q.eachRecord() ).then (iterator) ->
+      service.query(olderEmployees).then( (q) -> q.eachRecord() ).then (stream) ->
         n = sum = 0
-        iterator.error done
-        iterator.each (e) ->
+        stream.on 'error', done
+        stream.on 'data', (e) ->
           n++
           sum += e.age
-        iterator.done ->
+        stream.on 'end', ->
           n.should.equal 46
           sum.should.equal 2688
           done()

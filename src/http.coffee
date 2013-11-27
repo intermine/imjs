@@ -1,13 +1,12 @@
-{BufferedResponse} = require('buffered-response')
-{Deferred}         = require('underscore.deferred')
-{_}                = require('underscore')
+{defer, Promise}   = require 'rsvp'
+JSONStream = require('JSONStream')
+through    = require 'through'
 http               = require('http')
 URL                = require('url')
 qs                 = require('querystring')
 {ACCEPT_HEADER}    = require('./constants')
-{error, invoke}    = require('./util')
 {VERSION}          = require('./version')
-util               = require('util')
+{withCB, merge, invoke} = utils = require('./util')
 
 # The user-agent string we will use to identify ourselves
 USER_AGENT = "node-http/imjs-#{ VERSION }"
@@ -31,93 +30,66 @@ exports.supports = -> true
 # The function to use when streaming results one by
 # one from the connection, rather than buffering them all
 # in memory.
-streaming = (ret, opts) -> (resp) ->
-  containerBuffer = ''
-  char0   = if opts.data.format is 'json' then '[' else '{'
-  charZ   = if opts.data.format is 'json' then ']' else '}'
-  defined = (item) -> item?
-  toItem  = (line, idx) ->
-    try
-      return JSON.parse line.replace PESKY_COMMA, ''
-    catch e
-      containerBuffer += line
-      lastChar = line[line.length - 1]
-      if idx > 0 and (lastChar is ',' or (lastChar is char0 && line[0] is charZ))
-        # This should have parsed
-        iter.emit('error', e, line)
-      return undefined
-  onEnd = ->
-    # Check the container on end to make sure all was well.
-    try
-      container = JSON.parse containerBuffer
-      if container.error
-        iter.emit 'error', new Error(container.error)
-    catch e
-      iter.emit 'error', "Mal-formed JSON response: #{ containerBuffer }"
-
-  iter = new BufferedResponse(resp, 'utf8')
-    .map(toItem)
-    .filter(defined)
-    .each(opts.success)
-    .error(opts.error)
-    .done(onEnd)
-
-  ret.resolve iter
+streaming = (opts, resolve, reject) -> (resp) ->
+  resp.pause() # Wait for handlers to attach...
+  stream = JSONStream.parse 'results.*'
+  resp.pipe(stream)
+  resolve stream
 
 # Get a message that explains what went wrong.
 getMsg = ({type, url}, text, e, code) ->
-  "Could not parse response to #{ type } #{ url }: #{ util.inspect(text) } (#{ code }: #{ e })"
+  "Could not parse response to #{ type } #{ url }: #{ text } (#{ code }: #{ e })"
 
-blocking = (deferred, opts) -> (resp) ->
+blocking = (opts, resolve, reject) -> (resp) ->
   containerBuffer = ''
-  deferred.done(opts.success)
   resp.on 'data', (chunk) -> containerBuffer += chunk
-  resp.on 'error', (e) -> deferred.reject(e)
+  resp.on 'error', reject
   resp.on 'end', ->
     if /json/.test(opts.dataType) or /json/.test opts.data.format
       if '' is containerBuffer and resp.statusCode is 200
-        # No body, but all-good.
-        deferred.resolve()
+        # No body, but success.
+        resolve()
       else
         try
           parsed = JSON.parse containerBuffer
           if err = parsed.error
-            deferred.reject new Error(err)
+            reject new Error(err)
           else
-            deferred.resolve parsed
+            resolve parsed
         catch e
           if resp.statusCode >= 400
-            deferred.reject new Error(resp.statusCode)
+            reject new Error(resp.statusCode)
           else
-            deferred.reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
+            reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
     else
       if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
-        deferred.reject new Error(e[2])
+        reject new Error(e[2])
       else
-        deferred.resolve containerBuffer
+        resolve containerBuffer
 
-exports.iterReq = (method, path, format) ->
-  (q, page = {}, doThis = (->), onErr = (->), onEnd = (->)) ->
-    if _.isFunction(page)
-      [page, doThis, onErr, onEnd] = [{}, page, doThis, onErr]
-    req = _.extend {format}, page, query: q.toXML()
-    @makeRequest(method, path, req, null, true)
-      .fail(onErr)
-      .done(invoke 'each', doThis)
-      .done(invoke 'error', onErr)
-      .done(invoke 'done', onEnd)
+# Return a function to be called in as a method of a service instance.
+exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->), onEnd = (->)) ->
+    if utils.isFunction(page)
+      [page, cb, eb, onEnd] = [{}, page, cb, eb]
+    req = merge {format}, page, query: q.toXML()
+    attach = (stream) ->
+      stream.on 'data', cb
+      stream.on 'error', eb
+      stream.on 'end', onEnd
+      setTimeout (-> stream.resume()), 3 # Allow handlers in promises to attach.
+      return stream
 
-promise = (body) ->
-  def = new Deferred body
-  return def.promise()
+    @makeRequest(method, path, req, [null, eb], true).then attach, eb
 
-exports.doReq = (opts, iter) -> promise ->
-  @fail opts.error
-  @done opts.success
-  if _.isString opts.data
+exports.doReq = (opts, iter) ->
+  {promise, resolve, reject} = defer "#{ opts.type } #{ opts.url }"
+  promise.fail opts.error
+
+  if typeof opts.data is 'string'
     postdata = opts.data
     if opts.type in [ 'GET', 'DELETE' ]
-      return ret.reject("Invalid request. #{ opts.type } requests must not have bodies")
+      reject("Invalid request. #{ opts.type } requests must not have bodies")
+      return promise
   else
     postdata = qs.stringify opts.data
   url = URL.parse(opts.url, true)
@@ -126,18 +98,20 @@ exports.doReq = (opts, iter) -> promise ->
   url.headers =
     'User-Agent': USER_AGENT
     'Accept': ACCEPT_HEADER[opts.dataType]
-  if url.method in ['GET', 'DELETE'] and _.size opts.data
+  if url.method in ['GET', 'DELETE'] and postdata?.length
     url.path += '?' + postdata
   else
     url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
     url.headers['Content-Length'] = postdata.length
 
-  handler = if iter then streaming else blocking
-  req = http.request url, handler @, opts
+  handler = (if iter then streaming else blocking) opts, resolve, reject
+  req = http.request url, handler
 
-  req.on 'error', @reject
+  req.on 'error', reject
 
   if url.method in [ 'POST', 'PUT' ]
     req.write postdata
   req.end()
+
+  return promise
 
