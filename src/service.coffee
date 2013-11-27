@@ -626,11 +626,8 @@ class Service
   fetchModel: (cb) ->
 
     return _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
-      .done((m) -> console.log "GOT MODEL", m)
       .pipe(Model.load)
-      .done((m) -> console.log "INSTANTIATED MODEL", m)
       .pipe(set service: @)
-      .done((m) -> console.log "SET SERVICE ON MODEL", m)
       .done(cb)
 
   # Fetch the configured summary-fields.

@@ -136,9 +136,8 @@ Model::makePath = Model::getPathInfo
 Model::findCommonTypeOfMultipleClasses = Model::findCommonType # API preserving alias.
 
 # Static constructor.
-Model.load = (data) -> 
+Model.load = (data) ->
   try
-    debugger
     new Model(data)
   catch err
     console.error "Error loading model", err
