@@ -2,8 +2,7 @@
 # exports object (if we are in node) or onto the global
 # intermine.funcutils namespace
 
-{Deferred} = require 'underscore.deferred'
-{_} = require 'underscore'
+{Promise} = require 'rsvp'
 
 root = exports
 
@@ -17,12 +16,18 @@ root.curry = curry = (f, args...) -> (rest...) -> f.apply(null, args.concat(rest
 # Helper for transforming an error into a rejection.
 # @param e The error.
 # @return [Promise<Error>] A promise to reject with an error.
-root.error = (e) -> Deferred( -> @reject new Error(e) ).promise()
+root.error = error = (e) -> new Promise (_, reject) -> reject new Error e
 
 # Helper for wrapping a value in a promise.
 # @param args the The resolution.
 # @return [Promise<args...>] A promise to resolve with the resolution.
-root.success = success = (args...) -> Deferred( -> @resolve args... ).promise()
+root.success = success = (args...) -> new Promise (resolve) -> resolve args...
+
+# Attach a callback, yielding the original promise.
+# @param f The callback
+# @param p The promise
+# @return [Promise] The promise
+root.withCallback = (f, p) -> p.then(f); p
 
 root.fold = fold = (f) -> (init, xs) ->
   if arguments.length is 1
@@ -96,7 +101,16 @@ root.concatMap = (f) -> (xs) ->
 
 root.flatMap = root.concatMap
 
+root.flatten = null # TODO
+
 root.sum = root.concatMap id
+
+root.merge = (objs...) ->
+  newObj = {}
+  for o in objs
+    for own k, v of o
+      newObj[k] = v
+  return newObj
 
 root.AND = (a, b) -> a and b
 
@@ -123,7 +137,7 @@ root.invoke = (name, args...) -> (obj) ->
   if obj[name]?.apply
     obj[name].apply(obj, args)
   else
-    Deferred().reject("No method: #{ name }").promise()
+    throw new Error "No method named \"#{ name }\""
 
 # Get a function that invokes a method on an object
 # that is passed to it with the arguments given here, with
@@ -164,7 +178,7 @@ root.set = (name, value) -> (obj) ->
       obj[k] = v
   return obj
 
-root.flip = (f) -> (args...) -> f.apply(null, args.reverse())
+root.flip = (f, ctx) -> (args...) -> f.apply(ctx, args.reverse())
 
 # Make a function that lets users know
 # when they are trying to use a service that
@@ -174,7 +188,7 @@ REQUIRES = (required, got) ->
 
 # A wrapper for functions that make requests to endpoints
 # that require a certain version of the intermine API.
-root.REQUIRES_VERSION = (s, n, f) -> s.fetchVersion().pipe (v) ->
+root.REQUIRES_VERSION = (s, n, f) -> s.fetchVersion().then (v) ->
   if v >= n
     f()
   else
@@ -192,7 +206,7 @@ root.dejoin = (q) ->
 # Sequence a series of asynchronous functions.
 thenFold = fold (p, f) -> p.then f
 
-root.sequence = (fns...) -> thenFold success(), _.flatten fns
+root.sequence = (fns...) -> thenFold success(), fns
 
 pairFold = fold (o, [k, v]) ->
   if o[k]?

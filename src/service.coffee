@@ -9,10 +9,7 @@
 # and browsers.
 #
 
-# Import from the appropriate place depending on whether
-# if we are in node.js or in the browser.
-{_}            = require('underscore')
-{Deferred}     = $ = require('underscore.deferred')
+{Promise}      = require('rsvp')
 {Model}        = require('./model')
 {Query}        = require('./query')
 {List}         = require('./lists')
@@ -25,7 +22,7 @@ http           = require('./http')
 
 intermine = exports
 
-{pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
+{merge, pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = funcutils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -96,8 +93,8 @@ _get_or_fetch = (propName, store, path, key, cb) ->
   prop = @[propName] ?= if (@useCache and value = store[@root])
     success(value)
   else
-    @get(path).pipe(get key).done (x) => store[@root] = x
-  prop.done cb
+    @get(path).then(get key).then (x) => store[@root] = x
+  withCallback cb, prop
 
 # A private helper that produces a function that will read
 # through an array of Lists, and find the first one with the
@@ -107,11 +104,11 @@ _get_or_fetch = (propName, store, path, key, cb) ->
 # @param [String] name The name of the list to find.
 # @return [([List]) -> Deferred.<List>] A function from an array of
 #   List objects to a promise to return a List.
-getListFinder = (name) -> (lists) -> Deferred ->
+getListFinder = (name) -> (lists) -> new Promise (resolve, reject) ->
   if list = (_.find lists, (l) -> l.name is name)
-    @resolve list
+    resolve list
   else
-    @reject """List "#{ name }" not found among: #{ lists.map get 'name' }"""
+    reject """List "#{ name }" not found among: #{ lists.map get 'name' }"""
 
 LIST_PIPE = (service, prop = 'listName') -> _.compose service.fetchList, get prop
 TO_NAMES = (xs = []) -> (x.name ? x for x in (if _.isArray(xs) then xs else [xs]))
@@ -251,7 +248,7 @@ class Service
   # @return [Promise<Array<Object>>] A promise to get results.
   enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
     @get(ENRICHMENT_PATH, _.defaults {}, opts, maxp: 0.05, correction: 'Holm-Bonferroni')
-      .pipe(get 'results')
+      .then(get 'results')
       .done(cb)
 
   # Search for items in the database by any term or facet.
@@ -276,7 +273,7 @@ class Service
       for k, v of options.facets
         req["facet_#{ k }"] = v
     parse = (response) -> success response.results, response.facets
-    @post(QUICKSEARCH_PATH, req).pipe(parse).done(cb)
+    @post(QUICKSEARCH_PATH, req).then(parse).done(cb)
 
   # Find out how many rows a given query would return when run.
   #
@@ -295,11 +292,11 @@ class Service
       @pathValues(p, 'count').done(cb)
     else if q.toXML?
       req = {query: q.toXML(), format: 'jsoncount'}
-      @post(QUERY_RESULTS_PATH, req).pipe(get 'count').done(cb)
+      @post(QUERY_RESULTS_PATH, req).then(get 'count').done(cb)
     else if _.isString q
-      @fetchModel().pipe(invoke 'makePath', q.replace(/\.\*$/, '.id')).pipe(@count).done(cb)
+      @fetchModel().then(invoke 'makePath', q.replace(/\.\*$/, '.id')).then(@count).done(cb)
     else
-      @query(q).pipe(@count).done(cb)
+      @query(q).then(@count).done(cb)
 
   # Retrieve a representation of a specific object.
   # @param [String] type The type of the object to find (eg: Gene)
@@ -308,9 +305,9 @@ class Service
   # @return [Promise<Object>] A promise to yield an object.
   findById: (type, id, cb) =>
     @query(from: type, select: ['**'], where: {id: id})
-      .pipe(dejoin)
-      .pipe(invoke 'records')
-      .pipe(get 0)
+      .then(dejoin)
+      .then(invoke 'records')
+      .then(get 0)
       .done(cb)
 
   # Find all the objects in the database that match the search term.
@@ -322,15 +319,15 @@ class Service
   # TODO: add support for extra-values
   find: (type, term, cb) ->
     @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term]])
-      .pipe(dejoin)
-      .pipe(invoke 'records')
+      .then(dejoin)
+      .then(invoke 'records')
       .done(cb)
 
   # Retrieve information about the currently authenticated user.
   # @param [(User) ->] cb A callback the receives a User object.
   # @return [Promise<User>] A promise to yield a user.
   whoami: (cb) => REQUIRES_VERSION @, 9, =>
-    @get(WHOAMI_PATH).pipe(get 'user').pipe((x) => new User(@, x)).done(cb)
+    @get(WHOAMI_PATH).then(get 'user').then((x) => new User(@, x)).done(cb)
 
   # Alias for {Service#whoami}
   fetchUser: (args...) => @whoami args...
@@ -354,11 +351,11 @@ class Service
     _pathValues = (path) =>
       format = if wanted is 'count' then 'jsoncount' else 'json'
       req = {format, path: path.toString(), typeConstraints: JSON.stringify(path.subclasses)}
-      @post(PATH_VALUES_PATH, req).pipe(get wanted)
+      @post(PATH_VALUES_PATH, req).then(get wanted)
 
     try
-      @fetchModel().pipe(invoke 'makePath', path, (path.subclasses || typeConstraints))
-                   .pipe(_pathValues)
+      @fetchModel().then(invoke 'makePath', path, (path.subclasses || typeConstraints))
+                   .then(_pathValues)
                    .done(cb)
     catch e
       error e
@@ -384,9 +381,9 @@ class Service
     if q.toXML?
       [cb, page] = [page, {}] if _.isFunction page
       req = _.defaults {}, {query: q.toXML(), format: format}, page
-      @post(path, req).pipe((resp) -> success(resp.results, resp)).done(cb)
+      @post(path, req).then((resp) -> success(resp.results, resp)).done(cb)
     else
-      @query(q).pipe((query) => @doPagedRequest(query, path, page, format, cb))
+      @query(q).then((query) => @doPagedRequest(query, path, page, format, cb))
 
   # Get a page of results in jsontable format.
   #
@@ -470,7 +467,7 @@ class Service
   #
   # @param [(Array<Object>) ->] cb A callback (optional).
   # @return [Promise<Array<Object>>] A promise to yield an array of templates.
-  fetchTemplates: (cb) => @get(TEMPLATES_PATH).pipe(get 'templates').done(cb)
+  fetchTemplates: (cb) => @get(TEMPLATES_PATH).then(get 'templates').done(cb)
 
   # Get the lists this user currently has access to.
   #
@@ -484,23 +481,23 @@ class Service
   #   (Optional - default = '', ie. all lists).
   # @param [(Array<List>) ->] cb A callback (optional).
   # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
-  findLists: (name = '', cb = (->)) => @fetchVersion().pipe (v) =>
+  findLists: (name = '', cb = (->)) => @fetchVersion().then (v) =>
     if name and v < 13
       error "Finding lists by name on the server requires version 13. This is only #{ v }"
     else
       fn = (ls) => (new List(data, @) for data in ls)
-      @get(LISTS_PATH, {name}).pipe(get 'lists').pipe(fn).done(cb)
+      @get(LISTS_PATH, {name}).then(get 'lists').then(fn).done(cb)
 
   # Get a list by name.
   #
   # @param [String] name The exact name of the list.
   # @param [->] cb A callback function (optional).
   # @return [Promise<List>] A promise to yield a {List}.
-  fetchList: (name, cb) => @fetchVersion().pipe (v) =>
+  fetchList: (name, cb) => @fetchVersion().then (v) =>
     if v < 13
-      @findLists().pipe(getListFinder(name)).done(cb)
+      @findLists().then(getListFinder(name)).done(cb)
     else
-      @findLists(name).pipe(get 0).done(cb)
+      @findLists(name).then(get 0).done(cb)
 
   # Get the lists that contain the given object.
   #
@@ -516,7 +513,7 @@ class Service
   # @return [Promise<Array<List>>] A promise to yield an array of {List} objects.
   fetchListsContaining: (opts, cb) =>
     fn = (xs) => (new List(x, @) for x in xs)
-    @get(WITH_OBJ_PATH, opts).pipe(get 'lists').pipe(fn).done(cb)
+    @get(WITH_OBJ_PATH, opts).then(get 'lists').then(fn).done(cb)
 
   # Combine two or more lists using the given operation.
   #
@@ -534,7 +531,7 @@ class Service
     req.description ?= "#{ operation } of #{ options.lists.join(', ') }"
     req.tags = (options.tags or []).join(';')
     req.lists = (options.lists or []).join(';')
-    @get(LIST_OPERATION_PATHS[operation], req).pipe(LIST_PIPE @).done(cb)
+    @get(LIST_OPERATION_PATHS[operation], req).then(LIST_PIPE @).done(cb)
 
   # Combine two or more lists through a union operation.
   #
@@ -603,7 +600,7 @@ class Service
     description ?= defaultDesc()
     tags ?= []
     req = {name, description, tags, lists, references}
-    @post(SUBTRACT_PATH, req).pipe(LIST_PIPE @).done(cb)
+    @post(SUBTRACT_PATH, req).then(LIST_PIPE @).done(cb)
 
   # The following methods fetch resources that can be considered
   # stable - they are not expected to change between releases of
@@ -626,8 +623,8 @@ class Service
   fetchModel: (cb) ->
 
     return _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
-      .pipe(Model.load)
-      .pipe(set service: @)
+      .then(Model.load)
+      .then(set service: @)
       .done(cb)
 
   # Fetch the configured summary-fields.
@@ -648,16 +645,9 @@ class Service
   #   for more information on the structure of these options.
   # @param [(Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
-  query: (options, cb) => $.when(@fetchModel(), @fetchSummaryFields()).pipe (m, sfs) =>
-    args = _.extend {}, options, {model: m, summaryFields: sfs}
-    service = @
-    Deferred ->
-      @fail(service.errorHandler)
-      @done(cb)
-      try # The whole point of this is to catch errors.
-        @resolve new Query(args, service)
-      catch e
-        @reject e
+  query: (options, cb) =>
+    When.join(@fetchModel(), @fetchSummaryFields())
+        .then ([m, sfs, s]) => new Query (merge options, model: m, summaryFields: sfs), @
 
   # Perform operations on a user's preferences.
   #
@@ -667,7 +657,7 @@ class Service
   # @return [Promise<Object>] A promise to yield the user's preferences
   #   following the update.
   manageUserPreferences: (method, data) -> REQUIRES_VERSION @, 11, =>
-    @makeRequest(method, PREF_PATH, data).pipe(get 'preferences')
+    @makeRequest(method, PREF_PATH, data).then(get 'preferences')
 
   # Submit an ID resolution job.
   # @param [Object] opts The parameters to the id resolution service.
@@ -687,7 +677,7 @@ class Service
       contentType: 'application/json'
       data: JSON.stringify(opts)
       dataType: 'json'
-    @doReq(req).pipe(get 'uid').pipe(IDResolutionJob.create @).done(cb)
+    @doReq(req).then(get 'uid').then(IDResolutionJob.create @).done(cb)
 
   # Create a new list through the identifier upload service.
   #
@@ -713,7 +703,7 @@ class Service
       type: 'POST'
       contentType: 'text/plain'
 
-    @doReq(req).pipe(LIST_PIPE @).done(cb)
+    @doReq(req).then(LIST_PIPE @).done(cb)
 
 # Methods for processing items individually.
 

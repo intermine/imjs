@@ -7,14 +7,14 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
-{_}             = require 'underscore'
-{Deferred}  = $ = require 'underscore.deferred'
+RSVP = require 'rsvp'
 {Table}         = require './table'
 {PathInfo}      = require './path'
-{error, omap}   = require('./util')
+{flatten, first, error, omap}   = require('./util')
 intermine = exports
 
 # Either mocha or should is breaking the reference to _
+
 {flatten, intersection} = _
 
 # Lift classes to Tables

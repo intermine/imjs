@@ -23,7 +23,9 @@
     "underscore": "stable",
     "underscore.deferred": "0.2.0",
     "buffered-response": "latest",
-    "xmldom": "~0.1.15"
+    "xmldom": "~0.1.15",
+    "when": "~2.6.0",
+    "rsvp": "~2.0.4"
   },
   "engines": {
     "node": ">= 0.8.0"
