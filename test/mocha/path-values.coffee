@@ -7,17 +7,21 @@ describe 'Service', ->
 
   {service} = new Fixture()
 
+  describe '#pathValues()', ->
+
+    it 'should fail', shouldFail service.pathValues
+
   describe '#values()', ->
 
     it 'should fail', shouldFail service.values
 
-  describe '#values("Foo.bar")', ->
+  describe '#pathValues("Foo.bar")', ->
 
-    it 'should fail', shouldFail -> service.values 'Foo.bar'
+    it 'should fail', shouldFail -> service.pathValues 'Foo.bar'
 
-  describe '#values("Company.name")', ->
+  describe '#pathValues("Company.name")', ->
 
-    @beforeAll prepare -> service.values 'Company.name'
+    @beforeAll prepare -> service.pathValues 'Company.name'
 
     it 'should get a list of seven values', eventually (values) ->
       values.length.should.equal 7
@@ -25,10 +29,10 @@ describe 'Service', ->
     it 'should include Wernham-Hogg', eventually (values) ->
       (v.value for v in values).should.include 'Wernham-Hogg'
 
-  describe '#values(Path("Company.name"))', ->
+  describe '#pathValues(Path("Company.name"))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
-      service.values m.makePath 'Company.name'
+      service.pathValues m.makePath 'Company.name'
 
     it 'should get a list of seven values', eventually (values) ->
       values.length.should.equal 7
@@ -36,9 +40,9 @@ describe 'Service', ->
     it 'should include Wernham-Hogg', eventually (values) ->
       (v.value for v in values).should.include 'Wernham-Hogg'
 
-  describe '#values("Department.employees.name")', ->
+  describe '#pathValues("Department.employees.name")', ->
 
-    @beforeAll prepare -> service.values 'Department.employees.name'
+    @beforeAll prepare -> service.pathValues 'Department.employees.name'
 
     it 'should get a list of 132 values', eventually (values) ->
       values.length.should.equal 132
@@ -46,19 +50,19 @@ describe 'Service', ->
     it 'should include David-Brent', eventually (values) ->
       (v.value for v in values).should.include 'David Brent'
 
-  describe '#values("Department.employees.name")', ->
+  describe '#pathValues("Department.employees.name")', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
-      service.values m.makePath 'Department.employees.name'
+      service.pathValues m.makePath 'Department.employees.name'
 
     it 'should get a list of 132 values', eventually (values) ->
       
     it 'should include David-Brent', eventually (values) ->
       (v.value for v in values).should.include 'David Brent'
 
-  describe '#values("Department.employees.name", {"Department.employees": "CEO"})', ->
+  describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"})', ->
 
-    @beforeAll prepare -> service.values 'Department.employees.name', 'Department.employees': 'CEO'
+    @beforeAll prepare -> service.pathValues 'Department.employees.name', 'Department.employees': 'CEO'
 
     it 'should get a list of six values', eventually (values) ->
       values.length.should.equal 6
@@ -68,6 +72,33 @@ describe 'Service', ->
 
     it "should include B'wah Hah Hah", eventually (values) ->
       (v.value for v in values).should.include "Charles Miner"
+
+  describe '#pathValues(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
+
+    @beforeAll prepare -> service.fetchModel().then (m) ->
+      service.pathValues m.makePath 'Department.employees.name', 'Department.employees': 'CEO'
+
+    it 'should get a list of six values', eventually (values) ->
+      values.length.should.equal 6
+    
+    it 'should not include David-Brent', eventually (values) ->
+      (v.value for v in values).should.not.include 'David Brent'
+
+    it "should include B'wah Hah Hah", eventually (values) ->
+      (v.value for v in values).should.include "Charles Miner"
+
+  describe '#values("Department.employees.name", {"Department.employees": "CEO"})', ->
+
+    @beforeAll prepare -> service.values 'Department.employees.name', 'Department.employees': 'CEO'
+
+    it 'should get a list of six values', eventually (values) ->
+      values.length.should.equal 6
+    
+    it 'should not include David-Brent', eventually (values) ->
+      values.should.not.include 'David Brent'
+
+    it "should include B'wah Hah Hah", eventually (values) ->
+      values.should.include "Charles Miner"
 
   describe '#values(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 
@@ -78,8 +109,8 @@ describe 'Service', ->
       values.length.should.equal 6
     
     it 'should not include David-Brent', eventually (values) ->
-      (v.value for v in values).should.not.include 'David Brent'
+      values.should.not.include 'David Brent'
 
     it "should include B'wah Hah Hah", eventually (values) ->
-      (v.value for v in values).should.include "Charles Miner"
+      values.should.include "Charles Miner"
 

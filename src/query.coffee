@@ -26,7 +26,7 @@ SIMPLE_ATTRS = BASIC_ATTRS.concat [ 'value', 'extraValue' ]
 
 RESULTS_METHODS = [
   'rowByRow', 'eachRow', 'recordByRecord', 'eachRecord',
-  'records', 'rows', 'table', 'tableRows'
+  'records', 'rows', 'table', 'tableRows', 'values'
 ]
 
 LIST_PIPE = (service) -> utils.compose service.fetchList, get 'listName'

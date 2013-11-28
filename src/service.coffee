@@ -441,17 +441,21 @@ class Service
   # @param [->] cb A call-back to which results will be yielded. (optional).
   #
   # @return [Promise<<Array<Object>] A promise to yield results.
-  values: (q, opts, cb = (->)) =>
-    withCB cb, if not q?
+  values: (q, opts, cb) =>
+    if utils.isFunction opts
+      [cb, opts] = [opts, cb]
+    resp = if not q?
       error "No query term supplied"
     else if q.descriptors? or typeof q is 'string'
-      @pathValues(q, opts)
+      @pathValues(q, opts).then(invoke 'map', get 'value')
+    else if q.toXML?
+      if q.views.length isnt 1
+        error "Expected one column, got #{ q.views.length }"
+      else
+        @rows(q, opts).then(invoke 'map', get 0)
     else
-      @query(q).then (query) => # Lift to query, check and then run.
-        if query.views.length isnt 1
-          error "Expected one column, got #{ q.views.length }"
-        else
-          @rows(query, opts).then(invoke 'map', get 0)
+      @query(q).then (query) => @values query, opts
+    resp.nodeify cb
 
   # Get a page of results suitable for building the cells in a table.
   #
