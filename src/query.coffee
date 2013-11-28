@@ -1063,7 +1063,7 @@ _get_data_fetcher = (server_fn) -> (page, cbs...) ->
     else if utils.isFunction page
       page = {}
       cbs = (x for x in arguments)
-    page = merge {start: @start, size: @maxRows}, page
+    page = noUndefVals merge {start: @start, size: @maxRows}, page
     return @service[server_fn](@, page, cbs...)
   else
     throw new Error("Service does not provide '#{ server_fn }'.")

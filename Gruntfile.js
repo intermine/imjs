@@ -203,14 +203,19 @@ module.exports = function (grunt) {
       "http://localhost:8080/intermine-test";
     var obj = {
       mocha: {
-        css: "../../components/mocha/mocha.css",
-        js: "../../components/mocha/mocha.js"
+        css: "../../bower_components/mocha/mocha.css",
+        js: "../../bower_components/mocha/mocha.js"
       },
       args: {
         root: root,
         token: "test-user-token"
       },
-      expect: "../../components/expect/expect.js",
+      expect: {
+        js: "../../bower_components/expect/expect.js"
+      },
+      promise: {
+        js: "../../bower_components/q/q.js"
+      },
       imjs: "../../dist/im.js"
     };
     var processed = grunt.template.process(templ.toString(), {data: obj});

@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0 - 2013-11-28 */
+/*! imjs - v3.0.0-pre - 2013-11-28 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3622,10 +3622,10 @@
             return _results;
           }).apply(this, arguments);
         }
-        page = merge({
+        page = noUndefVals(merge({
           start: this.start,
           size: this.maxRows
-        }, page);
+        }, page));
         return (_ref1 = this.service)[server_fn].apply(_ref1, [this, page].concat(__slice.call(cbs)));
       } else {
         throw new Error("Service does not provide '" + server_fn + "'.");

@@ -33,10 +33,10 @@ describe('Acceptance', function() {
     var service = new Service(service_args);
 
     it('Should be able to get a sensible version', function(done) {
-      service.fetchVersion().fail(done).done(function(v) {
+      service.fetchVersion().done(function(v) {
         expect(v).to.be.above(8);
         done();
-      });
+      }, done);
     });
 
     describe('Data Model', function() {
@@ -66,10 +66,10 @@ describe('Acceptance', function() {
     var service = new Service(service_args);
 
     it('Should be able to count the employees', function(done) {
-      service.count({select: ['id'], from: 'Employee'}).fail(done).done(function(c) {
+      service.count({select: ['id'], from: 'Employee'}).done(function(c) {
         expect(c).to.eql(132);
         done();
-      });
+      }, done);
     });
 
     it('Should find lists with brenda in them', function(done) {
@@ -118,7 +118,9 @@ describe('Acceptance', function() {
 
     it('Should be able to summarise a numeric path', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
-      var test = function(summary, stats) {
+      var test = function(data) {
+        var summary = data.results;
+        var stats = data.stats;
         expect(summary.length).to.be.below(21);
         expect(summary.mapSum(get('count'))).to.equal(46);
         expect(stats.min).to.be.above(49);
@@ -126,17 +128,19 @@ describe('Acceptance', function() {
         expect(stats.uniqueValues).to.be.above(summary.length);
         done();
       };
-      service.query(oldies).then(invoke('summarise', 'age')).then(test, done);
+      service.query(oldies).then(invoke('summarise', 'age')).done(test, done);
     });
 
     it('Should be able to summarise a string path', function(done) {
       var oldies = {select: ['Employee.age'], where: { age: {gt: 50} }};
-      var test = function(summary, stats) {
+      var test = function(data) {
+        var summary = data.results;
+        var stats = data.stats;
         expect(summary.map(get('item'))).to.contain('Wernham-Hogg');
         expect(stats.uniqueValues).to.equal(6);
         done();
       };
-      service.query(oldies).then(invoke('summarise', 'department.company.name')).then(test, done);
+      service.query(oldies).then(invoke('summarise', 'department.company.name')).done(test, done);
     });
 
     it('should be able to fetch widgets', function(done) {
@@ -146,7 +150,7 @@ describe('Acceptance', function() {
         expect(widgets.filter(function(w) { return w.name === 'contractor_enrichment' }).length).to.equal(1);
         done();
       };
-      service.fetchWidgets().then(test, done);
+      service.fetchWidgets().done(test, done);
     });
 
     it('should be able to fetch widget mapping', function(done) {
@@ -156,7 +160,7 @@ describe('Acceptance', function() {
         expect(widgets.contractor_enrichment.widgetType).to.equal('enrichment');
         done();
       };
-      service.fetchWidgetMap().then(test, done);
+      service.fetchWidgetMap().done(test, done);
     });
 
     it('should be able to perform an enrichment calculation', function(done) {
@@ -170,7 +174,7 @@ describe('Acceptance', function() {
         expect(results[0].identifier).to.equal('Vikram');
         done();
       };
-      service.enrichment(args).then(test, done);
+      service.enrichment(args).done(test, done);
     });
 
     describe('Paging', function() {
@@ -195,12 +199,12 @@ describe('Acceptance', function() {
 
       it('Should support paging forwards via Query#next', function(done) {
         var query = {select: ['Employee.name'], where: { age: { gt: 50 } }, limit: 10, start: 0 };
-        service.query(query).then(invoke('next')).then(invoke('records')).then(test(done), done);
+        service.query(query).then(invoke('next')).then(invoke('records')).done(test(done), done);
       });
 
       it('Should support paging backwards via Query#previous', function(done) {
         var query = {select: ['Employee.name'], where: { age: { gt: 50 } }, limit: 10, start: 20 };
-        service.query(query).then(invoke('previous')).then(invoke('records')).then(test(done), done);
+        service.query(query).then(invoke('previous')).then(invoke('records')).done(test(done), done);
       });
     });
   });
@@ -213,21 +217,19 @@ describe('Acceptance', function() {
       var expected   = 3
       var request = { type: 'Employee', identifiers: ['anne', 'brenda', 'carol'] };
 
-      $.when(service.fetchVersion(), service.resolveIds(request)).then(testJob).fail(done);
+      Q.all([service.fetchVersion(), service.resolveIds(request)]).done(testJob, done);
       
-      function testJob (v, job) {
+      function testJob (args) {
+        var v = args[0];
+        var job = args[1];
         var poll = job.poll();
         
-        poll.progress(onProgress);
-        poll.done(check(v));
-        poll.fail(done);
-        poll.always(job.del);
+        poll.then(check(v), done).done(job.del, job.del);
       }
 
       function check (version) {
         console.log("Testing ID resolution service @" + version);
         return function(results) {
-          expect(polls).to.be.above(0);
           if (version >= 16) {
             var keys = Object.keys(results);
             expect(keys).to.have.length(4);
@@ -241,7 +243,6 @@ describe('Acceptance', function() {
           done();
         };
       }
-      function onProgress () { polls++ }
     });
   });
 
@@ -252,10 +253,8 @@ describe('Acceptance', function() {
       service.fetchLists().then(function(lists) {
         var gonners = lists.filter(function(l) { return l.hasTag('test') || l.hasTag('imjs') });
         var promises = gonners.map(function(l) { return l.del() });
-        $.when.apply($, promises).fail(done).done(function() {
-          done();
-        });
-      });
+        Q.all(promises).then(function() { done();}, done);
+      }, done);
     };
     this.beforeAll(clearUp);
     this.afterAll(clearUp);
@@ -265,11 +264,10 @@ describe('Acceptance', function() {
       var TEST_NAME = 'test-list-from-idents';
 
       this.beforeAll(function(done) {
+        var ok = function () { done() };
         service.fetchList(TEST_NAME).then(function(l) {
           return l.del();
-        }).always(function() {
-          done();
-        });
+        }).then(ok, ok);
       });
 
       it('should have the right name, size, tags', function(done) {
@@ -295,7 +293,7 @@ describe('Acceptance', function() {
           });
           done();
         };
-        service.createList(opts, idents).then(test, done);
+        service.createList(opts, idents).done(test, done);
       });
 
     });
@@ -324,7 +322,7 @@ describe('Acceptance', function() {
           }).then(function() {done()}, done);
         };
 
-        service.intersect(options).then(test, done);
+        service.intersect(options).done(test, done);
       });
 
     });
