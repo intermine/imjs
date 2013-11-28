@@ -2,9 +2,31 @@
 # exports object (if we are in node) or onto the global
 # intermine.funcutils namespace
 
-{Promise} = require 'rsvp'
+Promise = require 'promise'
 
 root = exports
+
+root.defer = ->
+  deferred = {}
+  deferred.promise = new Promise (resolve, reject) ->
+    deferred.resolve = resolve
+    deferred.reject = reject
+  return deferred
+
+qsFromList = (pairs) -> (pair.map(encodeURIComponent).join('=') for pair in pairs).join('&')
+
+root.querystring = (obj) ->
+  if isArray obj
+    pairs = obj.slice()
+  else
+    pairs = []
+    for k, v of obj
+      if isArray v
+        subList = ([k, sv] for sv in v)
+        pairs = pairs.concat subList
+      else
+        pairs.push [k, v]
+  qsFromList pairs
 
 # Simply because this is a whole load cleaner and less ugly than
 # calls to `_.bind(f, null, arg1, arg2, ...)`.
@@ -21,7 +43,7 @@ root.error = error = (e) -> new Promise (_, reject) -> reject new Error e
 # Helper for wrapping a value in a promise.
 # @param args the The resolution.
 # @return [Promise<args...>] A promise to resolve with the resolution.
-root.success = success = (args...) -> new Promise (resolve) -> resolve args...
+root.success = success = Promise.from
 
 # Attach a callback, yielding the original promise.
 # @param f The callback

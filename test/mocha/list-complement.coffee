@@ -135,5 +135,5 @@ describe 'Service', ->
         list.hasTag(t).should.be.true for t in tags
         done()
 
-      promise.fail done
+      promise.then null, done
 

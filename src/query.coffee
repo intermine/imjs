@@ -9,12 +9,11 @@
 # and browsers.
 
 intermine       = exports
-{Promise}       = require 'rsvp'
-toQueryString   = require('querystring').stringify
 intermine.xml   = require('./xml')
 utils           = require './util'
 
 {withCB, merge, pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = utils
+toQueryString   = utils.querystring
 
 get_canonical_op = (orig) ->
   canonical = if orig?.toLowerCase? then Query.OP_DICT[orig.toLowerCase()] else null

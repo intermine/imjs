@@ -1,12 +1,10 @@
-{defer, Promise}   = require 'rsvp'
-JSONStream = require('JSONStream')
-through    = require 'through'
-http               = require('http')
-URL                = require('url')
-qs                 = require('querystring')
-{ACCEPT_HEADER}    = require('./constants')
-{VERSION}          = require('./version')
-{withCB, merge, invoke} = utils = require('./util')
+httpinvoke         = require 'httpinvoke'
+URL                = require 'url'
+JSONStream         = require 'JSONStream'
+http               = require 'http'
+{ACCEPT_HEADER}    = require './constants'
+{VERSION}          = require './version'
+{defer, withCB, merge, invoke} = utils = require('./util')
 
 # The user-agent string we will use to identify ourselves
 USER_AGENT = "node-http/imjs-#{ VERSION }"
@@ -82,8 +80,8 @@ exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->),
     @makeRequest(method, path, req, [null, eb], true).then attach, eb
 
 exports.doReq = (opts, iter) ->
-  {promise, resolve, reject} = defer "#{ opts.type } #{ opts.url }"
-  promise.fail opts.error
+  {promise, resolve, reject} = defer()
+  promise.then null, opts.error
 
   if typeof opts.data is 'string'
     postdata = opts.data

@@ -23,7 +23,7 @@ describe 'Service', ->
       promise = service.fetchLists (lists) ->
         (l.name for l in lists).should.include 'My-Favourite-Employees'
         done()
-      promise.fail done
+      promise.then null, done
 
   describe '#fetchList()', ->
 
@@ -51,5 +51,5 @@ describe 'Service', ->
         list.size.should.equal 4
         done()
 
-      promise.fail done
+      promise.then null, done
 

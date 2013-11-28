@@ -38,6 +38,11 @@ module.exports = function (grunt) {
           'js/im.min.js': ['js/im.js']
         }
       },
+      bundle: {
+        files: {
+          'dist/im.min.js': ['dist/im.js']
+        }
+      },
       version: {
         src: 'js/<%= pkg.version %>/im.js',
         dest: 'js/<%= pkg.version %>/im.min.js'
@@ -148,7 +153,8 @@ module.exports = function (grunt) {
           'dist/im.js': ['build/service.js']
         },
         options: {
-          debug: true,
+          noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
+          ignore: ['xmldom'],
           standalone: 'intermine'
         }
       }

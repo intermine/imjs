@@ -1,5 +1,5 @@
 {Service} = require './lib/fixture'
-RSVP = require 'rsvp'
+Promise = require 'promise'
 {prepare, eventually} = require './lib/utils'
 
 countRecords = (gff3) ->
@@ -20,7 +20,7 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
     it 'should find only two genes, due to the pathways', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 2
@@ -37,7 +37,7 @@ describe 'GFF3 Queries', ->
       joins: ['pathways']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
     it 'should find 5 genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -53,7 +53,7 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
     it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -73,7 +73,7 @@ describe 'GFF3 Queries', ->
       qp = beta.query(opts)
       statsp = qp.then (q) -> q.summarise('symbol').then ({stats}) -> stats
       gff3p = qp.then (q) -> q.getGFF3 view: ['organism.name', 'length']
-      RSVP.all [statsp, gff3p]
+      Promise.all [statsp, gff3p]
 
     it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -96,7 +96,7 @@ describe 'GFF3 Queries', ->
       joins: ['exons']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      RSVP.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
     it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5

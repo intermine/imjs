@@ -1,12 +1,12 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 should = require 'should'
-RSVP = require 'rsvp'
+Promise = require 'promise'
 Fixture = require './lib/fixture'
 {set} = Fixture.funcutils
 
 tags = ['js', 'node', 'testing', 'mocha', 'save-as-list']
 makeTheList = (s, name, opts) -> prepare -> clear(s, name)().then ->
-  RSVP.all [s.query(opts).then((q) -> q.saveAsList {name, tags}), s.count(opts)]
+  Promise.all [s.query(opts).then((q) -> q.saveAsList {name, tags}), s.count(opts)]
 
 describe 'Query#saveAsList', ->
 

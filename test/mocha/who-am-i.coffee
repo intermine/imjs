@@ -22,7 +22,7 @@ describe 'Service', ->
       promise = service.whoami (user) ->
         user.username.should.equal 'intermine-test-user'
         done()
-      promise.fail done
+      promise.then null, done
 
   describe '#fetchUser()', ->
 

@@ -1,4 +1,5 @@
-{Promise} = RSVP = require 'rsvp'
+Promise = require 'promise'
+
 {funcutils: {error, invoke}} = require './fixture'
 
 clear = (service, name) -> () -> new Promise (resolve, reject) ->
@@ -11,30 +12,29 @@ clear = (service, name) -> () -> new Promise (resolve, reject) ->
            .then(invoke 'del')
            .then(replaceErrorHandler, replaceErrorHandler)
 
-
 cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))
 
 deferredTest = DT = (test) -> (args...) -> new Promise (resolve, reject) ->
-    try
-        ret = test args...
-        if ret and ret.then and ret.fail
-            ret.then resolve, reject
-        else
-            resolve ret
-    catch e
-        reject e
+  try
+    ret = test args...
+    if ret and ret.then?
+      ret.then resolve, reject
+    else
+      resolve ret
+  catch e
+    reject e
 
 after = (promises) ->
-  if promises?.length then RSVP.all(promises) else RSVP.resolve()
+  if promises?.length then Promise.all(promises) else Promise.from(true)
 
-report = (done, promise) -> promise.then (-> done()), done
+report = (done, promise) -> promise.done (-> done()), done
+
+prepare = (promiser) -> (done) -> report done, @promise = promiser()
 
 eventually = (test) -> (done) -> report done, @promise.then DT test
 
 promising = (p, test) -> (done) -> report done, p.then DT test
-
-prepare = (promiser) -> (done) -> report done, @promise = promiser()
 
 always = (fn) -> (done) -> fn().then (-> done()), (-> done())
 

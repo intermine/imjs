@@ -9,7 +9,7 @@
 # and browsers.
 #
 
-{Promise} = RSVP = require('rsvp')
+Promise        = require('promise')
 {Model}        = require('./model')
 {Query}        = require('./query')
 {List}         = require('./lists')
@@ -17,7 +17,7 @@
 {IDResolutionJob} = require('./id-resolution-job')
 version      = require('./version')
 utils        = require('./util')
-to_query_string    = require('querystring').stringify
+to_query_string    = utils.querystring
 http           = require('./http')
 
 intermine = exports
@@ -90,11 +90,11 @@ DEFAULT_ERROR_HANDLER = (e) ->
 #   that should be yielded to the user.
 # @param [->] cb A callback that accepts this kind of thing. (optional)
 _get_or_fetch = (propName, store, path, key, cb) ->
-  prop = @[propName] ?= if (@useCache and value = store[@root])
+  promise = @[propName] ?= if (@useCache and value = store[@root])
     success(value)
   else
     @get(path).then(get key).then (x) => store[@root] = x
-  withCB cb, prop
+  promise.nodeify cb
 
 # A private helper that produces a function that will read
 # through an array of Lists, and find the first one with the
@@ -622,9 +622,10 @@ class Service
   # Fetch the description of the data model for this service.
   # @return [Promise<Model>] A promise to yield metadata about this service.
   fetchModel: (cb) ->
-    withCB cb, _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
+    _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
       .then(Model.load)
       .then(set service: @)
+      .nodeify(cb)
 
   # Fetch the configured summary-fields.
   # The summary fields describe which fields should be used to summarise each class.
@@ -645,8 +646,11 @@ class Service
   # @param [(Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) =>
-    withCB cb, RSVP.hash(model: @fetchModel(), summaryFields: @fetchSummaryFields())
-                   .then (deps) => new Query (merge options, deps), this
+    deps = [@fetchModel(), @fetchSummaryFields()]
+    buildQuery = ([model, summaryFields]) => new Query (merge options, {model, summaryFields}), @
+    Promise.all(deps)
+           .then(buildQuery)
+           .nodeify(cb)
 
   # Perform operations on a user's preferences.
   #

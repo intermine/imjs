@@ -21,8 +21,9 @@
   },
   "dependencies": {
     "xmldom": "~0.1.15",
-    "rsvp": "~2.0.4",
-    "JSONStream": "~0.7.1"
+    "JSONStream": "~0.7.1",
+    "promise": "~3.2.0",
+    "httpinvoke": "~1.0.4"
   },
   "engines": {
     "node": ">= 0.8.0"

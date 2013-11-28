@@ -111,7 +111,7 @@ describe 'List', ->
           copy.name.should.equal name
           done()
 
-      promise.fail done
+      promise.then null, done
 
   describe '#copy({name, tags}, cb)', ->
 
@@ -132,7 +132,7 @@ describe 'List', ->
           copy.hasTag(t).should.be.true for t in args.tags
           done()
 
-      promise.fail done
+      promise.then null, done
 
   describe '#copy(cb)', ->
 
@@ -147,6 +147,6 @@ describe 'List', ->
           copy.name.should.not.equal 'My-Favourite-Employees'
           done()
 
-      promise.fail done
+      promise.then null, done
 
 

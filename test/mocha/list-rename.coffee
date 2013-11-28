@@ -52,5 +52,5 @@ describe 'List', ->
         .then(invoke 'copy', {tags, name})
         .then (copy) -> copy.rename newName, test copy
 
-      promise.fail done
+      promise.then null, done
 

@@ -1,10 +1,10 @@
 Fixture              = require './lib/fixture'
 {needs, prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
-RSVP                 = require 'rsvp'
+Promise              = require 'promise'
 {invoke} = Fixture.funcutils
 
-once = (promises...) -> RSVP.all(promises)
+once = Promise.all
 
 atV = needs 12
 

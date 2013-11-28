@@ -1,4 +1,4 @@
-/*! imjs - v2.10.6 - 2013-11-22 */
+/*! imjs - v3.0.0 - 2013-11-28 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -7,37 +7,18 @@
 // 
 // The copyright is held by InterMine (www.intermine.org) and Alex Kalderimis (alex@intermine.org).
 (function() {
-  var IS_NODE, data, fs, imjs, intermine, path, pkg, _ref, _ref1;
+  var imjs, pkg;
 
-  IS_NODE = typeof exports !== 'undefined';
+  imjs = exports;
 
-  if (IS_NODE) {
-    imjs = exports;
-  } else {
-    intermine = ((_ref = this.intermine) != null ? _ref : this.intermine = {});
-    imjs = ((_ref1 = intermine.imjs) != null ? _ref1 : intermine.imjs = {});
-  }
+  pkg = require("../package.json");
 
-  imjs.VERSION = "unknown";
-
-  if (IS_NODE) {
-    fs = require('fs');
-    path = require('path');
-    if (process.mainModule != null) {
-      data = fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8');
-      pkg = JSON.parse(data);
-      imjs.VERSION = pkg.version;
-    }
-  } else {
-    imjs.VERSION = "2.10.6";
-  }
+  imjs.VERSION = pkg.version;
 
 }).call(this);
 
 (function() {
-  var HAS_CONSOLE, HAS_JSON, IS_NODE, NOT_ENUM, hasDontEnumBug, hasOwnProperty, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
-
-  IS_NODE = typeof exports !== 'undefined';
+  var HAS_CONSOLE, HAS_JSON, NOT_ENUM, hasDontEnumBug, hasOwnProperty, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
 
   HAS_CONSOLE = typeof console !== 'undefined';
 
@@ -45,124 +26,132 @@
 
   NOT_ENUM = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
 
-  if (!IS_NODE) {
-    if (!HAS_JSON) {
-      jQuery.getScript('http://cdn.intermine.org/js/json3/3.2.2/json3.min.js');
-    }
-    if (Object.keys == null) {
-      hasOwnProperty = Object.prototype.hasOwnProperty;
-      hasDontEnumBug = !{
-        toString: null
-      }.propertyIsEnumerable("toString");
-      Object.keys = function(o) {
-        var keys, name, nonEnum, _i, _len;
-        if (typeof o !== "object" && typeof o !== "" || o === null) {
-          throw new TypeError("Object.keys called on a non-object");
-        }
-        keys = (function() {
-          var _results;
-          _results = [];
-          for (name in o) {
-            if (hasOwnProperty.call(o, name)) {
-              _results.push(name);
-            }
-          }
-          return _results;
-        })();
-        if (hasDontEnumBug) {
-          for (_i = 0, _len = NOT_ENUM.length; _i < _len; _i++) {
-            nonEnum = NOT_ENUM[_i];
-            if (hasOwnProperty.call(o, nonEnum)) {
-              keys.push(nonEnum);
-            }
-          }
-        }
-        return keys;
-      };
-    }
-    if (Array.prototype.map == null) {
-      Array.prototype.map = function(f) {
-        var x, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = this.length; _i < _len; _i++) {
-          x = this[_i];
-          _results.push(f(x));
-        }
-        return _results;
-      };
-    }
-    if (Array.prototype.filter == null) {
-      Array.prototype.filter = function(f) {
-        var x, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = this.length; _i < _len; _i++) {
-          x = this[_i];
-          if (f(x)) {
-            _results.push(x);
-          }
-        }
-        return _results;
-      };
-    }
-    if (Array.prototype.reduce == null) {
-      Array.prototype.reduce = function(f, initValue) {
-        var ret, x, xs, _i, _len;
-        xs = this.slice();
-        ret = arguments.length < 2 ? xs.pop() : initValue;
-        for (_i = 0, _len = xs.length; _i < _len; _i++) {
-          x = xs[_i];
-          ret = f(ret, x);
-        }
-        return ret;
-      };
-    }
-    if (Array.prototype.forEach == null) {
-      Array.prototype.forEach = function(f, ctx) {
-        var i, x, _i, _len, _results;
-        if (!f) {
-          throw new Error("No function provided");
-        }
-        _results = [];
-        for (i = _i = 0, _len = this.length; _i < _len; i = ++_i) {
-          x = this[i];
-          _results.push(f.call(ctx != null ? ctx : this, x, i, this));
-        }
-        return _results;
-      };
-    }
-    if (!HAS_CONSOLE) {
-      this.console = {
-        log: (function() {}),
-        error: (function() {}),
-        debug: (function() {})
-      };
-      if (typeof window !== "undefined" && window !== null) {
-        window.console = this.console;
+  if (!HAS_JSON) {
+    jQuery.getScript('http://cdn.intermine.org/js/json3/3.2.2/json3.min.js');
+  }
+
+  if (Object.keys == null) {
+    hasOwnProperty = Object.prototype.hasOwnProperty;
+    hasDontEnumBug = !{
+      toString: null
+    }.propertyIsEnumerable("toString");
+    Object.keys = function(o) {
+      var keys, name, nonEnum, _i, _len;
+      if (typeof o !== "object" && typeof o !== "" || o === null) {
+        throw new TypeError("Object.keys called on a non-object");
       }
-    }
-    if ((_ref = console.log) == null) {
-      console.log = function() {};
-    }
-    if ((_ref1 = console.error) == null) {
-      console.error = function() {};
-    }
-    if ((_ref2 = console.debug) == null) {
-      console.debug = function() {};
-    }
-    if (console.log.apply == null) {
-      console.log("Your console needs patching.");
-      _ref3 = ['log', 'error', 'debug'];
-      _fn = function(m) {
-        var oldM;
-        oldM = console[m];
-        return console[m] = function(args) {
-          return oldM(args);
-        };
-      };
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        m = _ref3[_i];
-        _fn(m);
+      keys = (function() {
+        var _results;
+        _results = [];
+        for (name in o) {
+          if (hasOwnProperty.call(o, name)) {
+            _results.push(name);
+          }
+        }
+        return _results;
+      })();
+      if (hasDontEnumBug) {
+        for (_i = 0, _len = NOT_ENUM.length; _i < _len; _i++) {
+          nonEnum = NOT_ENUM[_i];
+          if (hasOwnProperty.call(o, nonEnum)) {
+            keys.push(nonEnum);
+          }
+        }
       }
+      return keys;
+    };
+  }
+
+  if (Array.prototype.map == null) {
+    Array.prototype.map = function(f) {
+      var x, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = this.length; _i < _len; _i++) {
+        x = this[_i];
+        _results.push(f(x));
+      }
+      return _results;
+    };
+  }
+
+  if (Array.prototype.filter == null) {
+    Array.prototype.filter = function(f) {
+      var x, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = this.length; _i < _len; _i++) {
+        x = this[_i];
+        if (f(x)) {
+          _results.push(x);
+        }
+      }
+      return _results;
+    };
+  }
+
+  if (Array.prototype.reduce == null) {
+    Array.prototype.reduce = function(f, initValue) {
+      var ret, x, xs, _i, _len;
+      xs = this.slice();
+      ret = arguments.length < 2 ? xs.pop() : initValue;
+      for (_i = 0, _len = xs.length; _i < _len; _i++) {
+        x = xs[_i];
+        ret = f(ret, x);
+      }
+      return ret;
+    };
+  }
+
+  if (Array.prototype.forEach == null) {
+    Array.prototype.forEach = function(f, ctx) {
+      var i, x, _i, _len, _results;
+      if (!f) {
+        throw new Error("No function provided");
+      }
+      _results = [];
+      for (i = _i = 0, _len = this.length; _i < _len; i = ++_i) {
+        x = this[i];
+        _results.push(f.call(ctx != null ? ctx : this, x, i, this));
+      }
+      return _results;
+    };
+  }
+
+  if (!HAS_CONSOLE) {
+    this.console = {
+      log: (function() {}),
+      error: (function() {}),
+      debug: (function() {})
+    };
+    if (typeof window !== "undefined" && window !== null) {
+      window.console = this.console;
+    }
+  }
+
+  if ((_ref = console.log) == null) {
+    console.log = function() {};
+  }
+
+  if ((_ref1 = console.error) == null) {
+    console.error = function() {};
+  }
+
+  if ((_ref2 = console.debug) == null) {
+    console.debug = function() {};
+  }
+
+  if (console.log.apply == null) {
+    console.log("Your console needs patching.");
+    _ref3 = ['log', 'error', 'debug'];
+    _fn = function(m) {
+      var oldM;
+      oldM = console[m];
+      return console[m] = function(args) {
+        return oldM(args);
+      };
+    };
+    for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+      m = _ref3[_i];
+      _fn(m);
     }
   }
 
@@ -271,16 +260,9 @@
 }).call(this, typeof exports === 'undefined' ? this : exports);
 
 (function() {
-  var IS_NODE, constants, intermine, _ref, _ref1;
+  var constants;
 
-  IS_NODE = typeof exports !== 'undefined';
-
-  if (IS_NODE) {
-    constants = exports;
-  } else {
-    intermine = ((_ref = this.intermine) != null ? _ref : this.intermine = {});
-    constants = ((_ref1 = intermine.constants) != null ? _ref1 : intermine.constants = {});
-  }
+  constants = exports;
 
   constants.ACCEPT_HEADER = {
     'json': 'application/json',
@@ -298,28 +280,64 @@
 }).call(this);
 
 (function() {
-  var Deferred, IS_NODE, REQUIRES, curry, fold, id, pairFold, root, success, thenFold, _, _base, _ref, _ref1,
+  var Promise, REQUIRES, comp, curry, entities, error, flatten, fold, id, invoke, isArray, pairFold, qsFromList, root, success, thenFold, _ref,
     __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __hasProp = {}.hasOwnProperty;
 
-  IS_NODE = typeof exports !== 'undefined';
+  Promise = require('promise');
 
-  root = typeof exports !== "undefined" && exports !== null ? exports : this;
+  root = exports;
 
-  if (IS_NODE) {
-    Deferred = require('underscore.deferred').Deferred;
-    _ = require('underscore')._;
-  } else {
-    Deferred = root.jQuery.Deferred;
-    _ = root._;
-    if ((_ref = root.intermine) == null) {
-      root.intermine = {};
+  root.defer = function() {
+    var deferred;
+    deferred = {};
+    deferred.promise = new Promise(function(resolve, reject) {
+      deferred.resolve = resolve;
+      return deferred.reject = reject;
+    });
+    return deferred;
+  };
+
+  qsFromList = function(pairs) {
+    var pair;
+    return ((function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
+        pair = pairs[_i];
+        _results.push(pair.map(encodeURIComponent).join('='));
+      }
+      return _results;
+    })()).join('&');
+  };
+
+  root.querystring = function(obj) {
+    var k, pairs, subList, sv, v;
+    if (isArray(obj)) {
+      pairs = obj.slice();
+    } else {
+      pairs = [];
+      for (k in obj) {
+        v = obj[k];
+        if (isArray(v)) {
+          subList = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = v.length; _i < _len; _i++) {
+              sv = v[_i];
+              _results.push([k, sv]);
+            }
+            return _results;
+          })();
+          pairs = pairs.concat(subList);
+        } else {
+          pairs.push([k, v]);
+        }
+      }
     }
-    if ((_ref1 = (_base = root.intermine).funcutils) == null) {
-      _base.funcutils = {};
-    }
-    root = root.intermine.funcutils;
-  }
+    return qsFromList(pairs);
+  };
 
   root.curry = curry = function() {
     var args, f;
@@ -331,18 +349,22 @@
     };
   };
 
-  root.error = function(e) {
-    return Deferred(function() {
-      return this.reject(new Error(e));
-    }).promise();
+  root.error = error = function(e) {
+    return new Promise(function(_, reject) {
+      return reject(new Error(e));
+    });
   };
 
-  root.success = success = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return Deferred(function() {
-      return this.resolve.apply(this, args);
-    }).promise();
+  root.success = success = Promise.from;
+
+  root.withCB = function() {
+    var f, fs, p, _i, _j, _len;
+    fs = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), p = arguments[_i++];
+    for (_j = 0, _len = fs.length; _j < _len; _j++) {
+      f = fs[_j];
+      p.then(f);
+    }
+    return p;
   };
 
   root.fold = fold = function(f) {
@@ -394,11 +416,77 @@
     };
   };
 
+  root.uniqBy = function(f, xs) {
+    var k, keys, values, x, _i, _len;
+    keys = [];
+    values = [];
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      k = f(x);
+      if (__indexOf.call(keys, k) < 0) {
+        keys.push(k);
+        values.push(x);
+      }
+    }
+    return values;
+  };
+
+  root.any = function(xs, f) {
+    var x, _i, _len;
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (f(x)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  root.find = function(xs, f) {
+    var x, _i, _len;
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (f(x)) {
+        return x;
+      }
+    }
+    return null;
+  };
+
+  isArray = (_ref = Array.isArray) != null ? _ref : function(xs) {
+    return ((xs != null ? xs.splice : void 0) != null) && ((xs != null ? xs.push : void 0) != null) && ((xs != null ? xs.pop : void 0) != null) && ((xs != null ? xs.slice : void 0) != null);
+  };
+
+  root.isArray = isArray;
+
+  root.isFunction = typeof /./ !== 'function' ? function(f) {
+    return typeof f === 'function';
+  } : function(f) {
+    return (f != null) && (f.call != null) && (f.apply != null) && f.toString() === '[object Function]';
+  };
+
+  entities = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;'
+  };
+
+  root.escape = function(str) {
+    if (!(str != null)) {
+      return '';
+    }
+    return String(str).replace(/[&<>"']/g, function(entity) {
+      return entities[entity];
+    });
+  };
+
   root.omap = function(f) {
     var merger;
     merger = fold(function(a, oldk, oldv) {
-      var newk, newv, _ref2;
-      _ref2 = f(oldk, oldv), newk = _ref2[0], newv = _ref2[1];
+      var newk, newv, _ref1;
+      _ref1 = f(oldk, oldv), newk = _ref1[0], newv = _ref1[1];
       a[newk] = newv;
       return a;
     });
@@ -440,12 +528,11 @@
         x = xs[_i];
         fx = f(x);
         ret = (function() {
-          var _ref2;
           if (ret === void 0) {
             return fx;
-          } else if ((_ref2 = typeof fx) === 'string' || _ref2 === 'number') {
+          } else if (typeof ret === 'number') {
             return ret + fx;
-          } else if (fx.slice != null) {
+          } else if (ret.concat != null) {
             return ret.concat(fx);
           } else {
             for (k in fx) {
@@ -460,9 +547,81 @@
     };
   };
 
+  root.map = function(f) {
+    return invoke('map', f);
+  };
+
+  comp = fold(function(f, g) {
+    return function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return f(g.apply(null, args));
+    };
+  });
+
+  root.compose = function() {
+    var fs;
+    fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return comp(fs);
+  };
+
   root.flatMap = root.concatMap;
 
+  root.difference = function(xs, remove) {
+    var x, _i, _len, _ref1, _results;
+    _results = [];
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (_ref1 = !x, __indexOf.call(remove, _ref1) >= 0) {
+        _results.push(x);
+      }
+    }
+    return _results;
+  };
+
+  root.stringList = function(x) {
+    if (typeof x === 'string') {
+      return [x];
+    } else {
+      return x;
+    }
+  };
+
+  root.flatten = flatten = function() {
+    var ret, x, xs, xx, _i, _j, _len, _len1, _ref1;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    ret = [];
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (isArray(x)) {
+        _ref1 = flatten.apply(null, x);
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          xx = _ref1[_j];
+          ret.push(xx);
+        }
+      } else {
+        ret.push(x);
+      }
+    }
+    return ret;
+  };
+
   root.sum = root.concatMap(id);
+
+  root.merge = function() {
+    var k, newObj, o, objs, v, _i, _len;
+    objs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    newObj = {};
+    for (_i = 0, _len = objs.length; _i < _len; _i++) {
+      o = objs[_i];
+      for (k in o) {
+        if (!__hasProp.call(o, k)) continue;
+        v = o[k];
+        newObj[k] = v;
+      }
+    }
+    return newObj;
+  };
 
   root.AND = function(a, b) {
     return a && b;
@@ -490,15 +649,15 @@
     return false;
   };
 
-  root.invoke = function() {
+  root.invoke = invoke = function() {
     var args, name;
     name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     return function(obj) {
-      var _ref2;
-      if ((_ref2 = obj[name]) != null ? _ref2.apply : void 0) {
+      var _ref1;
+      if ((_ref1 = obj[name]) != null ? _ref1.apply : void 0) {
         return obj[name].apply(obj, args);
       } else {
-        return Deferred().reject("No method: " + name).promise();
+        throw new Error("No method named \"" + name + "\"");
       }
     };
   };
@@ -537,11 +696,11 @@
     };
   };
 
-  root.flip = function(f) {
+  root.flip = function(f, ctx) {
     return function() {
       var args;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return f.apply(null, args.reverse());
+      return f.apply(ctx, args.reverse());
     };
   };
 
@@ -550,7 +709,7 @@
   };
 
   root.REQUIRES_VERSION = function(s, n, f) {
-    return s.fetchVersion().pipe(function(v) {
+    return s.fetchVersion().then(function(v) {
       if (v >= n) {
         return f();
       } else {
@@ -560,10 +719,10 @@
   };
 
   root.dejoin = function(q) {
-    var parts, view, _i, _len, _ref2;
-    _ref2 = q.views;
-    for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-      view = _ref2[_i];
+    var parts, view, _i, _len, _ref1;
+    _ref1 = q.views;
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      view = _ref1[_i];
       parts = view.split('.');
       if (parts.length > 2) {
         q.addJoin(parts.slice(1, -1).join('.'));
@@ -579,7 +738,7 @@
   root.sequence = function() {
     var fns;
     fns = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return thenFold(success(), _.flatten(fns));
+    return thenFold(success(), fns);
   };
 
   pairFold = fold(function(o, _arg) {
@@ -837,47 +996,34 @@
 }).call(this);
 
 (function() {
-  var DOMParser, IS_NODE, domParser, intermine, jQuery, parse, __root__, _ref;
+  var DOMParser, domParser;
 
-  IS_NODE = typeof exports !== 'undefined';
+  DOMParser = require('xmldom').DOMParser;
 
-  if (IS_NODE) {
-    DOMParser = require('xmldom').DOMParser;
-    __root__ = exports;
-    domParser = new DOMParser;
-    parse = function(xml) {
-      var ret;
-      if (!(xml != null ? xml.match('<.*>') : void 0)) {
-        xml = xml + '>';
-      }
-      try {
-        if (xml) {
-          ret = domParser.parseFromString(xml, 'text/xml');
-        }
-      } catch (e) {
-        ret = void 0;
-      }
-      if ((!ret) || (!ret.documentElement) || (ret.getElementsByTagName('parsererror').length)) {
-        throw new Error('Invalid xml: ' + xml);
-      }
-      return ret;
-    };
-  } else {
-    jQuery = this.jQuery, intermine = this.intermine;
-    __root__ = ((_ref = intermine.xml) != null ? _ref : intermine.xml = {});
-    parse = jQuery.parseXML;
-  }
+  domParser = new DOMParser;
 
-  __root__.parse = parse;
+  exports.parse = function(xml) {
+    var ret;
+    if (!(xml != null ? xml.match('<.*>') : void 0)) {
+      xml = xml + '>';
+    }
+    try {
+      if (xml) {
+        ret = domParser.parseFromString(xml, 'text/xml');
+      }
+    } catch (e) {
+      ret = void 0;
+    }
+    if ((!ret) || (!ret.documentElement) || (ret.getElementsByTagName('parsererror').length)) {
+      throw new Error('Invalid xml: ' + xml);
+    }
+    return ret;
+  };
 
 }).call(this);
 
 (function() {
-  var IS_NODE, Table, merge, properties, __root__, _ref;
-
-  IS_NODE = typeof exports !== 'undefined';
-
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : ((_ref = this.intermine) != null ? _ref : this.intermine = {});
+  var Table, merge, properties;
 
   merge = function(src, dest) {
     var k, v, _results;
@@ -894,7 +1040,7 @@
   Table = (function() {
 
     function Table(_arg) {
-      var c, prop, _, _i, _len, _ref1;
+      var c, prop, _, _i, _len, _ref;
       this.name = _arg.name, this.attributes = _arg.attributes, this.references = _arg.references, this.collections = _arg.collections;
       this.fields = {};
       this.__parents__ = arguments[0]['extends'];
@@ -902,9 +1048,9 @@
         prop = properties[_i];
         merge(this[prop], this.fields);
       }
-      _ref1 = this.collections;
-      for (_ in _ref1) {
-        c = _ref1[_];
+      _ref = this.collections;
+      for (_ in _ref) {
+        c = _ref[_];
         c.isCollection = true;
       }
     }
@@ -912,11 +1058,11 @@
     Table.prototype.toString = function() {
       var n, _;
       return "[Table name=" + this.name + ", fields=[" + ((function() {
-        var _ref1, _results;
-        _ref1 = this.fields;
+        var _ref, _results;
+        _ref = this.fields;
         _results = [];
-        for (n in _ref1) {
-          _ = _ref1[n];
+        for (n in _ref) {
+          _ = _ref[n];
           _results.push(n);
         }
         return _results;
@@ -924,40 +1070,28 @@
     };
 
     Table.prototype.parents = function() {
-      var _ref1;
-      return ((_ref1 = this.__parents__) != null ? _ref1 : []).slice();
+      var _ref;
+      return ((_ref = this.__parents__) != null ? _ref : []).slice();
     };
 
     return Table;
 
   })();
 
-  __root__.Table = Table;
+  exports.Table = Table;
 
 }).call(this);
 
 (function() {
-  var $, Deferred, IS_NODE, NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, _, __root__,
+  var NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  IS_NODE = typeof exports !== 'undefined';
+  intermine = exports;
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+  utils = require('./util');
 
-  if (IS_NODE) {
-    intermine = __root__;
-    _ = require('underscore')._;
-    Deferred = ($ = require('underscore.deferred')).Deferred;
-    utils = require('./util');
-  } else {
-    _ = __root__._;
-    Deferred = ($ = __root__.jQuery).Deferred;
-    intermine = __root__.intermine;
-    utils = intermine.funcutils;
-  }
-
-  concatMap = utils.concatMap, get = utils.get, any = utils.any, set = utils.set, copy = utils.copy, success = utils.success, error = utils.error;
+  withCB = utils.withCB, concatMap = utils.concatMap, get = utils.get, any = utils.any, set = utils.set, copy = utils.copy, success = utils.success, error = utils.error;
 
   NAMES = {};
 
@@ -1007,7 +1141,7 @@
 
       this.isRoot = __bind(this.isRoot, this);
 
-      this.end = _.last(this.descriptors);
+      this.end = this.descriptors[this.descriptors.length - 1];
       if ((_ref = this.ident) == null) {
         this.ident = makeKey(this.model, this, this.subclasses);
       }
@@ -1054,7 +1188,7 @@
       data = {
         root: this.root,
         model: this.model,
-        descriptors: _.initial(this.descriptors),
+        descriptors: this.descriptors.slice(0, this.descriptors.length - 1),
         subclasses: this.subclasses
       };
       return new PathInfo(data);
@@ -1065,14 +1199,14 @@
       if (this.isAttribute()) {
         throw new Error("" + this + " is an attribute.");
       }
-      fld = _.isString(attr) ? this.getType().fields[attr] : attr;
+      fld = typeof attr === 'string' ? this.getType().fields[attr] : attr;
       if (fld == null) {
         throw new Error("" + attr + " is not a field of " + (this.getType()));
       }
       data = {
         root: this.root,
         model: this.model,
-        descriptors: this.descriptors.concat(fld),
+        descriptors: this.descriptors.concat([fld]),
         subclasses: this.subclasses
       };
       return new PathInfo(data);
@@ -1100,12 +1234,12 @@
           return '/' + d.name;
         }))(this.allDescriptors()), params = (set({
           format: 'json'
-        }))(copy(this.subclasses)), this.model.service.get(path, params).then(get('display')).done(function(n) {
+        }))(copy(this.subclasses)), this.model.service.get(path, params).then(get('display')).then(function(n) {
           var _name, _ref1;
           return (_ref1 = NAMES[_name = _this.ident]) != null ? _ref1 : NAMES[_name] = n;
         }));
       }
-      return this.namePromise.done(cb);
+      return withCB(cb, this.namePromise);
     };
 
     PathInfo.prototype.getChildNodes = function() {
@@ -1188,30 +1322,17 @@
 }).call(this);
 
 (function() {
-  var $, Deferred, IS_NODE, Model, PathInfo, Table, flatten, intermine, intersection, liftToTable, omap, _, __root__, _ref,
+  var Model, PathInfo, Table, error, find, flatten, intermine, liftToTable, omap, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  IS_NODE = typeof exports !== 'undefined';
+  Table = require('./table').Table;
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+  PathInfo = require('./path').PathInfo;
 
-  if (IS_NODE) {
-    intermine = __root__;
-    _ = require('underscore')._;
-    Deferred = ($ = require('underscore.deferred')).Deferred;
-    Table = require('./table').Table;
-    PathInfo = require('./path').PathInfo;
-    omap = require('./util').omap;
-  } else {
-    _ = __root__._;
-    Deferred = ($ = __root__.jQuery).Deferred;
-    intermine = ((_ref = __root__.intermine) != null ? _ref : __root__.intermine = {});
-    Table = intermine.Table, PathInfo = intermine.PathInfo;
-    omap = intermine.funcutils.omap;
-  }
+  _ref = require('./util'), flatten = _ref.flatten, find = _ref.find, error = _ref.error, omap = _ref.omap;
 
-  flatten = _.flatten, intersection = _.intersection;
+  intermine = exports;
 
   liftToTable = omap(function(k, v) {
     return [k, new Table(v)];
@@ -1240,7 +1361,7 @@
     };
 
     Model.prototype.getSubclassesOf = function(cls) {
-      var cd, clazz, ret, _ref1, _ref2;
+      var cd, clazz, ret, _, _ref1, _ref2;
       clazz = cls && cls.name ? cls : this.classes[cls];
       if (clazz == null) {
         throw new Error("" + cls + " is not a table");
@@ -1271,7 +1392,7 @@
     };
 
     Model.prototype.findSharedAncestor = function(classA, classB) {
-      var a_ancestry, b_ancestry, _ref1;
+      var a_ancestry, b_ancestry, firstCommon;
       if (classB === null || classA === null) {
         return null;
       }
@@ -1286,7 +1407,10 @@
       if (__indexOf.call(b_ancestry, classA) >= 0) {
         return classA;
       }
-      return (_ref1 = intersection(a_ancestry, b_ancestry).shift()) != null ? _ref1 : null;
+      firstCommon = find(a_ancestry, function(a) {
+        return __indexOf.call(b_ancestry, a) >= 0;
+      });
+      return firstCommon;
     };
 
     Model.prototype.findCommonType = function(xs) {
@@ -1305,7 +1429,11 @@
   Model.prototype.findCommonTypeOfMultipleClasses = Model.prototype.findCommonType;
 
   Model.load = function(data) {
-    return new Model(data);
+    try {
+      return new Model(data);
+    } catch (e) {
+      throw new Error("Error loading model: " + e);
+    }
   };
 
   Model.INTEGRAL_TYPES = ["int", "Integer", "long", "Long"];
@@ -1321,27 +1449,15 @@
 }).call(this);
 
 (function() {
-  var Deferred, IS_NODE, User, do_pref_req, error, intermine, _, __root__,
+  var User, do_pref_req, error, intermine, withCB, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  IS_NODE = typeof exports !== 'undefined';
+  _ref = require('./util'), withCB = _ref.withCB, error = _ref.error;
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  if (IS_NODE) {
-    Deferred = require('underscore.deferred').Deferred;
-    _ = require('underscore')._;
-    error = require('./util').error;
-    intermine = __root__;
-  } else {
-    _ = __root__._;
-    Deferred = __root__.jQuery.Deferred;
-    intermine = __root__.intermine;
-    error = intermine.funcutils.error;
-  }
+  intermine = exports;
 
   do_pref_req = function(user, data, method) {
-    return user.service.manageUserPreferences(method, data).done(function(prefs) {
+    return user.service.manageUserPreferences(method, data).then(function(prefs) {
       return user.preferences = prefs;
     });
   };
@@ -1349,7 +1465,7 @@
   User = (function() {
 
     function User(service, _arg) {
-      var _ref;
+      var _ref1;
       this.service = service;
       this.username = _arg.username, this.preferences = _arg.preferences;
       this.refresh = __bind(this.refresh, this);
@@ -1363,20 +1479,20 @@
       this.setPreference = __bind(this.setPreference, this);
 
       this.hasPreferences = this.preferences != null;
-      if ((_ref = this.preferences) == null) {
+      if ((_ref1 = this.preferences) == null) {
         this.preferences = {};
       }
     }
 
     User.prototype.setPreference = function(key, value) {
       var data;
-      if (_.isString(key)) {
+      if (typeof key === 'string') {
         data = {};
         data[key] = value;
       } else if (!(value != null)) {
         data = key;
       } else {
-        error("Incorrect arguments to setPreference");
+        return error("Incorrect arguments to setPreference");
       }
       return this.setPreferences(data);
     };
@@ -1408,25 +1524,16 @@
 }).call(this);
 
 (function() {
-  var INVITES, IS_NODE, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, funcutils, get, getFolderName, intermine, invoke, isFolder, set, _, __root__,
+  var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  IS_NODE = typeof exports !== 'undefined';
+  utils = require('./util');
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+  intermine = exports;
 
-  if (IS_NODE) {
-    _ = require('underscore')._;
-    funcutils = require('./util');
-    intermine = __root__;
-  } else {
-    _ = __root__._, intermine = __root__.intermine;
-    funcutils = intermine.funcutils;
-  }
-
-  get = funcutils.get, invoke = funcutils.invoke, REQUIRES_VERSION = funcutils.REQUIRES_VERSION, set = funcutils.set, dejoin = funcutils.dejoin;
+  merge = utils.merge, withCB = utils.withCB, get = utils.get, invoke = utils.invoke, REQUIRES_VERSION = utils.REQUIRES_VERSION, set = utils.set, dejoin = utils.dejoin;
 
   TAGS_PATH = "list/tags";
 
@@ -1443,10 +1550,13 @@
   };
 
   List = (function() {
+    var getTags;
 
     function List(properties, service) {
       var k, v;
       this.service = service;
+      this._updateTags = __bind(this._updateTags, this);
+
       this.hasTag = __bind(this.hasTag, this);
 
       for (k in properties) {
@@ -1479,56 +1589,55 @@
       }, cb);
     };
 
+    getTags = function(_arg) {
+      var tags;
+      tags = _arg.tags;
+      return tags;
+    };
+
+    List.prototype._updateTags = function(tags) {
+      this.tags = tags;
+      return this.folders = this.tags.filter(isFolder).map(getFolderName);
+    };
+
     List.prototype.fetchTags = function(cb) {
-      var _this = this;
-      return this.service.makeRequest('GET', 'list/tags', {
+      return withCB(this._updateTags, cb, this.service.makeRequest('GET', 'list/tags', {
         name: this.name
-      }).pipe(function(resp) {
-        return resp.tags;
-      }).done(function(tags) {
-        _this.tags = tags;
-        return _this.folders.filter(isFolder).map(getFolderName);
-      }).done(cb);
+      }).then(getTags));
     };
 
     List.prototype.addTags = function(tags, cb) {
-      var _this = this;
-      return this.service.makeRequest('POST', 'list/tags', {
+      var req;
+      req = {
         name: this.name,
         tags: tags
-      }).pipe(function(resp) {
-        return resp.tags;
-      }).done(function(tags) {
-        _this.tags = tags;
-        return _this.folders.filter(isFolder).map(getFolderName);
-      }).done(cb);
+      };
+      return withCB(this._updateTags, cb, this.service.makeRequest('POST', 'list/tags', req).then(getTags));
     };
 
     List.prototype.removeTags = function(tags, cb) {
-      var _this = this;
-      return this.service.makeRequest('DELETE', 'list/tags', {
+      var req;
+      req = {
         name: this.name,
         tags: tags
-      }).pipe(function(resp) {
-        return resp.tags;
-      }).done(function(tags) {
-        _this.tags = tags;
-        return _this.folders.filter(isFolder).map(getFolderName);
-      }).done(cb);
+      };
+      return withCB(this._updateTags, cb, this.service.makeRequest('DELETE', 'list/tags', req).then(getTags));
     };
 
     List.prototype.contents = function(cb) {
-      return this.query().pipe(dejoin).pipe(invoke('records')).done(cb);
+      return withCB(cb, this.query().then(dejoin).then(invoke('records')));
     };
 
     List.prototype.rename = function(newName, cb) {
-      var _this = this;
-      return this.service.post('lists/rename', {
+      var req,
+        _this = this;
+      req = {
         oldname: this.name,
         newname: newName
-      }).pipe(get('listName')).done(function(n) {
+      };
+      return withCB(cb, this.service.post('lists/rename', req).then(get('listName')).then(function(n) {
         return _this.name = n;
-      }).pipe(this.service.fetchList).done(cb);
+      }).then(this.service.fetchList));
     };
 
     List.prototype.copy = function(opts, cb) {
@@ -1540,42 +1649,42 @@
       if (cb == null) {
         cb = (function() {});
       }
-      if (arguments.length === 1 && _.isFunction(opts)) {
+      if (arguments.length === 1 && utils.isFunction(opts)) {
         _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
       }
-      if (_.isString(opts)) {
+      if (typeof opts === 'string') {
         opts = {
-          name: '' + opts
+          name: opts
         };
       }
       name = baseName = (_ref1 = opts.name) != null ? _ref1 : "" + this.name + "_copy";
       tags = this.tags.concat((_ref2 = opts.tags) != null ? _ref2 : []);
       query = this.query(['id']);
-      return this.service.fetchLists().pipe(invoke('map', get('name'))).pipe(function(names) {
+      return withCB(cb, this.service.fetchLists().then(invoke('map', get('name'))).then(function(names) {
         var c;
         c = 1;
         while (__indexOf.call(names, name) >= 0) {
           name = "" + baseName + "-" + (c++);
         }
-        return query.pipe(invoke('saveAsList', {
+        return query.then(invoke('saveAsList', {
           name: name,
           tags: tags,
           description: _this.description
-        })).done(cb);
-      });
+        }));
+      }));
     };
 
     List.prototype.enrichment = function(opts, cb) {
-      return this.service.enrichment((set({
+      return this.service.enrichment(merge({
         list: this.name
-      }))(opts), cb);
+      }, opts), cb);
     };
 
     List.prototype.shareWithUser = function(recipient, cb) {
-      return this.service.post(SHARES, {
+      return withCB(cb, this.service.post(SHARES, {
         'list': this.name,
         'with': recipient
-      }).done(cb);
+      }));
     };
 
     List.prototype.inviteUserToShare = function(recipient, notify, cb) {
@@ -1585,11 +1694,11 @@
       if (cb == null) {
         cb = (function() {});
       }
-      return this.service.post(INVITES, {
+      return withCB(cb, this.service.post(INVITES, {
         list: this.name,
         to: recipient,
         notify: !!notify
-      }).done(cb);
+      }));
     };
 
     return List;
@@ -1601,26 +1710,16 @@
 }).call(this);
 
 (function() {
-  var CategoryResults, Deferred, IDResolutionJob, IS_NODE, IdResults, ONE_MINUTE, concatMap, fold, funcutils, get, id, intermine, __root__,
+  var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, fold, funcutils, get, id, intermine, withCB,
     __hasProp = {}.hasOwnProperty,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  IS_NODE = typeof exports !== 'undefined';
+  funcutils = require('./util');
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+  intermine = exports;
 
-  if (IS_NODE) {
-    Deferred = require('underscore.deferred').Deferred;
-    funcutils = require('./util');
-    intermine = __root__;
-  } else {
-    Deferred = __root__.jQuery.Deferred;
-    intermine = __root__.intermine;
-    funcutils = intermine.funcutils;
-  }
-
-  id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
+  defer = funcutils.defer, withCB = funcutils.withCB, id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
 
   ONE_MINUTE = 60 * 1000;
 
@@ -1758,16 +1857,16 @@
     }
 
     IDResolutionJob.prototype.fetchStatus = function(cb) {
-      return this.service.get("ids/" + this.uid + "/status").pipe(get('status')).done(cb);
+      return withCB(cb, this.service.get("ids/" + this.uid + "/status").then(get('status')));
     };
 
     IDResolutionJob.prototype.fetchErrorMessage = function(cb) {
-      return this.service.get("ids/" + this.uid + "/status").pipe(get('message')).done(cb);
+      return withCB(cb, this.service.get("ids/" + this.uid + "/status").then(get('message')));
     };
 
     IDResolutionJob.prototype.fetchResults = function(cb) {
       var gettingRes, gettingVer;
-      gettingRes = this.service.get("ids/" + this.uid + "/result").pipe(get('results'));
+      gettingRes = this.service.get("ids/" + this.uid + "/result").then(get('results'));
       gettingVer = this.service.fetchVersion();
       return gettingVer.then(function(v) {
         return gettingRes.then(function(results) {
@@ -1787,27 +1886,29 @@
     IDResolutionJob.prototype.decay = 50;
 
     IDResolutionJob.prototype.poll = function(onSuccess, onError, onProgress) {
-      var backOff, resp, ret,
+      var backOff, notify, promise, reject, resolve, resp, _ref,
         _this = this;
-      ret = Deferred().done(onSuccess).fail(onError).progress(onProgress);
+      _ref = defer(), promise = _ref.promise, resolve = _ref.resolve, reject = _ref.reject;
+      promise.then(onSuccess, onError);
+      notify = onProgress != null ? onProgress : (function() {});
       resp = this.fetchStatus();
-      resp.fail(ret.reject);
+      resp.then(null, reject);
       backOff = this.decay;
-      this.decay = Math.min(ONE_MINUTE, backOff * 2);
-      resp.done(function(status) {
-        ret.notify(status);
+      this.decay = Math.min(ONE_MINUTE, backOff * 1.25);
+      resp.then(function(status) {
+        notify(status);
         switch (status) {
           case 'SUCCESS':
-            return _this.fetchResults().then(ret.resolve, ret.reject);
+            return _this.fetchResults().then(resolve, reject);
           case 'ERROR':
-            return _this.fetchErrorMessage().then(ret.reject, ret.reject);
+            return _this.fetchErrorMessage().then(reject, reject);
           default:
             return setTimeout((function() {
-              return _this.poll(ret.resolve, ret.reject, ret.notify);
+              return _this.poll(resolve, reject, notify);
             }), backOff);
         }
       });
-      return ret.promise();
+      return promise;
     };
 
     return IDResolutionJob;
@@ -1831,35 +1932,25 @@
 }).call(this);
 
 (function() {
-  var $, BASIC_ATTRS, CODES, Deferred, IS_NODE, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, jQuery, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, _, __root__, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref, _ref1, _ref2,
+  var BASIC_ATTRS, CODES, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty;
 
-  IS_NODE = typeof exports !== 'undefined';
+  intermine = exports;
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+  intermine.xml = require('./xml');
 
-  if (IS_NODE) {
-    intermine = __root__;
-    _ = require('underscore')._;
-    Deferred = ($ = require('underscore.deferred')).Deferred;
-    toQueryString = require('querystring').stringify;
-    intermine.xml = require('./xml');
-    _ref = require('./util'), pairsToObj = _ref.pairsToObj, filter = _ref.filter, partition = _ref.partition, fold = _ref.fold, take = _ref.take, concatMap = _ref.concatMap, id = _ref.id, get = _ref.get, invoke = _ref.invoke;
-  } else {
-    _ = __root__._, jQuery = __root__.jQuery, intermine = __root__.intermine;
-    _ref1 = intermine.funcutils, pairsToObj = _ref1.pairsToObj, filter = _ref1.filter, partition = _ref1.partition, fold = _ref1.fold, take = _ref1.take, concatMap = _ref1.concatMap, id = _ref1.id, get = _ref1.get, invoke = _ref1.invoke;
-    Deferred = ($ = jQuery).Deferred;
-    toQueryString = function(obj) {
-      return jQuery.param(obj, true);
-    };
-  }
+  utils = require('./util');
+
+  withCB = utils.withCB, merge = utils.merge, pairsToObj = utils.pairsToObj, filter = utils.filter, partition = utils.partition, fold = utils.fold, take = utils.take, concatMap = utils.concatMap, id = utils.id, get = utils.get, invoke = utils.invoke;
+
+  toQueryString = utils.querystring;
 
   get_canonical_op = function(orig) {
     var canonical;
-    canonical = _.isString(orig) ? Query.OP_DICT[orig.toLowerCase()] : null;
+    canonical = (orig != null ? orig.toLowerCase : void 0) != null ? Query.OP_DICT[orig.toLowerCase()] : null;
     if (!canonical) {
       throw new Error("Illegal constraint operator: " + orig);
     }
@@ -1873,7 +1964,7 @@
   RESULTS_METHODS = ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table', 'tableRows'];
 
   LIST_PIPE = function(service) {
-    return _.compose(service.fetchList, get('listName'));
+    return utils.compose(service.fetchList, get('listName'));
   };
 
   CODES = [null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
@@ -1887,7 +1978,7 @@
 
   conValStr = function(v) {
     if (v != null) {
-      return "<value>" + (_.escape(v)) + "</value>";
+      return "<value>" + (utils.escape(v)) + "</value>";
     } else {
       return "<nullValue/>";
     }
@@ -1901,7 +1992,7 @@
       for (k in c) {
         v = c[k];
         if ((__indexOf.call(names, k) >= 0)) {
-          _results.push("" + k + "=\"" + (_.escape(v)) + "\" ");
+          _results.push("" + k + "=\"" + (utils.escape(v)) + "\" ");
         }
       }
       return _results;
@@ -1929,14 +2020,14 @@
   };
 
   conStr = function(c) {
-    var _ref2;
+    var _ref;
     if (c.values != null) {
       return multiConStr(c);
     } else if (c.ids != null) {
       return idConStr(c);
     } else if (!(c.op != null)) {
       return typeConStr(c);
-    } else if (_ref2 = c.op, __indexOf.call(Query.NULL_OPS, _ref2) >= 0) {
+    } else if (_ref = c.op, __indexOf.call(Query.NULL_OPS, _ref) >= 0) {
       return noValueConStr(c);
     } else {
       return simpleConStr(c);
@@ -1987,17 +2078,17 @@
   };
 
   interpretConstraint = function(path, con) {
-    var constraint, k, keys, v, x, _ref2;
+    var constraint, k, keys, v, x, _ref, _ref1;
     constraint = {
       path: path
     };
     if (con === null) {
       constraint.op = 'IS NULL';
-    } else if (_.isArray(con)) {
+    } else if (utils.isArray(con)) {
       constraint.op = 'ONE OF';
       constraint.values = con;
-    } else if (_.isString(con) || _.isNumber(con)) {
-      if (_ref2 = typeof con.toUpperCase === "function" ? con.toUpperCase() : void 0, __indexOf.call(Query.NULL_OPS, _ref2) >= 0) {
+    } else if ((_ref = typeof con) === 'string' || _ref === 'number') {
+      if (_ref1 = typeof con.toUpperCase === "function" ? con.toUpperCase() : void 0, __indexOf.call(Query.NULL_OPS, _ref1) >= 0) {
         constraint.op = con;
       } else {
         constraint.op = '=';
@@ -2014,7 +2105,7 @@
         return _results;
       })();
       if (__indexOf.call(keys, 'isa') >= 0) {
-        if (_.isArray(con.isa)) {
+        if (utils.isArray(con.isa)) {
           constraint.op = k;
           constraint.values = con.isa;
         } else {
@@ -2030,7 +2121,7 @@
             continue;
           }
           constraint.op = k;
-          if (_.isArray(v)) {
+          if (utils.isArray(v)) {
             constraint.values = v;
           } else {
             constraint.value = v;
@@ -2042,14 +2133,14 @@
   };
 
   interpretConArray = function(conArgs) {
-    var a0, constraint, v, _ref2;
+    var a0, constraint, v, _ref;
     conArgs = conArgs.slice();
     constraint = {
       path: conArgs.shift()
     };
     if (conArgs.length === 1) {
       a0 = conArgs[0];
-      if (_ref2 = typeof a0.toUpperCase === "function" ? a0.toUpperCase() : void 0, __indexOf.call(Query.NULL_OPS, _ref2) >= 0) {
+      if (_ref = typeof a0.toUpperCase === "function" ? a0.toUpperCase() : void 0, __indexOf.call(Query.NULL_OPS, _ref) >= 0) {
         constraint.op = a0;
       } else {
         constraint.type = a0;
@@ -2057,7 +2148,7 @@
     } else if (conArgs.length >= 2) {
       constraint.op = conArgs[0];
       v = conArgs[1];
-      if (_.isArray(v)) {
+      if (utils.isArray(v)) {
         constraint.values = v;
       } else {
         constraint.value = v;
@@ -2076,9 +2167,9 @@
     }
     parts = str.split(/\s+/);
     pathIndices = (function() {
-      var _i, _ref2, _results;
+      var _i, _ref, _results;
       _results = [];
-      for (x = _i = 0, _ref2 = parts.length / 2; 0 <= _ref2 ? _i < _ref2 : _i > _ref2; x = 0 <= _ref2 ? ++_i : --_i) {
+      for (x = _i = 0, _ref = parts.length / 2; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
         _results.push(x * 2);
       }
       return _results;
@@ -2111,7 +2202,7 @@
   };
 
   Query = (function() {
-    var addPI, cAttrs, getPaths, kids, qAttrs, scFold, toAttrPairs, xmlAttr;
+    var addPI, cAttrs, getPaths, kids, parseSummary, qAttrs, scFold, toAttrPairs, toPathAndType, xmlAttr;
 
     Query.JOIN_STYLES = ['INNER', 'OUTER'];
 
@@ -2174,12 +2265,12 @@
     getPaths = function() {};
 
     Query.prototype.on = function(events, callback, context) {
-      var calls, ev, list, tail, _ref2, _ref3, _ref4;
+      var calls, ev, list, tail, _ref, _ref1, _ref2;
       events = events.split(/\s+/);
-      calls = ((_ref2 = this._callbacks) != null ? _ref2 : this._callbacks = {});
+      calls = ((_ref = this._callbacks) != null ? _ref : this._callbacks = {});
       while (ev = events.shift()) {
-        list = ((_ref3 = calls[ev]) != null ? _ref3 : calls[ev] = {});
-        tail = ((_ref4 = list.tail) != null ? _ref4 : list.tail = (list.next = {}));
+        list = ((_ref1 = calls[ev]) != null ? _ref1 : calls[ev] = {});
+        tail = ((_ref2 = list.tail) != null ? _ref2 : list.tail = (list.next = {}));
         tail.callback = callback;
         tail.context = context;
         list.tail = tail.next = {};
@@ -2194,13 +2285,13 @@
     };
 
     Query.prototype.off = function(events, callback, context) {
-      var calls, current, ev, last, linkedList, node, remove, _i, _len, _ref2;
+      var calls, current, ev, last, linkedList, node, remove, _i, _len, _ref;
       if (events == null) {
         this._callbacks = {};
         return this;
       }
       events = events.split(/\s+/);
-      calls = ((_ref2 = this._callbacks) != null ? _ref2 : this._callbacks = {});
+      calls = ((_ref = this._callbacks) != null ? _ref : this._callbacks = {});
       for (_i = 0, _len = events.length; _i < _len; _i++) {
         ev = events[_i];
         if (callback != null) {
@@ -2298,11 +2389,11 @@
     };
 
     kids = function(el, name) {
-      var kid, _i, _len, _ref2, _results;
-      _ref2 = el.getElementsByTagName(name);
+      var kid, _i, _len, _ref, _results;
+      _ref = el.getElementsByTagName(name);
       _results = [];
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        kid = _ref2[_i];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        kid = _ref[_i];
         _results.push(kid);
       }
       return _results;
@@ -2327,11 +2418,11 @@
       q.view = q.view.split(/\s+/);
       q.sortOrder = stringToSortOrder(q.sortOrder);
       q.joins = (function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = kids(query, 'join');
+        var _i, _len, _ref, _results;
+        _ref = kids(query, 'join');
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          j = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          j = _ref[_i];
           if (styleOf(j) === 'OUTER') {
             _results.push(pathOf(j));
           }
@@ -2339,21 +2430,21 @@
         return _results;
       })();
       q.constraints = (function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = kids(query, 'constraint');
+        var _i, _len, _ref, _results;
+        _ref = kids(query, 'constraint');
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          con = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          con = _ref[_i];
           _results.push((function(con) {
             var c, tn, v, values, x;
             c = pairsToObj(toAttrPairs(con, cAttrs));
             if (c.ids != null) {
               c.ids = (function() {
-                var _j, _len1, _ref3, _results1;
-                _ref3 = c.ids.split(',');
+                var _j, _len1, _ref1, _results1;
+                _ref1 = c.ids.split(',');
                 _results1 = [];
-                for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-                  x = _ref3[_j];
+                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                  x = _ref1[_j];
                   _results1.push(parseInt(x, 10));
                 }
                 return _results1;
@@ -2367,11 +2458,11 @@
                 for (_j = 0, _len1 = values.length; _j < _len1; _j++) {
                   v = values[_j];
                   _results1.push(((function() {
-                    var _k, _len2, _ref3, _results2;
-                    _ref3 = v.childNodes;
+                    var _k, _len2, _ref1, _results2;
+                    _ref1 = v.childNodes;
                     _results2 = [];
-                    for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-                      tn = _ref3[_k];
+                    for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+                      tn = _ref1[_k];
                       _results2.push(tn.data);
                     }
                     return _results2;
@@ -2388,6 +2479,24 @@
       return q;
     };
 
+    Query.prototype.constraints = [];
+
+    Query.prototype.views = [];
+
+    Query.prototype.joins = {};
+
+    Query.prototype.constraintLogic = '';
+
+    Query.prototype.sortOrder = '';
+
+    Query.prototype.name = null;
+
+    Query.prototype.title = null;
+
+    Query.prototype.comment = null;
+
+    Query.prototype.description = null;
+
     function Query(properties, service) {
       this.addConstraint = __bind(this.addConstraint, this);
 
@@ -2397,32 +2506,28 @@
 
       this.select = __bind(this.select, this);
 
-      var prop, _i, _len, _ref10, _ref11, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+      var prop, _i, _len, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
         _this = this;
-      _.defaults(this, {
-        constraints: [],
-        views: [],
-        joins: {},
-        constraintLogic: "",
-        sortOrder: ""
-      });
       if (properties == null) {
         properties = {};
       }
-      this.displayNames = _.extend({}, (_ref2 = (_ref3 = properties.displayNames) != null ? _ref3 : properties.aliases) != null ? _ref2 : {});
-      _ref4 = ['name', 'title', 'comment', 'description'];
-      for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-        prop = _ref4[_i];
+      this.constraints = [];
+      this.views = [];
+      this.joins = {};
+      this.displayNames = utils.copy((_ref = (_ref1 = properties.displayNames) != null ? _ref1 : properties.aliases) != null ? _ref : {});
+      _ref2 = ['name', 'title', 'comment', 'description'];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        prop = _ref2[_i];
         if (properties[prop] != null) {
           this[prop] = properties[prop];
         }
       }
       this.service = service != null ? service : {};
-      this.model = (_ref5 = properties.model) != null ? _ref5 : {};
-      this.summaryFields = (_ref6 = properties.summaryFields) != null ? _ref6 : {};
-      this.root = (_ref7 = properties.root) != null ? _ref7 : properties.from;
-      this.maxRows = (_ref8 = (_ref9 = properties.size) != null ? _ref9 : properties.limit) != null ? _ref8 : properties.maxRows;
-      this.start = (_ref10 = (_ref11 = properties.start) != null ? _ref11 : properties.offset) != null ? _ref10 : 0;
+      this.model = (_ref3 = properties.model) != null ? _ref3 : {};
+      this.summaryFields = (_ref4 = properties.summaryFields) != null ? _ref4 : {};
+      this.root = (_ref5 = properties.root) != null ? _ref5 : properties.from;
+      this.maxRows = (_ref6 = (_ref7 = properties.size) != null ? _ref7 : properties.limit) != null ? _ref6 : properties.maxRows;
+      this.start = (_ref8 = (_ref9 = properties.start) != null ? _ref9 : properties.offset) != null ? _ref8 : 0;
       this.select(properties.views || properties.view || properties.select || []);
       this.addConstraints(properties.constraints || properties.where || []);
       this.addJoins(properties.joins || properties.join || []);
@@ -2431,22 +2536,35 @@
         this.constraintLogic = properties.constraintLogic;
       }
       getPaths = function(root, depth) {
-        var cd, others, ret;
+        var cd, field, name, others, ret, subPaths;
         cd = _this.getPathInfo(root).getEndClass();
         ret = [root];
-        others = !(cd && depth > 0) ? [] : _.flatten(_.map(cd.fields, function(r) {
+        subPaths = concatMap(function(r) {
           return getPaths("" + root + "." + r.name, depth - 1);
-        }));
-        return _.flatten(ret.concat(others));
+        });
+        others = cd && depth > 0 ? subPaths((function() {
+          var _ref10, _results;
+          _ref10 = cd.fields;
+          _results = [];
+          for (name in _ref10) {
+            field = _ref10[name];
+            _results.push(field);
+          }
+          return _results;
+        })()) : [];
+        return ret.concat(others);
       };
       this.on('change:views', removeIrrelevantSortOrders, this);
     }
 
     Query.prototype.removeFromSelect = function(unwanted) {
       var mapFn, so, uw, v;
-      unwanted = _.isString(unwanted) ? [unwanted] : unwanted || [];
-      mapFn = _.compose(this.expandStar, this.adjustPath);
-      unwanted = _.flatten((function() {
+      if (unwanted == null) {
+        unwanted = [];
+      }
+      unwanted = utils.stringList(unwanted);
+      mapFn = utils.compose(this.expandStar, this.adjustPath);
+      unwanted = utils.flatten((function() {
         var _i, _len, _results;
         _results = [];
         for (_i = 0, _len = unwanted.length; _i < _len; _i++) {
@@ -2456,23 +2574,23 @@
         return _results;
       })());
       this.sortOrder = (function() {
-        var _i, _len, _ref2, _ref3, _results;
-        _ref2 = this.sortOrder;
+        var _i, _len, _ref, _ref1, _results;
+        _ref = this.sortOrder;
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          so = _ref2[_i];
-          if (!(_ref3 = so.path, __indexOf.call(unwanted, _ref3) >= 0)) {
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          so = _ref[_i];
+          if (!(_ref1 = so.path, __indexOf.call(unwanted, _ref1) >= 0)) {
             _results.push(so);
           }
         }
         return _results;
       }).call(this);
       this.views = (function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = this.views;
+        var _i, _len, _ref, _results;
+        _ref = this.views;
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          v = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          v = _ref[_i];
           if (!(__indexOf.call(unwanted, v) >= 0)) {
             _results.push(v);
           }
@@ -2492,8 +2610,8 @@
       iscon = typeof con === 'string' ? (function(c) {
         return c.code === con;
       }) : (function(c) {
-        var _ref2, _ref3;
-        return (c.path === con.path) && (c.op === con.op) && (c.value === con.value) && (c.extraValue === con.extraValue) && (con.type === c.type) && (((_ref2 = c.values) != null ? _ref2.join('%%') : void 0) === ((_ref3 = con.values) != null ? _ref3.join('%%') : void 0));
+        var _ref, _ref1;
+        return (c.path === con.path) && (c.op === con.op) && (c.value === con.value) && (c.extraValue === con.extraValue) && (con.type === c.type) && (((_ref = c.values) != null ? _ref.join('%%') : void 0) === ((_ref1 = con.values) != null ? _ref1.join('%%') : void 0));
       });
       reduced = (function() {
         var _i, _len, _results;
@@ -2512,20 +2630,32 @@
       this.constraints = reduced;
       if (!silent) {
         this.trigger('change:constraints');
-        return this.trigger('removed:constraints', _.difference(orig, reduced));
+        return this.trigger('removed:constraints', utils.difference(orig, reduced));
       }
     };
 
     Query.prototype.addToSelect = function(views) {
-      var dups, p, toAdd, _i, _len;
-      views = _.isString(views) ? [views] : views || [];
-      toAdd = _.flatten([_.map(views, _.compose(this.expandStar, this.adjustPath))]);
+      var dups, mapFn, p, toAdd, v, x, _ref;
+      if (views == null) {
+        views = [];
+      }
+      views = utils.stringList(views);
+      mapFn = utils.compose(this.expandStar, this.adjustPath);
+      toAdd = utils.flatten((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = views.length; _i < _len; _i++) {
+          v = views[_i];
+          _results.push(mapFn(v));
+        }
+        return _results;
+      })());
       dups = (function() {
         var _i, _len, _results;
         _results = [];
         for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
           p = toAdd[_i];
-          if (__indexOf.call(this.views, p) >= 0 || _.indexOf(toAdd, p) !== _.lastIndexOf(toAdd, p)) {
+          if (__indexOf.call(this.views, p) >= 0) {
             _results.push(p);
           }
         }
@@ -2534,16 +2664,44 @@
       if (dups.length) {
         throw new Error("" + dups + " already in the select list");
       }
-      for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
-        p = toAdd[_i];
-        this.views.push(p);
+      dups = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
+          p = toAdd[_i];
+          if (((function() {
+            var _j, _len1, _results1;
+            _results1 = [];
+            for (_j = 0, _len1 = toAdd.length; _j < _len1; _j++) {
+              x = toAdd[_j];
+              if (x === p) {
+                _results1.push(x);
+              }
+            }
+            return _results1;
+          })()).length > 1) {
+            _results.push(p);
+          }
+        }
+        return _results;
+      })();
+      if (dups.length) {
+        throw new Error("" + dups + " specified multiple times as arguments to addToSelect");
       }
+      (_ref = this.views).push.apply(_ref, toAdd);
       return this.trigger('add:view change:views', toAdd);
     };
 
     Query.prototype.select = function(views) {
-      this.views = [];
-      this.addToSelect(views);
+      var oldViews;
+      oldViews = this.views.slice();
+      try {
+        this.views = [];
+        this.addToSelect(views);
+      } catch (e) {
+        this.views = oldViews;
+        utils.error(e);
+      }
       return this;
     };
 
@@ -2560,20 +2718,20 @@
     };
 
     Query.prototype.getPossiblePaths = function(depth) {
-      var _base, _ref2, _ref3;
+      var _base, _ref, _ref1;
       if (depth == null) {
         depth = 3;
       }
-      if ((_ref2 = this._possiblePaths) == null) {
+      if ((_ref = this._possiblePaths) == null) {
         this._possiblePaths = {};
       }
-      return (_ref3 = (_base = this._possiblePaths)[depth]) != null ? _ref3 : _base[depth] = getPaths(this.root, depth);
+      return (_ref1 = (_base = this._possiblePaths)[depth]) != null ? _ref1 : _base[depth] = getPaths(this.root, depth);
     };
 
     Query.prototype.getPathInfo = function(path) {
-      var adjusted, pi, _ref2;
+      var adjusted, pi, _ref;
       adjusted = this.adjustPath(path);
-      pi = (_ref2 = this.model) != null ? typeof _ref2.getPathInfo === "function" ? _ref2.getPathInfo(adjusted, this.getSubclasses()) : void 0 : void 0;
+      pi = (_ref = this.model) != null ? typeof _ref.getPathInfo === "function" ? _ref.getPathInfo(adjusted, this.getSubclasses()) : void 0 : void 0;
       if (pi && adjusted in this.displayNames) {
         pi.displayName = this.displayNames[adjusted];
       }
@@ -2582,9 +2740,11 @@
 
     Query.prototype.makePath = Query.prototype.getPathInfo;
 
-    scFold = _.compose(pairsToObj, filter(get(1)), invoke('map', function(c) {
+    toPathAndType = function(c) {
       return [c.path, c.type];
-    }));
+    };
+
+    scFold = utils.compose(pairsToObj, utils.map(toPathAndType), filter(get('type')));
 
     Query.prototype.getSubclasses = function() {
       return scFold(this.constraints);
@@ -2595,27 +2755,34 @@
     };
 
     Query.prototype.getViewNodes = function() {
-      var toParentNode,
+      var p, toParentNode,
         _this = this;
       toParentNode = function(v) {
         return _this.getPathInfo(v).getParent();
       };
-      return _.uniq(_.map(this.views, toParentNode), false, function(n) {
-        return n.toPathString();
-      });
+      return utils.uniqBy(String, (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.views;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          p = _ref[_i];
+          _results.push(toParentNode(p));
+        }
+        return _results;
+      }).call(this));
     };
 
     Query.prototype.isInView = function(path) {
-      var pi, pstr, _ref2;
+      var pi, pstr, _ref;
       pi = this.getPathInfo(path);
       if (!pi) {
         throw new Error("Invalid path: " + path);
       }
       if (pi.isAttribute()) {
-        return _ref2 = pi.toString(), __indexOf.call(this.views, _ref2) >= 0;
+        return _ref = pi.toString(), __indexOf.call(this.views, _ref) >= 0;
       } else {
         pstr = pi.toString();
-        return _.any(this.getViewNodes(), function(n) {
+        return utils.any(this.getViewNodes(), function(n) {
           return n.toString() === pstr;
         });
       }
@@ -2639,7 +2806,7 @@
           return (c.op != null) && (c.path === pi.toString() || pi.equals(_this.getPathInfo(c.path).getParent()));
         };
       }
-      return _.any(this.constraints, test);
+      return utils.any(this.constraints, test);
     };
 
     Query.prototype.canHaveMultipleValues = function(path) {
@@ -2650,11 +2817,11 @@
       var c, constrainedNodes, pi, viewNodes;
       viewNodes = this.getViewNodes();
       constrainedNodes = (function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = this.constraints;
+        var _i, _len, _ref, _results;
+        _ref = this.constraints;
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          c = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          c = _ref[_i];
           if (!(!(c.type != null))) {
             continue;
           }
@@ -2667,28 +2834,28 @@
         }
         return _results;
       }).call(this);
-      return _.uniq(viewNodes.concat(constrainedNodes), false, String);
+      return utils.uniqBy(String, viewNodes.concat(constrainedNodes));
     };
 
     Query.prototype.isInQuery = function(p) {
-      var c, pi, pstr, _i, _len, _ref2;
+      var c, pi, pstr, _i, _len, _ref;
       pi = this.getPathInfo(p);
       if (pi) {
         pstr = pi.toPathString();
-        _ref2 = this.views.concat((function() {
-          var _j, _len, _ref2, _results;
-          _ref2 = this.constraints;
+        _ref = this.views.concat((function() {
+          var _j, _len, _ref, _results;
+          _ref = this.constraints;
           _results = [];
-          for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
-            c = _ref2[_j];
+          for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+            c = _ref[_j];
             if (!(c.type != null)) {
               _results.push(c.path);
             }
           }
           return _results;
         }).call(this));
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          p = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          p = _ref[_i];
           if (0 === p.indexOf(pstr)) {
             return true;
           }
@@ -2706,13 +2873,13 @@
       }
       sought = pi.toString();
       nodes = this.getViewNodes();
-      return _.any(nodes, function(n) {
+      return utils.any(nodes, function(n) {
         return n.toPathString() === sought;
       });
     };
 
     Query.prototype.expandStar = function(path) {
-      var cd, expand, fn, n, pathStem;
+      var attrViews, cd, expand, fn, n, name, pathStem, starViews;
       if (/\*$/.test(path)) {
         pathStem = path.substr(0, path.lastIndexOf('.'));
         expand = function(x) {
@@ -2721,13 +2888,13 @@
         cd = this.getType(pathStem);
         if (/\.\*$/.test(path)) {
           if (cd && this.summaryFields[cd.name]) {
-            fn = _.compose(expand, decapitate);
+            fn = utils.compose(expand, decapitate);
             return (function() {
-              var _i, _len, _ref2, _results;
-              _ref2 = this.summaryFields[cd.name];
+              var _i, _len, _ref, _results;
+              _ref = this.summaryFields[cd.name];
               _results = [];
-              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-                n = _ref2[_i];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                n = _ref[_i];
                 if (!this.hasView(n)) {
                   _results.push(fn(n));
                 }
@@ -2735,12 +2902,17 @@
               return _results;
             }).call(this);
           }
-        }
-        if (/\.\*\*$/.test(path)) {
-          fn = _.compose(expand, function(a) {
-            return '.' + a.name;
-          });
-          return _.uniq(_.union(this.expandStar(pathStem + '.*'), _.map(cd.attributes, fn)));
+        } else if (/\.\*\*$/.test(path)) {
+          starViews = this.expandStar(pathStem + '.*');
+          attrViews = (function() {
+            var _results;
+            _results = [];
+            for (name in cd.attributes) {
+              _results.push(expand("." + name));
+            }
+            return _results;
+          })();
+          return utils.uniqBy(id, starViews.concat(attrViews));
         }
       }
       return path;
@@ -2751,7 +2923,8 @@
     };
 
     Query.prototype.hasView = function(v) {
-      return this.views && _.include(this.views, this.adjustPath(v));
+      var _ref;
+      return this.views && (_ref = this.adjustPath(v), __indexOf.call(this.views, _ref) >= 0);
     };
 
     Query.prototype.count = function(cont) {
@@ -2763,8 +2936,8 @@
     };
 
     Query.prototype.appendToList = function(target, cb) {
-      var name, req, toRun, updateTarget;
-      name = target && target.name ? target.name : '' + target;
+      var name, processor, req, toRun, updateTarget;
+      name = (target != null ? target.name : void 0) ? target.name : String(target);
       toRun = this.makeListQuery();
       req = {
         listName: name,
@@ -2773,18 +2946,19 @@
       updateTarget = (target != null ? target.name : void 0) ? (function(list) {
         return target.size = list.size;
       }) : (function() {});
-      return this.service.post('query/append/tolist', req).pipe(LIST_PIPE(this.service)).done(cb, updateTarget);
+      processor = LIST_PIPE(this.service);
+      return withCB(updateTarget, cb, this.service.post('query/append/tolist', req).then(processor));
     };
 
     Query.prototype.makeListQuery = function() {
-      var n, toRun, _i, _len, _ref2;
+      var n, toRun, _i, _len, _ref;
       toRun = this.clone();
       if (toRun.views.length !== 1 || toRun.views[0] === null || !toRun.views[0].match(/\.id$/)) {
         toRun.select(['id']);
       }
-      _ref2 = this.getViewNodes();
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        n = _ref2[_i];
+      _ref = this.getViewNodes();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        n = _ref[_i];
         if (!this.isOuterJoined(n)) {
           if (!(toRun.isInView(n || toRun.isConstrained(n))) && (n.getEndClass().fields.id != null)) {
             toRun.addConstraint([n.append('id'), 'IS NOT NULL']);
@@ -2797,13 +2971,13 @@
     Query.prototype.saveAsList = function(options, cb) {
       var req, toRun;
       toRun = this.makeListQuery();
-      req = _.clone(options);
+      req = utils.copy(options);
       req.listName = req.listName || req.name;
       req.query = toRun.toXML();
       if (options.tags) {
         req.tags = options.tags.join(';');
       }
-      return this.service.post('query/tolist', req).pipe(LIST_PIPE(this.service)).done(cb);
+      return withCB(cb, this.service.post('query/tolist', req).then(LIST_PIPE(this.service)));
     };
 
     Query.prototype.summarise = function(path, limit, cont) {
@@ -2816,17 +2990,36 @@
       return this.summarise.apply(this, args);
     };
 
+    parseSummary = function(data) {
+      var isNumeric, r, stats, _i, _len, _ref, _ref1;
+      isNumeric = ((_ref = data.results[0]) != null ? _ref.max : void 0) != null;
+      _ref1 = data.results;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        r = _ref1[_i];
+        r.count = parseInt(r.count, 10);
+      }
+      stats = {
+        uniqueValues: data.uniqueValues,
+        filteredCount: data.filteredCount
+      };
+      if (isNumeric) {
+        stats = merge(stats, data.results[0]);
+      }
+      data.stats = stats;
+      return data;
+    };
+
     Query.prototype.filterSummary = function(path, term, limit, cont) {
-      var parse, req, toRun, _ref2;
+      var req, toRun, _ref;
       if (cont == null) {
         cont = (function() {});
       }
-      if (_.isFunction(limit)) {
-        _ref2 = [limit, null], cont = _ref2[0], limit = _ref2[1];
+      if (utils.isFunction(limit)) {
+        _ref = [limit, null], cont = _ref[0], limit = _ref[1];
       }
       path = this.adjustPath(path);
       toRun = this.clone();
-      if (!_.include(toRun.views, path)) {
+      if (__indexOf.call(toRun.views, path) < 0) {
         toRun.views.push(path);
       }
       req = {
@@ -2840,36 +3033,20 @@
       if (term) {
         req.filterTerm = term;
       }
-      parse = function(data) {
-        return Deferred(function() {
-          var results, stats, _ref3;
-          results = data.results.map(function(x) {
-            x.count = parseInt(x.count, 10);
-            return x;
-          });
-          stats = {
-            uniqueValues: data.uniqueValues
-          };
-          if ((((_ref3 = results[0]) != null ? _ref3.max : void 0) != null)) {
-            _.extend(stats, results[0]);
-          }
-          return this.resolve(results, stats, data.filteredCount);
-        });
-      };
-      return this.service.post('query/results', req).pipe(parse).done(cont);
+      return withCB(cont, this.service.post('query/results', req).then(parseSummary));
     };
 
     Query.prototype.clone = function(cloneEvents) {
-      var cloned, k, v, _ref2, _ref3;
+      var cloned, k, v, _ref, _ref1;
       cloned = new Query(this, this.service);
-      if ((_ref2 = cloned._callbacks) == null) {
+      if ((_ref = cloned._callbacks) == null) {
         cloned._callbacks = {};
       }
       if (cloneEvents) {
-        _ref3 = this._callbacks;
-        for (k in _ref3) {
-          if (!__hasProp.call(_ref3, k)) continue;
-          v = _ref3[k];
+        _ref1 = this._callbacks;
+        for (k in _ref1) {
+          if (!__hasProp.call(_ref1, k)) continue;
+          v = _ref1[k];
           cloned._callbacks[k] = v;
         }
         cloned.off('change:views', removeIrrelevantSortOrders, this);
@@ -2898,11 +3075,11 @@
     };
 
     Query.prototype.getSortDirection = function(path) {
-      var dir, so, _i, _len, _ref2;
+      var dir, so, _i, _len, _ref;
       path = this.adjustPath(path);
-      _ref2 = this.sortOrder;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        so = _ref2[_i];
+      _ref = this.sortOrder;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        so = _ref[_i];
         if (so.path === path) {
           dir = so.direction;
         }
@@ -2911,39 +3088,56 @@
     };
 
     Query.prototype.isOuterJoined = function(path) {
+      var dir, jp, _ref;
       path = this.adjustPath(path);
-      return _.any(this.joins, function(d, p) {
-        return d === 'OUTER' && path.indexOf(p) === 0;
-      });
+      _ref = this.joins;
+      for (jp in _ref) {
+        dir = _ref[jp];
+        if (dir === 'OUTER' && path.indexOf(jp) === 0) {
+          return true;
+        }
+      }
+      return false;
     };
 
     Query.prototype.getOuterJoin = function(path) {
-      var joinPaths,
+      var joinPaths, k,
         _this = this;
       path = this.adjustPath(path);
-      joinPaths = _.sortBy(_.keys(this.joins), get('length')).reverse();
-      return _.find(joinPaths, function(p) {
+      joinPaths = ((function() {
+        var _results;
+        _results = [];
+        for (k in this.joins) {
+          _results.push(k);
+        }
+        return _results;
+      }).call(this)).sort(function(a, b) {
+        return b.length - a.length;
+      });
+      return utils.find(joinPaths, function(p) {
         return _this.joins[p] === 'OUTER' && path.indexOf(p) === 0;
       });
     };
 
     Query.prototype._parse_sort_order = function(input) {
-      var direction, path, so;
+      var direction, k, path, so, v, _ref;
       so = input;
-      if (_.isString(input)) {
+      if (typeof input === 'string') {
         so = {
           path: input,
           direction: 'ASC'
         };
-      } else if (_.isArray(input)) {
+      } else if (utils.isArray(input)) {
         path = input[0], direction = input[1];
         so = {
           path: path,
           direction: direction
         };
       } else if (!(input.path != null)) {
-        path = _.keys(input)[0];
-        direction = _.values(input)[0];
+        for (k in input) {
+          v = input[k];
+          _ref = [k, v], path = _ref[0], direction = _ref[1];
+        }
         so = {
           path: path,
           direction: direction
@@ -2955,15 +3149,15 @@
     };
 
     Query.prototype.addOrSetSortOrder = function(so) {
-      var currentDirection, oe, _i, _len, _ref2;
+      var currentDirection, oe, _i, _len, _ref;
       so = this._parse_sort_order(so);
       currentDirection = this.getSortDirection(so.path);
       if (!(currentDirection != null)) {
         return this.addSortOrder(so);
       } else if (currentDirection !== so.direction) {
-        _ref2 = this.sortOrder;
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          oe = _ref2[_i];
+        _ref = this.sortOrder;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          oe = _ref[_i];
           if (oe.path === so.path) {
             oe.direction = so.direction;
           }
@@ -2990,7 +3184,7 @@
 
     Query.prototype.addJoins = function(joins) {
       var j, k, v, _i, _len, _results, _results1;
-      if (_.isArray(joins)) {
+      if (utils.isArray(joins)) {
         _results = [];
         for (_i = 0, _len = joins.length; _i < _len; _i++) {
           j = joins[_i];
@@ -3011,16 +3205,16 @@
     };
 
     Query.prototype.addJoin = function(join) {
-      var _ref2, _ref3, _ref4;
-      if (_.isString(join)) {
+      var _ref, _ref1, _ref2;
+      if (typeof join === 'string') {
         join = {
           path: join,
           style: 'OUTER'
         };
       }
       join.path = this.adjustPath(join.path);
-      join.style = (_ref2 = (_ref3 = join.style) != null ? _ref3.toUpperCase() : void 0) != null ? _ref2 : join.style;
-      if (_ref4 = join.style, __indexOf.call(Query.JOIN_STYLES, _ref4) < 0) {
+      join.style = (_ref = (_ref1 = join.style) != null ? _ref1.toUpperCase() : void 0) != null ? _ref : join.style;
+      if (_ref2 = join.style, __indexOf.call(Query.JOIN_STYLES, _ref2) < 0) {
         throw new Error("Invalid join style: " + join.style);
       }
       this.joins[join.path] = join.style;
@@ -3047,7 +3241,7 @@
       var c, con, path, _fn, _i, _len,
         _this = this;
       this.__silent__ = true;
-      if (_.isArray(constraints)) {
+      if (utils.isArray(constraints)) {
         for (_i = 0, _len = constraints.length; _i < _len; _i++) {
           c = constraints[_i];
           this.addConstraint(c);
@@ -3067,7 +3261,7 @@
     };
 
     Query.prototype.addConstraint = function(constraint) {
-      if (_.isArray(constraint)) {
+      if (utils.isArray(constraint)) {
         constraint = interpretConArray(constraint);
       } else {
         constraint = copyCon(constraint);
@@ -3094,11 +3288,11 @@
     Query.prototype.getSorting = function() {
       var oe;
       return ((function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = this.sortOrder;
+        var _i, _len, _ref, _results;
+        _ref = this.sortOrder;
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          oe = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          oe = _ref[_i];
           _results.push("" + oe.path + " " + oe.direction);
         }
         return _results;
@@ -3108,11 +3302,11 @@
     Query.prototype.getConstraintXML = function() {
       var c, toSerialise;
       toSerialise = (function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = this.constraints;
+        var _i, _len, _ref, _results;
+        _ref = this.constraints;
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          c = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          c = _ref[_i];
           if (!(c.type != null) || this.isInQuery(c.path)) {
             _results.push(c);
           }
@@ -3131,11 +3325,11 @@
     Query.prototype.getJoinXML = function() {
       var p, s, strs;
       strs = (function() {
-        var _ref2, _results;
-        _ref2 = this.joins;
+        var _ref, _results;
+        _ref = this.joins;
         _results = [];
-        for (p in _ref2) {
-          s = _ref2[p];
+        for (p in _ref) {
+          s = _ref[p];
           if (this.isInQuery(p) && s === 'OUTER') {
             _results.push("<join path=\"" + p + "\" style=\"OUTER\"/>");
           }
@@ -3180,21 +3374,21 @@
         constraintLogic: this.constraintLogic,
         from: this.root,
         select: (function() {
-          var _i, _len, _ref2, _results;
-          _ref2 = this.views;
+          var _i, _len, _ref, _results;
+          _ref = this.views;
           _results = [];
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            v = _ref2[_i];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            v = _ref[_i];
             _results.push(headLess(v));
           }
           return _results;
         }).call(this),
         orderBy: (function() {
-          var _i, _len, _ref2, _ref3, _results;
-          _ref2 = this.sortOrder;
+          var _i, _len, _ref, _ref1, _results;
+          _ref = this.sortOrder;
           _results = [];
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            _ref3 = _ref2[_i], path = _ref3.path, direction = _ref3.direction;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            _ref1 = _ref[_i], path = _ref1.path, direction = _ref1.direction;
             _results.push({
               path: headLess(path),
               direction: direction
@@ -3203,11 +3397,11 @@
           return _results;
         }).call(this),
         joins: (function() {
-          var _ref2, _results;
-          _ref2 = this.joins;
+          var _ref, _results;
+          _ref = this.joins;
           _results = [];
-          for (path in _ref2) {
-            style = _ref2[path];
+          for (path in _ref) {
+            style = _ref[path];
             if (style === 'OUTER') {
               _results.push(headLess(path));
             }
@@ -3215,11 +3409,11 @@
           return _results;
         }).call(this),
         where: (function() {
-          var _i, _len, _ref2, _results;
-          _ref2 = this.constraints;
+          var _i, _len, _ref, _results;
+          _ref = this.constraints;
           _results = [];
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            c = _ref2[_i];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            c = _ref[_i];
             _results.push(conToJSON(c));
           }
           return _results;
@@ -3233,11 +3427,11 @@
         query: this.toXML(),
         lang: lang
       };
-      return this.service.post('query/code', req).pipe(this.service.VERIFIER).pipe(get('code')).done(cb);
+      return withCB(cb, this.service.post('query/code', req).then(this.service.VERIFIER).then(get('code')));
     };
 
     Query.prototype.save = function(name, cb) {
-      var req,
+      var req, setName,
         _this = this;
       if (name != null) {
         this.name = name;
@@ -3249,26 +3443,27 @@
         type: 'POST',
         dataType: 'json'
       };
-      return this.service.doReq(req).pipe(this.service.VERIFIER).pipe(get('name')).done(cb, function(name) {
+      setName = function(name) {
         return _this.name = name;
-      });
+      };
+      return withCB(cb, setName, this.service.doReq(req).then(this.service.VERIFIER).then(get('name')));
     };
 
     Query.prototype.getCodeURI = function(lang) {
-      var req, _ref2;
+      var req, _ref;
       req = {
         query: this.toXML(),
         lang: lang,
         format: 'text'
       };
-      if (((_ref2 = this.service) != null ? _ref2.token : void 0) != null) {
+      if (((_ref = this.service) != null ? _ref.token : void 0) != null) {
         req.token = this.service.token;
       }
       return "" + this.service.root + "query/code?" + (toQueryString(req));
     };
 
     Query.prototype.getExportURI = function(format) {
-      var req, _ref2;
+      var req, _ref;
       if (format == null) {
         format = 'tab';
       }
@@ -3279,18 +3474,16 @@
         query: this.toXML(),
         format: format
       };
-      if (((_ref2 = this.service) != null ? _ref2.token : void 0) != null) {
+      if (((_ref = this.service) != null ? _ref.token : void 0) != null) {
         req.token = this.service.token;
       }
       return "" + this.service.root + "query/results?" + (toQueryString(req));
     };
 
     Query.prototype.fetchQID = function(cb) {
-      return this.service.post('queries', {
+      return withCB(cb, this.service.post('queries', {
         query: this.toXML()
-      }).then(function(resp) {
-        return resp.id;
-      }).done(cb);
+      }).then(get('id')));
     };
 
     addPI = function(p) {
@@ -3301,16 +3494,16 @@
       var isSuitable, toRun;
       toRun = this.makeListQuery();
       isSuitable = function(p) {
-        return _.any(types, function(t) {
+        return utils.any(types, function(t) {
           return p.isa(t);
         });
       };
       toRun.views = take(n)((function() {
-        var _i, _len, _ref2, _results;
-        _ref2 = this.getViewNodes();
+        var _i, _len, _ref, _results;
+        _ref = this.getViewNodes();
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          n = _ref2[_i];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          n = _ref[_i];
           if (isSuitable(n)) {
             _results.push(addPI(n));
           }
@@ -3337,82 +3530,86 @@
 
   })();
 
-  Query.ATTRIBUTE_OPS = _.union(Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS);
+  union = fold(function(xs, ys) {
+    return xs.concat(ys);
+  });
 
-  Query.REFERENCE_OPS = _.union(Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS);
+  Query.ATTRIBUTE_OPS = union([Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS]);
 
-  _ref2 = Query.BIO_FORMATS;
+  Query.REFERENCE_OPS = union([Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS]);
+
+  _ref = Query.BIO_FORMATS;
   _fn = function(f) {
     var getMeth, reqMeth, uriMeth;
     reqMeth = "_" + f + "_req";
     getMeth = "get" + (f.toUpperCase());
     uriMeth = getMeth + "URI";
     Query.prototype[getMeth] = function(opts, cb) {
-      var req, v, _ref3;
+      var req, v, _ref1;
       if (opts == null) {
         opts = {};
       }
       if (cb == null) {
         cb = function() {};
       }
-      if (_.isFunction(opts)) {
-        _ref3 = [{}, opts], opts = _ref3[0], cb = _ref3[1];
+      if (utils.isFunction(opts)) {
+        _ref1 = [{}, opts], opts = _ref1[0], cb = _ref1[1];
       }
       if ((opts != null ? opts.view : void 0) != null) {
         opts.view = (function() {
-          var _j, _len1, _ref4, _results;
-          _ref4 = opts.view;
+          var _j, _len1, _ref2, _results;
+          _ref2 = opts.view;
           _results = [];
-          for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-            v = _ref4[_j];
+          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+            v = _ref2[_j];
             _results.push(this.getPathInfo(v).toString());
           }
           return _results;
         }).call(this);
       }
-      req = _.extend(this[reqMeth](), opts);
-      return this.service.post('query/results/' + f, req).done(cb);
+      req = merge(this[reqMeth](), opts);
+      return withCB(cb, this.service.post('query/results/' + f, req));
     };
     return Query.prototype[uriMeth] = function(opts, cb) {
-      var req, v, _ref3;
+      var req, v, _ref1;
       if (opts == null) {
         opts = {};
       }
-      if (_.isFunction(opts)) {
-        _ref3 = [{}, opts], opts = _ref3[0], cb = _ref3[1];
+      if (utils.isFunction(opts)) {
+        _ref1 = [{}, opts], opts = _ref1[0], cb = _ref1[1];
       }
       if ((opts != null ? opts.view : void 0) != null) {
         opts.view = (function() {
-          var _j, _len1, _ref4, _results;
-          _ref4 = opts.view;
+          var _j, _len1, _ref2, _results;
+          _ref2 = opts.view;
           _results = [];
-          for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-            v = _ref4[_j];
+          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+            v = _ref2[_j];
             _results.push(this.getPathInfo(v).toString());
           }
           return _results;
         }).call(this);
       }
-      req = _.extend(this[reqMeth](), opts);
+      req = merge(this[reqMeth](), opts);
       if (this.service.token != null) {
         req.token = this.service.token;
       }
       return "" + this.service.root + "query/results/" + f + "?" + (toQueryString(req));
     };
   };
-  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-    f = _ref2[_i];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    f = _ref[_i];
     _fn(f);
   }
 
   _get_data_fetcher = function(server_fn) {
     return function() {
-      var cbs, page, x, _ref3;
+      var cbs, page, x, _ref1;
       page = arguments[0], cbs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       if (this.service[server_fn]) {
         if (!(page != null)) {
           page = {};
-        } else if (_.isFunction(page)) {
+        } else if (utils.isFunction(page)) {
           page = {};
           cbs = (function() {
             var _j, _len1, _results;
@@ -3424,11 +3621,11 @@
             return _results;
           }).apply(this, arguments);
         }
-        _.defaults(page, {
+        page = merge({
           start: this.start,
           size: this.maxRows
-        });
-        return (_ref3 = this.service)[server_fn].apply(_ref3, [this, page].concat(__slice.call(cbs)));
+        }, page);
+        return (_ref1 = this.service)[server_fn].apply(_ref1, [this, page].concat(__slice.call(cbs)));
       } else {
         throw new Error("Service does not provide '" + server_fn + "'.");
       }
@@ -3445,36 +3642,34 @@
 }).call(this);
 
 (function() {
-  var $, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, Deferred, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDENTITY, IDResolutionJob, IS_NODE, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, funcutils, get, getListFinder, http, intermine, invoke, jQuery, omap, pairsToObj, set, success, to_query_string, _, __root__, _get_or_fetch,
+  var DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDENTITY, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, intermine, invoke, merge, omap, pairsToObj, set, success, to_query_string, utils, version, withCB, _get_or_fetch,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
     __slice = [].slice;
 
-  IS_NODE = typeof exports !== 'undefined';
+  Promise = require('promise');
 
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
+  Model = require('./model').Model;
 
-  if (IS_NODE) {
-    _ = require('underscore')._;
-    Deferred = ($ = require('underscore.deferred')).Deferred;
-    Model = require('./model').Model;
-    Query = require('./query').Query;
-    List = require('./lists').List;
-    User = require('./user').User;
-    IDResolutionJob = require('./id-resolution-job').IDResolutionJob;
-    funcutils = require('./util');
-    to_query_string = require('querystring').stringify;
-    http = require('./http');
-    intermine = exports;
-  } else {
-    _ = __root__._, jQuery = __root__.jQuery, intermine = __root__.intermine;
-    Deferred = ($ = jQuery).Deferred;
-    to_query_string = function(obj) {
-      return jQuery.param(obj, true);
-    };
-    Model = intermine.Model, Query = intermine.Query, List = intermine.List, User = intermine.User, IDResolutionJob = intermine.IDResolutionJob, funcutils = intermine.funcutils, http = intermine.http;
-  }
+  Query = require('./query').Query;
 
-  pairsToObj = funcutils.pairsToObj, omap = funcutils.omap, get = funcutils.get, set = funcutils.set, invoke = funcutils.invoke, success = funcutils.success, error = funcutils.error, REQUIRES_VERSION = funcutils.REQUIRES_VERSION, dejoin = funcutils.dejoin;
+  List = require('./lists').List;
+
+  User = require('./user').User;
+
+  IDResolutionJob = require('./id-resolution-job').IDResolutionJob;
+
+  version = require('./version');
+
+  utils = require('./util');
+
+  to_query_string = utils.querystring;
+
+  http = require('./http');
+
+  intermine = exports;
+
+  withCB = utils.withCB, merge = utils.merge, pairsToObj = utils.pairsToObj, omap = utils.omap, get = utils.get, set = utils.set, invoke = utils.invoke, success = utils.success, error = utils.error, REQUIRES_VERSION = utils.REQUIRES_VERSION, dejoin = utils.dejoin;
 
   VERSIONS = {};
 
@@ -3533,36 +3728,30 @@
   SUFFIX = "/service/";
 
   DEFAULT_ERROR_HANDLER = function(e) {
-    var args, _ref;
-    if (IS_NODE && (e.stack != null)) {
-      return console.error(e.stack);
-    } else {
-      args = (e != null ? e.stack : void 0) ? [e.stack] : arguments;
-      if (typeof console !== "undefined" && console !== null) {
-        return (_ref = console.error || console.log) != null ? _ref.apply(console, args) : void 0;
-      }
-    }
+    var f, _ref;
+    f = (_ref = console.error) != null ? _ref : console.log;
+    return f(e);
   };
 
   _get_or_fetch = function(propName, store, path, key, cb) {
-    var prop, value, _ref,
+    var promise, value, _ref,
       _this = this;
-    prop = (_ref = this[propName]) != null ? _ref : this[propName] = this.useCache && (value = store[this.root]) ? success(value) : this.get(path).pipe(get(key)).done(function(x) {
+    promise = (_ref = this[propName]) != null ? _ref : this[propName] = this.useCache && (value = store[this.root]) ? success(value) : this.get(path).then(get(key)).then(function(x) {
       return store[_this.root] = x;
     });
-    return prop.done(cb);
+    return promise.nodeify(cb);
   };
 
   getListFinder = function(name) {
     return function(lists) {
-      return Deferred(function() {
+      return new Promise(function(resolve, reject) {
         var list;
-        if (list = _.find(lists, function(l) {
+        if (list = utils.find(lists, function(l) {
           return l.name === name;
         })) {
-          return this.resolve(list);
+          return resolve(list);
         } else {
-          return this.reject("List \"" + name + "\" not found among: " + (lists.map(get('name'))));
+          return reject("List \"" + name + "\" not found among: " + (lists.map(get('name'))));
         }
       });
     };
@@ -3572,7 +3761,7 @@
     if (prop == null) {
       prop = 'listName';
     }
-    return _.compose(service.fetchList, get(prop));
+    return utils.compose(service.fetchList, get(prop));
   };
 
   TO_NAMES = function(xs) {
@@ -3580,7 +3769,7 @@
     if (xs == null) {
       xs = [];
     }
-    _ref = (_.isArray(xs) ? xs : [xs]);
+    _ref = (utils.isArray(xs) ? xs : [xs]);
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       x = _ref[_i];
@@ -3595,7 +3784,7 @@
     Service.prototype.doReq = http.doReq;
 
     function Service(_arg) {
-      var loc, noCache, _ref, _ref1,
+      var noCache, _ref, _ref1,
         _this = this;
       this.root = _arg.root, this.token = _arg.token, this.errorHandler = _arg.errorHandler, this.DEBUG = _arg.DEBUG, this.help = _arg.help, noCache = _arg.noCache;
       this.createList = __bind(this.createList, this);
@@ -3659,17 +3848,9 @@
         this.help = 'no.help.available@dev.null';
       }
       this.useCache = !noCache;
-      loc = IS_NODE ? '' : location.protocol + '//' + location.host;
       this.getFormat = function(intended) {
         if (intended == null) {
           intended = 'json';
-        }
-        if (!/jsonp/.test(intended)) {
-          if (!(IS_NODE || jQuery.support.cors)) {
-            if (loc.substring(0, _this.root.length) !== _this.root) {
-              return intended.replace('json', 'jsonp');
-            }
-          }
         }
         return intended;
       };
@@ -3703,10 +3884,10 @@
       if (indiv == null) {
         indiv = false;
       }
-      if (_.isArray(cb)) {
+      if (utils.isArray(cb)) {
         _ref = cb, cb = _ref[0], errBack = _ref[1];
       }
-      if (_.isArray(data)) {
+      if (utils.isArray(data)) {
         data = pairsToObj(data);
       }
       url = this.root + path;
@@ -3743,10 +3924,12 @@
     Service.prototype.enrichment = function(opts, cb) {
       var _this = this;
       return REQUIRES_VERSION(this, 8, function() {
-        return _this.get(ENRICHMENT_PATH, _.defaults({}, opts, {
+        var req;
+        req = merge({
           maxp: 0.05,
           correction: 'Holm-Bonferroni'
-        })).pipe(get('results')).done(cb);
+        }, opts);
+        return withCB(cb, _this.get(ENRICHMENT_PATH, req).then(get('results')));
       });
     };
 
@@ -3759,30 +3942,27 @@
         cb = (function() {});
       }
       return REQUIRES_VERSION(this, 9, function() {
-        var k, parse, req, v, _ref, _ref1;
-        if (_.isFunction(options)) {
+        var k, req, v, _ref;
+        if (utils.isFunction(options)) {
           _ref = [options, {}], cb = _ref[0], options = _ref[1];
         }
-        if (_.isString(options)) {
-          options = {
+        if (typeof options === 'string') {
+          req = {
             q: options
           };
-        }
-        req = _.defaults({}, options, {
-          q: ''
-        });
-        delete req.facets;
-        if (options.facets) {
-          _ref1 = options.facets;
-          for (k in _ref1) {
-            v = _ref1[k];
-            req["facet_" + k] = v;
+        } else {
+          req = {
+            q: options.q
+          };
+          for (k in options) {
+            if (!__hasProp.call(options, k)) continue;
+            v = options[k];
+            if (k !== 'q') {
+              req["facet_" + k] = v;
+            }
           }
         }
-        parse = function(response) {
-          return success(response.results, response.facets);
-        };
-        return _this.post(QUICKSEARCH_PATH, req).pipe(parse).done(cb);
+        return withCB(cb, _this.post(QUICKSEARCH_PATH, req));
       });
     };
 
@@ -3791,48 +3971,40 @@
       if (cb == null) {
         cb = (function() {});
       }
-      if (!q) {
-        return error("Not enough arguments");
-      } else if (q.toPathString != null) {
-        p = q.isClass() ? q.append('id') : q;
-        return this.pathValues(p, 'count').done(cb);
-      } else if (q.toXML != null) {
-        req = {
-          query: q.toXML(),
-          format: 'jsoncount'
-        };
-        return this.post(QUERY_RESULTS_PATH, req).pipe(get('count')).done(cb);
-      } else if (_.isString(q)) {
-        return this.fetchModel().pipe(invoke('makePath', q.replace(/\.\*$/, '.id'))).pipe(this.count).done(cb);
-      } else {
-        return this.query(q).pipe(this.count).done(cb);
-      }
+      return withCB(cb, !q ? error("Not enough arguments") : q.toPathString != null ? (p = q.isClass() ? q.append('id') : q, this.pathValues(p, 'count')) : q.toXML != null ? (req = {
+        query: q.toXML(),
+        format: 'jsoncount'
+      }, this.post(QUERY_RESULTS_PATH, req).then(get('count'))) : typeof q === 'string' ? this.fetchModel().then(invoke('makePath', q.replace(/\.\*$/, '.id'))).then(this.count) : this.query(q).then(this.count));
     };
 
     Service.prototype.findById = function(type, id, cb) {
-      return this.query({
+      return withCB(cb, this.query({
         from: type,
         select: ['**'],
         where: {
           id: id
         }
-      }).pipe(dejoin).pipe(invoke('records')).pipe(get(0)).done(cb);
+      }).then(dejoin).then(invoke('records')).then(get(0)));
     };
 
-    Service.prototype.find = function(type, term, cb) {
-      return this.query({
+    Service.prototype.find = function(type, term, context, cb) {
+      var extraValue, _ref;
+      if (utils.isFunction(extraValue)) {
+        _ref = [null, extraValue], extraValue = _ref[0], cb = _ref[1];
+      }
+      return withCB(cb, this.query({
         from: type,
         select: ['**'],
-        where: [[type, 'LOOKUP', term]]
-      }).pipe(dejoin).pipe(invoke('records')).done(cb);
+        where: [[type, 'LOOKUP', term, context]]
+      }).then(dejoin).then(invoke('records')));
     };
 
     Service.prototype.whoami = function(cb) {
       var _this = this;
       return REQUIRES_VERSION(this, 9, function() {
-        return _this.get(WHOAMI_PATH).pipe(get('user')).pipe(function(x) {
+        return withCB(cb, _this.get(WHOAMI_PATH).then(get('user')).then(function(x) {
           return new User(_this, x);
-        }).done(cb);
+        }));
       });
     };
 
@@ -3851,8 +4023,8 @@
         cb = (function() {});
       }
       return REQUIRES_VERSION(this, 6, function() {
-        var wanted, _pathValues;
-        if (_.isString(typeConstraints)) {
+        var wanted, _pathValues, _ref;
+        if (typeof typeConstraints === 'string') {
           wanted = typeConstraints;
           typeConstraints = {};
         }
@@ -3867,10 +4039,10 @@
             path: path.toString(),
             typeConstraints: JSON.stringify(path.subclasses)
           };
-          return _this.post(PATH_VALUES_PATH, req).pipe(get(wanted));
+          return _this.post(PATH_VALUES_PATH, req).then(get(wanted));
         };
         try {
-          return _this.fetchModel().pipe(invoke('makePath', path, path.subclasses || typeConstraints)).pipe(_pathValues).done(cb);
+          return withCB(cb, _this.fetchModel().then(invoke('makePath', path, (_ref = path.subclasses) != null ? _ref : typeConstraints)).then(_pathValues));
         } catch (e) {
           return error(e);
         }
@@ -3887,18 +4059,19 @@
         cb = (function() {});
       }
       if (q.toXML != null) {
-        if (_.isFunction(page)) {
+        if (utils.isFunction(page)) {
           _ref = [page, {}], cb = _ref[0], page = _ref[1];
         }
-        req = _.defaults({}, {
+        req = merge(page, {
           query: q.toXML(),
           format: format
-        }, page);
-        return this.post(path, req).pipe(function(resp) {
-          return success(resp.results, resp);
-        }).done(cb);
+        });
+        return this.post(path, req).then(function(resp) {
+          cb(resp.results, resp);
+          return resp.results;
+        });
       } else {
-        return this.query(q).pipe(function(query) {
+        return this.query(q).then(function(query) {
           return _this.doPagedRequest(query, path, page, format, cb);
         });
       }
@@ -3921,19 +4094,13 @@
       if (cb == null) {
         cb = (function() {});
       }
-      if (!(q != null)) {
-        return error("No query term supplied");
-      } else if ((q.descriptors != null) || _.isString(q)) {
-        return this.pathValues(q, opts, cb);
-      } else {
-        return this.query(q).then(function(query) {
-          if (query.views.length !== 1) {
-            return error("Expected one column, got " + q.views.length);
-          } else {
-            return _this.rows(query, opts).then(invoke('map', get(0))).done(cb);
-          }
-        });
-      }
+      return withCB(cb, !(q != null) ? error("No query term supplied") : (q.descriptors != null) || typeof q === 'string' ? this.pathValues(q, opts) : this.query(q).then(function(query) {
+        if (query.views.length !== 1) {
+          return error("Expected one column, got " + q.views.length);
+        } else {
+          return _this.rows(query, opts).then(invoke('map', get(0)));
+        }
+      }));
     };
 
     Service.prototype.tableRows = function(q, page, cb) {
@@ -3941,7 +4108,7 @@
     };
 
     Service.prototype.fetchTemplates = function(cb) {
-      return this.get(TEMPLATES_PATH).pipe(get('templates')).done(cb);
+      return this.get(TEMPLATES_PATH).then(get('templates')).done(cb);
     };
 
     Service.prototype.fetchLists = function(cb) {
@@ -3956,35 +4123,26 @@
       if (cb == null) {
         cb = (function() {});
       }
-      return this.fetchVersion().pipe(function(v) {
+      return this.fetchVersion().then(function(v) {
         var fn;
-        if (name && v < 13) {
-          return error("Finding lists by name on the server requires version 13. This is only " + v);
-        } else {
-          fn = function(ls) {
-            var data, _i, _len, _results;
-            _results = [];
-            for (_i = 0, _len = ls.length; _i < _len; _i++) {
-              data = ls[_i];
-              _results.push(new List(data, _this));
-            }
-            return _results;
-          };
-          return _this.get(LISTS_PATH, {
-            name: name
-          }).pipe(get('lists')).pipe(fn).done(cb);
-        }
+        return withCB(cb, name && v < 13 ? error("Finding lists by name on the server requires version 13. This is only " + v) : (fn = function(ls) {
+          var data, _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = ls.length; _i < _len; _i++) {
+            data = ls[_i];
+            _results.push(new List(data, _this));
+          }
+          return _results;
+        }, _this.get(LISTS_PATH, {
+          name: name
+        }).then(get('lists')).then(fn)));
       });
     };
 
     Service.prototype.fetchList = function(name, cb) {
       var _this = this;
-      return this.fetchVersion().pipe(function(v) {
-        if (v < 13) {
-          return _this.findLists().pipe(getListFinder(name)).done(cb);
-        } else {
-          return _this.findLists(name).pipe(get(0)).done(cb);
-        }
+      return this.fetchVersion().then(function(v) {
+        return withCB(cb, v < 13 ? _this.findLists().then(getListFinder(name)) : _this.findLists(name).then(get(0)));
       });
     };
 
@@ -4000,18 +4158,25 @@
         }
         return _results;
       };
-      return this.get(WITH_OBJ_PATH, opts).pipe(get('lists')).pipe(fn).done(cb);
+      return withCB(cb, this.get(WITH_OBJ_PATH, opts).then(get('lists')).then(fn));
     };
 
     Service.prototype.combineLists = function(operation, options, cb) {
-      var req, _ref;
-      req = _.pick(options, 'name', 'description');
-      if ((_ref = req.description) == null) {
-        req.description = "" + operation + " of " + (options.lists.join(', '));
+      var description, lists, name, req, tags, _ref, _ref1;
+      _ref = merge({
+        lists: [],
+        tags: []
+      }, options), name = _ref.name, lists = _ref.lists, tags = _ref.tags, description = _ref.description;
+      req = {
+        name: name,
+        description: description
+      };
+      if ((_ref1 = req.description) == null) {
+        req.description = "" + operation + " of " + (lists.join(', '));
       }
-      req.tags = (options.tags || []).join(';');
-      req.lists = (options.lists || []).join(';');
-      return this.get(LIST_OPERATION_PATHS[operation], req).pipe(LIST_PIPE(this)).done(cb);
+      req.tags = tags.join(';');
+      req.lists = lists.join(';');
+      return withCB(cb, this.get(LIST_OPERATION_PATHS[operation], req).then(LIST_PIPE(this)));
     };
 
     Service.prototype.merge = function() {
@@ -4056,7 +4221,7 @@
         lists: lists,
         references: references
       };
-      return this.post(SUBTRACT_PATH, req).pipe(LIST_PIPE(this)).done(cb);
+      return withCB(cb, this.post(SUBTRACT_PATH, req).then(LIST_PIPE(this)));
     };
 
     Service.prototype.fetchWidgets = function(cb) {
@@ -4074,14 +4239,14 @@
       var _this = this;
       return REQUIRES_VERSION(this, 8, function() {
         var _ref;
-        return ((_ref = _this.__wmap__) != null ? _ref : _this.__wmap__ = _this.fetchWidgets().then(toMapByName)).done(cb);
+        return withCB(cb, ((_ref = _this.__wmap__) != null ? _ref : _this.__wmap__ = _this.fetchWidgets().then(toMapByName)));
       });
     };
 
     Service.prototype.fetchModel = function(cb) {
-      return _get_or_fetch.call(this, 'model', MODELS, MODEL_PATH, 'model').pipe(Model.load).pipe(set({
+      return _get_or_fetch.call(this, 'model', MODELS, MODEL_PATH, 'model').then(Model.load).then(set({
         service: this
-      })).done(cb);
+      })).nodeify(cb);
     };
 
     Service.prototype.fetchSummaryFields = function(cb) {
@@ -4093,30 +4258,24 @@
     };
 
     Service.prototype.query = function(options, cb) {
-      var _this = this;
-      return $.when(this.fetchModel(), this.fetchSummaryFields()).pipe(function(m, sfs) {
-        var args, service;
-        args = _.extend({}, options, {
-          model: m,
-          summaryFields: sfs
-        });
-        service = _this;
-        return Deferred(function() {
-          this.fail(service.errorHandler);
-          this.done(cb);
-          try {
-            return this.resolve(new Query(args, service));
-          } catch (e) {
-            return this.reject(e);
-          }
-        });
-      });
+      var buildQuery, deps,
+        _this = this;
+      deps = [this.fetchModel(), this.fetchSummaryFields()];
+      buildQuery = function(_arg) {
+        var model, summaryFields;
+        model = _arg[0], summaryFields = _arg[1];
+        return new Query(merge(options, {
+          model: model,
+          summaryFields: summaryFields
+        }), _this);
+      };
+      return Promise.all(deps).then(buildQuery).nodeify(cb);
     };
 
-    Service.prototype.manageUserPreferences = function(method, data) {
+    Service.prototype.manageUserPreferences = function(method, data, cb) {
       var _this = this;
       return REQUIRES_VERSION(this, 11, function() {
-        return _this.makeRequest(method, PREF_PATH, data).pipe(get('preferences'));
+        return withCB(cb, _this.makeRequest(method, PREF_PATH, data).then(get('preferences')));
       });
     };
 
@@ -4131,7 +4290,7 @@
           data: JSON.stringify(opts),
           dataType: 'json'
         };
-        return _this.doReq(req).pipe(get('uid')).pipe(IDResolutionJob.create(_this)).done(cb);
+        return withCB(cb, _this.doReq(req).then(get('uid')).then(IDResolutionJob.create(_this)));
       });
     };
 
@@ -4148,13 +4307,13 @@
         cb = function() {};
       }
       adjust = function(x) {
-        return _.defaults({
+        return merge(x, {
           token: _this.token,
           tags: opts.tags || []
-        }, x);
+        });
       };
       req = {
-        data: _.isArray(ids) ? ids.map(function(x) {
+        data: utils.isArray(ids) ? ids.map(function(x) {
           return "\"" + x + "\"";
         }).join("\n") : ids,
         dataType: 'json',
@@ -4162,7 +4321,7 @@
         type: 'POST',
         contentType: 'text/plain'
       };
-      return this.doReq(req).pipe(LIST_PIPE(this)).done(cb);
+      return withCB(cb, this.doReq(req).then(LIST_PIPE(this)));
     };
 
     return Service;
@@ -4177,7 +4336,7 @@
     if (q.toXML != null) {
       return f.apply(this, arguments);
     } else {
-      return this.query(arguments[0]).then(function(query) {
+      return this.query(q).then(function(query) {
         return _this.rowByRow.apply(_this, [query].concat(__slice.call(args)));
       });
     }
@@ -4193,7 +4352,7 @@
     if (q.toXML != null) {
       return f.apply(this, arguments);
     } else {
-      return this.query(arguments[0]).then(function(query) {
+      return this.query(q).then(function(query) {
         return _this.recordByRecord.apply(_this, [query].concat(__slice.call(args)));
       });
     }
@@ -4226,5 +4385,11 @@
   };
 
   intermine.Service = Service;
+
+  intermine.Model = Model;
+
+  intermine.Query = Query;
+
+  intermine.imjs = version;
 
 }).call(this);

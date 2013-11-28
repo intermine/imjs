@@ -40,7 +40,7 @@ describe 'Query', ->
       service.query(query).then(invoke 'rows').then test(done), done
 
     it 'should return 46 rows, with a sum of 2688, and work with callbacks', (done) ->
-      service.query(query).then(invoke 'rows', test(done)).fail done
+      service.query(query).then(invoke 'rows', test(done)).then null, done
 
   describe '#eachRow', ->
 
@@ -57,11 +57,11 @@ describe 'Query', ->
 
     it 'should allow iteration with promises', (done) ->
       {check, count} = new Counter 46, 2688, done
-      service.query(query).then(invoke 'eachRow').fail(done).then (stream) ->
+      attach = (stream) ->
         stream.on 'data', count
         stream.on 'error', done
         stream.on 'end', check
-
+      service.query(query).then(invoke 'eachRow').then attach, done
 describe 'Service', ->
   @slow SLOW
 
@@ -75,11 +75,11 @@ describe 'Service', ->
   describe '#rows()', ->
 
     it 'accepts a query options object, and can run it as it would a query', (done) ->
-      service.rows(query).then(test(done), done).fail done
+      service.rows(query).then(test(done), done).then null, done
       
     it 'accepts a query options object, and can run it, accepting callbacks', (done) ->
       resPromise = service.rows query, test(done)
-      resPromise.fail done
+      resPromise.then null, done
 
   describe '#eachRow()', ->
 

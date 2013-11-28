@@ -1,6 +1,6 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
-RSVP = require 'rsvp'
+Promise = require 'promise'
 
 describe 'Query#appendToList', ->
 
@@ -16,7 +16,7 @@ describe 'Query#appendToList', ->
 
   describe 'target: List', ->
 
-    @beforeAll prepare -> clearList().then -> RSVP.all([
+    @beforeAll prepare -> clearList().then -> Promise.all([
       service.count(youngerEmployees),
       service.count(olderEmployees),
       service.query(youngerEmployees),
@@ -34,7 +34,7 @@ describe 'Query#appendToList', ->
 
   describe 'target: String', ->
 
-    @beforeAll prepare -> clearList().then -> RSVP.all([
+    @beforeAll prepare -> clearList().then -> Promise.all([
       service.count(youngerEmployees),
       service.count(olderEmployees),
       service.query(youngerEmployees),

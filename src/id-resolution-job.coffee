@@ -9,11 +9,10 @@
 # and browsers.
 #
 
-{defer}   = require 'rsvp'
 funcutils = require './util'
 intermine = exports
 
-{withCB, id, get, fold, concatMap} = funcutils
+{defer, withCB, id, get, fold, concatMap} = funcutils
 
 ONE_MINUTE = 60 * 1000
 
@@ -80,11 +79,11 @@ class IDResolutionJob
   # @return [Promise<Object>] A promise to yield the results.
   # @see Service#resolveIds
   poll: (onSuccess, onError, onProgress) ->
-    {promise, resolve, reject} = defer "id-resolution"
+    {promise, resolve, reject} = defer()
     promise.then onSuccess, onError
     notify = onProgress ? (->)
     resp = @fetchStatus()
-    resp.fail reject
+    resp.then null, reject
     backOff = @decay
     @decay = Math.min ONE_MINUTE, backOff * 1.25
     resp.then (status) =>
