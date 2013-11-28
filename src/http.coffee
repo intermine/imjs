@@ -1,10 +1,10 @@
-httpinvoke         = require 'httpinvoke'
 URL                = require 'url'
 JSONStream         = require 'JSONStream'
 http               = require 'http'
+qs                 = require 'querystring'
 {ACCEPT_HEADER}    = require './constants'
 {VERSION}          = require './version'
-{defer, withCB, merge, invoke} = utils = require('./util')
+{defer, merge, invoke} = utils = require('./util')
 
 # The user-agent string we will use to identify ourselves
 USER_AGENT = "node-http/imjs-#{ VERSION }"
@@ -19,6 +19,7 @@ URLENC = "application/x-www-form-urlencoded"
 # method 'x'.
 #
 # @param [String] x The method I'm thinking of using.
+# @return [String] y The method you should actually use.
 exports.getMethod = (x) -> x
 
 # Whether or not this service supports the given method
@@ -110,6 +111,10 @@ exports.doReq = (opts, iter) ->
   if url.method in [ 'POST', 'PUT' ]
     req.write postdata
   req.end()
+
+  if opts.timeout > 0
+    to = setTimeout (-> reject "Request timed out."), opts.timeout
+    promise.then -> cancelTimeout to
 
   return promise
 

@@ -16,14 +16,7 @@ cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))
 
 deferredTest = DT = (test) -> (args...) -> new Promise (resolve, reject) ->
-  try
-    ret = test args...
-    if ret and ret.then?
-      ret.then resolve, reject
-    else
-      resolve ret
-  catch e
-    reject e
+    resolve test args...
 
 after = (promises) ->
   if promises?.length then Promise.all(promises) else Promise.from(true)

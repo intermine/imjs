@@ -153,8 +153,9 @@ module.exports = function (grunt) {
           'dist/im.js': ['build/service.js']
         },
         options: {
-          noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
+          alias: ['build/http-browser.js:./http'],
           ignore: ['xmldom'],
+          noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
           standalone: 'intermine'
         }
       }

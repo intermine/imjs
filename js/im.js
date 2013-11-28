@@ -996,28 +996,29 @@
 }).call(this);
 
 (function() {
-  var DOMParser, domParser;
+  var DOMParser;
 
-  DOMParser = require('xmldom').DOMParser;
-
-  domParser = new DOMParser;
+  try {
+    DOMParser = window.DOMParser;
+  } catch (e) {
+    DOMParser = require('xmldom').DOMParser;
+  }
 
   exports.parse = function(xml) {
-    var ret;
-    if (!(xml != null ? xml.match('<.*>') : void 0)) {
-      xml = xml + '>';
+    var dom, parser;
+    if (!xml || typeof xml !== 'string') {
+      throw new Error("Expected a string - got " + xml);
     }
-    try {
-      if (xml) {
-        ret = domParser.parseFromString(xml, 'text/xml');
-      }
-    } catch (e) {
-      ret = void 0;
+    dom = (function() {
+      try {
+        parser = new DOMParser();
+        return parser.parseFromString(xml, 'text/xml');
+      } catch (_error) {}
+    })();
+    if ((!dom) || (!dom.documentElement) || dom.getElementsByTagName('parsererror').length) {
+      throw new Error("Invalid XML: " + xml);
     }
-    if ((!ret) || (!ret.documentElement) || (ret.getElementsByTagName('parsererror').length)) {
-      throw new Error('Invalid xml: ' + xml);
-    }
-    return ret;
+    return dom;
   };
 
 }).call(this);

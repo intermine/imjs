@@ -1,12 +1,17 @@
-{DOMParser} = require('xmldom')
-domParser   = new DOMParser
+try
+  DOMParser = window.DOMParser
+catch e
+  {DOMParser} = require('xmldom')
 
-exports.parse = (xml) -> # fn which is api compatible with jq behaviour
-  xml = xml + '>' unless xml?.match('<.*>') # Otherwise we enter an infinite loop. srsly
-  try
-    ret = domParser.parseFromString(xml, 'text/xml') if xml
-  catch e
-    ret = undefined
-  if (not ret) or (not ret.documentElement) or (ret.getElementsByTagName('parsererror').length)
-    throw new Error('Invalid xml: '  + xml)
-  return ret
+exports.parse = (xml) ->
+  if not xml or typeof xml isnt 'string'
+    throw new Error("Expected a string - got #{ xml }")
+
+  dom = try
+    parser = new DOMParser()
+    parser.parseFromString(xml, 'text/xml')
+
+  if (not dom) or (not dom.documentElement) or dom.getElementsByTagName('parsererror').length
+    throw new Error("Invalid XML: #{ xml }")
+
+  return dom
