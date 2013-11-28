@@ -3737,8 +3737,10 @@
   _get_or_fetch = function(propName, store, path, key, cb) {
     var promise, value, _ref,
       _this = this;
-    promise = (_ref = this[propName]) != null ? _ref : this[propName] = this.useCache && (value = store[this.root]) ? success(value) : this.get(path).then(get(key)).then(function(x) {
-      return store[_this.root] = x;
+    promise = (_ref = this[propName]) != null ? _ref : this[propName] = this.useCache && (value = store[this.root]) ? success(value) : this.get(path).then(function(x) {
+      var o;
+      o = x[key];
+      return store[_this.root] = o;
     });
     return promise.nodeify(cb);
   };

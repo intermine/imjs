@@ -211,9 +211,7 @@ module.exports = function (grunt) {
         token: "test-user-token"
       },
       expect: "../../components/expect/expect.js",
-      jquery: "../../components/jquery/jquery.js",
-      underscore: "../../components/underscore/underscore.js",
-      imjs: "../../js/im.js"
+      imjs: "../../dist/im.js"
     };
     var processed = grunt.template.process(templ.toString(), {data: obj});
     grunt.file.write(outf, processed);
@@ -238,8 +236,6 @@ module.exports = function (grunt) {
         token: grunt.option('token') || "test-user-token"
       },
       expect: "http://cdn.intermine.org/js/expect/latest/expect.js",
-      jquery: "http://code.jquery.com/jquery-1.9.1.min.js",
-      underscore: "http://cdn.intermine.org/js/underscore.js/1.3.3/underscore-min.js",
       imjs: "http://ci.intermine.org/job/imjs/lastSuccessfulBuild/artifact/js/im.js"
     };
     var processed = grunt.template.process(templ.toString(), {data: obj});
@@ -294,7 +290,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink']);
   grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit']);
-  grunt.registerTask('build', ['clean:build', 'compile', 'concat', 'uglify'])
+  grunt.registerTask('build', ['clean:build', 'compile', 'browserify', 'concat', 'uglify'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob']);
   grunt.registerTask('test', ['build', 'test-node', 'phantomjs']);
   grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])

@@ -4,5 +4,9 @@
     <script type="text/javascript" charset="UTF-8" src="dist/im.js"></script>
   </head>
   <body>
+      <script type="text/javascript">
+          print = console.log.bind(console, ">>");
+          raise = function (e) { console.error(e, e.stack) };
+      </script>
   </body>
 </html>

@@ -93,7 +93,10 @@ _get_or_fetch = (propName, store, path, key, cb) ->
   promise = @[propName] ?= if (@useCache and value = store[@root])
     success(value)
   else
-    @get(path).then(get key).then (x) => store[@root] = x
+    @get(path).then (x) =>
+      o = x[key]
+      store[@root] = o
+
   promise.nodeify cb
 
 # A private helper that produces a function that will read

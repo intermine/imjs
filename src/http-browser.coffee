@@ -1,6 +1,7 @@
-httpinvoke         = require 'httpinvoke'
-{ACCEPT_HEADER}    = require './constants'
-{error, merge}     = utils = require('./util')
+Promise                 = require 'promise'
+httpinvoke              = require 'httpinvoke'
+{ACCEPT_HEADER}         = require './constants'
+{success, error, merge} = utils = require('./util')
 
 # Pattern to match optional trailing commas
 PESKY_COMMA = /,\s*$/
@@ -22,7 +23,7 @@ exports.supports = -> true
 # The function to use when streaming results one by
 # one from the connection, rather than buffering them all
 # in memory.
-streaming = -> (data) -> 'on': (evt, cb) ->
+streaming = (data) -> 'on': (evt, cb) ->
   switch evt
     when 'data' then (cb res for res in data.results)
     when 'end' then cb()
@@ -39,6 +40,15 @@ exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->),
       return stream
 
     @makeRequest(method, path, req, null, true).then attach, eb
+
+check = (response) ->
+  if response.statusCode is 200
+    response.body
+  else
+    if response.body?.error?
+      throw new Error response.body.error
+    else
+      throw new Error "Bad response: #{ response.statusCode }"
 
 exports.doReq = (opts, iter) ->
   method = opts.type
@@ -59,18 +69,20 @@ exports.doReq = (opts, iter) ->
       postdata = undefined
     else
       headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
-      headers['Content-Length'] = postdata.length
 
   options =
     timeout: opts.timeout
     headers: headers
-    inputType: 'text'
-    input: postdata
     outputType: if isJSON then 'json' else 'text'
+    corsExposedHeaders: ['Content-Type'],
     converters:
       'text json': JSON.parse
 
-  resp = httpinvoke(url, method, options)
+  if postdata?
+    options.inputType = 'text'
+    options.input = postdata
+
+  resp = Promise.from(httpinvoke url, method, options).then check
   resp.then(opts.success, opts.error)
 
   if iter
