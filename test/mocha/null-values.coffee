@@ -7,7 +7,7 @@ should = require 'should'
 serviceIs13 = (service) -> service.fetchVersion().then (v) ->
   if v >= 13 then success(service) else error('Service must be at version 13')
 
-describe.skip 'Query', ->
+describe 'Query', ->
 
   describe 'summary of a path with nulls', ->
 
@@ -16,7 +16,7 @@ describe.skip 'Query', ->
     @beforeEach prepare -> serviceIs13(service).then (s) ->
       s.query(allEmployees).then(invoke 'summarise', 'end')
 
-    it 'should find lots of nulls', eventually ([top, rest...]) ->
+    it 'should find lots of nulls', eventually ({results: [top, rest...]}) ->
       should.not.exist top.item
 
   describe 'Now restricting to nulls with multi-value', ->
@@ -28,11 +28,11 @@ describe.skip 'Query', ->
     @beforeEach prepare -> serviceIs13(service).then (s) ->
       s.query(allEmployees).then(invoke 'summarise', 'end')
 
-    it 'should find lots of nulls', eventually ([top, rest...]) ->
+    it 'should find lots of nulls', eventually ({results: [top, rest...]}) ->
       should.not.exist top.item
 
-    it 'should find what we asked for', eventually (items) ->
-      items.length.should.equal 3
+    it 'should find what we asked for', eventually ({results}) ->
+      results.length.should.equal 3
 
   describe 'Now restricting to non-nulls with multi-value constraints', ->
 
@@ -43,11 +43,11 @@ describe.skip 'Query', ->
     @beforeEach prepare -> serviceIs13(service).then (s) ->
       s.query(allEmployees).then(invoke 'summarise', 'end')
 
-    it 'should not find any nulls', eventually (items) ->
-      for x in items
+    it 'should not find any nulls', eventually ({results}) ->
+      for x in results
         should.exist x.item
 
-    it 'should find something though', eventually (items) ->
-      items.length.should.be.above 0
+    it 'should find something though', eventually ({results}) ->
+      results.length.should.be.above 0
 
 
