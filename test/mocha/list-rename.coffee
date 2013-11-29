@@ -40,17 +40,18 @@ describe 'List', ->
     @beforeAll prepare cleanup
     @afterAll always cleanup
 
-    it 'should support the callback API', (done) -> @promise.then ->
-      test = (copy) -> (renamed) ->
-        copy.name.should.equal newName
-        copy.size.should.equal 4
-        should.exist renamed
-        renamed.name.should.equal newName
-        renamed.size.should.equal 4
-        done()
-      promise = service.fetchList(FAVS)
-        .then(invoke 'copy', {tags, name})
-        .then (copy) -> copy.rename newName, test copy
-
-      promise.then null, done
+    it 'should support the callback API', (done) ->
+      test = (copy) ->
+        copy.rename newName, (err, renamed) ->
+          return done err if err?
+          try
+            copy.name.should.equal newName
+            copy.size.should.equal 4
+            should.exist renamed
+            renamed.name.should.equal newName
+            renamed.size.should.equal 4
+            done()
+          catch e
+            done e
+      service.fetchList(FAVS).then(invoke 'copy', {tags, name}).done test, done
 

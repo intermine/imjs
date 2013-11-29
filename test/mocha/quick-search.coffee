@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{report, eventually} = require './lib/utils'
+{prepare, report, eventually} = require './lib/utils'
 
 describe 'Service#search', ->
 
@@ -9,7 +9,7 @@ describe 'Service#search', ->
   
     describe 'to look for everything', ->
 
-      @beforeAll (done) -> report done, @promise = service.search()
+      @beforeAll prepare -> service.search()
 
       it 'should find at least 100 things', eventually ({results}) ->
         results.length.should.be.above 99
@@ -19,7 +19,7 @@ describe 'Service#search', ->
 
     describe 'to look for David', ->
 
-      @beforeAll (done) -> report done, @promise = service.search 'david'
+      @beforeAll prepare -> service.search 'david'
 
       it 'should find david and his department', eventually ({results}) ->
         results.length.should.equal 2
@@ -32,7 +32,7 @@ describe 'Service#search', ->
 
     describe 'to look for David, with a request object', ->
 
-      @beforeAll (done) -> report done, @promise = service.search q: 'david'
+      @beforeAll prepare -> service.search q: 'david'
 
       it 'should find david and his department', eventually ({results}) ->
         results.length.should.equal 2
@@ -45,8 +45,7 @@ describe 'Service#search', ->
 
     describe 'searcing by a specific type', ->
 
-      @beforeAll (done) ->
-        report done, @promise = service.search q: 'david', Category: 'Department'
+      @beforeAll prepare -> service.search q: 'david', Category: 'Department'
 
       it "should find david's department", eventually ({results}) ->
         results.length.should.equal 1

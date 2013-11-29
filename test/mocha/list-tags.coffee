@@ -23,7 +23,11 @@ describe 'List', ->
     @beforeAll prepare -> service.fetchList(origList).then (l) ->
       list = l
       l.addTags(tags)
+
     @afterAll always -> service.fetchList(origList).then (l) -> l.removeTags(tags)
+
+    it 'should yield three tags', eventually (ret) ->
+      should.exist ret
 
     it 'should yield three tags', eventually (ret) ->
       ret.length.should.equal 3

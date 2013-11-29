@@ -9,32 +9,52 @@ listOpTest = ({method, expectedMember, lists, size}) ->
 
   {service} = new Fixture()
 
+  args =
+    tags: [method].concat(testTags)
+    name: namePrefix + method
+    lists: lists
+
+  clearList = clear service, args.name
+
   describe "a list created by #{ method }", ->
 
-    args =
-      tags: [method].concat(testTags)
-      name: namePrefix + method
-      lists: lists
+    describe 'using the promise api', ->
 
-    clearList = clear service, args.name
-    gotInputs = args.lists.map service.fetchList
+      gotInputs = args.lists.map service.fetchList
 
-    @slow 400
-    @afterAll always clearList
-    @beforeAll prepare -> clearList().then -> service[method] args
+      @slow 400
+      @afterAll always clearList
+      @beforeAll prepare -> clearList().then -> service[method] args
 
-    it "should have #{ size } members", eventually (list) ->
-      list.size.should.equal size
+      it "should have #{ size } members", eventually (list) ->
+        list.size.should.equal size
 
-    it "should be called #{ args.name }", eventually (list) ->
-      list.name.should.equal args.name
+      it "should be called #{ args.name }", eventually (list) ->
+        list.name.should.equal args.name
 
-    it "should contain #{ expectedMember }", eventually (list) ->
-      list.contents().then deferredTest (contents) ->
-        (x.name for x in contents).should.include expectedMember
+      it "should contain #{ expectedMember }", eventually (list) ->
+        list.contents().then deferredTest (contents) ->
+          (x.name for x in contents).should.include expectedMember
 
-    it 'should have the test tags', eventually (list) ->
-      list.hasTag(t).should.be.true for t in testTags
+      it 'should have the test tags', eventually (list) ->
+        list.hasTag(t).should.be.true for t in testTags
+
+    describe 'using the callback api', ->
+
+        @slow 400
+        @afterAll always clearList
+        @beforeAll always clearList
+
+        it 'should have the right size, name, and all the tags we specified', (done) ->
+          service[method] args, (err, list) ->
+            return done err if err?
+            try
+              list.size.should.equal size
+              list.name.should.equal args.name
+              list.hasTag(t).should.be.true for t in testTags
+              done()
+            catch e
+              done e
 
 describe 'List Operations', ->
 

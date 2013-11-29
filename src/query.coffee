@@ -680,12 +680,17 @@ class Query
       throw new Error("This query has no service with count functionality attached.")
 
   appendToList: (target, cb) ->
-    name = if (target?.name) then target.name else String target
+    if target?.name # Target is list.
+      name = target.name
+      updateTarget = (err, list) -> target.size = list.size unless err?
+    else
+      name = String target
+      updateTarget = null
     toRun = @makeListQuery()
     req =
       listName: name
       query: toRun.toXML()
-    updateTarget = if (target?.name) then ((list) -> target.size = list.size) else (->)
+
     processor = LIST_PIPE @service
 
     withCB updateTarget, cb, @service.post('query/append/tolist', req).then processor

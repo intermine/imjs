@@ -34,6 +34,15 @@ describe 'Service', ->
     it 'should find 46 older employees', promising service.count(olderEmployees), (c) ->
       c.should.equal 46
 
+    it 'should be able to use callbacks', (done) ->
+      service.count olderEmployees, (err, c) ->
+        return done err if err?
+        try
+          c.should.equal 46
+          done()
+        catch e
+          done e
+
     it 'should find 46 older employees with a query object',
       promising service.query(olderEmployees), (q) ->
         service.count(q).then deferredTest (c) -> c.should.equal 46

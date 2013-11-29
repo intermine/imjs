@@ -2,6 +2,8 @@
 Fixture = require './lib/fixture'
 Promise = require 'promise'
 
+{invoke} = Fixture.funcutils
+
 describe 'Query#appendToList', ->
 
   {service, olderEmployees, youngerEmployees} = new Fixture()
@@ -20,14 +22,15 @@ describe 'Query#appendToList', ->
       service.count(youngerEmployees),
       service.count(olderEmployees),
       service.query(youngerEmployees),
-      service.query(olderEmployees).then((q) -> q.saveAsList {name, tags})
-    ]).then ([yc, oc, yq, ol]) -> yq.appendToList(ol).then (al) -> [yc, oc, ol, al]
+      service.query(olderEmployees).then(invoke 'saveAsList', {name, tags})
+    ]).then ([yc, oc, yq, target]) ->
+      yq.appendToList(target).then (newState) -> [yc, oc, target, newState]
 
-    it 'should actually add items to the list', eventually ([yc, oc, list]) ->
-      list.size.should.be.above oc
+    it 'should actually add items to the list', eventually ([_, oc, orig]) ->
+      orig.size.should.be.above oc
 
-    it 'should in fact add all the youngsters', eventually ([yc, oc, list]) ->
-      list.size.should.equal yc + oc
+    it 'should in fact add all the youngsters', eventually ([yc, oc, orig]) ->
+      orig.size.should.equal yc + oc
 
     it 'should keep the input and output lists in sync', eventually ([_..., orig, appended]) ->
       orig.size.should.equal appended.size

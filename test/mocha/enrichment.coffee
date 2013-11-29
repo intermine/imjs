@@ -40,6 +40,21 @@ describe 'Service', ->
 
     it 'performs an enrichment calculation', eventually there_is_one_and_it_is_vikram
 
+  describe '#enrichment with callback', ->
+
+    it 'performs an enrichment calculation with a callback', (done) ->
+      opts =
+        list: 'My-Favourite-Employees'
+        widget: 'contractor_enrichment'
+        maxp: 1
+      service.enrichment opts, (err, results) ->
+        return done(err) if err?
+        try
+          there_is_one_and_it_is_vikram results
+          done()
+        catch e
+          done e
+
 describe 'Query', ->
 
   @slow SLOW

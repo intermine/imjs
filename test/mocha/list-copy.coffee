@@ -1,15 +1,14 @@
-{prepare, eventually, always, clear} = require './lib/utils'
+{prepare, after, eventually, always, clear} = require './lib/utils'
 should = require 'should'
 Fixture = require './lib/fixture'
-{success} = Fixture.funcutils
-once = require('underscore.deferred').when
+{invoke, success} = Fixture.funcutils
 
 describe 'List', ->
 
   {service} = new Fixture()
 
   @beforeAll always -> service.fetchLists().then (lists) ->
-    once (l.del() for l in lists when l.name.match(/_copy/) or l.hasTag('copy'))
+    after (l.del() for l in lists when l.name.match(/_copy/) or l.hasTag('copy'))
 
   @slow 400
 
@@ -103,15 +102,18 @@ describe 'List', ->
     @afterAll always cleanUp
 
     it 'should make a list with the right name and size', (done) ->
-      promise = @promise.then -> service.fetchList('My-Favourite-Employees').then (favs) ->
-        favs.copy name, (copy) ->
+      testCopy = invoke 'copy', name, (err, copy) ->
+        return done err if err?
+        try
           should.exist copy
           copy.size.should.equal 4
           copy.name.should.not.equal 'My-Favourite-Employees'
           copy.name.should.equal name
           done()
+        catch e
+          done e
 
-      promise.then null, done
+      service.fetchList('My-Favourite-Employees').done testCopy, done
 
   describe '#copy({name, tags}, cb)', ->
 
@@ -123,30 +125,40 @@ describe 'List', ->
     @afterAll always cleanUp
 
     it 'should make a list with the right name and size', (done) ->
-      promise = @promise.then -> service.fetchList('My-Favourite-Employees').then (favs) ->
-        favs.copy args, (copy) ->
+      testCopy = invoke 'copy', args, (err, copy) ->
+        return done err if err?
+        try
           should.exist copy
           copy.size.should.equal 4
           copy.name.should.not.equal 'My-Favourite-Employees'
           copy.name.should.equal args.name
           copy.hasTag(t).should.be.true for t in args.tags
           done()
+        catch e
+          done e
 
-      promise.then null, done
+      service.fetchList('My-Favourite-Employees').done testCopy, done
 
   describe '#copy(cb)', ->
 
-    promise = null
-    @afterAll always -> if promise? then promise.then((l) -> l.del()) else success()
+    made = {}
+    @afterAll always ->
+      if made.name?
+        service.fetchList(made.name).then(invoke 'del')
+      else
+        success()
 
     it 'should make a list with the right name and size', (done) ->
-      promise = @promise.then -> service.fetchList('My-Favourite-Employees').then (favs) ->
-        favs.copy (copy) ->
+      testCopy = invoke 'copy', (err, copy) ->
+        return done err if err?
+        try
           should.exist copy
+          made.name = copy.name
           copy.size.should.equal 4
           copy.name.should.not.equal 'My-Favourite-Employees'
           done()
+        catch e
+          done e
 
-      promise.then null, done
-
+      service.fetchList('My-Favourite-Employees').done testCopy, done
 

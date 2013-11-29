@@ -31,10 +31,12 @@ promising = (p, test) -> (done) -> report done, p.then DT test
 
 always = (fn) -> (done) -> fn().then (-> done()), (-> done())
 
-shouldFail = (fn) -> (done) ->
+shouldFail = (fn) -> shouldBeRejected fn()
+
+shouldBeRejected = (promise) -> (done) ->
   onErr = -> done()
   onSucc = (args...) -> done new Error "Expected failure, got: [#{ args.join(', ') }]"
-  fn().then onSucc, onErr
+  promise.then onSucc, onErr
 
 needs = (exp) -> (service) -> (fn) -> prepare -> service.fetchVersion().then (actual) ->
   if actual >= exp then fn service else error "Service at #{ actual }, must be >= #{ exp }"
@@ -50,6 +52,7 @@ module.exports = {
   prepare,
   always,
   shouldFail,
+  shouldBeRejected,
   needs
 }
 

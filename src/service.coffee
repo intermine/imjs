@@ -22,7 +22,7 @@ http           = require('./http')
 
 intermine = exports
 
-{withCB, merge, pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
+{withCB, map, merge, pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -251,7 +251,9 @@ class Service
   # @return [Promise<Array<Object>>] A promise to get results.
   enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
     req = merge {maxp: 0.05, correction: 'Holm-Bonferroni'}, opts
-    withCB cb, @get(ENRICHMENT_PATH, req).then get 'results'
+    @get(ENRICHMENT_PATH, req)
+      .then(get 'results')
+      .nodeify cb
 
   # Search for items in the database by any term or facet.
   #
@@ -319,12 +321,30 @@ class Service
   #   comma separated sub-terms. eg: "eve, zen, bib, r, H"
   # @param [(Array<Object>) ->] cb A callback that receives an Array of objects. (optional).
   # @return [Promise<Array<Object>>] A promise to yield an array of objects.
-  find: (type, term, context, cb) ->
-    if utils.isFunction extraValue
-      [extraValue, cb] = [null, extraValue]
+  lookup: (type, term, context, cb) ->
+    if utils.isFunction context
+      [context, cb] = [null, context]
     withCB cb, @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term, context]])
       .then(dejoin)
       .then(invoke 'records')
+
+  # Find the single object that matches the given term, or report an error if none is
+  # found, or more than one is found.
+  # @param [String] type The type of the object to find (eg: Gene)
+  # @param [String] term A search term to use. This may use wild-cards and
+  #   comma separated sub-terms. eg: "eve, zen, bib, r, H"
+  # @param [(Array<Object>) ->] cb A callback that receives an Array of objects. (optional).
+  # @return [Promise<Array<Object>>] A promise to yield an array of objects.
+  find: (type, term, context, cb) ->
+    if utils.isFunction context
+      [context, cb] = [null, context]
+    withCB cb, @lookup(type, term, context).then (found) ->
+      if not found? or found.length is 0
+        error "Nothing found"
+      else if found.length > 1
+        error "Multiple items found: #{ found.slice(0, 3) }..."
+      else
+        success found[0]
 
   # Retrieve information about the currently authenticated user.
   # @param [(User) ->] cb A callback the receives a User object.
@@ -344,10 +364,12 @@ class Service
   # @param [(Array<Object>|Number) ->] cb An optional callback.
   # @return [Promise<Array<Object>, Number>] A promise to return a list of objects with
   #   two properties ('count' and 'value').
-  pathValues: (path, typeConstraints = {}, cb = (->)) => REQUIRES_VERSION @, 6, =>
+  pathValues: (path, typeConstraints = {}, cb) => REQUIRES_VERSION @, 6, =>
     if typeof typeConstraints is 'string'
       wanted = typeConstraints
       typeConstraints = {}
+    if utils.isFunction(typeConstraints)
+      [typeConstraints, cb] = [cb, typeConstraints]
 
     wanted = 'results' unless wanted is 'count'
 
@@ -383,9 +405,8 @@ class Service
     if q.toXML?
       [cb, page] = [page, {}] if utils.isFunction page
       req = merge page, query: q.toXML(), format: format
-      @post(path, req).then (resp) ->
-        cb(resp.results, resp)
-        return resp.results
+      # TODO: Is there a good reason to want access to the envelope? How to expose...
+      withCB cb, @post(path, req).then get 'results'
     else
       @query(q).then((query) => @doPagedRequest(query, path, page, format, cb))
 
@@ -444,18 +465,20 @@ class Service
   values: (q, opts, cb) =>
     if utils.isFunction opts
       [cb, opts] = [opts, cb]
+
     resp = if not q?
       error "No query term supplied"
     else if q.descriptors? or typeof q is 'string'
-      @pathValues(q, opts).then(invoke 'map', get 'value')
+      @pathValues(q, opts).then(map get 'value')
     else if q.toXML?
       if q.views.length isnt 1
         error "Expected one column, got #{ q.views.length }"
       else
-        @rows(q, opts).then(invoke 'map', get 0)
+        @rows(q, opts).then(map get 0)
     else
       @query(q).then (query) => @values query, opts
-    resp.nodeify cb
+
+    withCB cb, resp
 
   # Get a page of results suitable for building the cells in a table.
   #

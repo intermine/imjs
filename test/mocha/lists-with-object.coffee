@@ -20,6 +20,21 @@ describe 'Service#fetchListsContaining', ->
     it 'should find "the great unknowns"', eventually (ls) ->
       (l.name for l in ls).should.include 'The great unknowns'
 
+  describe 'searching with the callback api', ->
+
+    it 'should still work', (done) ->
+      options =
+        type: 'Employee'
+        publicId: 'Brenda'
+      service.fetchListsContaining options, (err, lists) ->
+        return done err if err?
+        try
+          lists.length.should.equal 2
+          (l.name for l in lists).should.include 'The great unknowns'
+          done()
+        catch e
+          done e
+
   describe 'searching for internal ids', ->
 
     @beforeAll prepare ->

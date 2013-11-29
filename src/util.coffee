@@ -45,14 +45,16 @@ root.error = error = (e) -> new Promise (_, reject) -> reject new Error e
 # @return [Promise<args...>] A promise to resolve with the resolution.
 root.success = success = Promise.from
 
-# Attach a callback, yielding the original promise.
+# Attach a node-style callback (err, result), yielding the original promise.
 # @param f The callback
 # @param p The promise
 # @return [Promise] The promise
 root.withCB = (fs..., p) ->
-  for f in fs
-    p.then f
-  p
+  for f in fs when f? then do (f) ->
+    onSucc = (res) -> f null, res
+    onErr = (err) -> f err
+    p.then onSucc, onErr
+  return p
 
 root.fold = fold = (f) -> (init, xs) ->
   if arguments.length is 1
@@ -85,11 +87,15 @@ root.uniqBy = (f, xs) ->
   values
 
 root.any = (xs, f) ->
+  f ?= id
   for x in xs
     return true if f x
   return false
 
 root.find = (xs, f) ->
+  if arguments.length is 1
+    f = xs
+    return (xs) -> root.find xs, f
   for x in xs
     return x if f x
   return null
@@ -128,14 +134,12 @@ root.omap = (f) ->
 root.copy = root.omap (k, v) -> [k, v]
 
 root.partition = (f) -> (xs) ->
-  trues = []
-  falses = []
-  for x in xs
+  divide = fold ([trues, falses], x) ->
     if f x
-      trues.push x
+      [trues.concat([x]), falses]
     else
-      falses.push x
-  [trues, falses]
+      [trues, falses.concat([x])]
+  divide [[], []], xs
 
 # The identity function
 #

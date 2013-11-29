@@ -128,12 +128,14 @@ describe 'Service', ->
     @afterAll always clearUp
 
     it 'should support the callback API', (done) ->
-      promise = @promise.then -> service.complement opts, (list) ->
-        should.exist list
-        list.name.should.equal opts.name
-        list.size.should.equal 2
-        list.hasTag(t).should.be.true for t in tags
-        done()
-
-      promise.then null, done
+      service.complement opts, (err, list) ->
+        return done err if err?
+        try
+          should.exist list
+          list.name.should.equal opts.name
+          list.size.should.equal 2
+          list.hasTag(t).should.be.true for t in tags
+          done()
+        catch e
+          done e
 

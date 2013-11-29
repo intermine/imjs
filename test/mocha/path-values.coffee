@@ -29,6 +29,18 @@ describe 'Service', ->
     it 'should include Wernham-Hogg', eventually (values) ->
       (v.value for v in values).should.include 'Wernham-Hogg'
 
+  describe '#pathValues("Company.name", cb)', ->
+     
+    it 'should find WH in amongst the 7 companies', (done) ->
+      service.pathValues "Company.name", (err, values) ->
+        return done err if err?
+        try
+          values.length.should.equal 7
+          (v.value for v in values).should.include 'Wernham-Hogg'
+          done()
+        catch e
+          done e
+
   describe '#pathValues(Path("Company.name"))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
@@ -72,6 +84,20 @@ describe 'Service', ->
 
     it "should include B'wah Hah Hah", eventually (values) ->
       (v.value for v in values).should.include "Charles Miner"
+
+  describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"}, cb)', ->
+
+    it 'should find 6 CEOs, including Charles Miner', (done) ->
+      service.pathValues 'Department.employees.name', {'Department.employees': 'CEO'}, (e, vs) ->
+        return done e if e?
+        try
+          vs.length.should.equal 6
+          names = (v.value for v in vs)
+          names.should.not.include 'David Brent'
+          names.should.include "Charles Miner"
+          done()
+        catch err
+          done err
 
   describe '#pathValues(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 

@@ -18,6 +18,12 @@ class Fixture
             select: ['*']
             from: 'Employee'
 
+        @badQuery =
+          select: ['name']
+          from: 'Employee'
+          where:
+            id: 'foo'
+
         @olderEmployees =
             select: ['*']
             from: 'Employee'

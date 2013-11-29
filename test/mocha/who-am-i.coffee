@@ -19,10 +19,13 @@ describe 'Service', ->
   describe '#whoami(cb)', ->
 
     it 'should support the callback API', (done) ->
-      promise = service.whoami (user) ->
-        user.username.should.equal 'intermine-test-user'
-        done()
-      promise.then null, done
+      service.whoami (err, user) ->
+        done err if err?
+        try
+          user.username.should.equal 'intermine-test-user'
+          done()
+        catch e
+          done e
 
   describe '#fetchUser()', ->
 

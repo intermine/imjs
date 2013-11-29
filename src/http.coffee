@@ -4,7 +4,7 @@ http               = require 'http'
 qs                 = require 'querystring'
 {ACCEPT_HEADER}    = require './constants'
 {VERSION}          = require './version'
-{defer, merge, invoke} = utils = require('./util')
+{error, defer, merge, invoke} = utils = require('./util')
 
 # The user-agent string we will use to identify ourselves
 USER_AGENT = "node-http/imjs-#{ VERSION }"
@@ -31,9 +31,15 @@ exports.supports = -> true
 # in memory.
 streaming = (opts, resolve, reject) -> (resp) ->
   resp.pause() # Wait for handlers to attach...
-  stream = JSONStream.parse 'results.*'
-  resp.pipe(stream)
-  resolve stream
+  resp.on 'error', reject
+  if resp.statusCode isnt 200
+    errors = JSONStream.parse 'error'
+    resp.pipe errors
+    reject [resp.statusCode, errors]
+  else
+    results = JSONStream.parse 'results.*'
+    resp.pipe(results)
+    resolve results
 
 # Get a message that explains what went wrong.
 getMsg = ({type, url}, text, e, code) ->
@@ -77,8 +83,13 @@ exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->),
       stream.on 'end', onEnd
       setTimeout (-> stream.resume()), 3 # Allow handlers in promises to attach.
       return stream
-
-    @makeRequest(method, path, req, [null, eb], true).then attach, eb
+    readErrors = ([sc, errors]) ->
+      errors.on 'data', eb
+      errors.on 'error', eb
+      errors.on 'end', onEnd
+      errors.resume()
+      error sc
+    @makeRequest(method, path, req, null, true).then attach, readErrors
 
 exports.doReq = (opts, iter) ->
   {promise, resolve, reject} = defer()

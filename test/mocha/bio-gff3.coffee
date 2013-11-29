@@ -13,6 +13,7 @@ describe 'GFF3 Queries', ->
   service = new Service root: 'www.flymine.org/query'
 
   describe 'implicitly constrained', ->
+
     opts =
       from: 'Gene'
       select: ['symbol', 'pathways.name']

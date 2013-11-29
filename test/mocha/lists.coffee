@@ -17,13 +17,42 @@ describe 'Service', ->
       (l.name for l in lists).should.include 'My-Favourite-Employees'
 
 
-  describe '#fetchLists (lists) ->', ->
+  describe '#fetchLists (err, list) ->', ->
 
     it 'should find "My-Favourite-Employees"', (done) ->
-      promise = service.fetchLists (lists) ->
-        (l.name for l in lists).should.include 'My-Favourite-Employees'
-        done()
-      promise.then null, done
+      service.fetchLists (err, lists) ->
+        return done err if err?
+        try
+          (l.name for l in lists).should.include 'My-Favourite-Employees'
+          done()
+        catch e
+          done e
+
+  describe '#findLists name', ->
+
+    @beforeAll prepare -> service.findLists 'My-Favourite-Employees'
+
+    it 'should find one list', eventually (lists) ->
+      lists.length.should.equal 1
+
+    it 'should find the right list', eventually ([list]) ->
+      list.name.should.equal 'My-Favourite-Employees'
+
+    it 'should have 4 members', eventually ([list]) ->
+      list.size.should.equal 4
+
+  describe '#findLists name, (err, lists) ->', ->
+
+    it 'should find the right list', (done) ->
+
+      service.findLists 'My-Favourite-Employees', (err, lists) ->
+        return done err if err?
+        try
+          lists.length.should.equal 1
+          lists[0].size.should.equal 4
+          done()
+        catch e
+          done e
 
   describe '#fetchList()', ->
 
@@ -42,14 +71,15 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.include 'David Brent'
 
-  describe '#fetchList (list) ->', ->
+  describe '#fetchList (err, list) ->', ->
 
     it 'should find "My-Favourite-Employees"', (done) ->
-      promise = service.fetchList 'My-Favourite-Employees', (list) ->
-        should.exist list
-        list.name.should.equal 'My-Favourite-Employees'
-        list.size.should.equal 4
-        done()
-
-      promise.then null, done
-
+      service.fetchList 'My-Favourite-Employees', (err, list) ->
+        done err if err?
+        try
+          should.exist list
+          list.name.should.equal 'My-Favourite-Employees'
+          list.size.should.equal 4
+          done()
+        catch e
+          done e

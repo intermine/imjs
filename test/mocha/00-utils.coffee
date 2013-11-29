@@ -1,7 +1,96 @@
-utils = require '../../build/util'
-require 'should'
+should = require 'should'
+  
+even = (n) -> n % 2 is 0
+add = (a, b) -> a + b
+lengthOf = (x) -> x.length
 
 describe 'utils', ->
+
+  utils = require '../../build/util'
+
+  describe 'Type Checking', ->
+
+    {isFunction, isArray} = utils
+
+    describe 'A function', ->
+
+      f = (x) -> x * x
+
+      it 'should be a function', ->
+        isFunction(f).should.be.true
+
+      it 'should not be an array', ->
+        isArray(f).should.not.be.true
+
+    describe 'An object', ->
+
+      o = {}
+
+      it 'should not be a function', ->
+        isFunction(o).should.not.be.true
+      it 'should not be an array', ->
+        isArray(o).should.not.be.true
+
+    describe 'An array', ->
+
+      a = []
+
+      it 'should not be a function', ->
+        isFunction(a).should.not.be.true
+      it 'should be an array', ->
+        isArray(a).should.be.true
+
+    describe 'A regex', ->
+       
+      r = /foo/
+
+      it 'should not be a function', ->
+        isFunction(r).should.not.be.true
+      it 'should not be an array', ->
+        isArray(r).should.not.be.true
+
+    describe 'A date', ->
+
+      d = new Date
+
+      it 'should not be a function', ->
+        isFunction(d).should.not.be.true
+      it 'should not be an array', ->
+        isArray(d).should.not.be.true
+
+    describe 'A string', ->
+
+      s = "foo"
+
+      it 'should not be a function', ->
+        isFunction(s).should.not.be.true
+      it 'should not be an array', ->
+        isArray(s).should.not.be.true
+
+    describe 'A number', ->
+
+      n = 100
+
+      it 'should not be a function', ->
+        isFunction(n).should.not.be.true
+      it 'should not be an array', ->
+        isArray(n).should.not.be.true
+
+    describe 'A boolean', ->
+
+      b = true
+
+      it 'should not be a function', ->
+        isFunction(b).should.not.be.true
+      it 'should not be an array', ->
+        isArray(b).should.not.be.true
+
+    describe 'null', ->
+
+      it 'should not be a function', ->
+        isFunction(null).should.not.be.true
+      it 'should not be an array', ->
+        isArray(null).should.not.be.true
 
   describe 'isArray', ->
 
@@ -12,12 +101,6 @@ describe 'utils', ->
 
     it 'should agree that [1, 2, 3] is an array', ->
       isArray([1, 2, 3]).should.be.true
-
-    it 'should deny that {} is an array', ->
-      isArray({}).should.not.be.true
-
-    it 'should deny that null is an array', ->
-      isArray(null).should.not.be.true
 
   describe 'querystring', ->
 
@@ -56,7 +139,6 @@ describe 'utils', ->
 
     {curry} = utils
 
-    add = (a, b) -> a + b
     plusTwo = curry add, 2
     getFour = curry add, 2, 2
 
@@ -101,9 +183,9 @@ describe 'utils', ->
       it 'should equal 106', ->
         n.should.eql 106
 
-    describe 'the attempt to call sum with no arguments', -> 
+    describe 'the attempt to call sum with no arguments', ->
       attempt = -> sum()
-      it 'should throw and error', ->
+      it 'should throw an error', ->
         attempt.should.throw /null/
 
     describe 'the sum of a non-empty list', ->
@@ -138,7 +220,6 @@ describe 'utils', ->
 
     {filter} = utils
 
-    even = (n) -> n % 2 is 0
     evens = filter even
 
     describe 'the first 5 even numbers', ->
@@ -155,7 +236,6 @@ describe 'utils', ->
 
     describe 'using a hashable key', ->
 
-      lengthOf = (x) -> x.length
       uniqByLength = uniqBy lengthOf
       input = ["foo", "bar", "quux"]
 
@@ -181,4 +261,119 @@ describe 'utils', ->
 
       it 'should work as it would if curried', ->
         oneEvenOneOdd.should.eql [1, 2]
+
+  describe 'any', ->
+
+    {any} = utils
+
+    describe 'The first ten numbers', ->
+
+      firstTen = [1 .. 10]
+
+      it 'should contain a truthy value', ->
+        any(firstTen).should.be.true
+
+      it 'should contain an even number', ->
+        any(firstTen, even).should.be.true
+
+      it 'should not contain a number above ten', ->
+        aboveTen = (x) -> x > 10
+        any(firstTen, aboveTen).should.be.false
+
+  describe 'Searching in', ->
+
+    {find} = utils
+
+    describe 'The first ten numbers', ->
+
+      firstTen = [1 .. 10]
+
+      describe 'for even numbers', ->
+
+        findEven = find even
+
+        it 'should find two', ->
+          findEven(firstTen).should.equal 2
+
+      describe 'for numbers above ten', ->
+
+        findAboveTen = find (x) -> x > 10
+
+        it 'should not find anything', ->
+          should.not.exist findAboveTen firstTen
+
+  describe 'escape', ->
+
+    {escape} = utils
+
+    describe 'escaping "foo"', ->
+
+      escaped = escape "foo"
+
+      it 'should not have changed anything', ->
+        escaped.should.eql "foo"
+
+    describe 'escaping "foo said "bar\'s dumb", & walked off >.<"', ->
+
+      escaped = escape 'foo said "bar\'s dumb", & walked off >.<'
+
+      it 'should have escaped all the XML entities', ->
+        escaped.should.eql 'foo said &quot;bar&#x27;s dumb&quot;, &amp; walked off &gt;.&lt;'
+
+
+  describe 'omap', ->
+
+    {omap} = utils
+
+    describe 'an inverter', ->
+
+      invert = omap (k, v) -> [v, k]
+
+      it 'should invert objects', ->
+        invert(a: 'b', c: 'd').should.eql d: 'c', b: 'a'
+
+  describe 'copy', ->
+
+    {copy} = utils
+    original = a: 'b', c: 'd'
+
+    describe 'a copy of an object', ->
+
+      clone = copy original
+
+      it 'should be equal to its source', ->
+        clone.should.eql original
+
+    describe 'an altered clone', ->
+
+      clone = copy original
+      clone.e = 'f'
+
+      it 'should not be connected', ->
+        clone.should.not.eql original
+
+  describe 'partitioning', ->
+
+    {partition} = utils
+
+    describe 'the first ten numbers into evens and odds', ->
+
+      firstTen = [1 .. 10]
+      intoEvensAndOdds = partition even
+      evensAndOdds = intoEvensAndOdds firstTen
+
+      it 'should produce a collection of evens, and one of odds', ->
+        evensAndOdds.should.eql [ [2,4,6,8,10], [1,3,5,7,9] ]
+
+  describe 'id', ->
+
+    {id} = utils
+
+    it 'should be a function', ->
+      utils.isFunction(id).should.be.true
+
+    it 'should return its input', ->
+      for x in [true, false, 1, 3.14, "foo", {a: 'b'}, [1, 2, 3]]
+        id(x).should.equal x
+      should.not.exist id null
 

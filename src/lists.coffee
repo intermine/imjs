@@ -61,7 +61,10 @@ class List
 
   getTags = ({tags}) -> tags
 
-  _updateTags: (@tags) => @folders = @tags.filter(isFolder).map(getFolderName)
+  _updateTags: (err, tags) =>
+    return if err?
+    @tags = tags.slice()
+    @folders = @tags.filter(isFolder).map(getFolderName)
 
   # Get the current set of tags for this list, and update this object so it reflects the
   # current state of the server.

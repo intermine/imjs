@@ -6,13 +6,13 @@
 #
 # @author: Alex Kalderimis
 
-{withCB, error}    = require './util'
+{isFunction, error}    = require './util'
 intermine  = exports
 
 # Simple utility to take the returned value from manageUserPreferences and
 # update the preferences property on this object.
-do_pref_req = (user, data, method) ->
-  user.service.manageUserPreferences(method, data).then (prefs) -> user.preferences = prefs
+do_pref_req = (user, data, method, cb) ->
+  user.service.manageUserPreferences(method, data, cb).then (prefs) -> user.preferences = prefs
 
 # A representation of the user we are logged in as.
 class User
@@ -34,27 +34,29 @@ class User
   # @param [String] key The key to set.
   # @param [String] value The value to set.
   # @return [Deferred] a promise to set a preference.
-  setPreference: (key, value) =>
+  setPreference: (key, value, cb) =>
+    if isFunction value
+      [value, cb] = [null, value]
     if typeof key is 'string'
       data = {}
       data[key] = value
     else if not value?
       data = key
     else
-      return error "Incorrect arguments to setPreference"
-    @setPreferences(data)
+      return withCB cb, error "Incorrect arguments to setPreference"
+    @setPreferences(data, cb)
 
   # Set one or more preferences, provided as an object.
-  setPreferences: (prefs) =>
-    do_pref_req @, prefs, 'POST'
+  setPreferences: (prefs, cb) =>
+    do_pref_req @, prefs, 'POST', cb
 
   # Clear a preference.
-  clearPreference: (key) => do_pref_req @, {key: key}, 'DELETE'
+  clearPreference: (key, cb) => do_pref_req @, {key: key}, 'DELETE', cb
 
   # Clear all preferences.
-  clearPreferences: () => do_pref_req @, {}, 'DELETE'
+  clearPreferences: (cb) => do_pref_req @, {}, 'DELETE', cb
 
-  refresh: () => do_pref_req @, {}, 'GET'
+  refresh: (cb) => do_pref_req @, {}, 'GET', cb
 
 intermine.User = User
 
