@@ -1,14 +1,14 @@
 Fixture = require './lib/fixture'
-idresolution = require '../../src/id-resolution-job'
-fs = require 'fs'
+idresolution = require '../../build/id-resolution-job'
+
+OLD_ID_RES_FORMAT = require './data/old-id-resolution-format.json'
 {cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {fold, get, invoke} = Fixture.funcutils
 should = require 'should'
 
 describe 'IdResults', ->
 
-  fixture = fs.readFileSync "#{ __dirname }/data/old-id-resolution-format.json", 'utf8'
-  data = JSON.parse fixture
+  data = OLD_ID_RES_FORMAT
   result = new idresolution.IdResults data
   n = Object.keys(data).length
 

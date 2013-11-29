@@ -111,6 +111,9 @@ describe 'utils', ->
       it 'should make "foo=bar" from [["foo", "bar"]]', ->
         querystring([['foo', 'bar']]).should.eql "foo=bar"
 
+      it 'should make "" from [["foo", null]]', ->
+        querystring([['foo', null]]).should.eql ""
+
       it 'should make "a=b&c=d" from [["a", "b"], ["c", "d"]]', ->
         querystring([["a", "b"], ["c", "d"]]).should.eql "a=b&c=d"
 
@@ -124,6 +127,9 @@ describe 'utils', ->
 
       it 'should make "foo=bar" from {"foo": "bar"}', ->
         querystring(foo: 'bar').should.eql "foo=bar"
+
+      it 'should make "" from {"foo": undefined}', ->
+        querystring(foo: undefined).should.eql ""
 
       it 'should make "a=b&c=d" from {"a": "b", "c": "d"}', ->
         # This could be fragile, depending on the key iteration order.

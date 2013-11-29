@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-pre - 2013-11-28 */
+/*! imjs - v3.0.0-pre - 2013-11-29 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -313,7 +313,7 @@
   };
 
   root.querystring = function(obj) {
-    var k, pairs, subList, sv, v;
+    var k, p, pairs, subList, sv, v;
     if (isArray(obj)) {
       pairs = obj.slice();
     } else {
@@ -336,7 +336,17 @@
         }
       }
     }
-    return qsFromList(pairs);
+    return qsFromList((function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
+        p = pairs[_i];
+        if (p[1] != null) {
+          _results.push(p);
+        }
+      }
+      return _results;
+    })());
   };
 
   root.curry = curry = function() {
@@ -362,7 +372,18 @@
     fs = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), p = arguments[_i++];
     for (_j = 0, _len = fs.length; _j < _len; _j++) {
       f = fs[_j];
-      p.then(f);
+      if (f != null) {
+        (function(f) {
+          var onErr, onSucc;
+          onSucc = function(res) {
+            return f(null, res);
+          };
+          onErr = function(err) {
+            return f(err);
+          };
+          return p.then(onSucc, onErr);
+        })(f);
+      }
     }
     return p;
   };
@@ -397,7 +418,7 @@
       if (n != null) {
         return xs.slice(0, (n - 1) + 1 || 9e9);
       } else {
-        return xs;
+        return xs.slice();
       }
     };
   };
@@ -418,6 +439,9 @@
 
   root.uniqBy = function(f, xs) {
     var k, keys, values, x, _i, _len;
+    if (arguments.length === 1) {
+      return curry(root.uniqBy, f);
+    }
     keys = [];
     values = [];
     for (_i = 0, _len = xs.length; _i < _len; _i++) {
@@ -433,6 +457,9 @@
 
   root.any = function(xs, f) {
     var x, _i, _len;
+    if (f == null) {
+      f = id;
+    }
     for (_i = 0, _len = xs.length; _i < _len; _i++) {
       x = xs[_i];
       if (f(x)) {
@@ -444,6 +471,12 @@
 
   root.find = function(xs, f) {
     var x, _i, _len;
+    if (arguments.length === 1) {
+      f = xs;
+      return function(xs) {
+        return root.find(xs, f);
+      };
+    }
     for (_i = 0, _len = xs.length; _i < _len; _i++) {
       x = xs[_i];
       if (f(x)) {
@@ -501,18 +534,17 @@
 
   root.partition = function(f) {
     return function(xs) {
-      var falses, trues, x, _i, _len;
-      trues = [];
-      falses = [];
-      for (_i = 0, _len = xs.length; _i < _len; _i++) {
-        x = xs[_i];
+      var divide;
+      divide = fold(function(_arg, x) {
+        var falses, trues;
+        trues = _arg[0], falses = _arg[1];
         if (f(x)) {
-          trues.push(x);
+          return [trues.concat([x]), falses];
         } else {
-          falses.push(x);
+          return [trues, falses.concat([x])];
         }
-      }
-      return [trues, falses];
+      });
+      return divide([[], []], xs);
     };
   };
 
@@ -1450,15 +1482,15 @@
 }).call(this);
 
 (function() {
-  var User, do_pref_req, error, intermine, withCB, _ref,
+  var User, do_pref_req, error, intermine, isFunction, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  _ref = require('./util'), withCB = _ref.withCB, error = _ref.error;
+  _ref = require('./util'), isFunction = _ref.isFunction, error = _ref.error;
 
   intermine = exports;
 
-  do_pref_req = function(user, data, method) {
-    return user.service.manageUserPreferences(method, data).then(function(prefs) {
+  do_pref_req = function(user, data, method, cb) {
+    return user.service.manageUserPreferences(method, data, cb).then(function(prefs) {
       return user.preferences = prefs;
     });
   };
@@ -1485,35 +1517,38 @@
       }
     }
 
-    User.prototype.setPreference = function(key, value) {
-      var data;
+    User.prototype.setPreference = function(key, value, cb) {
+      var data, _ref1;
+      if (isFunction(value)) {
+        _ref1 = [null, value], value = _ref1[0], cb = _ref1[1];
+      }
       if (typeof key === 'string') {
         data = {};
         data[key] = value;
       } else if (!(value != null)) {
         data = key;
       } else {
-        return error("Incorrect arguments to setPreference");
+        return withCB(cb, error("Incorrect arguments to setPreference"));
       }
-      return this.setPreferences(data);
+      return this.setPreferences(data, cb);
     };
 
-    User.prototype.setPreferences = function(prefs) {
-      return do_pref_req(this, prefs, 'POST');
+    User.prototype.setPreferences = function(prefs, cb) {
+      return do_pref_req(this, prefs, 'POST', cb);
     };
 
-    User.prototype.clearPreference = function(key) {
+    User.prototype.clearPreference = function(key, cb) {
       return do_pref_req(this, {
         key: key
-      }, 'DELETE');
+      }, 'DELETE', cb);
     };
 
-    User.prototype.clearPreferences = function() {
-      return do_pref_req(this, {}, 'DELETE');
+    User.prototype.clearPreferences = function(cb) {
+      return do_pref_req(this, {}, 'DELETE', cb);
     };
 
-    User.prototype.refresh = function() {
-      return do_pref_req(this, {}, 'GET');
+    User.prototype.refresh = function(cb) {
+      return do_pref_req(this, {}, 'GET', cb);
     };
 
     return User;
@@ -1596,8 +1631,11 @@
       return tags;
     };
 
-    List.prototype._updateTags = function(tags) {
-      this.tags = tags;
+    List.prototype._updateTags = function(err, tags) {
+      if (err != null) {
+        return;
+      }
+      this.tags = tags.slice();
       return this.folders = this.tags.filter(isFolder).map(getFolderName);
     };
 
@@ -1962,7 +2000,7 @@
 
   SIMPLE_ATTRS = BASIC_ATTRS.concat(['value', 'extraValue']);
 
-  RESULTS_METHODS = ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table', 'tableRows'];
+  RESULTS_METHODS = ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table', 'tableRows', 'values'];
 
   LIST_PIPE = function(service) {
     return utils.compose(service.fetchList, get('listName'));
@@ -2938,15 +2976,22 @@
 
     Query.prototype.appendToList = function(target, cb) {
       var name, processor, req, toRun, updateTarget;
-      name = (target != null ? target.name : void 0) ? target.name : String(target);
+      if (target != null ? target.name : void 0) {
+        name = target.name;
+        updateTarget = function(err, list) {
+          if (err == null) {
+            return target.size = list.size;
+          }
+        };
+      } else {
+        name = String(target);
+        updateTarget = null;
+      }
       toRun = this.makeListQuery();
       req = {
         listName: name,
         query: toRun.toXML()
       };
-      updateTarget = (target != null ? target.name : void 0) ? (function(list) {
-        return target.size = list.size;
-      }) : (function() {});
       processor = LIST_PIPE(this.service);
       return withCB(updateTarget, cb, this.service.post('query/append/tolist', req).then(processor));
     };
@@ -3643,7 +3688,7 @@
 }).call(this);
 
 (function() {
-  var DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDENTITY, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, intermine, invoke, merge, omap, pairsToObj, set, success, to_query_string, utils, version, withCB, _get_or_fetch,
+  var DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDENTITY, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, omap, pairsToObj, set, success, to_query_string, utils, version, withCB, _get_or_fetch,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __slice = [].slice;
@@ -3670,7 +3715,7 @@
 
   intermine = exports;
 
-  withCB = utils.withCB, merge = utils.merge, pairsToObj = utils.pairsToObj, omap = utils.omap, get = utils.get, set = utils.set, invoke = utils.invoke, success = utils.success, error = utils.error, REQUIRES_VERSION = utils.REQUIRES_VERSION, dejoin = utils.dejoin;
+  withCB = utils.withCB, map = utils.map, merge = utils.merge, pairsToObj = utils.pairsToObj, omap = utils.omap, get = utils.get, set = utils.set, invoke = utils.invoke, success = utils.success, error = utils.error, REQUIRES_VERSION = utils.REQUIRES_VERSION, dejoin = utils.dejoin;
 
   VERSIONS = {};
 
@@ -3932,7 +3977,7 @@
           maxp: 0.05,
           correction: 'Holm-Bonferroni'
         }, opts);
-        return withCB(cb, _this.get(ENRICHMENT_PATH, req).then(get('results')));
+        return _this.get(ENRICHMENT_PATH, req).then(get('results')).nodeify(cb);
       });
     };
 
@@ -3990,16 +4035,32 @@
       }).then(dejoin).then(invoke('records')).then(get(0)));
     };
 
-    Service.prototype.find = function(type, term, context, cb) {
-      var extraValue, _ref;
-      if (utils.isFunction(extraValue)) {
-        _ref = [null, extraValue], extraValue = _ref[0], cb = _ref[1];
+    Service.prototype.lookup = function(type, term, context, cb) {
+      var _ref;
+      if (utils.isFunction(context)) {
+        _ref = [null, context], context = _ref[0], cb = _ref[1];
       }
       return withCB(cb, this.query({
         from: type,
         select: ['**'],
         where: [[type, 'LOOKUP', term, context]]
       }).then(dejoin).then(invoke('records')));
+    };
+
+    Service.prototype.find = function(type, term, context, cb) {
+      var _ref;
+      if (utils.isFunction(context)) {
+        _ref = [null, context], context = _ref[0], cb = _ref[1];
+      }
+      return withCB(cb, this.lookup(type, term, context).then(function(found) {
+        if (!(found != null) || found.length === 0) {
+          return error("Nothing found");
+        } else if (found.length > 1) {
+          return error("Multiple items found: " + (found.slice(0, 3)) + "...");
+        } else {
+          return success(found[0]);
+        }
+      }));
     };
 
     Service.prototype.whoami = function(cb) {
@@ -4022,14 +4083,14 @@
       if (typeConstraints == null) {
         typeConstraints = {};
       }
-      if (cb == null) {
-        cb = (function() {});
-      }
       return REQUIRES_VERSION(this, 6, function() {
-        var wanted, _pathValues, _ref;
+        var wanted, _pathValues, _ref, _ref1;
         if (typeof typeConstraints === 'string') {
           wanted = typeConstraints;
           typeConstraints = {};
+        }
+        if (utils.isFunction(typeConstraints)) {
+          _ref = [cb, typeConstraints], typeConstraints = _ref[0], cb = _ref[1];
         }
         if (wanted !== 'count') {
           wanted = 'results';
@@ -4045,7 +4106,7 @@
           return _this.post(PATH_VALUES_PATH, req).then(get(wanted));
         };
         try {
-          return withCB(cb, _this.fetchModel().then(invoke('makePath', path, (_ref = path.subclasses) != null ? _ref : typeConstraints)).then(_pathValues));
+          return withCB(cb, _this.fetchModel().then(invoke('makePath', path, (_ref1 = path.subclasses) != null ? _ref1 : typeConstraints)).then(_pathValues));
         } catch (e) {
           return error(e);
         }
@@ -4069,10 +4130,7 @@
           query: q.toXML(),
           format: format
         });
-        return this.post(path, req).then(function(resp) {
-          cb(resp.results, resp);
-          return resp.results;
-        });
+        return withCB(cb, this.post(path, req).then(get('results')));
       } else {
         return this.query(q).then(function(query) {
           return _this.doPagedRequest(query, path, page, format, cb);
@@ -4093,17 +4151,15 @@
     };
 
     Service.prototype.values = function(q, opts, cb) {
-      var _this = this;
-      if (cb == null) {
-        cb = (function() {});
+      var resp, _ref,
+        _this = this;
+      if (utils.isFunction(opts)) {
+        _ref = [opts, cb], cb = _ref[0], opts = _ref[1];
       }
-      return withCB(cb, !(q != null) ? error("No query term supplied") : (q.descriptors != null) || typeof q === 'string' ? this.pathValues(q, opts) : this.query(q).then(function(query) {
-        if (query.views.length !== 1) {
-          return error("Expected one column, got " + q.views.length);
-        } else {
-          return _this.rows(query, opts).then(invoke('map', get(0)));
-        }
-      }));
+      resp = !(q != null) ? error("No query term supplied") : (q.descriptors != null) || typeof q === 'string' ? this.pathValues(q, opts).then(map(get('value'))) : q.toXML != null ? q.views.length !== 1 ? error("Expected one column, got " + q.views.length) : this.rows(q, opts).then(map(get(0))) : this.query(q).then(function(query) {
+        return _this.values(query, opts);
+      });
+      return withCB(cb, resp);
     };
 
     Service.prototype.tableRows = function(q, page, cb) {

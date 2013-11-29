@@ -57,3 +57,43 @@ describe 'Service#search', ->
         should = require 'should'
         should.not.exist facets.Category.Manager
 
+  describe 'using the callback API', ->
+  
+    describe 'to look for everything', ->
+
+      it 'should find at least 100 things, and some banks', (done) ->
+        service.search (err, resp) ->
+          return done err if err?
+          try
+            resp.results.length.should.be.above 99
+            resp.facets.Category.Bank.should.equal 5
+            done()
+          catch e
+            done e
+
+    describe 'to look for David', ->
+
+      it 'should find david and his department', (done) ->
+        service.search 'david', (err, {results, facets} = {}) ->
+          return done err if err?
+          try
+            results.length.should.equal 2
+            facets.Category.Department.should.equal 1
+            facets.Category.Manager.should.equal 1
+            done()
+          catch e
+            done e
+
+    describe 'searching by a specific type', ->
+
+      it "should find david's department, and no managers", (done) ->
+        service.search {q: 'david', Category: 'Department'}, (err, {results, facets} = {}) ->
+          return done err if err?
+          try
+            results.length.should.equal 1
+            facets.Category.Department.should.equal 1
+            should = require 'should'
+            should.not.exist facets.Category.Manager
+            done()
+          catch e
+            done e

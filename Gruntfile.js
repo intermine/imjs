@@ -158,6 +158,22 @@ module.exports = function (grunt) {
           noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
           standalone: 'intermine'
         }
+      },
+      tests: {
+        files: {
+          'test/browser/mocha-test.js': ['test/mocha/*.coffee'],
+        },
+        options: {
+          transform: ['coffeeify'],
+          alias: [
+            'build/http-browser.js:./http',
+            'test/mocha/lib/utils.coffee:./lib/utils',
+            'test/mocha/lib/fixture.coffee:./lib/fixture',
+            'test/mocha/lib/fixture.coffee:./fixture'
+          ],
+          ignore: ['xmldom'],
+          noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js']
+        }
       }
     },
     symlink: {

@@ -26,7 +26,8 @@ root.querystring = (obj) ->
         pairs = pairs.concat subList
       else
         pairs.push [k, v]
-  qsFromList pairs
+  # Remove undefined values, and serialise.
+  qsFromList (p for p in pairs when p[1]?)
 
 # Simply because this is a whole load cleaner and less ugly than
 # calls to `_.bind(f, null, arg1, arg2, ...)`.

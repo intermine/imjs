@@ -1,7 +1,9 @@
-lib = if process.env.IMJS_COV then 'build-cov' else 'build'
+{Model} = require "../../build/service"
+{PathInfo} = require "../../build/path"
 
-{Model} = require "../../#{ lib }/model"
-{PathInfo} = require "../../#{ lib }/path"
+if process.env.IMJS_COV
+  {Model} = require "../../build-cov/model"
+  {PathInfo} = require "../../build-cov/path"
 
 {TESTMODEL} = require './data/model'
 

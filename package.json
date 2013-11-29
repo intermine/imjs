@@ -54,6 +54,7 @@
     "httpinvoke": "~1.0.4",
     "mocha": "latest",
     "oboe": "~1.11.0",
-    "should": "latest"
+    "should": "latest",
+    "coffeeify": "~0.5.2"
   }
 }
