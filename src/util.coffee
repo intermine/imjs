@@ -67,12 +67,14 @@ root.fold = fold = (f) -> (init, xs) ->
       ret = if ret? then f(ret, k, v) else {k: v}
     ret
 
-root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs
+root.take = (n) -> (xs) -> if n? then xs[0 .. n - 1] else xs.slice()
 
 # Curried version of filtering
 root.filter = (f) -> (xs) -> (x for x in xs when f x)
 
 root.uniqBy = (f, xs) ->
+  if arguments.length is 1
+    return curry root.uniqBy, f
   keys = []
   values = []
   for x in xs
