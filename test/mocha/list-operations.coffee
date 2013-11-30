@@ -2,7 +2,7 @@ Fixture = require './lib/fixture'
 {prepare, always, clear, eventually, deferredTest} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 
-testTags = ['js', 'testing', 'mocha', 'imjs']
+testTags = ['js', 'testing', 'mocha', 'imjs', '__folder__:test']
 namePrefix = 'temp-testing-list-operations-'
 
 listOpTest = ({method, expectedMember, lists, size}) ->
@@ -38,6 +38,9 @@ listOpTest = ({method, expectedMember, lists, size}) ->
 
       it 'should have the test tags', eventually (list) ->
         list.hasTag(t).should.be.true for t in testTags
+
+      it 'should be in the test folder', eventually (list) ->
+        list.folders.should.include 'test'
 
     describe 'using the callback api', ->
 

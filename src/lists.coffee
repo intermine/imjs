@@ -17,7 +17,7 @@ SHARES = "lists/shares"
 INVITES = 'lists/invitations'
 
 isFolder      = (t) -> t.substr(0, t.indexOf(':')) is '__folder__'
-getFolderName = (t) -> s.substr(t.indexOf(':') + 1)
+getFolderName = (t) -> t.substr(t.indexOf(':') + 1)
 
 # A representation of collections of objects stored in a data-warehouse.
 #

@@ -87,12 +87,6 @@ root.uniqBy = (f, xs) ->
       values.push x
   values
 
-root.any = (xs, f) ->
-  f ?= id
-  for x in xs
-    return true if f x
-  return false
-
 root.find = (xs, f) ->
   if arguments.length is 1
     f = xs

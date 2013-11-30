@@ -6,7 +6,7 @@ lengthOf = (x) -> x.length
 
 describe 'utils', ->
 
-  utils = require '../../build/util'
+  {utils} = require './lib/fixture'
 
   describe 'Type Checking', ->
 

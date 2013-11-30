@@ -1,15 +1,24 @@
-{Model} = require "../../build/service"
-{PathInfo} = require "../../build/path"
-
 if process.env.IMJS_COV
   {Model} = require "../../build-cov/model"
   {PathInfo} = require "../../build-cov/path"
+else
+  {Model} = require "../../build/service"
+  {PathInfo} = require "../../build/path"
+
+Promise = require 'promise'
+
+{shouldFail, prepare, eventually} = require './lib/utils'
+Fixture = require './lib/fixture'
 
 {TESTMODEL} = require './data/model'
 
 testmodel = new Model TESTMODEL.model
+{service} = new Fixture
+testmodel.service = service
 
 describe 'PathInfo', ->
+
+  @afterEach PathInfo.flushCache
 
   describe 'Illegal paths', ->
 
@@ -93,6 +102,25 @@ describe 'PathInfo', ->
 
     describe '#getType()', -> it 'should report an appropriate type', ->
       path.getType().should.equal('int')
+
+    describe '#getDisplayName', ->
+
+      describe 'promise API', ->
+        @beforeAll prepare path.getDisplayName
+
+        it 'should be a nice human readable string', eventually (name) ->
+          name.should.equal "Employee > Years Alive"
+
+      describe 'callback api', ->
+        
+        it 'should yield the name', (done) ->
+          path.getDisplayName (err, name) ->
+            return done err if err?
+            try
+              name.should.equal "Employee > Years Alive"
+              done()
+            catch e
+              done e
 
     describe '#containsCollection()', -> it 'should not contain a collection', ->
       path.containsCollection().should.be.false
@@ -325,7 +353,22 @@ describe 'PathInfo', ->
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
 
+  describe 'A path with a custom name', ->
+    path = testmodel.makePath 'Company.departments.manager.address'
+    path.displayName = "FOO"
+
+    describe '#getDisplayName', ->
+
+      @beforeAll prepare path.getDisplayName
+      @afterEach PathInfo.flushCache
+
+      it 'should promise to return the name we gave it', eventually (name) ->
+        name.should.equal "FOO"
+
   describe 'Long reference with collection chain', ->
+
+    PathInfo.flushCache()
+
     path = testmodel.makePath 'Company.departments.manager.address'
 
     it 'should stringify with toString()', ->
@@ -334,6 +377,13 @@ describe 'PathInfo', ->
       path.toPathString().should.equal('Company.departments.manager.address')
     it 'should stringify with string concatenation', ->
       ('' + path).should.equal('Company.departments.manager.address')
+
+    describe '#getPathInfo', ->
+
+      @beforeAll prepare path.getDisplayName
+
+      it 'should promise to return a name', eventually (name) ->
+        name.should.equal "Company > Departments > Manager > Address"
 
     describe '#getType()', -> it 'should report an appropriate type', ->
       path.getType().name.should.equal('Address')
@@ -375,4 +425,19 @@ describe 'PathInfo', ->
       it 'should not say it is a Department', -> path.isa('Department').should.not.be.true
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
+
+describe 'Two similar paths', ->
+
+  pathA = testmodel.makePath 'Employee.name'
+  pathB = testmodel.makePath 'Employee.name'
+
+  it 'should equal each other', ->
+    pathA.equals(pathB).should.be.true
+
+  describe 'their names', ->
+
+    @beforeAll prepare -> Promise.all (p.getDisplayName() for p in [pathA, pathB])
+
+    it 'should be the same', eventually ([a, b]) ->
+      a.should.eql b
 

@@ -42,6 +42,7 @@ class Fixture
 
 
 Fixture.funcutils = funcutils
+Fixture.utils = funcutils
 Fixture.Query = Query
 Fixture.Model = Model
 Fixture.Service = Service

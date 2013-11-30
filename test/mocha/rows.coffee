@@ -1,6 +1,6 @@
 Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
-{invoke, defer, get, flatMap} = Fixture.funcutils
+{invokeWith, invoke, defer, get, flatMap} = Fixture.funcutils
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
@@ -64,7 +64,7 @@ describe 'Query', ->
 
     it 'should allow iteration per item', (done) ->
       cbs = Counter.forOlderEmployees done
-      service.query(query).done (q) -> q.eachRow cbs...
+      service.query(query).done invokeWith 'eachRow', cbs
 
     it 'should allow iteration per item with a single callback', (done) ->
       [count, error, end] = Counter.forOlderEmployees done
