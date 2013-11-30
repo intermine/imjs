@@ -24,9 +24,9 @@ class Counter
       @reject e
 
 Counter.forOldEmployees = (done) ->
-    {promise, resolve, reject} = defer()
-    promise.then (-> done()), ((e) -> done e)
-    new Counter 46, 2688, resolve, reject
+  {promise, resolve, reject} = defer()
+  promise.then (-> done()), ((e) -> done e)
+  new Counter 46, 2688, resolve, reject
 
 SLOW = 100
 
