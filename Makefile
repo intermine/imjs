@@ -10,11 +10,17 @@ REPORTER = spec
 
 export PATH := $(shell find node_modules -name 'bin' -printf %p:)node_modules/.bin:${PATH}
 
+compile:
+	grunt clean:build compile jshint coffeelint browserify
+
 build:
 	grunt build
 
 test:
 	grunt test
+
+all:
+	grunt default
 
 run:
 	grunt $(TASK)
