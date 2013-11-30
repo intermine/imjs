@@ -1,9 +1,9 @@
-{Service, Query, Model} = require '../../../build/service'
-funcutils = require "../../../build/util"
-
 if process.env.IMJS_COV
   funcutils = require "../../../build-cov/util"
   {Service, Query, Model} = require '../../../build-cov/service'
+else
+  {Service, Query, Model} = require '../../../build/service'
+  funcutils = require "../../../build/util"
 
 args =
     root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'

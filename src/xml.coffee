@@ -3,9 +3,23 @@ try
 catch e
   {DOMParser} = require('xmldom')
 
+sanitize = (xml) ->
+  xml = xml.replace /^\s*/g, ''
+  xml = xml.replace /\s$/g, ''
+  if xml.length is 0
+    return xml
+  else if xml[xml.length - 1] isnt '>'
+    return xml + '>' # Prevent infinite loop.
+  else
+    return xml
+
 exports.parse = (xml) ->
-  if not xml or typeof xml isnt 'string'
+  if typeof xml isnt 'string'
     throw new Error("Expected a string - got #{ xml }")
+
+  xml = sanitize xml
+
+  throw new Error("Expected content - got empty string") unless xml
 
   dom = try
     parser = new DOMParser()

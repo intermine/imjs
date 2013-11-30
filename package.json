@@ -22,7 +22,7 @@
   "dependencies": {
     "JSONStream": "~0.7.1",
     "promise": "~3.2.0",
-    "xmldom": "~0.1.15"
+    "xmldom": "~0.1.16"
   },
   "engines": {
     "node": ">= 0.8.0"

@@ -16,53 +16,72 @@ xml = """
   </query>
 """
 
-
 describe 'Query.fromXML', ->
 
-  q = Query.fromXML xml
+  describe 'attempting to parse nonsense', ->
+    attempt = -> Query.fromXML 'foo bar baz'
 
-  it 'should not loop forever when parsing pathological xml', ->
-    (-> Query.fromXML '<r').should.throw
+    it 'should raise an error', ->
+      attempt.should.throwError /Invalid/
 
-  it 'should raise errors at empty strings', ->
-    (-> Query.fromXML '  ').should.throw
+  describe 'attempting to parse things that cause xmldom#40', ->
+    attempt = -> Query.fromXML '<r'
 
-  it 'should have two elements in the view', ->
+    it 'should raise an error, and not enter an infinite loop', ->
+      attempt.should.throwError()
 
-    q.view.length.should.equal 2
+  describe 'attempting to parse non-strings', ->
+    attempt = -> Query.fromXML new Object
 
-  it 'should have the right sort-order', ->
+    it 'should raise an error', ->
+      attempt.should.throwError /Expected/
 
-    q.sortOrder[0][0].should.equal 'Employee.name'
-    q.sortOrder[1][0].should.equal 'Employee.fullTime'
+  describe 'attempting to parse an empty string', ->
+    attempt = -> Query.fromXML ''
 
-    q.sortOrder[0][1].should.equal 'ASC'
-    q.sortOrder[1][1].should.equal 'DESC'
+    it 'should raise an error', ->
+      attempt.should.throwError /Expected/
 
-  it 'should construct a query with the right sort-order', ->
+  describe 'attempting to parse a blank string', ->
+    attempt = -> Query.fromXML '   '
 
-    query = new Query(q)
+    it 'should raise an error', ->
+      attempt.should.throwError /empty/
 
-    query.sortOrder[0].path.should.equal 'Employee.name'
-    query.sortOrder[1].path.should.equal 'Employee.fullTime'
+  describe 'the result of parsing sensible input', ->
 
-    query.sortOrder[0].direction.should.equal 'ASC'
-    query.sortOrder[1].direction.should.equal 'DESC'
+    q = Query.fromXML xml
 
-  it 'should have three constraints', ->
+    it 'should have two elements in the view', ->
+      q.view.length.should.equal 2
 
-    q.constraints.length.should.equal 3
+    it 'should have the right sort-order', ->
+      q.sortOrder[0][0].should.equal 'Employee.name'
+      q.sortOrder[1][0].should.equal 'Employee.fullTime'
 
-  it 'should have a sub-class constraint', ->
+      q.sortOrder[0][1].should.equal 'ASC'
+      q.sortOrder[1][1].should.equal 'DESC'
 
-    q.constraints[0].should.eql {path: 'Employee.department.manager', type: 'CEO'}
+    it 'should have a sub-class constraint', ->
+      q.constraints[0].should.eql {path: 'Employee.department.manager', type: 'CEO'}
 
-  it 'should have the expected constraint', ->
+    it 'should have the expected attribute constraint', ->
+      q.constraints[1].should.eql {path: "Employee.department.name", op: "=", value: "Sales"}
 
-    q.constraints[1].should.eql {path: "Employee.department.name", op: "=", value: "Sales"}
+    it 'should have a constraint with the expected values', ->
+      q.constraints[2].values.should.eql ['Foo', 'Bar', 'Baz']
 
-  it 'should have a constraint with the expected values', ->
+    it 'should have three constraints', ->
+      q.constraints.length.should.equal 3
 
-    q.constraints[2].values.should.eql ['Foo', 'Bar', 'Baz']
+    describe 'using this to instantiate a query', ->
 
+      query = new Query(q)
+
+      it 'should construct a query with the right sort-order', ->
+        query.sortOrder[0].path.should.equal 'Employee.name'
+        query.sortOrder[1].path.should.equal 'Employee.fullTime'
+
+        query.sortOrder[0].direction.should.equal 'ASC'
+        query.sortOrder[1].direction.should.equal 'DESC'
   
