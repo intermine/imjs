@@ -22,7 +22,7 @@ http           = require('./http')
 
 intermine = exports
 
-{withCB, map, merge, pairsToObj, omap, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
+{withCB, map, merge, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -199,7 +199,7 @@ class Service
     if utils.isArray cb
       [cb, errBack] = cb
     if utils.isArray data
-      data = pairsToObj data
+      data = utils.pairsToObj data
 
     url = @root + path
     errBack ?= @errorHandler
@@ -233,7 +233,6 @@ class Service
       type: method
 
     return @doReq(opts, indiv)
-
 
   # Get the results of using a list enrichment widget to calculate
   # statistics for a set of objects. An enrichment calculation
@@ -644,7 +643,7 @@ class Service
   fetchWidgets: (cb) => REQUIRES_VERSION @, 8, =>
     _get_or_fetch.call @, 'widgets', WIDGETS, WIDGETS_PATH, 'widgets', cb
 
-  toMapByName = omap (w) -> [w.name, w]
+  toMapByName = utils.omap (w) -> [w.name, w]
 
   fetchWidgetMap: (cb) => REQUIRES_VERSION @, 8, =>
     withCB cb, (@__wmap__ ?= @fetchWidgets().then toMapByName)

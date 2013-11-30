@@ -41,20 +41,20 @@ listOpTest = ({method, expectedMember, lists, size}) ->
 
     describe 'using the callback api', ->
 
-        @slow 400
-        @afterAll always clearList
-        @beforeAll always clearList
+      @slow 400
+      @afterAll always clearList
+      @beforeAll always clearList
 
-        it 'should have the right size, name, and all the tags we specified', (done) ->
-          service[method] args, (err, list) ->
-            return done err if err?
-            try
-              list.size.should.equal size
-              list.name.should.equal args.name
-              list.hasTag(t).should.be.true for t in testTags
-              done()
-            catch e
-              done e
+      it 'should have the right size, name, and all the tags we specified', (done) ->
+        service[method] args, (err, list) ->
+          return done err if err?
+          try
+            list.size.should.equal size
+            list.name.should.equal args.name
+            list.hasTag(t).should.be.true for t in testTags
+            done()
+          catch e
+            done e
 
 describe 'List Operations', ->
 

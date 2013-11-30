@@ -1,7 +1,7 @@
 Promise                 = require 'promise'
 httpinvoke              = require 'httpinvoke'
 {ACCEPT_HEADER}         = require './constants'
-{success, error, merge} = utils = require('./util')
+{withCB, success, error, merge} = utils = require('./util')
 
 # Pattern to match optional trailing commas
 PESKY_COMMA = /,\s*$/
@@ -9,46 +9,67 @@ PESKY_COMMA = /,\s*$/
 # The urlencoded content-type.
 URLENC = "application/x-www-form-urlencoded"
 
+IE_VERSION = -1
+
+if navigator.appName is 'Microsoft Internet Explorer'
+  ua = navigator.userAgent
+  re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})")
+  if matches = ua.match re
+    IE_VERSION = parseFloat matches[1]
+
 # Get the method we should actually use to make a request of
 # method 'x'.
 #
 # @param [String] x The method I'm thinking of using.
 # @return [String] y The method you should actually use.
-exports.getMethod = (x) -> x
+exports.getMethod = (x) ->
+  switch x
+    when "PUT" then "POST"
+    when "DELETE" then "GET"
+    else x
 
 # Whether or not this service supports the given method
 # The default implementation returns true for all inputs.
-exports.supports = -> true
+exports.supports = (x) ->
+  if 0 < IE_VERSION < 10 and x is 'PUT' or x is 'DELETE'
+    false # IE's XDomainRequest object is awful.
+  else
+    true
 
 # The function to use when streaming results one by
 # one from the connection, rather than buffering them all
 # in memory.
-streaming = (data) -> 'on': (evt, cb) ->
+streaming = (data) -> resume: (->), pause: (->), on: (evt, cb) ->
   switch evt
     when 'data' then (cb res for res in data.results)
     when 'end' then cb()
 
 # Return a function to be called in as a method of a service instance.
-exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->), onEnd = (->)) ->
-    if utils.isFunction(page)
-      [page, cb, eb, onEnd] = [{}, page, cb, eb]
-    req = merge {format}, page, query: q.toXML()
+exports.iterReq = (method, path, format) -> (q, page = {}, cb, eb, onEnd) ->
+  if utils.isFunction(page)
+    [page, cb, eb, onEnd] = [{}, page, cb, eb]
+  req = merge {format}, page, query: q.toXML()
 
-    attach = (stream) ->
-      stream.on 'data', cb
-      stream.on 'end', onEnd
-      return stream
+  attach = (stream) ->
+    console.log "Attaching"
+    stream.on 'data', cb if cb?
+    stream.on 'end', onEnd if onEnd?
+    return stream
 
-    @makeRequest(method, path, req, null, true).then attach, eb
+  withCB eb, @makeRequest(method, path, req, null, true).then attach
 
 check = (response) ->
-  if response.statusCode is 200
+  sc = response.statusCode
+  if 200 <= sc < 400
     response.body
   else
-    if response.body?.error?
-      throw new Error response.body.error
-    else
-      throw new Error "Bad response: #{ response.statusCode }"
+    msg = "Bad response: #{ sc }"
+    if err = response.body?.error
+      msg += ": #{ err }"
+    error new Error(msg)
+
+CHARSET = "; charset=UTF-8"
+CONVERTERS = 'text json': JSON.parse
 
 exports.doReq = (opts, iter) ->
   method = opts.type
@@ -68,15 +89,14 @@ exports.doReq = (opts, iter) ->
       url += '?' + postdata
       postdata = undefined
     else
-      headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
+      headers['Content-Type'] = (opts.contentType or URLENC) + CHARSET
 
   options =
     timeout: opts.timeout
     headers: headers
     outputType: if isJSON then 'json' else 'text'
     corsExposedHeaders: ['Content-Type'],
-    converters:
-      'text json': JSON.parse
+    converters: CONVERTERS
 
   if postdata?
     options.inputType = 'text'

@@ -33,20 +33,22 @@ module.exports = function (grunt) {
       }
     },
     uglify: {
+      /*
       latest: {
         files: {
           'js/im.min.js': ['js/im.js']
         }
       },
+      */
       bundle: {
         files: {
           'dist/im.min.js': ['dist/im.js']
         }
-      },
+      } /*,
       version: {
         src: 'js/<%= pkg.version %>/im.js',
         dest: 'js/<%= pkg.version %>/im.min.js'
-      }
+      } */
     },
     coffeelint: {
       options: grunt.file.readJSON('coffeelint.json'),
@@ -105,7 +107,7 @@ module.exports = function (grunt) {
           intermine: true
         },
         files: {
-          src: ['test/browser/*.js']
+          src: ['test/browser/acceptance.js']
         }
       }
     },
@@ -124,7 +126,8 @@ module.exports = function (grunt) {
       }
     },
     mocha_phantomjs: {
-      all: ['test/browser/index.html']
+      all: ['test/browser/index.html'],
+      bundle: ['test/browser/bundle-index.html']
     },
     bump: {
       options: {
@@ -156,7 +159,8 @@ module.exports = function (grunt) {
           alias: ['build/http-browser.js:./http'],
           ignore: ['xmldom'],
           noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
-          standalone: 'intermine'
+          standalone: 'intermine',
+          postBundleCB: bundled,
         }
       },
       tests: {
@@ -176,6 +180,12 @@ module.exports = function (grunt) {
         }
       }
     },
+    jscoverage: {
+      options: {
+        inputDirectory: 'build',
+        outputDirectory: 'build-cov'
+      }
+    },
     symlink: {
       options: {
         overwrite: true,
@@ -192,28 +202,69 @@ module.exports = function (grunt) {
     }
   })
 
-  grunt.loadNpmTasks('grunt-bump');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
+  function bundled (error, src, next) {
+    try {
+      var bundleBanner = grunt.template.process(banner)
+      var shiv = grunt.file.read("build/shiv.js")
+      next(null, [bundleBanner, shiv, src].join("\n"))
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  grunt.loadNpmTasks("grunt-jscoverage")
+  grunt.loadNpmTasks('grunt-bump')
+  grunt.loadNpmTasks('grunt-contrib-copy')
+  grunt.loadNpmTasks('grunt-contrib-uglify')
+  grunt.loadNpmTasks('grunt-contrib-concat')
+  grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
   grunt.loadNpmTasks('grunt-contrib-clean')
-  grunt.loadNpmTasks('grunt-mocha-phantomjs');
-  grunt.loadNpmTasks('grunt-contrib-symlink');
-  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-mocha-phantomjs')
+  grunt.loadNpmTasks('grunt-contrib-symlink')
+  grunt.loadNpmTasks('grunt-browserify')
   grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {
     global.should = require('should')
-  });
+  })
 
   grunt.registerTask(
     'build-acceptance-index',
     'Build a index.html page to run acceptance tests', function () {
-    var templ = grunt.file.read('test/browser/template.html', 'utf8');
-    var outf = 'test/browser/index.html';
+    var templ = grunt.file.read('test/browser/template.html', 'utf8')
+    var outf = 'test/browser/index.html'
+    var root = process.env.TESTMODEL_URL ||
+      grunt.option('root') ||
+      "http://localhost:8080/intermine-test"
+    var obj = {
+      mocha: {
+        css: "../../bower_components/mocha/mocha.css",
+        js: "../../bower_components/mocha/mocha.js"
+      },
+      args: {
+        root: root,
+        token: "test-user-token"
+      },
+      expect: {
+        js: "../../bower_components/expect/expect.js"
+      },
+      promise: {
+        js: "../../bower_components/q/q.js"
+      },
+      imjs: "../../dist/im.js"
+    }
+    var processed = grunt.template.process(templ.toString(), {data: obj})
+    grunt.file.write(outf, processed)
+    grunt.log.writeln('Wrote ' + outf)
+  })
+
+  grunt.registerTask(
+    'build-bundle-test-index',
+    'Build a index.html page to run acceptance tests from browserified test bundle', function () {
+    var templ = grunt.file.read('test/browser/bundle-template.html', 'utf8');
+    var outf = 'test/browser/bundle-index.html';
     var root = process.env.TESTMODEL_URL ||
       grunt.option('root') ||
       "http://localhost:8080/intermine-test";
@@ -232,21 +283,23 @@ module.exports = function (grunt) {
       promise: {
         js: "../../bower_components/q/q.js"
       },
-      imjs: "../../dist/im.js"
-    };
-    var processed = grunt.template.process(templ.toString(), {data: obj});
-    grunt.file.write(outf, processed);
-    grunt.log.writeln('Wrote ' + outf);
-  });
+      bundle: {
+        js: "mocha-test.js"
+      }
+    }
+    var processed = grunt.template.process(templ.toString(), {data: obj})
+    grunt.file.write(outf, processed)
+    grunt.log.writeln('Wrote ' + outf)
+  })
 
   grunt.registerTask(
     'build-static-acceptance-index',
     'Build a index.html page to run acceptance tests', function () {
-    var templ = grunt.file.read('test/browser/template.html', 'utf8');
-    var outf = 'test/browser/acceptance.html';
+    var templ = grunt.file.read('test/browser/template.html', 'utf8')
+    var outf = 'test/browser/acceptance.html'
     var root = process.env.TESTMODEL_URL ||
       grunt.option('root') ||
-      "http://localhost:8080/intermine-test";
+      "http://localhost:8080/intermine-test"
     var obj = {
       mocha: {
         css: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.css",
@@ -258,62 +311,66 @@ module.exports = function (grunt) {
       },
       expect: "http://cdn.intermine.org/js/expect/latest/expect.js",
       imjs: "http://ci.intermine.org/job/imjs/lastSuccessfulBuild/artifact/js/im.js"
-    };
-    var processed = grunt.template.process(templ.toString(), {data: obj});
-    grunt.file.write(outf, processed);
-    grunt.log.writeln('Wrote ' + outf);
-  });
+    }
+    var processed = grunt.template.process(templ.toString(), {data: obj})
+    grunt.file.write(outf, processed)
+    grunt.log.writeln('Wrote ' + outf)
+  })
 
   grunt.registerTask('docs', 'Generate API documentation', function () {
-    var done = this.async();
-    var cmd = './node_modules/codo/bin/codo';
-    var args = ['-n', 'imjs', 'src'];
-    var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'});
+    var done = this.async()
+    var cmd = './node_modules/codo/bin/codo'
+    var args = ['-n', 'imjs', 'src']
+    var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'})
     child.on('exit', function (code) {
       done(code === 0);
-    });
-  });
+    })
+  })
 
-  grunt.registerTask('phantomjs', ['build-acceptance-index', 'mocha_phantomjs']);
+  grunt.registerTask('phantomjs', [
+    'build-acceptance-index',
+    'build-bundle-test-index',
+    'mocha_phantomjs'
+  ])
 
   grunt.registerTask('test-node', 'Run tests in the nodejs VM', function () {
-    var grep = grunt.option('grep');
-    var reporter = grunt.option('reporter');
+    var grep = grunt.option('grep')
+    var reporter = grunt.option('reporter')
     if (grep) {
-      grunt.config('simplemocha.all.options.grep', grep);
+      grunt.config('simplemocha.all.options.grep', grep)
     }
     if (reporter) {
-      grunt.config('simplemocha.all.options.reporter', reporter);
+      grunt.config('simplemocha.all.options.reporter', reporter)
     }
-    grunt.task.run('simplemocha:all');
-  });
+    grunt.task.run('simplemocha:all')
+  })
 
   grunt.registerTask('-checkcdn', 'Check that the CDN is initialised', function () {
-    var done = this.async();
-    var cdn = grunt.config('CDN');
+    var done = this.async()
+    var cdn = grunt.config('CDN')
     if (!cdn) {
-      grunt.log.error("No CDN location provided. Please set the CDN environment variable");
-      done(false);
+      grunt.log.error("No CDN location provided. Please set the CDN environment variable")
+      done(false)
     }
     fs.stat(cdn, function (err, stats) {
       if (err) {
-        grunt.log.error("Problem with CDN location: " + err);
-        done(false);
+        grunt.log.error("Problem with CDN location: " + err)
+        done(false)
       } else if (!stats.isDirectory()) {
-        grunt.log.error("CDN location is not a directory");
-        done(false);
+        grunt.log.error("CDN location is not a directory")
+        done(false)
       } else {
         grunt.log.writeln("CDN configured as: " + cdn);
         done();
       }
-    });
-  });
+    })
+  })
 
-  grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink']);
-  grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit']);
-  grunt.registerTask('build', ['clean:build', 'compile', 'browserify', 'concat', 'uglify'])
-  grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob']);
-  grunt.registerTask('test', ['build', 'test-node', 'phantomjs']);
+  grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink'])
+  grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit'])
+  grunt.registerTask('build', ['clean:build', 'compile', 'browserify', 'uglify'])
+  grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob'])
+  grunt.registerTask('test', ['build', 'test-node', 'phantomjs'])
   grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])
 
 }

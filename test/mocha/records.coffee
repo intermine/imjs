@@ -2,20 +2,31 @@ Fixture              = require './lib/fixture'
 {prepare, eventually, always, shouldBeRejected} = require './lib/utils'
 should               = require 'should'
 
-{invoke} = Fixture.funcutils
+{defer, invoke} = Fixture.funcutils
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
-  constructor: (@expN, @expT, @done) ->
-    @n = 0
-    @total = 0
+  n: 0
+  total: 0
+
+  constructor: (@expN, @expT, @resolve, @reject) ->
+
   count: (emp) =>
-    @n++
-    @total += emp.age
+    @n = @n + 1
+    @total = @total + emp.age
+
   check: () =>
-    @n.should.equal(@expN)
-    @total.should.equal(@expT)
-    @done()
+    try
+      @n.should.equal(@expN)
+      @total.should.equal(@expT)
+      @resolve()
+    catch e
+      @reject e
+
+Counter.forOldEmployees = (done) ->
+    {promise, resolve, reject} = defer()
+    promise.then (-> done()), ((e) -> done e)
+    new Counter 46, 2688, resolve, reject
 
 SLOW = 100
 
@@ -75,44 +86,77 @@ describe 'Service', ->
           done "Expected error - got #{ emps }" unless err?
           done()
 
-  describe '#eachRecord', ->
 
-    {service} = new Fixture()
-    query =
-      select: ['age']
-      from: 'Employee'
-      where: olderEmployees.where
+describe 'Service#eachRecord', ->
 
-    it 'can yield each employee', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> service.eachRecord q, {}, count, done, check
+  {olderEmployees, service} = new Fixture()
 
-    it 'can yield each employee, without needing a page', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> service.eachRecord q, count, done, check
+  query =
+    select: ['age']
+    from: 'Employee'
+    where: olderEmployees.where
 
-    it 'can yield a buffered-reader for employees', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> service.eachRecord(q).then (stream) ->
-        stream.on 'data', count
-        stream.on 'end', check
-        stream.on 'error', done
+  describe 'Params', ->
 
     it 'can yield each employee, using params', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.eachRecord query, {}, count, done, check
+      {reject, check, count} = Counter.forOldEmployees done
+      service.eachRecord query, {}, count, reject, check
 
     it 'can yield each employee, without needing a page, using params', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.eachRecord query, count, done, check
+      {reject, check, count} = Counter.forOldEmployees done
+      service.eachRecord query, count, reject, check
 
-    it 'can yield a buffered-reader for employees, using params', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.eachRecord(query).then (stream) ->
+    it 'can yield a stream of employees, using params', (done) ->
+      {reject, check, count} = Counter.forOldEmployees done
+      service.eachRecord(query).done (stream) ->
         stream.on 'data', count
         stream.on 'end', check
-        stream.on 'error', done
+        stream.on 'error', reject
 
+  describe 'Query', ->
+
+    it 'can yield each employee, all parameters', (done) ->
+      {reject, check, count} = Counter.forOldEmployees done
+      service.query(query).done (q) -> service.eachRecord q, {}, count, reject, check
+
+    it 'can yield each employee, without needing a page', (done) ->
+      {reject, check, count} = Counter.forOldEmployees done
+      testQuery = (q) -> service.eachRecord q, count, reject, check
+      service.query(query).done testQuery
+
+    it 'can yield a stream of employees, no callbacks', (done) ->
+      {reject, check, count} = Counter.forOldEmployees done
+      testStream = (stream) ->
+        stream.on 'data', count
+        stream.on 'end', check
+        stream.on 'error', reject
+      testQuery = (q) -> service.eachRecord(q).then testStream, reject
+      service.query(query).then testQuery, reject
+
+describe 'Query#eachRecord', ->
+
+  {olderEmployees, service} = new Fixture()
+
+  query =
+    select: ['Employee.age']
+    where: olderEmployees.where
+
+  @beforeAll prepare -> service.query(query).then(invoke 'eachRecord')
+
+  it 'promises to return a stream over the employees', eventually (stream) ->
+    {promise, resolve, reject} = defer()
+    n = sum = 0
+    stream.on 'error', reject
+    stream.on 'data', (e) ->
+      n++
+      sum += e.age
+    stream.on 'end', ->
+      try
+        n.should.equal 46
+        sum.should.equal 2688
+        resolve()
+      catch e
+        reject e
 
 describe 'Query', ->
 
@@ -138,21 +182,6 @@ describe 'Query', ->
           done e
 
       service.query(olderEmployees).done testEmps, done
-
-
-  describe '#eachRecord', ->
-
-    it 'promises to return an iterator over the employees', (done) ->
-      service.query(olderEmployees).then( (q) -> q.eachRecord() ).then (stream) ->
-        n = sum = 0
-        stream.on 'error', done
-        stream.on 'data', (e) ->
-          n++
-          sum += e.age
-        stream.on 'end', ->
-          n.should.equal 46
-          sum.should.equal 2688
-          done()
 
 
 

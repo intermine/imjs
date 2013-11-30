@@ -1,19 +1,31 @@
 Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
-{invoke, get, flatMap} = Fixture.funcutils
+{invoke, defer, get, flatMap} = Fixture.funcutils
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
-  constructor: (@expN, @expT, @done) ->
-    @n = 0
-    @total = 0
+  n: 0
+  total: 0
+  constructor: (@expN, @expT, done) ->
+    {promise, @reject, @resolve} = defer()
+    promise.then (-> done()), done
   count: (row) =>
     @n++
     @total += row[0]
   check: () =>
-    @n.should.equal(@expN)
-    @total.should.equal(@expT)
-    @done()
+    try
+      @n.should.equal(@expN)
+      @total.should.equal(@expT)
+      @resolve()
+    catch e
+      @reject e
+
+  callbacks: ->
+    [@count, @reject, @check]
+
+Counter.forOlderEmployees = (done) ->
+  c = new Counter 46, 2688, done
+  c.callbacks()
 
 SLOW = 100
 sumRows = flatMap get 0
@@ -51,23 +63,24 @@ describe 'Query', ->
   describe '#eachRow', ->
 
     it 'should allow iteration per item', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) -> q.eachRow count, done, check
+      cbs = Counter.forOlderEmployees done
+      service.query(query).done (q) -> q.eachRow cbs...
 
     it 'should allow iteration per item with a single callback', (done) ->
-      {check, count} = new Counter 46, 2688, done
-      service.query(query).then (q) ->
-        q.eachRow( count ).then (stream) ->
-          stream.on 'error', done
-          stream.on 'end', check
+      [count, error, end] = Counter.forOlderEmployees done
+      testStream = (stream) ->
+        stream.on 'error', error
+        stream.on 'end', end
+      testQuery = (q) -> q.eachRow(count).then testStream, error
+      service.query(query).then testQuery, error
 
     it 'should allow iteration with promises', (done) ->
-      {check, count} = new Counter 46, 2688, done
+      [count, error, end] = Counter.forOlderEmployees done
       attach = (stream) ->
         stream.on 'data', count
-        stream.on 'error', done
-        stream.on 'end', check
-      service.query(query).then(invoke 'eachRow').then attach, done
+        stream.on 'error', error
+        stream.on 'end', end
+      service.query(query).then(invoke 'eachRow').then attach, error
 
 describe 'Service', ->
   @slow SLOW
@@ -117,47 +130,53 @@ describe 'Service', ->
         where: olderEmployees.where
 
       it 'can run a query and yield each row', (done) ->
-        {check, count} = new Counter 46, 2688, done
-        service.query(query).then (q) -> service.eachRow q, {}, count, done, check
+        cbs = Counter.forOlderEmployees done
+        service.query(query).done (q) -> service.eachRow q, {}, cbs...
 
       it 'can run a query and yield each row, and does not need a page', (done) ->
-        {check, count} = new Counter 46, 2688, done
-        service.query(query).then (q) -> service.eachRow q, count, done, check
+        cbs = Counter.forOlderEmployees done
+        service.query(query).done (q) -> service.eachRow q, cbs...
 
-      it 'accepts a query options object and can run it as it would a query, callbacks', (done) ->
-        {check, count} = new Counter 46, 2688, done
-        service.eachRow(query, {}, count, done, check)
+      it 'accepts a query options object and can run it as a query, callbacks', (done) ->
+        cbs = Counter.forOlderEmployees done
+        service.eachRow query, {}, cbs...
 
-      it 'accepts a query options object and can run it as it would a query, callbacks, no page',
-        (done) ->
-          {check, count} = new Counter 46, 2688, done
-          service.eachRow(query, count, done, check)
+      it 'accepts a query options object and can run it as a query, callbacks, no page', (done) ->
+        cbs = Counter.forOlderEmployees done
+        service.eachRow query, cbs...
 
       it 'accepts a query options object and can run it as it would a query, callback', (done) ->
-        {check, count} = new Counter 46, 2688, done
-        service.eachRow(query, count).then (stream) ->
-          stream.on 'error', done
-          stream.on 'end', check
+        [count, error, end] = Counter.forOlderEmployees done
+        service.eachRow(query, count).done (stream) ->
+          stream.on 'error', error
+          stream.on 'end', end
           stream.resume()
 
       it 'accepts a query options object and can run it as it would a query, promise', (done) ->
-        {check, count} = new Counter 46, 2688, done
-        service.eachRow(query).then (stream) ->
+        [count, error, end] = Counter.forOlderEmployees done
+        service.eachRow(query).done (stream) ->
           stream.on 'data', count
-          stream.on 'error', done
-          stream.on 'end', check
+          stream.on 'error', error
+          stream.on 'end', end
           stream.resume()
 
     describe 'bad requests', ->
 
+      # Takes a looong time in firefox with firebug open.
+      @slow 3000
+      @timeout 10000
+
       {service, badQuery} = new Fixture()
       service.errorHandler = null
 
-      it 'should return a failed promise', shouldFail -> service.eachRow badQuery
+      request = -> service.eachRow badQuery
+
+      it 'should return a failed promise', shouldFail request
 
       it 'should report the status code of a bad query', (done) ->
         failed = service.eachRow badQuery
-        failed.then (res) -> done new Error("Should have failed")
+        failed.then (res) ->
+          return done new Error("Should have failed")
         failed.then null, (status) ->
           try
             status.should.match /400/
@@ -167,7 +186,8 @@ describe 'Service', ->
 
       it 'should trigger the error handler provided', (done) ->
         state = {}
-        reportNoError = -> done(new Error("Reached end without error")) unless state.error?
+        reportNoError =
+          -> done(new Error("Reached end without error")) unless state.error?
         onRow = (row) -> done new Error("Expected failure, got #{ row }")
         onError = (e) ->
           state.error = e

@@ -3,6 +3,9 @@ Fixture              = require './lib/fixture'
 {prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 
+workerNames = 'Department.employees.name'
+workingBosses = 'Department.employees': 'CEO'
+
 describe 'Service', ->
 
   {service} = new Fixture()
@@ -54,7 +57,7 @@ describe 'Service', ->
 
   describe '#pathValues("Department.employees.name")', ->
 
-    @beforeAll prepare -> service.pathValues 'Department.employees.name'
+    @beforeAll prepare -> service.pathValues workerNames
 
     it 'should get a list of 132 values', eventually (values) ->
       values.length.should.equal 132
@@ -74,7 +77,7 @@ describe 'Service', ->
 
   describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"})', ->
 
-    @beforeAll prepare -> service.pathValues 'Department.employees.name', 'Department.employees': 'CEO'
+    @beforeAll prepare -> service.pathValues workerNames, workingBosses
 
     it 'should get a list of six values', eventually (values) ->
       values.length.should.equal 6
@@ -88,7 +91,7 @@ describe 'Service', ->
   describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"}, cb)', ->
 
     it 'should find 6 CEOs, including Charles Miner', (done) ->
-      service.pathValues 'Department.employees.name', {'Department.employees': 'CEO'}, (e, vs) ->
+      service.pathValues workerNames, workingBosses, (e, vs) ->
         return done e if e?
         try
           vs.length.should.equal 6
@@ -102,7 +105,7 @@ describe 'Service', ->
   describe '#pathValues(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
-      service.pathValues m.makePath 'Department.employees.name', 'Department.employees': 'CEO'
+      service.pathValues m.makePath workerNames, workingBosses
 
     it 'should get a list of six values', eventually (values) ->
       values.length.should.equal 6
@@ -115,7 +118,7 @@ describe 'Service', ->
 
   describe '#values("Department.employees.name", {"Department.employees": "CEO"})', ->
 
-    @beforeAll prepare -> service.values 'Department.employees.name', 'Department.employees': 'CEO'
+    @beforeAll prepare -> service.values workerNames, workingBosses
 
     it 'should get a list of six values', eventually (values) ->
       values.length.should.equal 6
@@ -129,7 +132,7 @@ describe 'Service', ->
   describe '#values(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
-      service.values m.makePath 'Department.employees.name', 'Department.employees': 'CEO'
+      service.values m.makePath workerNames, workingBosses
 
     it 'should get a list of six values', eventually (values) ->
       values.length.should.equal 6

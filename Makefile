@@ -10,6 +10,9 @@ REPORTER = spec
 
 export PATH := $(shell find node_modules -name 'bin' -printf %p:)node_modules/.bin:${PATH}
 
+build:
+	grunt build
+
 test:
 	grunt test
 
@@ -33,14 +36,11 @@ xunit: build
 	mocha-phantomjs test/browser/index.html -R xunit > test/results/browser.xml
 	@echo Generated test reports in test/results
 
-build:
-	grunt build
-
 instrument: build
 	@echo Instrumenting source code.
-	@jscoverage --no-highlight build build-cov
+	grunt jscoverage
 
-docs:
+docs: src
 	codo \
 		--name imjs \
 		--title 'InterMine Client Library Documentation' \
@@ -67,5 +67,4 @@ clean:
 
 jenkins: clean xunit test-cov docs build-static-acceptance
 
-
-.PHONY: test
+.PHONY: test build test-cov

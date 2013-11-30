@@ -11,8 +11,8 @@ describe 'Service#fetchListsContaining', ->
   describe 'searching for public ids', ->
 
     @beforeAll prepare -> service.fetchListsContaining
-        type: 'Employee'
-        publicId: 'Brenda'
+      type: 'Employee'
+      publicId: 'Brenda'
 
     it 'should find the right number of lists', eventually (ls) ->
       ls.length.should.equal 2

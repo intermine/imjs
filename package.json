@@ -55,6 +55,7 @@
     "mocha": "latest",
     "oboe": "~1.11.0",
     "should": "latest",
-    "coffeeify": "~0.5.2"
+    "coffeeify": "~0.5.2",
+    "grunt-jscoverage": "0.0.3"
   }
 }

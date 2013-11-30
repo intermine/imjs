@@ -20,7 +20,8 @@ URLENC = "application/x-www-form-urlencoded"
 #
 # @param [String] x The method I'm thinking of using.
 # @return [String] y The method you should actually use.
-exports.getMethod = (x) -> x
+#
+# Not required if the implementation supports all methods.
 
 # Whether or not this service supports the given method
 # The default implementation returns true for all inputs.
@@ -74,22 +75,22 @@ blocking = (opts, resolve, reject) -> (resp) ->
 
 # Return a function to be called in as a method of a service instance.
 exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->), onEnd = (->)) ->
-    if utils.isFunction(page)
-      [page, cb, eb, onEnd] = [{}, page, cb, eb]
-    req = merge {format}, page, query: q.toXML()
-    attach = (stream) ->
-      stream.on 'data', cb
-      stream.on 'error', eb
-      stream.on 'end', onEnd
-      setTimeout (-> stream.resume()), 3 # Allow handlers in promises to attach.
-      return stream
-    readErrors = ([sc, errors]) ->
-      errors.on 'data', eb
-      errors.on 'error', eb
-      errors.on 'end', onEnd
-      errors.resume()
-      error sc
-    @makeRequest(method, path, req, null, true).then attach, readErrors
+  if utils.isFunction(page)
+    [page, cb, eb, onEnd] = [{}, page, cb, eb]
+  req = merge {format}, page, query: q.toXML()
+  attach = (stream) ->
+    stream.on 'data', cb
+    stream.on 'error', eb
+    stream.on 'end', onEnd
+    setTimeout (-> stream.resume()), 3 # Allow handlers in promises to attach.
+    return stream
+  readErrors = ([sc, errors]) ->
+    errors.on 'data', eb
+    errors.on 'error', eb
+    errors.on 'end', onEnd
+    errors.resume()
+    error sc
+  @makeRequest(method, path, req, null, true).then attach, readErrors
 
 exports.doReq = (opts, iter) ->
   {promise, resolve, reject} = defer()
