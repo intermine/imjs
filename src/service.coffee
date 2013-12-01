@@ -90,14 +90,13 @@ DEFAULT_ERROR_HANDLER = (e) ->
 #   that should be yielded to the user.
 # @param [->] cb A callback that accepts this kind of thing. (optional)
 _get_or_fetch = (propName, store, path, key, cb) ->
-  promise = @[propName] ?= if (@useCache and value = store[@root])
+  {root, useCache} = @
+  promise = @[propName] ?= if (useCache and value = store[root])
     success(value)
   else
-    @get(path).then (x) =>
-      o = x[key]
-      store[@root] = o
+    @get(path).then (x) -> store[root] = x[key]
 
-  promise.nodeify cb
+  withCB cb, promise
 
 # A private helper that produces a function that will read
 # through an array of Lists, and find the first one with the
@@ -650,7 +649,7 @@ class Service
 
   # Fetch the description of the data model for this service.
   # @return [Promise<Model>] A promise to yield metadata about this service.
-  fetchModel: (cb) ->
+  fetchModel: (cb) =>
     _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
       .then(Model.load)
       .then(set service: @)
@@ -660,12 +659,12 @@ class Service
   # The summary fields describe which fields should be used to summarise each class.
   # @return [Promise<Object<String, Array<String>>>] A promise to yield a mapping
   #   from class-name to a list of paths.
-  fetchSummaryFields: (cb) ->
+  fetchSummaryFields: (cb) =>
     _get_or_fetch.call @, 'summaryFields', SUMMARY_FIELDS, SUMMARYFIELDS_PATH, 'classes', cb
 
   # Fetch the number that describes the web-service capabilities.
   # @return [Promise<Number>] A promise to yield a version number.
-  fetchVersion: (cb) ->
+  fetchVersion: (cb) =>
     _get_or_fetch.call @, 'version', VERSIONS, VERSION_PATH, 'version', cb
 
   # Promise to make a new Query.
@@ -815,7 +814,9 @@ Service.flushCaches = () ->
 # Static method for instantiation. Allows us to provide
 # alternate implementations in the future, and pass this function
 # around when needed.
-Service.connect = (opts = {}) -> new Service(opts)
+Service.connect = (opts) ->
+  throw new Error "Invalid options provided: #{ JSON.stringify opts }" unless opts?.root?
+  new Service opts
 
 # Export the Service class to the world
 intermine.Service = Service

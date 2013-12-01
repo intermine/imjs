@@ -1,8 +1,11 @@
 Fixture = require './lib/fixture'
-idresolution = require '../../build/id-resolution-job'
+if process.env.IMJS_COV
+  idresolution = require '../../build-cov/id-resolution-job'
+else
+  idresolution = require '../../build/id-resolution-job'
 
 OLD_ID_RES_FORMAT = require './data/old-id-resolution-format.json'
-{cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
+{cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {fold, get, invoke} = Fixture.funcutils
 should = require 'should'
 
@@ -89,15 +92,15 @@ describe 'Service', ->
     it 'should get resolved', eventually (job) -> job.wait()
 
     it 'should find four employees', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.allMatchIds().length.should.equal 4
 
     it 'should find four good employees', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.goodMatchIds().length.should.equal 4
 
     it 'should find one unresolved identifier', eventually (job) ->
-      job.wait().then deferredTest (results) ->
+      job.wait().then (results) ->
         results.unresolved.length.should.equal 1
         results.stats.identifiers.notFound.should.equal 1
 
@@ -106,7 +109,7 @@ describe 'Service', ->
         q = select: ['Employee.age'], where: {id: results.allMatchIds()}
         service.values(q).then fold (a, b) -> a + b
 
-      job.wait().then(sumAges).then deferredTest (total) -> total.should.equal 215
+      job.wait().then(sumAges).then (total) -> total.should.equal 215
 
   describe '#resolveIds(convertedTypes)', ->
 
@@ -119,17 +122,17 @@ describe 'Service', ->
     it 'should get resolved', eventually (job) -> job.wait()
 
     it 'should find several employees:all', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.stats.objects.all.should.equal 18
     it 'should find several employees:issues', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.stats.objects.issues.should.equal 18
     it 'should find several employees:allMatchIds', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.allMatchIds().length.should.equal 18
 
     it 'should find zero good employees', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.stats.objects.matches.should.equal 0
         results.goodMatchIds().length.should.equal 0
 
@@ -145,10 +148,10 @@ describe 'Service', ->
     it 'should get resolved', eventually (job) -> job.poll()
 
     it 'should find three employees', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         results.allMatchIds().length.should.equal 3
 
     it 'should increase its backoff on each poll', eventually (job) ->
-      job.poll().then deferredTest (results) ->
+      job.poll().then (results) ->
         job.decay.should.be.above 50
 

@@ -1,5 +1,6 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
+{defer} = Fixture.utils
 
 constraints = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -26,4 +27,17 @@ describe 'Query', ->
         q.removeConstraint x
         q.constraints.length.should.equal --n
       changes.should.equal constraints.length
+
+  describe 'removed:constraint event', ->
+
+    it 'should be triggered when constraints are removed', eventually (q) ->
+      {promise, resolve, reject} = defer()
+      q.on 'removed:constraint', (c) ->
+        try
+          resolve c.should.eql constraints[1]
+        catch e
+          reject()
+      q.removeConstraint constraints[1]
+      reject "Event not fired"
+      return promise
 

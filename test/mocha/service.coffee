@@ -1,5 +1,12 @@
-{Service} = require '../../build/service'
+if process.env.IMJS_COV
+  {Service} = require '../../build-cov/service'
+else
+  {Service} = require '../../build/service'
+
 should = require 'should'
+Fixture = require './lib/fixture'
+{prepare, eventually} = require './lib/utils'
+{parallel} = Fixture.utils
 
 describe 'Service', ->
 
@@ -10,7 +17,7 @@ describe 'Service', ->
       should.exist service
       service.should.be.an.instanceOf Service
 
-    it 'should require a root property', ->
+    it 'should require at least a root property', ->
       (-> new Service).should.throw()
 
     it 'should not alter complete root urls', ->
@@ -33,10 +40,32 @@ describe 'Service', ->
       service.should.be.an.instanceOf Service
       service.root.should.equal 'http://localhost/intermine-test/service/'
 
+    it 'should check the arguments', ->
+      (-> Service.connect()).should.throw /Invalid/
 
+  # Note, the model is not re-requested, but because it is instantiated
+  # from data, each service instance gets its own copy.
+  describe 'caching', ->
 
+    describe 'useCache', ->
 
+      {service} = new Fixture
 
+      @beforeEach prepare service.fetchSummaryFields
 
+      it 'should be true', ->
+        service.useCache.should.be.true
 
+      it 'should should mean things like the summary fields are cached', eventually (fa) ->
+        Service.connect(service).fetchSummaryFields().then (fb) -> fb.should.equal fa
+
+    describe 'flushCaches', ->
+      {service} = new Fixture
+
+      @beforeEach prepare service.fetchSummaryFields
+      @afterEach Service.flushCaches
+
+      it 'should mean we get fresh objects', eventually (fa) ->
+        Service.flushCaches()
+        Service.connect(service).fetchSummaryFields().then (fb) -> fb.should.not.equal fa
 

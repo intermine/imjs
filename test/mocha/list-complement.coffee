@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
+{cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
 
@@ -46,7 +46,7 @@ describe 'Service', ->
       list.hasTag(t).should.be.true for t in tags
 
     it "should contain #{expectedMember }", eventually (list) ->
-      list.contents().then deferredTest (members) ->
+      list.contents().then (members) ->
         (m.name for m in members).should.include expectedMember
 
   describe '#complement(opts) {Array of list names}', ->
@@ -77,7 +77,7 @@ describe 'Service', ->
       list.hasTag(t).should.be.true for t in tags
 
     it "should contain #{expectedMember }", eventually (list) ->
-      list.contents().then deferredTest (members) ->
+      list.contents().then (members) ->
         (m.name for m in members).should.include expectedMember
 
   describe '#complement(opts) {Array of Lists}', ->
@@ -112,7 +112,7 @@ describe 'Service', ->
       list.hasTag(t).should.be.true for t in tags
 
     it "should contain #{expectedMember }", eventually (list) ->
-      list.contents().then deferredTest (members) ->
+      list.contents().then (members) ->
         (m.name for m in members).should.include expectedMember
 
   describe '#complement(opts, cb)', ->

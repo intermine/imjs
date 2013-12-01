@@ -1,5 +1,5 @@
 Fixture              = require './lib/fixture'
-{cleanSlate, deferredTest, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
+{cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 

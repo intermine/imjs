@@ -519,7 +519,7 @@ class Query
     @constraints = reduced
     unless silent
       @trigger 'change:constraints'
-      @trigger 'removed:constraints', utils.difference(orig, reduced)
+      @trigger 'removed:constraint', utils.find orig, iscon
 
   # Add an element to the select list.
   addToSelect: (views = []) ->

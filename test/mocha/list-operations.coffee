@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{prepare, always, clear, eventually, deferredTest} = require './lib/utils'
+{prepare, always, clear, eventually} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 
 testTags = ['js', 'testing', 'mocha', 'imjs', '__folder__:test']
@@ -33,7 +33,7 @@ listOpTest = ({method, expectedMember, lists, size}) ->
         list.name.should.equal args.name
 
       it "should contain #{ expectedMember }", eventually (list) ->
-        list.contents().then deferredTest (contents) ->
+        list.contents().then (contents) ->
           (x.name for x in contents).should.include expectedMember
 
       it 'should have the test tags', eventually (list) ->

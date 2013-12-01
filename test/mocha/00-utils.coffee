@@ -383,3 +383,137 @@ describe 'utils', ->
         id(x).should.equal x
       should.not.exist id null
 
+
+  describe 'concatMap', ->
+
+    {concatMap} = utils
+
+    describe 'Getting the first three powers of the first three numbers', ->
+      xs = [1 .. 3]
+      f = (x) -> (Math.pow x, y for y in [1 .. 3])
+      powers = concatMap f
+
+      it 'should return [1, 1, 1, 2, 4, 8, 3, 9, 27]', ->
+        powers(xs).should.eql [1, 1, 1, 2, 4, 8, 3, 9, 27]
+
+    describe 'Building an object from a list', ->
+      xs = ['a', 'b', 'c']
+      f = (c) ->
+        o = {}
+        o[c] = c.charCodeAt 0
+        o
+      charMapper = concatMap f
+
+      it 'should build {a: 97, b: 98, c: 99} from ["a", "b", "c"]', ->
+        charMapper(xs).should.eql {a: 97, b: 98, c: 99}
+
+    describe 'Summing a list', ->
+      xs = [1 .. 10]
+      sum = concatMap utils.id
+
+      it 'should sum the numbers', ->
+        sum(xs).should.eql 55
+
+    describe 'Building a string', ->
+      xs = [97, 98, 99]
+      f = String.fromCharCode
+      buildString = concatMap f
+
+      it 'should build "abc" from [97, 98, 99]', ->
+        buildString([97, 98, 99]).should.eql "abc"
+
+  describe 'difference', ->
+    {difference} = utils
+
+    it 'should be say that [4,5,6] is the difference of [1,2,3,4,5,6] and [1,2,3]', ->
+      difference([1 .. 6], [1 .. 3]).should.eql [4 .. 6]
+
+  describe 'invoke', ->
+    {invoke} = utils
+
+    describe 'attempting to invoke a method on a null object', ->
+      invokeMethod = invoke 'method'
+      attempt = -> invokeMethod null
+
+      it 'should throw a helpful error', ->
+        attempt.should.throw /method.*of null/
+
+    describe 'the invocation of a method without arguments', ->
+      o = state: 10, method: -> @state * 2
+      invokeMethod = invoke 'method'
+
+      it 'should call the method, in the context of the object', ->
+        invokeMethod(o).should.eql 20
+
+    describe 'the invocation of a method with an argument', ->
+      o = state: 10, method: (x) -> @state * x
+      invokeMethod = invoke 'method', 10
+
+      it 'should be called in the context of that object', ->
+        invokeMethod(o).should.eql 100
+
+    describe 'the invocation of a method with several arguments', ->
+      o = state: 10, method: (a, b) -> @state * (a + b)
+      invokeMethod = invoke 'method', 2, 3
+
+      it 'should be called in the context of that object', ->
+        invokeMethod(o).should.eql 50
+
+    describe 'attempting to call a non-existent method', ->
+      o = method: -> 'foo'
+      invokeMethod = invoke 'notMethod'
+      attempt = -> invokeMethod o
+
+      it 'shoud throw a helpful error', ->
+        attempt.should.throw /notMethod/
+
+  describe 'invokeWith', ->
+    {invokeWith} = utils
+
+    describe 'attempting to invoke a method on a null object', ->
+      invokeMethod = invokeWith 'method'
+      attempt = -> invokeMethod null
+
+      it 'should throw a helpful error', ->
+        attempt.should.throw /method.*of null/
+
+    describe 'the invocation of a method without arguments', ->
+      o = state: 10, method: -> @state * 2
+      invokeMethod = invokeWith 'method'
+
+      it 'should call the method, in the context of the object', ->
+        invokeMethod(o).should.eql 20
+
+      it 'should be identical to the equivalent function constructed with "invoke"', ->
+        invokeMethod(o).should.eql (utils.invoke 'method') o
+
+    describe 'invoking a method with an explicit this binding', ->
+      o = method: -> @state * 2
+      ctx = state: 7
+      invokeMethod = invokeWith 'method', [], ctx
+
+      it 'should call our method on the correct binding of this', ->
+        invokeMethod(o).should.eql 14
+
+    describe 'the invocation of a method with arguments', ->
+      o = state: 10, method: (x) -> @state * x
+      invokeMethod = invokeWith 'method', [10]
+
+      it 'should be called in the context of that object', ->
+        invokeMethod(o).should.eql 100
+
+    describe 'the invocation of a method with several arguments', ->
+      o = state: 10, method: (a, b) -> @state * (a + b)
+      invokeMethod = invokeWith 'method', [2, 3]
+
+      it 'should be called in the context of that object', ->
+        invokeMethod(o).should.eql 50
+
+    describe 'attempting to call a non-existent method', ->
+      o = method: -> 'foo'
+      invokeMethod = invokeWith 'notMethod'
+      attempt = -> invokeMethod o
+
+      it 'shoud throw a helpful error', ->
+        attempt.should.throw /notMethod/
+

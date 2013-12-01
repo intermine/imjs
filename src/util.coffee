@@ -46,6 +46,10 @@ root.error = error = (e) -> new Promise (_, reject) -> reject new Error e
 # @return [Promise<args...>] A promise to resolve with the resolution.
 root.success = success = Promise.from
 
+# Helper for performing promises in parallel. Mostly so we can
+# change promise library as we see fit...
+root.parallel = Promise.all
+
 # Attach a node-style callback (err, result), yielding the original promise.
 # @param f The callback
 # @param p The promise
@@ -162,8 +166,7 @@ root.concatMap = (f) -> (xs) ->
     else if ret.concat?
       ret.concat(fx)
     else
-      ret[k] = v for k, v of fx
-      ret
+      merge ret, fx
   ret
 
 root.map = (f) -> invoke 'map', f
@@ -174,7 +177,7 @@ root.compose = (fs...) -> comp fs
 
 root.flatMap = root.concatMap
 
-root.difference = (xs, remove) -> (x for x in xs when not x in remove)
+root.difference = (xs, remove) -> (x for x in xs when x not in remove)
 
 root.stringList = (x) -> if typeof x is 'string' then [x] else x
 
@@ -190,18 +193,12 @@ root.flatten = flatten = (xs...) ->
 
 root.sum = root.concatMap id
 
-root.merge = (objs...) ->
+root.merge = merge = (objs...) ->
   newObj = {}
   for o in objs
     for own k, v of o
       newObj[k] = v
   return newObj
-
-root.AND = (a, b) -> a and b
-
-root.OR = (a, b) -> a or b
-
-root.NOT = (x) -> not x
 
 root.any = (xs, f = id) ->
   for x in xs
@@ -218,11 +215,7 @@ root.any = (xs, f = id) ->
 # @param [String] name The name of a method
 # @param [Array] args An optional argument list, passed as varargs
 # @return [(obj) -> ?] A function that invokes a named method.
-root.invoke = invoke = (name, args...) -> (obj) ->
-  if obj[name]?.apply
-    obj[name].apply(obj, args)
-  else
-    throw new Error "No method named \"#{ name }\""
+root.invoke = invoke = (name, args...) -> invokeWith name, args
 
 # Get a function that invokes a method on an object
 # that is passed to it with the arguments given here, with
@@ -236,7 +229,13 @@ root.invoke = invoke = (name, args...) -> (obj) ->
 # @param [Array] args The arguments to the method
 # @param [Object] ctx The value for this in the invocation (optional)
 # @return [(obj) -> ?] A function that invokes a named method.
-root.invokeWith = (name, args = [], ctx = null) -> (o) -> o[name].apply((ctx or o), args)
+root.invokeWith = invokeWith = (name, args = [], ctx = null) -> (o) ->
+  if not o?
+    throw new Error("""Cannot call method "#{ name }" of null""")
+  if not o[name]
+    throw new Error("""Cannot call undefined method "#{ name } of #{ o }""")
+  else
+    o[name].apply((ctx or o), args)
 
 # Get a function that gets a named property off an object.
 #
@@ -262,8 +261,6 @@ root.set = (name, value) -> (obj) ->
     for own k, v of name
       obj[k] = v
   return obj
-
-root.flip = (f, ctx) -> (args...) -> f.apply(ctx, args.reverse())
 
 # Make a function that lets users know
 # when they are trying to use a service that

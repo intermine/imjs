@@ -15,9 +15,6 @@ clear = (service, name) -> () -> new Promise (resolve, reject) ->
 cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))
 
-deferredTest = DT = (test) -> (args...) -> new Promise (resolve, reject) ->
-    resolve test args...
-
 after = (promises) ->
   if promises?.length then Promise.all(promises) else Promise.from(true)
 
@@ -25,9 +22,9 @@ report = (done, promise) -> promise.done (-> done()), done
 
 prepare = (promiser) -> (done) -> report done, @promise = promiser()
 
-eventually = (test) -> (done) -> report done, @promise.then DT test
+eventually = (test) -> (done) -> report done, @promise.then test
 
-promising = (p, test) -> (done) -> report done, p.then DT test
+promising = (p, test) -> (done) -> report done, p.then test
 
 always = (fn) -> (done) -> fn().then (-> done()), (-> done())
 
@@ -45,7 +42,6 @@ module.exports = {
   cleanSlate,
   after,
   clear,
-  deferredTest,
   report,
   eventually,
   promising,

@@ -14,7 +14,7 @@ console.log "Testing against #{ args.root }" if process.env.DEBUG
 class Fixture
 
     constructor: ->
-        @service = new Service args
+        @service = Service.connect args
 
         @allEmployees =
             select: ['*']

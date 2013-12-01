@@ -1,5 +1,6 @@
 Fixture = require './lib/fixture'
-{deferredTest, promising, prepare, eventually, shouldFail} = require './lib/utils'
+{promising, prepare, eventually, shouldFail} = require './lib/utils'
+{invoke} = Fixture.utils
 
 describe 'Service', ->
 
@@ -28,32 +29,43 @@ describe 'Service', ->
 
   describe '#count(query)', ->
 
-    it 'should find 131 rows', promising service.count(allEmployees), (c) ->
-      c.should.equal 131
+    describe 'promise API', ->
+      describe 'the count of all employees', ->
+        @beforeAll prepare -> service.count allEmployees
 
-    it 'should find 46 older employees', promising service.count(olderEmployees), (c) ->
-      c.should.equal 46
+        it 'should equal 131', eventually (c) -> c.should.equal 131
 
-    it 'should be able to use callbacks', (done) ->
-      service.count olderEmployees, (err, c) ->
-        return done err if err?
-        try
-          c.should.equal 46
-          done()
-        catch e
-          done e
+      describe 'the count of older employees', ->
+        @beforeAll prepare -> service.count olderEmployees
 
-    it 'should find 46 older employees with a query object',
-      promising service.query(olderEmployees), (q) ->
-        service.count(q).then deferredTest (c) -> c.should.equal 46
+        it 'should equal 46', eventually (c) -> c.should.equal 46
+
+      describe 'using an instance of Query', ->
+        @beforeAll prepare -> service.query(olderEmployees).then service.count
+
+        it 'should still find 46 employees', eventually (c) -> c.should.equal 46
+
+    describe 'the callback API', ->
+
+      it 'should be more painful', (done) ->
+        service.count olderEmployees, (err, c) ->
+          return done err if err?
+          try
+            c.should.equal 46
+            done()
+          catch e
+            done e
 
 describe 'Query#count', ->
 
   {service, olderEmployees, allEmployees} = new Fixture()
+  count = invoke 'count'
 
-  it 'should find around 135 employees', promising service.query(allEmployees), (q) ->
-    q.count().then deferredTest (c) -> c.should.be.above(130).and.below(140)
+  it 'should find around 135 employees',
+    promising service.query(allEmployees).then(count),
+              (c) -> c.should.be.above(130).and.below(140)
 
-  it 'should find 46 older employees', promising service.query(olderEmployees), (q) ->
-    q.count().then deferredTest (c) -> c.should.equal 46
+  it 'should find 46 older employees',
+    promising service.query(olderEmployees).then(count),
+              (c) -> c.should.equal 46
 
