@@ -84,6 +84,7 @@ root.uniqBy = (f, xs) ->
     return curry root.uniqBy, f
   keys = []
   values = []
+  return values unless xs?
   for x in xs
     k = f x
     unless k in keys

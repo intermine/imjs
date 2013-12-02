@@ -72,10 +72,9 @@ cleanUp = (done) ->
   pass = -> done()
   @promise.then(invoke 'del').then pass, pass
 
-describe 'Service', ->
+testIDResolutionAgainst = (service, extraTests = {}) ->
 
   type = 'Employee'
-  {service} = new Fixture()
 
   describe '#resolveIds()', ->
 
@@ -91,6 +90,16 @@ describe 'Service', ->
 
     it 'should get resolved', eventually (job) -> job.wait()
 
+    it 'should report stats', eventually (job) ->
+      job.wait().then (results) ->
+        stats = results.getStats()
+        should.exist stats
+        stats.should.have.properties 'objects', 'identifiers'
+        stats.identifiers.matches.should.equal 4
+        stats.identifiers.issues.should.equal 0
+        stats.objects.matches.should.equal 4
+        stats.objects.issues.should.equal 0
+
     it 'should find four employees', eventually (job) ->
       job.poll().then (results) ->
         results.allMatchIds().length.should.equal 4
@@ -99,17 +108,14 @@ describe 'Service', ->
       job.poll().then (results) ->
         results.goodMatchIds().length.should.equal 4
 
-    it 'should find one unresolved identifier', eventually (job) ->
-      job.wait().then (results) ->
-        results.unresolved.length.should.equal 1
-        results.stats.identifiers.notFound.should.equal 1
-
     it 'should find four employee ids, which can be used', eventually (job) ->
       sumAges = (results) ->
         q = select: ['Employee.age'], where: {id: results.allMatchIds()}
         service.values(q).then fold (a, b) -> a + b
 
       job.wait().then(sumAges).then (total) -> total.should.equal 215
+
+    extraTests['#resolveIds(job)']?()
 
   describe '#resolveIds(convertedTypes)', ->
 
@@ -121,20 +127,17 @@ describe 'Service', ->
 
     it 'should get resolved', eventually (job) -> job.wait()
 
-    it 'should find several employees:all', eventually (job) ->
-      job.poll().then (results) ->
-        results.stats.objects.all.should.equal 18
-    it 'should find several employees:issues', eventually (job) ->
-      job.poll().then (results) ->
-        results.stats.objects.issues.should.equal 18
     it 'should find several employees:allMatchIds', eventually (job) ->
       job.poll().then (results) ->
-        results.allMatchIds().length.should.equal 18
+        results.allMatchIds().should.have.lengthOf 18
+        results.getMatchIds().should.have.lengthOf 18
 
     it 'should find zero good employees', eventually (job) ->
       job.poll().then (results) ->
-        results.stats.objects.matches.should.equal 0
-        results.goodMatchIds().length.should.equal 0
+        results.getStats('objects').matches.should.equal 0
+        results.getStats('identifiers').matches.should.equal 0
+        results.goodMatchIds().should.have.lengthOf 0
+        results.getMatchIds('MATCH').should.have.lengthOf 0
 
   describe '#resolveIds(caseSensitiveJob)', ->
 
@@ -154,4 +157,29 @@ describe 'Service', ->
     it 'should increase its backoff on each poll', eventually (job) ->
       job.poll().then (results) ->
         job.decay.should.be.above 50
+
+
+describe 'Service', ->
+
+  describe 'current', ->
+    {service} = new Fixture()
+
+    testIDResolutionAgainst service,
+      '#resolveIds(job)': ->
+        it 'should find one unresolved identifier', eventually (job) ->
+          job.wait().then (results) ->
+            results.unresolved.length.should.equal 1
+            results.stats.identifiers.notFound.should.equal 1
+      '#resolveIds(convertedTypes)': ->
+        it 'should find several employees:all', eventually (job) ->
+          job.poll().then (results) ->
+            results.stats.objects.all.should.equal 18
+        it 'should find several employees:issues', eventually (job) ->
+          job.poll().then (results) ->
+            results.stats.objects.issues.should.equal 18
+
+  describe 'legacy', ->
+    {legacy} = new Fixture()
+
+    testIDResolutionAgainst legacy
 

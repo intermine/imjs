@@ -1,6 +1,7 @@
 Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
 {invokeWith, invoke, defer, get, flatMap} = Fixture.funcutils
+should = require 'should'
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
@@ -106,6 +107,25 @@ describe 'Service', ->
           return done err if err?
           check rows
 
+    describe 'very short timeouts', ->
+
+      {service, olderEmployees} = new Fixture()
+
+      it 'should fail', shouldFail -> service.rows olderEmployees, {timeout: 1}
+
+    describe 'reasonable timeouts', ->
+
+      {service, olderEmployees} = new Fixture()
+
+      query =
+        select: ['age']
+        from: 'Employee'
+        where: olderEmployees.where
+
+      it 'should succeed and get results', (done) ->
+        check = test done
+        service.rows(query, timeout: 2000).done check, done
+
     describe 'bad requests', ->
 
       {service, badQuery} = new Fixture()
@@ -200,4 +220,3 @@ describe 'Service', ->
         # Sometimes end is reported before errors, so queue this event for later.
         onEnd = -> state.to = setTimeout reportNoError, 100
         service.eachRow badQuery, onRow, onError, onEnd
-

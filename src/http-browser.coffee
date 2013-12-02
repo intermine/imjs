@@ -64,8 +64,12 @@ check = (response) ->
     response.body
   else
     msg = "Bad response: #{ sc }"
-    if err = response.body?.error
-      msg += ": #{ err }"
+    err = if response.body?.error
+      response.body.error
+    else if e = response.body?.match?( /\[ERROR\] (\d+)([\s\S]*)/ )
+      e[2]
+
+    msg += ": #{ err }" if err?
     error new Error(msg)
 
 CHARSET = "; charset=UTF-8"

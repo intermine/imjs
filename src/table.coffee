@@ -25,9 +25,10 @@ class Table
   # @option opts [Object<String,Object>] attributes The descriptions of the N->X relationships.
   constructor: ({@name, @attributes, @references, @collections}) ->
     @fields = {}
-    @__parents__ = arguments[0]['extends'] # avoiding js keywords
+    @__parents__ = (arguments[0]['extends'] ? [])# avoiding js keywords
 
     for prop in properties
+      throw new Error "Bad model data: missing #{ prop }" unless @[prop]?
       merge @[prop], @fields
 
     c.isCollection = true for _, c of @collections

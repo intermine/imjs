@@ -19,24 +19,103 @@ describe 'Model', ->
     it 'should have classes', ->
       testmodel.should.have.property 'classes'
 
+  describe 'attempting to load bad data', ->
+
+    attempt = -> Model.load {classes: {Foo: {attributes: {}}}}
+
+    it 'should throw some kind of error', ->
+      attempt.should.throwError()
+
+  describe '#getAncestorsOf', ->
+
+    testmodel = Model.load TESTMODEL.model
+
+    describe 'attempting to get the ancestry of a non-class', ->
+      attempt = -> testmodel.getAncestorsOf 'Foo'
+
+      it 'should throw a helpful error', ->
+        attempt.should.throw /not a table/
+
+  describe '#findSharedAncestor', ->
+
+    testmodel = Model.load TESTMODEL.model
+
+    describe 'The shared ancestor of a class and null', ->
+
+      ancestor = testmodel.findSharedAncestor 'Employee', null
+
+      it 'should not exist', ->
+        should.not.exist ancestor
+
+    describe 'The shared ancestor of a class and itself', ->
+      ancestor = testmodel.findSharedAncestor 'Employable', 'Employable'
+
+      it 'should be non-null', ->
+        should.exist ancestor
+
+      it 'should be itself', ->
+        ancestor.should.equal 'Employable'
+
+    describe 'The shared ancestor of a class and one of its ancestors', ->
+      ancestor = testmodel.findSharedAncestor 'CEO', 'Employable'
+
+      it 'is the ancestor', ->
+        ancestor.should.equal 'Employable'
+
+    describe 'The shared ancestor of a class and one of its sub-classes', ->
+      ancestor = testmodel.findSharedAncestor 'Employable', 'CEO'
+
+      it 'is the class', ->
+        ancestor.should.equal 'Employable'
+
+    describe 'The shared ancestor of cousins', ->
+      ancestor = testmodel.findSharedAncestor 'Employee', 'Company'
+
+      it 'is the closest common ancestor', ->
+        ancestor.should.equal 'HasAddress'
+
   describe '#getSubclassesOf', ->
 
     testmodel = new Model TESTMODEL.model
 
-    it 'should find that CEO is one of the subclasses of Manager', ->
-      testmodel.getSubclassesOf('Manager').should.include('CEO')
+    describe 'attempting to get subclasses of a non-class', ->
+      attempt = -> testmodel.getSubclassesOf null
 
-    it 'should find that CEO is one of the subclasses of HasAddress', ->
-      testmodel.getSubclassesOf('HasAddress').should.include('CEO')
+      it 'should throw a helpful error', ->
+        attempt.should.throw /not a table/
 
-    it 'should find that CEO is one of the subclasses of Employable', ->
-      testmodel.getSubclassesOf('Employable').should.include('CEO')
+    describe 'the subclasses of Manager', ->
+      managerTypes = testmodel.getSubclassesOf 'Manager'
 
-    it 'should find all the classes that are things', ->
-      testmodel.getSubclassesOf('Thing').should.eql(things)
+      it 'should include "CEO"', ->
+       managerTypes.should.include('CEO')
 
-    it 'should find that Addresses are not per se Employable', ->
-      testmodel.getSubclassesOf('Employable').should.not.include('Address')
+    describe 'the subclasses of HasAddress', ->
+      addressables = testmodel.getSubclassesOf 'HasAddress'
+
+      it 'should include "CEO"', ->
+        addressables.should.include 'CEO'
+
+      it 'should include "Company"', ->
+        addressables.should.include 'Company'
+
+    describe 'the subclasses of Employable', ->
+      employables = testmodel.getSubclassesOf 'Employable'
+
+      it 'should include "CEO"', ->
+        employables.should.include 'CEO'
+
+      it 'should include "Contractor"', ->
+        employables.should.include 'Contractor'
+
+      it 'should not include "Address"', ->
+        employables.should.not.include 'Address'
+
+    describe 'Things', ->
+      foundThings = testmodel.getSubclassesOf 'Thing'
+
+      it 'should include all the things that are things', ->
+        foundThings.should.eql things
 
   describe '#findCommonType', ->
 

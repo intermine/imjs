@@ -266,9 +266,6 @@ class Query
     'ISA': 'ISA'
     'isa': 'ISA'
 
-  # Lexical function (aka private method), that is by default a no-op
-  getPaths = ->
-
   # Bind a callback to an event.
   #
   # An implementation of the EventEmitter API, allowing clients to subscribe
@@ -473,17 +470,6 @@ class Query
 
     @constraintLogic = properties.constraintLogic if properties.constraintLogic?
 
-    # Define private method.
-    getPaths = (root, depth) =>
-      cd = @getPathInfo(root).getEndClass()
-      ret = [root]
-      subPaths = concatMap (r) -> getPaths "#{ root }.#{ r.name }", depth - 1
-      others = if ( cd and depth > 0 )
-        subPaths (field for name, field of cd.fields)
-      else
-        []
-
-      ret.concat others
 
     @on 'change:views', removeIrrelevantSortOrders, @
 
@@ -558,6 +544,18 @@ class Query
     path
 
   getPossiblePaths: (depth = 3) ->
+    getPaths = (root, d) =>
+      ret = [root]
+      path = @getPathInfo(root)
+      if path.isAttribute()
+        ret
+      else
+        cd = @getPathInfo(root).getType()
+        subPaths = concatMap (ref) -> getPaths "#{ root }.#{ ref.name }", d - 1
+        others = if cd and (d > 0) then (subPaths (field for name, field of cd.fields)) else []
+
+        ret.concat others
+
     @_possiblePaths ?= {}
     @_possiblePaths[depth] ?= getPaths @root, depth
 

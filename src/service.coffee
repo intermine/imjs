@@ -61,9 +61,6 @@ TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
 PATH_VALUES_PATH = 'path/values'
 
-# The identity function f x = x
-IDENTITY = (x) -> x
-
 # Pattern for detecting if URI has a protocol
 HAS_PROTOCOL = /^https?:\/\//i
 
@@ -230,6 +227,10 @@ class Service
       error: errBack,
       url: url,
       type: method
+
+    if timeout = (data.timeout ? @timeout)
+      opts.timeout = timeout
+      delete data.timeout
 
     return @doReq(opts, indiv)
 

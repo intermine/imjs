@@ -12,13 +12,15 @@
 funcutils = require './util'
 intermine = exports
 
-{defer, withCB, id, get, fold, concatMap} = funcutils
+{uniqBy, difference, defer, withCB, id, get, fold, concatMap} = funcutils
 
 ONE_MINUTE = 60 * 1000
 
 class CategoryResults
 
   constructor: (results) -> @[k] = v for own k, v of results
+
+  getStats: (type) -> if type? then @stats[type] else @stats
 
   getIssueMatches = concatMap get 'matches'
 
@@ -34,12 +36,36 @@ class CategoryResults
 
 class IdResults
 
-  constructor: (results) ->
-    @[k] = v for own k, v of results
-
+  unique = uniqBy id
   flatten = concatMap id
   getReasons = (match) -> flatten (vals for k, vals of match.identifiers)
   isGood = (match, k) -> not k? or k in getReasons match
+
+  constructor: (results) ->
+    @[k] = v for own k, v of results
+
+  getStats: (type) ->
+    switch type
+      when 'objects' then @getObjectStats()
+      when 'identifiers' then @getIdentifierStats()
+      else
+        objects: @getObjectStats()
+        identifiers: @getIdentifierStats()
+
+  getIdentifierStats: ->
+    toIdents = (ms) -> unique flatten (ident for ident of match?.identifiers for match in ms)
+    matchIdents = toIdents @getMatches 'MATCH'
+    allIdents = toIdents @getMatches()
+    matches = matchIdents.length
+    all = allIdents.length
+    issues = (difference allIdents, matchIdents).length
+    {matches, all, issues}
+
+  getObjectStats: ->
+    matches = @goodMatchIds().length
+    all = @allMatchIds().length
+    issues = (id for own id, match of @ when 'MATCH' not in getReasons match).length
+    {matches, all, issues}
 
   getMatches: (k) -> (match for own id, match of @ when isGood match, k)
 

@@ -1,6 +1,8 @@
-{Service} = require './lib/fixture'
+{Service, utils} = require './lib/fixture'
 Promise = require 'promise'
-{prepare, eventually} = require './lib/utils'
+{shouldFail, prepare, eventually} = require './lib/utils'
+{invoke} = utils
+should = require 'should'
 
 countRecords = (gff3) ->
   (l for l in gff3.split(/\n/) when l.length and not /^#/.test(l.trim())).length
@@ -28,6 +30,19 @@ describe 'GFF3 Queries', ->
 
     it 'should find only two gff3 record, due to the pathways', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal 2
+
+    describe 'callback api', ->
+
+      it 'should work, just like promises do, but be more verbose', (done) ->
+        service.query opts, (err, query) ->
+          return done err if err?
+          query.getGFF3 (err, gff3) ->
+            return done err if err?
+            try
+              countRecords(gff3).should.equal 2
+              done()
+            catch e
+              done e
 
   describe 'outer joined', ->
     opts =
@@ -105,4 +120,26 @@ describe 'GFF3 Queries', ->
     it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.be.above 5
 
+  describe 'bad request', ->
+
+    service = new Service root: 'www.flymine.org/query', errorHandler: ->
+
+    opts =
+      from: 'Organism'
+      select: ['name']
+      where:
+        taxonId: 7227
+
+    it 'should fail', shouldFail -> service.query(opts).then invoke 'getGFF3'
+
+    it 'should supply an error message to callbacks', (done) ->
+      service.query opts, (err, query) ->
+        return done err if err?
+        query.getGFF3 (err, gff3) ->
+          return done new Error("Expected failure, got: #{ gff3 }") if gff3
+          try
+            err.should.match /No columns/
+            done()
+          catch e
+            done e
 
