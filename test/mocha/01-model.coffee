@@ -88,7 +88,7 @@ describe 'Model', ->
       managerTypes = testmodel.getSubclassesOf 'Manager'
 
       it 'should include "CEO"', ->
-       managerTypes.should.include('CEO')
+        managerTypes.should.include('CEO')
 
     describe 'the subclasses of HasAddress', ->
       addressables = testmodel.getSubclassesOf 'HasAddress'
