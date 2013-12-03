@@ -724,7 +724,7 @@ class Service
   # @option opts [String] extraValue A disambiguating value (optional).
   # @option opts [Array<String>] tags A list of tags to apply to the new list (optional).
   # @param [Array<String>|String] ids The identifiers to resolve.
-  # @param [(List) ->] cb A function that receives a {List}.
+  # @param [(Error, List) -> Any] cb A function that receives a {List}.
   # @return [Promise<List>] A promise to yield a {List}.
   createList: (opts = {}, ids = '', cb = ->) =>
     adjust = (x) => merge x, {@token, tags: (opts.tags or [])}
@@ -736,6 +736,25 @@ class Service
       contentType: 'text/plain'
 
     withCB cb, @doReq(req).then(LIST_PIPE @)
+
+  getNewUserToken = (resp) -> resp.user.temporaryToken
+
+  # Return a new service with the same root url as this one, but connected as a different
+  # user.
+  # @param [String] token The token for the user to connect as.
+  # @return [Service] A new connection to a service.
+  connectAs: (token) => Service.connect {@root, token}
+
+  # Create a new user at the current service.
+  #
+  # @param [Object] opts The user definition.
+  # @option opts [String] name The name of the new user. Used a login.
+  # @option opts [String] password The cleartext version of the users password.
+  # @option [(Error, Service) -> Any] cb An optional callback.
+  # @return [Promise<Service>] A promise to yield a new service for use with the new user.
+  createUser: ({name, password}, cb) ->
+    format = 'json'
+    withCB cb, @post('users', {name, password, format}).then(getNewUserToken).then(@connectAs)
 
 # Methods for processing items individually.
 
