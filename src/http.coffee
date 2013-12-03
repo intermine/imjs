@@ -51,7 +51,8 @@ blocking = (opts, resolve, reject) -> (resp) ->
   resp.on 'data', (chunk) -> containerBuffer += chunk
   resp.on 'error', reject
   resp.on 'end', ->
-    if /json/.test(opts.dataType) or /json/.test opts.data.format
+    ct = resp.headers['content-type']
+    if 'application/json' is ct or /json/.test(opts.dataType) or /json/.test opts.data.format
       if '' is containerBuffer and resp.statusCode is 200
         # No body, but success.
         resolve()
