@@ -1,5 +1,5 @@
 {Service} = require './lib/fixture'
-{prepare, eventually} = require './lib/utils'
+{shouldFail, prepare, eventually} = require './lib/utils'
 should = require 'should'
 
 describe 'legacy service', ->
@@ -24,4 +24,29 @@ describe 'legacy service', ->
     it 'should return good data', eventually (creatures) ->
       should.exist creatures
       creatures.should.contain 'Homo sapiens'
+
+  describe 'fetch lists', ->
+
+    @beforeAll prepare -> service.fetchLists()
+
+    it 'should get a bunch of lists', eventually (lists) ->
+      should.exist lists
+      lists.length.should.be.above 0
+
+
+  describe 'find list', ->
+
+    @beforeAll prepare -> service.fetchLists().then ([list]) ->
+      service.fetchList list.name
+
+    it 'should find a list', eventually (list) ->
+      should.exist list
+      list.name.should.be.ok
+      list.size.should.be.above 0
+
+  describe 'finding non-existent list', ->
+
+    it 'should fail', shouldFail -> service.fetchList 'non-existent-list'
+
+
 
