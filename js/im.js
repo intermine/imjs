@@ -235,8 +235,8 @@
 }).call(this);
 
 },{}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
-},{}],"zlU5Ni":[function(require,module,exports){
+module.exports=require('j+v/Vf');
+},{}],"j+v/Vf":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
 
@@ -3227,9 +3227,6 @@ module.exports=require('zlU5Ni');
     }
 
     Service.prototype.post = function(path, data) {
-      if (data == null) {
-        data = {};
-      }
       return this.makeRequest('POST', path, data);
     };
 
@@ -3268,11 +3265,6 @@ module.exports=require('zlU5Ni');
         }
         data = utils.copy(data);
         data.format = _this.getFormat(data.format);
-        if (/jsonp/.test(data.format)) {
-          data.method = method;
-          method = 'GET';
-          url += '?callback=?';
-        }
         dataType = /json/.test(data.format) ? 'json' : 'text';
         if (!http.supports(method)) {
           _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
@@ -3867,7 +3859,7 @@ module.exports=require('zlU5Ni');
 
 }).call(this);
 
-},{"./base64":1,"./http":"zlU5Ni","./id-resolution-job":5,"./lists":6,"./model":7,"./promise":9,"./query":10,"./user":13,"./util":14,"./version":15}],12:[function(require,module,exports){
+},{"./base64":1,"./http":"j+v/Vf","./id-resolution-job":5,"./lists":6,"./model":7,"./promise":9,"./query":10,"./user":13,"./util":14,"./version":15}],12:[function(require,module,exports){
 (function() {
   var Table, merge, properties;
 
