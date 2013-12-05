@@ -9,12 +9,13 @@
 # and browsers.
 #
 
-Promise        = require('promise')
+Promise        = require('./promise')
 {Model}        = require('./model')
 {Query}        = require('./query')
 {List}         = require('./lists')
 {User}         = require('./user')
 {IDResolutionJob} = require('./id-resolution-job')
+base64       = require ('./base64')
 version      = require('./version')
 utils        = require('./util')
 to_query_string    = utils.querystring
@@ -32,6 +33,8 @@ intermine = exports
 # Stable resources do not change between releases
 # of a service.
 VERSIONS = {}
+CLASSKEYS = {}
+RELEASES = {}
 MODELS = {}
 SUMMARY_FIELDS = {}
 WIDGETS = {}
@@ -43,6 +46,8 @@ DEFAULT_PROTOCOL = "http://"
 # A list of endpoints exposed by the service.
 VERSION_PATH = "version"
 TEMPLATES_PATH = "templates"
+RELEASE_PATH = "version/release"
+CLASSKEY_PATH = "classkeys"
 LISTS_PATH = "lists"
 MODEL_PATH = "model"
 SUMMARYFIELDS_PATH = "summaryfields"
@@ -91,7 +96,7 @@ _get_or_fetch = (propName, store, path, key, cb) ->
   promise = @[propName] ?= if (useCache and value = store[root])
     success(value)
   else
-    @get(path).then (x) -> store[root] = x[key]
+    @doReq(url: @root + path, type: 'GET', dataType: 'json').then (x) -> store[root] = x[key]
 
   withCB cb, promise
 
@@ -192,47 +197,53 @@ class Service
   #
   # @return [Promise<Object>] A promise to yield a response object.
   makeRequest: (method = 'GET', path = '', data = {}, cb = (->), indiv = false) ->
-    if utils.isArray cb
-      [cb, errBack] = cb
-    if utils.isArray data
-      data = utils.pairsToObj data
+    @fetchVersion().then (version) =>
+      if utils.isArray cb
+        [cb, errBack] = cb
+      if utils.isArray data
+        data = utils.pairsToObj data
 
-    url = @root + path
-    errBack ?= @errorHandler
-    data.token = @token if @token
-    data.format = @getFormat(data.format)
+      url = @root + path
+      errBack ?= @errorHandler
+      data = utils.copy data
+      data.format = @getFormat(data.format)
 
-    if /jsonp/.test data.format
-      # tunnel the true method
-      data.method = method
-      method = 'GET'
-      url += '?callback=?'
+      if /jsonp/.test data.format
+        # tunnel the true method
+        data.method = method
+        method = 'GET'
+        url += '?callback=?'
 
-    dataType = if /json/.test(data.format) then 'json' else 'text'
+      dataType = if /json/.test(data.format) then 'json' else 'text'
 
-    # IE requires that we tunnel DELETE and PUT
-    unless http.supports method
-      [data.method, method] = [method, http.getMethod(method)]
+      # IE requires that we tunnel DELETE and PUT
+      unless http.supports method
+        [data.method, method] = [method, http.getMethod(method)]
 
-    if method is 'DELETE'
-      # grumble grumble struts grumble grumble...
-      # (struts won't read query data from the request body
-      # of DELETE requests).
-      url += '?' + to_query_string data
+      opts =
+        data: data,
+        dataType: dataType,
+        success: cb,
+        error: errBack,
+        url: url,
+        type: method
 
-    opts =
-      data: data,
-      dataType: dataType,
-      success: cb,
-      error: errBack,
-      url: url,
-      type: method
+      if 'headers' of data
+        opts.headers = utils.copy data.headers
+        delete opts.data.headers
 
-    if timeout = (data.timeout ? @timeout)
-      opts.timeout = timeout
-      delete data.timeout
+      if @token?
+        if version >= 14
+          opts.headers ?= {}
+          opts.headers.Authorization = "Token #{ @token }"
+        else
+          opts.data.token = @token
 
-    return @doReq(opts, indiv)
+      if timeout = (data.timeout ? @timeout)
+        opts.timeout = timeout
+        delete data.timeout
+
+      return @doReq(opts, indiv)
 
   # Get the results of using a list enrichment widget to calculate
   # statistics for a set of objects. An enrichment calculation
@@ -668,6 +679,12 @@ class Service
   fetchVersion: (cb) =>
     _get_or_fetch.call @, 'version', VERSIONS, VERSION_PATH, 'version', cb
 
+  fetchClassKeys: (cb) =>
+    _get_or_fetch.call @, 'classkeys', CLASSKEYS, CLASSKEY_PATH, 'classes', cb
+
+  fetchRelease: (cb) =>
+    _get_or_fetch.call @, 'release', RELEASES, RELEASE_PATH, 'version', cb
+
   # Promise to make a new Query.
   #
   # @param [Object] options The JSON representation of the query. See {Query#constructor}
@@ -677,9 +694,7 @@ class Service
   query: (options, cb) =>
     deps = [@fetchModel(), @fetchSummaryFields()]
     buildQuery = ([model, summaryFields]) => new Query (merge options, {model, summaryFields}), @
-    Promise.all(deps)
-           .then(buildQuery)
-           .nodeify(cb)
+    withCB cb, Promise.all(deps).then(buildQuery)
 
   # Perform operations on a user's preferences.
   #
@@ -743,18 +758,65 @@ class Service
   # user.
   # @param [String] token The token for the user to connect as.
   # @return [Service] A new connection to a service.
-  connectAs: (token) => Service.connect {@root, token}
+  connectAs: (token) => Service.connect merge @, {token, noCache: not @useCache}
 
   # Create a new user at the current service.
   #
-  # @param [Object] opts The user definition.
-  # @option opts [String] name The name of the new user. Used a login.
-  # @option opts [String] password The cleartext version of the users password.
-  # @option [(Error, Service) -> Any] cb An optional callback.
+  # @param [String] name The name of the new user. Used a login.
+  # @param [String] password The cleartext version of the user's password.
+  # @param [(Error, Service) -> Any] cb An optional callback.
   # @return [Promise<Service>] A promise to yield a new service for use with the new user.
-  createUser: ({name, password}, cb) ->
-    format = 'json'
-    withCB cb, @post('users', {name, password, format}).then(getNewUserToken).then(@connectAs)
+  register: (name, password, cb) -> REQUIRES_VERSION @, 9, =>
+    withCB cb, @post('users', {name, password}).then(getNewUserToken).then(@connectAs)
+
+  FIVE_MIN = 5 * 60
+
+  # Promise to get a deregistration token.
+  #
+  # To provide some security to the account deregistration process account deactivation
+  # is a two-stage process - first a deregistration token must be acquired, and only
+  # then can a request to delete a user be made.
+  #
+  # @param [Number] The number of seconds the token should be valid (default = 5 minutes).
+  # @param [(Error, String) -> Any] An optional callback.
+  # @return [Promise<String>] A promise to return a token which can be used to delete an account.
+  getDeregistrationToken: (validity = FIVE_MIN, cb) -> REQUIRES_VERSION @, 16, =>
+    promise = if @token?
+      @post('user/deregistration', {validity}).then get 'token'
+    else
+      error "Not registered"
+    withCB cb, promise
+
+  # Return a promise to delete a user account, and retrieve all of its data.
+  #
+  # Before the user this service is connected to can be deleted, a deregistration token
+  # must be obtained via a call to 'getDeregistrationToken'.
+  #
+  # @param [String] The deregistration token to activate.
+  # @param [(Error, String) -> Any] An optional callback
+  # @return [Promise<String>] A promise to yield all the userdata for an account as XML.
+  deregister: (token, cb) -> REQUIRES_VERSION @, 16, =>
+    withCB cb, @makeRequest('DELETE', 'user', deregistrationToken: token, format: 'xml')
+
+  # Promise to return a service with the same root as this one, but associated with
+  # a different user account - the one specified by the login details.
+  # @param [(Error, Service) -> Any] cb An optional callback
+  # @return [Promise<Service>] A promise to yield a service.
+  login: (name, password, cb) -> REQUIRES_VERSION @, 9, =>
+    headers = {'Authorization': "Basic " + base64.encode("#{ name }:#{ password }")}
+    service = @connectAs null
+    withCB cb, service.get('user/token', {headers})
+                      .then(get 'token')
+                      .then (token) ->
+                        service.token = token
+                        return service
+
+  # Promise to return a service with the same root as this one, but not associated with any
+  # user account. Attempts to use the yielded service to make list requests and
+  # other requests that require authenticated access will fail.
+  # @param [(Error, Service) -> Any] cb An optional callback
+  # @return [Promise<Service>] A promise to yield a service.
+  logout: (cb) -> withCB cb, success @connectAs()
 
 # Methods for processing items individually.
 
@@ -828,6 +890,8 @@ Service::subtract = Service::complement
 Service.flushCaches = () ->
   MODELS = {}
   VERSIONS = {}
+  RELEASES = {}
+  CLASSKEYS = {}
   SUMMARY_FIELDS = {}
   WIDGETS = {}
 
