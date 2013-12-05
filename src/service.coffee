@@ -171,7 +171,7 @@ class Service
   # @param [String] path The endpoint to post to.
   # @param [Object<String, String>, Array<[String, String]>] data parameters to send (optional)
   # @return [Promise<Object>] A promise to yield a response object.
-  post: (path, data = {}) -> @makeRequest 'POST', path, data
+  post: (path, data) -> @makeRequest 'POST', path, data
 
   # Convenience method for making basic GET requests.
   # @param [String] path The endpoint to get from.
@@ -209,12 +209,6 @@ class Service
       errBack ?= @errorHandler
       data = utils.copy data
       data.format = @getFormat(data.format)
-
-      if /jsonp/.test data.format
-        # tunnel the true method
-        data.method = method
-        method = 'GET'
-        url += '?callback=?'
 
       dataType = if /json/.test(data.format) then 'json' else 'text'
 
