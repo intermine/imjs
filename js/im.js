@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-pre - 2013-11-29 */
+/*! imjs - v3.0.0-pre - 2013-12-05 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -6,16 +6,6 @@
 // the terms of the LGPLv3.
 // 
 // The copyright is held by InterMine (www.intermine.org) and Alex Kalderimis (alex@intermine.org).
-(function() {
-  var imjs, pkg;
-
-  imjs = exports;
-
-  pkg = require("../package.json");
-
-  imjs.VERSION = pkg.version;
-
-}).call(this);
 
 (function() {
   var HAS_CONSOLE, HAS_JSON, NOT_ENUM, hasDontEnumBug, hasOwnProperty, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
@@ -157,108 +147,73 @@
 
 }).call(this);
 
-(function(root, undefined) {
-  var _ = root._,
-      jQuery = root.jQuery;
-  if (typeof jQuery === 'undefined') {
-    return null; 
-  }
-  var $ = jQuery;
-  // jQuery.XDomainRequest.js
-  // Author: Jason Moon - @JSONMOON
-  // IE8+
-  // see: https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest
-  if (!$.support.cors && window.XDomainRequest) {
-    console.log("Patching IE x-domain request support");
-    var httpRegEx = /^https?:\/\//i;
-    var getOrPostRegEx = /^get|post$/i;
-    var sameSchemeRegEx = new RegExp('^'+location.protocol, 'i');
-    var jsonRegEx = /\/json/i;
-    var xmlRegEx = /\/xml/i;
+!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.intermine=e():"undefined"!=typeof global?global.intermine=e():"undefined"!=typeof self&&(self.intermine=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
-    var XDomainTransporter = function (userOptions, options) {
-      this.userOptions = userOptions;
-      this.options = options;
-      this.userType = (userOptions.dataType||'').toLowerCase();
-      _.bindAll(this); // make sure we can use onLoad
-    };
-    XDomainTransporter.prototype.constructor = XDomainTransporter;
-    XDomainTransporter.prototype.send = function(headers, complete) {
-      this.xdr = new XDomainRequest();
-      this.complete = complete;
-      var xdr = this.xdr;
-      if (/^\d+$/.test(this.userOptions.timeout)) {
-        xdr.timeout = this.userOptions.timeout;
-      }
-      xdr.ontimeout = function() {
-        complete(500, 'timeout');
-      };
-      xdr.onerror = function() {
-        complete(500, 'error', { text: xdr.responseText });
-      };
-      xdr.onload = this.onLoad;
-      var postData = (this.userOptions.data && $.param(this.userOptions.data)) || '';
-      xdr.open(this.options.type, this.options.url);
-      xdr.send(postData);
-    };
-    XDomainTransporter.prototype.respond = function(status, statusText, responses, responseHeaders) {
-      var xdr = this.xdr;
-      xdr.onload = xdr.onerror = xdr.ontimeout = xdr.onprogress = jQuery.noop;
-      delete this.xdr;
-      jQuery.event.trigger('ajaxStop');
-      this.complete(status, statusText, responses, responseHeaders);
-    };
-    XDomainTransporter.prototype.abort = function() {
-      if (xdr) {
-        xdr.abort();
-      }
-    };
-    XDomainTransporter.prototype.onLoad = function() {
-        var xdr = this.xdr;
-        var allResponseHeaders = 'Content-Length: ' + xdr.responseText.length + '\r\nContent-Type: ' + xdr.contentType;
-        var status = {code: 200, message: 'success'};
-        var responses = {text: xdr.responseText};
-        try {
-          if ((this.userType === 'json') || ((this.userType !== 'text') && jsonRegEx.test(xdr.contentType))) {
-            try {
-              responses.json = $.parseJSON(xdr.responseText);
-            } catch (e) {
-              status.code = 500;
-              status.message = 'parseerror';
-            }
-          } else if ((this.userType === 'xml') || ((this.userType !== 'text') && xmlRegEx.test(xdr.contentType))) {
-            var doc = new ActiveXObject('Microsoft.XMLDOM');
-            doc.async = false;
-            try {
-              doc.loadXML(xdr.responseText);
-            } catch(e) {
-              doc = undefined;
-            }
-            if (!doc || !doc.documentElement || doc.getElementsByTagName('parsererror').length) {
-              status.code = 500;
-              status.message = 'parseerror';
-              throw 'Invalid XML: ' + xdr.responseText;
-            }
-            responses.xml = doc;
-          }
-        } catch (parseMessage) {
-          throw parseMessage;
-        } finally {
-          this.complete(status.code, status.message, responses, allResponseHeaders);
+/*
+*  Base64 encode / decode
+*  http://www.webtoolkit.info/
+*/
+
+
+(function() {
+  var char, keyChar, keyStr, utf8_encode;
+
+  keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+  char = String.fromCharCode;
+
+  keyChar = function(idx) {
+    return keyStr.charAt(idx);
+  };
+
+  utf8_encode = function(string) {
+    var c, chars, code, i;
+    string = string.replace(/\r\n/g, '\n');
+    chars = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (i = _i = 0, _len = string.length; _i < _len; i = ++_i) {
+        c = string[i];
+        code = string.charCodeAt(i);
+        if (code < 128) {
+          _results.push(c);
+        } else if (code < 2048) {
+          _results.push(char((code >> 6) | 192) + char((code & 63) | 128));
+        } else {
+          _results.push(char((code >> 12) | 224) + char(((char >> 6) & 63) | 128) + char((code & 63) | 128));
         }
-    };
+      }
+      return _results;
+    })();
+    return chars.join('');
+  };
 
-    // ajaxTransport exists in jQuery 1.5+
-    jQuery.ajaxTransport('text html xml json', function(options, userOptions, jqXHR){
-      // XDomainRequests must be: asynchronous, GET or POST methods, HTTP or HTTPS protocol, and same scheme as calling page
-      if (options.crossDomain && options.async && getOrPostRegEx.test(options.type) && httpRegEx.test(userOptions.url) && sameSchemeRegEx.test(userOptions.url)) {
-        return new XDomainTransporter(userOptions, options);
-      } 
-    });
-    jQuery.support.cors = true;
-  }
-}).call(this, typeof exports === 'undefined' ? this : exports);
+  exports.encode = function(input) {
+    var chr1, chr2, chr3, enc1, enc2, enc3, enc4, i, output;
+    output = "";
+    i = 0;
+    input = utf8_encode(input);
+    while (i < input.length) {
+      chr1 = input.charCodeAt(i++);
+      chr2 = input.charCodeAt(i++);
+      chr3 = input.charCodeAt(i++);
+      enc1 = chr1 >> 2;
+      enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+      enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+      enc4 = chr3 & 63;
+      if (isNaN(chr2)) {
+        enc3 = enc4 = 64;
+      } else if (isNaN(chr3)) {
+        enc4 = 64;
+      }
+      output += [enc1, enc2, enc3, enc4].map(keyChar).join('');
+    }
+    return output;
+  };
 
+}).call(this);
+
+},{}],2:[function(require,module,exports){
 (function() {
   var constants;
 
@@ -279,842 +234,783 @@
 
 }).call(this);
 
+},{}],"zlU5Ni":[function(require,module,exports){
 (function() {
-  var Promise, REQUIRES, comp, curry, entities, error, flatten, fold, id, invoke, isArray, pairFold, qsFromList, root, success, thenFold, _ref,
-    __slice = [].slice,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __hasProp = {}.hasOwnProperty;
+  var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
 
-  Promise = require('promise');
+  httpinvoke = require('httpinvoke');
 
-  root = exports;
+  Promise = require('./promise');
 
-  root.defer = function() {
-    var deferred;
-    deferred = {};
-    deferred.promise = new Promise(function(resolve, reject) {
-      deferred.resolve = resolve;
-      return deferred.reject = reject;
-    });
-    return deferred;
+  ACCEPT_HEADER = require('./constants').ACCEPT_HEADER;
+
+  _ref = utils = require('./util'), withCB = _ref.withCB, success = _ref.success, error = _ref.error, merge = _ref.merge;
+
+  PESKY_COMMA = /,\s*$/;
+
+  URLENC = "application/x-www-form-urlencoded";
+
+  IE_VERSION = -1;
+
+  if (navigator.appName === 'Microsoft Internet Explorer') {
+    ua = navigator.userAgent;
+    re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+    if (matches = ua.match(re)) {
+      IE_VERSION = parseFloat(matches[1]);
+    }
+  }
+
+  exports.getMethod = function(x) {
+    switch (x) {
+      case "PUT":
+        return "POST";
+      case "DELETE":
+        return "GET";
+      default:
+        return x;
+    }
   };
 
-  qsFromList = function(pairs) {
-    var pair;
-    return ((function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
-        pair = pairs[_i];
-        _results.push(pair.map(encodeURIComponent).join('='));
-      }
-      return _results;
-    })()).join('&');
-  };
-
-  root.querystring = function(obj) {
-    var k, p, pairs, subList, sv, v;
-    if (isArray(obj)) {
-      pairs = obj.slice();
+  exports.supports = function(x) {
+    if ((0 < IE_VERSION && IE_VERSION < 10) && x === 'PUT' || x === 'DELETE') {
+      return false;
     } else {
-      pairs = [];
-      for (k in obj) {
-        v = obj[k];
-        if (isArray(v)) {
-          subList = (function() {
-            var _i, _len, _results;
+      return true;
+    }
+  };
+
+  streaming = function(data) {
+    return {
+      resume: (function() {}),
+      pause: (function() {}),
+      on: function(evt, cb) {
+        var res, _i, _len, _ref1, _results;
+        switch (evt) {
+          case 'data':
+            _ref1 = data.results;
             _results = [];
-            for (_i = 0, _len = v.length; _i < _len; _i++) {
-              sv = v[_i];
-              _results.push([k, sv]);
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+              res = _ref1[_i];
+              _results.push(cb(res));
             }
             return _results;
-          })();
-          pairs = pairs.concat(subList);
-        } else {
-          pairs.push([k, v]);
+          case 'end':
+            return cb();
         }
       }
-    }
-    return qsFromList((function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
-        p = pairs[_i];
-        if (p[1] != null) {
-          _results.push(p);
-        }
-      }
-      return _results;
-    })());
-  };
-
-  root.curry = curry = function() {
-    var args, f;
-    f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    return function() {
-      var rest;
-      rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return f.apply(null, args.concat(rest));
     };
   };
 
-  root.error = error = function(e) {
-    return new Promise(function(_, reject) {
-      return reject(new Error(e));
-    });
-  };
-
-  root.success = success = Promise.from;
-
-  root.withCB = function() {
-    var f, fs, p, _i, _j, _len;
-    fs = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), p = arguments[_i++];
-    for (_j = 0, _len = fs.length; _j < _len; _j++) {
-      f = fs[_j];
-      if (f != null) {
-        (function(f) {
-          var onErr, onSucc;
-          onSucc = function(res) {
-            return f(null, res);
-          };
-          onErr = function(err) {
-            return f(err);
-          };
-          return p.then(onSucc, onErr);
-        })(f);
-      }
-    }
-    return p;
-  };
-
-  root.fold = fold = function(f) {
-    return function(init, xs) {
-      var k, ret, v;
-      if (arguments.length === 1) {
-        xs = (init != null ? init.slice() : void 0) || init;
-        init = (xs != null ? xs.shift() : void 0) || {};
-      }
-      if (xs == null) {
-        throw new Error("xs is null");
-      }
-      if (xs.reduce != null) {
-        return xs.reduce(f, init);
-      } else {
-        ret = init;
-        for (k in xs) {
-          v = xs[k];
-          ret = ret != null ? f(ret, k, v) : {
-            k: v
-          };
-        }
-        return ret;
-      }
-    };
-  };
-
-  root.take = function(n) {
-    return function(xs) {
-      if (n != null) {
-        return xs.slice(0, (n - 1) + 1 || 9e9);
-      } else {
-        return xs.slice();
-      }
-    };
-  };
-
-  root.filter = function(f) {
-    return function(xs) {
-      var x, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = xs.length; _i < _len; _i++) {
-        x = xs[_i];
-        if (f(x)) {
-          _results.push(x);
-        }
-      }
-      return _results;
-    };
-  };
-
-  root.uniqBy = function(f, xs) {
-    var k, keys, values, x, _i, _len;
-    if (arguments.length === 1) {
-      return curry(root.uniqBy, f);
-    }
-    keys = [];
-    values = [];
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      k = f(x);
-      if (__indexOf.call(keys, k) < 0) {
-        keys.push(k);
-        values.push(x);
-      }
-    }
-    return values;
-  };
-
-  root.any = function(xs, f) {
-    var x, _i, _len;
-    if (f == null) {
-      f = id;
-    }
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      if (f(x)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  root.find = function(xs, f) {
-    var x, _i, _len;
-    if (arguments.length === 1) {
-      f = xs;
-      return function(xs) {
-        return root.find(xs, f);
-      };
-    }
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      if (f(x)) {
-        return x;
-      }
-    }
-    return null;
-  };
-
-  isArray = (_ref = Array.isArray) != null ? _ref : function(xs) {
-    return ((xs != null ? xs.splice : void 0) != null) && ((xs != null ? xs.push : void 0) != null) && ((xs != null ? xs.pop : void 0) != null) && ((xs != null ? xs.slice : void 0) != null);
-  };
-
-  root.isArray = isArray;
-
-  root.isFunction = typeof /./ !== 'function' ? function(f) {
-    return typeof f === 'function';
-  } : function(f) {
-    return (f != null) && (f.call != null) && (f.apply != null) && f.toString() === '[object Function]';
-  };
-
-  entities = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;'
-  };
-
-  root.escape = function(str) {
-    if (!(str != null)) {
-      return '';
-    }
-    return String(str).replace(/[&<>"']/g, function(entity) {
-      return entities[entity];
-    });
-  };
-
-  root.omap = function(f) {
-    var merger;
-    merger = fold(function(a, oldk, oldv) {
-      var newk, newv, _ref1;
-      _ref1 = f(oldk, oldv), newk = _ref1[0], newv = _ref1[1];
-      a[newk] = newv;
-      return a;
-    });
-    return function(xs) {
-      return merger({}, xs);
-    };
-  };
-
-  root.copy = root.omap(function(k, v) {
-    return [k, v];
-  });
-
-  root.partition = function(f) {
-    return function(xs) {
-      var divide;
-      divide = fold(function(_arg, x) {
-        var falses, trues;
-        trues = _arg[0], falses = _arg[1];
-        if (f(x)) {
-          return [trues.concat([x]), falses];
-        } else {
-          return [trues, falses.concat([x])];
-        }
-      });
-      return divide([[], []], xs);
-    };
-  };
-
-  root.id = id = function(x) {
-    return x;
-  };
-
-  root.concatMap = function(f) {
-    return function(xs) {
-      var fx, k, ret, v, x, _i, _len;
-      ret = void 0;
-      for (_i = 0, _len = xs.length; _i < _len; _i++) {
-        x = xs[_i];
-        fx = f(x);
-        ret = (function() {
-          if (ret === void 0) {
-            return fx;
-          } else if (typeof ret === 'number') {
-            return ret + fx;
-          } else if (ret.concat != null) {
-            return ret.concat(fx);
-          } else {
-            for (k in fx) {
-              v = fx[k];
-              ret[k] = v;
-            }
-            return ret;
-          }
-        })();
-      }
-      return ret;
-    };
-  };
-
-  root.map = function(f) {
-    return invoke('map', f);
-  };
-
-  comp = fold(function(f, g) {
-    return function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return f(g.apply(null, args));
-    };
-  });
-
-  root.compose = function() {
-    var fs;
-    fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return comp(fs);
-  };
-
-  root.flatMap = root.concatMap;
-
-  root.difference = function(xs, remove) {
-    var x, _i, _len, _ref1, _results;
-    _results = [];
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      if (_ref1 = !x, __indexOf.call(remove, _ref1) >= 0) {
-        _results.push(x);
-      }
-    }
-    return _results;
-  };
-
-  root.stringList = function(x) {
-    if (typeof x === 'string') {
-      return [x];
-    } else {
-      return x;
-    }
-  };
-
-  root.flatten = flatten = function() {
-    var ret, x, xs, xx, _i, _j, _len, _len1, _ref1;
-    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    ret = [];
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      if (isArray(x)) {
-        _ref1 = flatten.apply(null, x);
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          xx = _ref1[_j];
-          ret.push(xx);
-        }
-      } else {
-        ret.push(x);
-      }
-    }
-    return ret;
-  };
-
-  root.sum = root.concatMap(id);
-
-  root.merge = function() {
-    var k, newObj, o, objs, v, _i, _len;
-    objs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    newObj = {};
-    for (_i = 0, _len = objs.length; _i < _len; _i++) {
-      o = objs[_i];
-      for (k in o) {
-        if (!__hasProp.call(o, k)) continue;
-        v = o[k];
-        newObj[k] = v;
-      }
-    }
-    return newObj;
-  };
-
-  root.AND = function(a, b) {
-    return a && b;
-  };
-
-  root.OR = function(a, b) {
-    return a || b;
-  };
-
-  root.NOT = function(x) {
-    return !x;
-  };
-
-  root.any = function(xs, f) {
-    var x, _i, _len;
-    if (f == null) {
-      f = id;
-    }
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      if (f(x)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  root.invoke = invoke = function() {
-    var args, name;
-    name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    return function(obj) {
-      var _ref1;
-      if ((_ref1 = obj[name]) != null ? _ref1.apply : void 0) {
-        return obj[name].apply(obj, args);
-      } else {
-        throw new Error("No method named \"" + name + "\"");
-      }
-    };
-  };
-
-  root.invokeWith = function(name, args, ctx) {
-    if (args == null) {
-      args = [];
-    }
-    if (ctx == null) {
-      ctx = null;
-    }
-    return function(o) {
-      return o[name].apply(ctx || o, args);
-    };
-  };
-
-  root.get = function(name) {
-    return function(obj) {
-      return obj[name];
-    };
-  };
-
-  root.set = function(name, value) {
-    return function(obj) {
-      var k, v;
-      if (arguments.length === 2) {
-        obj[name] = value;
-      } else {
-        for (k in name) {
-          if (!__hasProp.call(name, k)) continue;
-          v = name[k];
-          obj[k] = v;
-        }
-      }
-      return obj;
-    };
-  };
-
-  root.flip = function(f, ctx) {
-    return function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return f.apply(ctx, args.reverse());
-    };
-  };
-
-  REQUIRES = function(required, got) {
-    return "This service requires a service at version " + required + " or above. This one is at " + got;
-  };
-
-  root.REQUIRES_VERSION = function(s, n, f) {
-    return s.fetchVersion().then(function(v) {
-      if (v >= n) {
-        return f();
-      } else {
-        return error(REQUIRES(n, v));
-      }
-    });
-  };
-
-  root.dejoin = function(q) {
-    var parts, view, _i, _len, _ref1;
-    _ref1 = q.views;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      view = _ref1[_i];
-      parts = view.split('.');
-      if (parts.length > 2) {
-        q.addJoin(parts.slice(1, -1).join('.'));
-      }
-    }
-    return q;
-  };
-
-  thenFold = fold(function(p, f) {
-    return p.then(f);
-  });
-
-  root.sequence = function() {
-    var fns;
-    fns = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return thenFold(success(), fns);
-  };
-
-  pairFold = fold(function(o, _arg) {
-    var k, v;
-    k = _arg[0], v = _arg[1];
-    if (o[k] != null) {
-      throw new Error("Duplicate key: " + k);
-    }
-    o[k] = v;
-    return o;
-  });
-
-  root.pairsToObj = function(pairs) {
-    return pairFold({}, pairs);
-  };
-
-}).call(this);
-
-(function() {
-  var IS_NODE, buildArray, buildDict, intermine, __root__, _ref,
-    __slice = [].slice;
-
-  IS_NODE = typeof exports !== 'undefined';
-
-  __root__ = typeof exports !== "undefined" && exports !== null ? exports : this;
-
-  if (IS_NODE) {
-    intermine = __root__;
-  } else {
-    intermine = __root__.intermine;
-    if (intermine == null) {
-      intermine = __root__.intermine = {};
-    }
-  }
-
-  if ((_ref = intermine.compression) == null) {
-    intermine.compression = {};
-  }
-
-  buildDict = function(size) {
-    var dict, i, _i;
-    dict = {};
-    for (i = _i = 0; 0 <= size ? _i <= size : _i >= size; i = 0 <= size ? ++_i : --_i) {
-      dict[String.fromCharCode(i)] = i;
-    }
-    return dict;
-  };
-
-  buildArray = function(size) {
-    var x, _i, _results;
-    _results = [];
-    for (x = _i = 0; 0 <= size ? _i <= size : _i >= size; x = 0 <= size ? ++_i : --_i) {
-      _results.push(String.fromCharCode(x));
-    }
-    return _results;
-  };
-
-  intermine.compression.LZW = {
-    encode: function(s) {
-      var char, currPhrase, data, dict, dictSize, out, phrase, _i, _len;
-      data = (s + "").split("");
-      out = [];
-      phrase = '';
-      dictSize = 256;
-      dict = buildDict(dictSize);
-      for (_i = 0, _len = data.length; _i < _len; _i++) {
-        char = data[_i];
-        currPhrase = phrase + char;
-        if (currPhrase in dict) {
-          phrase = currPhrase;
-        } else {
-          out.push(dict[phrase]);
-          dict[currPhrase] = dictSize++;
-          phrase = String(char);
-        }
-      }
-      if (phrase !== '') {
-        out.push(dict[phrase]);
-      }
-      return out;
-    },
-    decode: function(data) {
-      var code, dict, dictSize, entry, head, result, tail, word, _i, _len;
-      dictSize = 256;
-      dict = buildArray(dictSize);
-      entry = '';
-      head = data[0], tail = 2 <= data.length ? __slice.call(data, 1) : [];
-      word = String.fromCharCode(head);
-      result = [word];
-      for (_i = 0, _len = tail.length; _i < _len; _i++) {
-        code = tail[_i];
-        entry = (function() {
-          if (dict[code]) {
-            return dict[code];
-          } else if (code === dictSize) {
-            return word + word.charAt(0);
-          } else {
-            throw new Error("Key is " + code);
-          }
-        })();
-        result.push(entry);
-        dict[dictSize++] = word + entry.charAt(0);
-        word = entry;
-      }
-      return result.join('');
-    }
-  };
-
-}).call(this);
-
-(function() {
-  var ACCEPT_HEADER, CHECKING_PIPE, ERROR_PIPE, XDomainRequest, error, get, http, inIE9, intermine, jQuery, mappingForIE, wrapCbs, _, _ref, _ref1;
-
-  jQuery = this.jQuery, _ = this._, intermine = this.intermine, XDomainRequest = this.XDomainRequest;
-
-  http = ((_ref = intermine.http) != null ? _ref : intermine.http = {});
-
-  ACCEPT_HEADER = intermine.constants.ACCEPT_HEADER;
-
-  _ref1 = intermine.funcutils, get = _ref1.get, error = _ref1.error;
-
-  (function() {
-    var converters, format, header;
-    converters = {};
-    for (format in ACCEPT_HEADER) {
-      header = ACCEPT_HEADER[format];
-      converters["text " + format] = jQuery.parseJSON;
-    }
-    return jQuery.ajaxSetup({
-      accepts: ACCEPT_HEADER,
-      contents: {
-        json: /json/
-      },
-      converters: converters
-    });
-  })();
-
-  CHECKING_PIPE = function(response) {
-    return jQuery.Deferred(function() {
-      if (response.wasSuccessful) {
-        return this.resolve(response);
-      } else {
-        return this.reject(response.error, response);
-      }
-    });
-  };
-
-  ERROR_PIPE = function(f) {
-    if (f == null) {
-      f = (function() {});
-    }
-    return function(xhr, textStatus, e) {
-      if ((xhr != null ? xhr.status : void 0) === 0) {
-        return;
-      }
-      try {
-        return f(JSON.parse(xhr.responseText).error);
-      } catch (e) {
-        return f(textStatus);
-      }
-    };
-  };
-
-  inIE9 = XDomainRequest != null;
-
-  mappingForIE = {
-    PUT: 'POST',
-    DELETE: 'GET'
-  };
-
-  if (inIE9) {
-    http.getMethod = function(x) {
-      var _ref2;
-      return (_ref2 = mappingForIE[x]) != null ? _ref2 : x;
-    };
-    http.supports = function(m) {
-      return !(m in mappingForIE);
-    };
-  } else {
-    http.getMethod = function(x) {
-      return x;
-    };
-    http.supports = function() {
-      return true;
-    };
-  }
-
-  wrapCbs = function(cbs) {
-    var atEnd, doThis, err, _doThis;
-    if (_.isArray(cbs)) {
-      if (!cbs.length) {
-        return [];
-      }
-      doThis = cbs[0], err = cbs[1], atEnd = cbs[2];
-      _doThis = function(rows) {
-        return _.each(rows, doThis != null ? doThis : function() {});
-      };
-      return [_doThis, err, atEnd];
-    } else {
-      _doThis = function(rows) {
-        return _.each(rows, cbs != null ? cbs : function() {});
-      };
-      return [_doThis];
-    }
-  };
-
-  http.iterReq = function(method, path, fmt) {
-    return function(q, page, doThis, onErr, onEnd) {
-      var req, _doThis, _ref2;
+  exports.iterReq = function(method, path, format) {
+    return function(q, page, cb, eb, onEnd) {
+      var attach, req, _ref1;
       if (page == null) {
         page = {};
       }
-      if (doThis == null) {
-        doThis = (function() {});
+      if (utils.isFunction(page)) {
+        _ref1 = [{}, page, cb, eb], page = _ref1[0], cb = _ref1[1], eb = _ref1[2], onEnd = _ref1[3];
       }
-      if (onErr == null) {
-        onErr = (function() {});
-      }
-      if (onEnd == null) {
-        onEnd = (function() {});
-      }
-      if (arguments.length === 2 && _.isFunction(page)) {
-        _ref2 = [page, {}], doThis = _ref2[0], page = _ref2[1];
-      }
-      req = _.extend({
-        format: fmt
+      req = merge({
+        format: format
       }, page, {
         query: q.toXML()
       });
-      _doThis = function(rows) {
-        return rows.forEach(doThis);
-      };
-      return this.makeRequest(method, path, req).fail(onErr).pipe(get('results')).done(doThis).done(onEnd);
-    };
-  };
-
-  http.doReq = function(opts) {
-    var def, errBack;
-    errBack = opts.error || this.errorHandler;
-    opts.error = ERROR_PIPE(errBack);
-    def = jQuery.Deferred(function() {
-      var resp,
-        _this = this;
-      resp = jQuery.ajax(opts);
-      resp.then(function() {
-        return _this.resolve.apply(_this, arguments);
-      });
-      return resp.fail(ERROR_PIPE(function(err) {
-        return _this.reject(err);
-      }));
-    });
-    return def.promise();
-  };
-
-}).call(this);
-
-(function() {
-  var DOMParser;
-
-  try {
-    DOMParser = window.DOMParser;
-  } catch (e) {
-    DOMParser = require('xmldom').DOMParser;
-  }
-
-  exports.parse = function(xml) {
-    var dom, parser;
-    if (!xml || typeof xml !== 'string') {
-      throw new Error("Expected a string - got " + xml);
-    }
-    dom = (function() {
-      try {
-        parser = new DOMParser();
-        return parser.parseFromString(xml, 'text/xml');
-      } catch (_error) {}
-    })();
-    if ((!dom) || (!dom.documentElement) || dom.getElementsByTagName('parsererror').length) {
-      throw new Error("Invalid XML: " + xml);
-    }
-    return dom;
-  };
-
-}).call(this);
-
-(function() {
-  var Table, merge, properties;
-
-  merge = function(src, dest) {
-    var k, v, _results;
-    _results = [];
-    for (k in src) {
-      v = src[k];
-      _results.push(dest[k] = v);
-    }
-    return _results;
-  };
-
-  properties = ['attributes', 'references', 'collections'];
-
-  Table = (function() {
-
-    function Table(_arg) {
-      var c, prop, _, _i, _len, _ref;
-      this.name = _arg.name, this.attributes = _arg.attributes, this.references = _arg.references, this.collections = _arg.collections;
-      this.fields = {};
-      this.__parents__ = arguments[0]['extends'];
-      for (_i = 0, _len = properties.length; _i < _len; _i++) {
-        prop = properties[_i];
-        merge(this[prop], this.fields);
-      }
-      _ref = this.collections;
-      for (_ in _ref) {
-        c = _ref[_];
-        c.isCollection = true;
-      }
-    }
-
-    Table.prototype.toString = function() {
-      var n, _;
-      return "[Table name=" + this.name + ", fields=[" + ((function() {
-        var _ref, _results;
-        _ref = this.fields;
-        _results = [];
-        for (n in _ref) {
-          _ = _ref[n];
-          _results.push(n);
+      attach = function(stream) {
+        console.log("Attaching");
+        if (cb != null) {
+          stream.on('data', cb);
         }
-        return _results;
-      }).call(this)) + "]]";
+        if (onEnd != null) {
+          stream.on('end', onEnd);
+        }
+        return stream;
+      };
+      return withCB(eb, this.makeRequest(method, path, req, null, true).then(attach));
+    };
+  };
+
+  check = function(response) {
+    var e, err, msg, sc, _ref1, _ref2;
+    sc = response.statusCode;
+    if ((200 <= sc && sc < 400)) {
+      return response.body;
+    } else {
+      msg = "Bad response: " + sc;
+      err = ((_ref1 = response.body) != null ? _ref1.error : void 0) ? response.body.error : (e = (_ref2 = response.body) != null ? typeof _ref2.match === "function" ? _ref2.match(/\[ERROR\] (\d+)([\s\S]*)/) : void 0 : void 0) ? e[2] : void 0;
+      if (err != null) {
+        msg += ": " + err;
+      }
+      return error(new Error(msg));
+    }
+  };
+
+  CHARSET = "; charset=UTF-8";
+
+  CONVERTERS = {
+    'text json': JSON.parse
+  };
+
+  exports.doReq = function(opts, iter) {
+    var headers, isJSON, method, options, postdata, resp, url, _ref1, _ref2;
+    method = opts.type;
+    url = opts.url;
+    headers = (_ref1 = opts.headers) != null ? _ref1 : {};
+    headers.Accept = ACCEPT_HEADER[opts.dataType];
+    isJSON = /json/.test(opts.dataType) || /json/.test((_ref2 = opts.data) != null ? _ref2.format : void 0);
+    if (opts.data != null) {
+      postdata = typeof opts.data === 'string' ? opts.data : "application/json" === opts.contentType ? JSON.stringify(opts.data) : utils.querystring(opts.data);
+      if ((method === 'GET' || method === 'DELETE') && (postdata != null ? postdata.length : void 0)) {
+        url += '?' + postdata;
+        postdata = void 0;
+      } else {
+        headers['Content-Type'] = (opts.contentType || URLENC) + CHARSET;
+      }
+    }
+    options = {
+      timeout: opts.timeout,
+      headers: headers,
+      outputType: isJSON ? 'json' : 'text',
+      corsExposedHeaders: ['Content-Type'],
+      converters: CONVERTERS
+    };
+    if (postdata != null) {
+      options.inputType = 'text';
+      options.input = postdata;
+    }
+    resp = Promise.from(httpinvoke(url, method, options)).then(check);
+    resp.then(opts.success, opts.error);
+    if (iter) {
+      return resp.then(streaming);
+    }
+    return resp;
+  };
+
+}).call(this);
+
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],5:[function(require,module,exports){
+(function() {
+  var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
+    __hasProp = {}.hasOwnProperty,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  funcutils = require('./util');
+
+  intermine = exports;
+
+  uniqBy = funcutils.uniqBy, difference = funcutils.difference, defer = funcutils.defer, withCB = funcutils.withCB, id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
+
+  ONE_MINUTE = 60 * 1000;
+
+  CategoryResults = (function() {
+    var getIssueMatches;
+
+    function CategoryResults(results) {
+      var k, v;
+      for (k in results) {
+        if (!__hasProp.call(results, k)) continue;
+        v = results[k];
+        this[k] = v;
+      }
+    }
+
+    CategoryResults.prototype.getStats = function(type) {
+      if (type != null) {
+        return this.stats[type];
+      } else {
+        return this.stats;
+      }
     };
 
-    Table.prototype.parents = function() {
+    getIssueMatches = concatMap(get('matches'));
+
+    CategoryResults.prototype.getMatches = function(k) {
       var _ref;
-      return ((_ref = this.__parents__) != null ? _ref : []).slice();
+      if (k === 'MATCH') {
+        return this.matches[k];
+      } else {
+        return (_ref = getIssueMatches(this.matches[k])) != null ? _ref : [];
+      }
     };
 
-    return Table;
+    CategoryResults.prototype.getMatchIds = function(k) {
+      if (k != null) {
+        return this.getMatches(k).map(get('id'));
+      } else {
+        return this.allMatchIds();
+      }
+    };
+
+    CategoryResults.prototype.goodMatchIds = function() {
+      return this.getMatchIds('MATCH');
+    };
+
+    CategoryResults.prototype.allMatchIds = function() {
+      var combineIds,
+        _this = this;
+      combineIds = fold(function(res, issueSet) {
+        return res.concat(_this.getMatchIds(issueSet));
+      });
+      return combineIds(this.goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']);
+    };
+
+    return CategoryResults;
 
   })();
 
-  exports.Table = Table;
+  IdResults = (function() {
+    var flatten, getReasons, isGood, unique;
+
+    unique = uniqBy(id);
+
+    flatten = concatMap(id);
+
+    getReasons = function(match) {
+      var k, vals;
+      return flatten((function() {
+        var _ref, _results;
+        _ref = match.identifiers;
+        _results = [];
+        for (k in _ref) {
+          vals = _ref[k];
+          _results.push(vals);
+        }
+        return _results;
+      })());
+    };
+
+    isGood = function(match, k) {
+      return !(k != null) || __indexOf.call(getReasons(match), k) >= 0;
+    };
+
+    function IdResults(results) {
+      var k, v;
+      for (k in results) {
+        if (!__hasProp.call(results, k)) continue;
+        v = results[k];
+        this[k] = v;
+      }
+    }
+
+    IdResults.prototype.getStats = function(type) {
+      switch (type) {
+        case 'objects':
+          return this.getObjectStats();
+        case 'identifiers':
+          return this.getIdentifierStats();
+        default:
+          return {
+            objects: this.getObjectStats(),
+            identifiers: this.getIdentifierStats()
+          };
+      }
+    };
+
+    IdResults.prototype.getIdentifierStats = function() {
+      var all, allIdents, issues, matchIdents, matches, toIdents;
+      toIdents = function(ms) {
+        var ident, match;
+        return unique(flatten((function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = ms.length; _i < _len; _i++) {
+            match = ms[_i];
+            _results.push((function() {
+              var _results1;
+              _results1 = [];
+              for (ident in match != null ? match.identifiers : void 0) {
+                _results1.push(ident);
+              }
+              return _results1;
+            })());
+          }
+          return _results;
+        })()));
+      };
+      matchIdents = toIdents(this.getMatches('MATCH'));
+      allIdents = toIdents(this.getMatches());
+      matches = matchIdents.length;
+      all = allIdents.length;
+      issues = (difference(allIdents, matchIdents)).length;
+      return {
+        matches: matches,
+        all: all,
+        issues: issues
+      };
+    };
+
+    IdResults.prototype.getObjectStats = function() {
+      var all, issues, match, matches;
+      matches = this.goodMatchIds().length;
+      all = this.allMatchIds().length;
+      issues = ((function() {
+        var _results;
+        _results = [];
+        for (id in this) {
+          if (!__hasProp.call(this, id)) continue;
+          match = this[id];
+          if (__indexOf.call(getReasons(match), 'MATCH') < 0) {
+            _results.push(id);
+          }
+        }
+        return _results;
+      }).call(this)).length;
+      return {
+        matches: matches,
+        all: all,
+        issues: issues
+      };
+    };
+
+    IdResults.prototype.getMatches = function(k) {
+      var match, _results;
+      _results = [];
+      for (id in this) {
+        if (!__hasProp.call(this, id)) continue;
+        match = this[id];
+        if (isGood(match, k)) {
+          _results.push(match);
+        }
+      }
+      return _results;
+    };
+
+    IdResults.prototype.getMatchIds = function(k) {
+      var match, _results;
+      _results = [];
+      for (id in this) {
+        if (!__hasProp.call(this, id)) continue;
+        match = this[id];
+        if (isGood(match, k)) {
+          _results.push(id);
+        }
+      }
+      return _results;
+    };
+
+    IdResults.prototype.goodMatchIds = function() {
+      return this.getMatchIds('MATCH');
+    };
+
+    IdResults.prototype.allMatchIds = function() {
+      return this.getMatchIds();
+    };
+
+    return IdResults;
+
+  })();
+
+  IDResolutionJob = (function() {
+
+    function IDResolutionJob(uid, service) {
+      this.uid = uid;
+      this.service = service;
+      this.del = __bind(this.del, this);
+
+      this.fetchResults = __bind(this.fetchResults, this);
+
+      this.fetchErrorMessage = __bind(this.fetchErrorMessage, this);
+
+      this.fetchStatus = __bind(this.fetchStatus, this);
+
+    }
+
+    IDResolutionJob.prototype.fetchStatus = function(cb) {
+      return withCB(cb, this.service.get("ids/" + this.uid + "/status").then(get('status')));
+    };
+
+    IDResolutionJob.prototype.fetchErrorMessage = function(cb) {
+      return withCB(cb, this.service.get("ids/" + this.uid + "/status").then(get('message')));
+    };
+
+    IDResolutionJob.prototype.fetchResults = function(cb) {
+      var gettingRes, gettingVer;
+      gettingRes = this.service.get("ids/" + this.uid + "/result").then(get('results'));
+      gettingVer = this.service.fetchVersion();
+      return gettingVer.then(function(v) {
+        return gettingRes.then(function(results) {
+          if (v >= 16) {
+            return new CategoryResults(results);
+          } else {
+            return new IdResults(results);
+          }
+        });
+      });
+    };
+
+    IDResolutionJob.prototype.del = function(cb) {
+      return this.service.makeRequest('DELETE', "ids/" + this.uid, {}, cb);
+    };
+
+    IDResolutionJob.prototype.decay = 50;
+
+    IDResolutionJob.prototype.poll = function(onSuccess, onError, onProgress) {
+      var backOff, notify, promise, reject, resolve, resp, _ref,
+        _this = this;
+      _ref = defer(), promise = _ref.promise, resolve = _ref.resolve, reject = _ref.reject;
+      promise.then(onSuccess, onError);
+      notify = onProgress != null ? onProgress : (function() {});
+      resp = this.fetchStatus();
+      resp.then(null, reject);
+      backOff = this.decay;
+      this.decay = Math.min(ONE_MINUTE, backOff * 1.25);
+      resp.then(function(status) {
+        notify(status);
+        switch (status) {
+          case 'SUCCESS':
+            return _this.fetchResults().then(resolve, reject);
+          case 'ERROR':
+            return _this.fetchErrorMessage().then(reject, reject);
+          default:
+            return setTimeout((function() {
+              return _this.poll(resolve, reject, notify);
+            }), backOff);
+        }
+      });
+      return promise;
+    };
+
+    return IDResolutionJob;
+
+  })();
+
+  IDResolutionJob.prototype.wait = IDResolutionJob.prototype.poll;
+
+  IDResolutionJob.create = function(service) {
+    return function(uid) {
+      return new IDResolutionJob(uid, service);
+    };
+  };
+
+  intermine.IDResolutionJob = IDResolutionJob;
+
+  intermine.CategoryResults = CategoryResults;
+
+  intermine.IdResults = IdResults;
 
 }).call(this);
 
+},{"./util":14}],6:[function(require,module,exports){
+(function() {
+  var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  utils = require('./util');
+
+  intermine = exports;
+
+  merge = utils.merge, withCB = utils.withCB, get = utils.get, invoke = utils.invoke, REQUIRES_VERSION = utils.REQUIRES_VERSION, set = utils.set, dejoin = utils.dejoin;
+
+  TAGS_PATH = "list/tags";
+
+  SHARES = "lists/shares";
+
+  INVITES = 'lists/invitations';
+
+  isFolder = function(t) {
+    return t.substr(0, t.indexOf(':')) === '__folder__';
+  };
+
+  getFolderName = function(t) {
+    return t.substr(t.indexOf(':') + 1);
+  };
+
+  List = (function() {
+    var getTags;
+
+    function List(properties, service) {
+      var k, v;
+      this.service = service;
+      this._updateTags = __bind(this._updateTags, this);
+
+      this.hasTag = __bind(this.hasTag, this);
+
+      for (k in properties) {
+        if (!__hasProp.call(properties, k)) continue;
+        v = properties[k];
+        this[k] = v;
+      }
+      this.dateCreated = (this.dateCreated != null) ? new Date(this.dateCreated) : null;
+      this.folders = this.tags.filter(isFolder).map(getFolderName);
+    }
+
+    List.prototype.hasTag = function(t) {
+      return __indexOf.call(this.tags, t) >= 0;
+    };
+
+    List.prototype.query = function(view) {
+      if (view == null) {
+        view = ['*'];
+      }
+      return this.service.query({
+        select: view,
+        from: this.type,
+        where: [[this.type, 'IN', this.name]]
+      });
+    };
+
+    List.prototype.del = function(cb) {
+      return this.service.makeRequest('DELETE', 'lists', {
+        name: this.name
+      }, cb);
+    };
+
+    getTags = function(_arg) {
+      var tags;
+      tags = _arg.tags;
+      return tags;
+    };
+
+    List.prototype._updateTags = function(err, tags) {
+      if (err != null) {
+        return;
+      }
+      this.tags = tags.slice();
+      return this.folders = this.tags.filter(isFolder).map(getFolderName);
+    };
+
+    List.prototype.fetchTags = function(cb) {
+      return withCB(this._updateTags, cb, this.service.makeRequest('GET', 'list/tags', {
+        name: this.name
+      }).then(getTags));
+    };
+
+    List.prototype.addTags = function(tags, cb) {
+      var req;
+      req = {
+        name: this.name,
+        tags: tags
+      };
+      return withCB(this._updateTags, cb, this.service.makeRequest('POST', 'list/tags', req).then(getTags));
+    };
+
+    List.prototype.removeTags = function(tags, cb) {
+      var req;
+      req = {
+        name: this.name,
+        tags: tags
+      };
+      return withCB(this._updateTags, cb, this.service.makeRequest('DELETE', 'list/tags', req).then(getTags));
+    };
+
+    List.prototype.contents = function(cb) {
+      return withCB(cb, this.query().then(dejoin).then(invoke('records')));
+    };
+
+    List.prototype.rename = function(newName, cb) {
+      var req,
+        _this = this;
+      req = {
+        oldname: this.name,
+        newname: newName
+      };
+      return withCB(cb, this.service.post('lists/rename', req).then(get('listName')).then(function(n) {
+        return _this.name = n;
+      }).then(this.service.fetchList));
+    };
+
+    List.prototype.copy = function(opts, cb) {
+      var baseName, name, query, tags, _ref, _ref1, _ref2,
+        _this = this;
+      if (opts == null) {
+        opts = {};
+      }
+      if (cb == null) {
+        cb = (function() {});
+      }
+      if (arguments.length === 1 && utils.isFunction(opts)) {
+        _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
+      }
+      if (typeof opts === 'string') {
+        opts = {
+          name: opts
+        };
+      }
+      name = baseName = (_ref1 = opts.name) != null ? _ref1 : "" + this.name + "_copy";
+      tags = this.tags.concat((_ref2 = opts.tags) != null ? _ref2 : []);
+      query = this.query(['id']);
+      return withCB(cb, this.service.fetchLists().then(invoke('map', get('name'))).then(function(names) {
+        var c;
+        c = 1;
+        while (__indexOf.call(names, name) >= 0) {
+          name = "" + baseName + "-" + (c++);
+        }
+        return query.then(invoke('saveAsList', {
+          name: name,
+          tags: tags,
+          description: _this.description
+        }));
+      }));
+    };
+
+    List.prototype.enrichment = function(opts, cb) {
+      return this.service.enrichment(merge({
+        list: this.name
+      }, opts), cb);
+    };
+
+    List.prototype.shareWithUser = function(recipient, cb) {
+      return withCB(cb, this.service.post(SHARES, {
+        'list': this.name,
+        'with': recipient
+      }));
+    };
+
+    List.prototype.inviteUserToShare = function(recipient, notify, cb) {
+      if (notify == null) {
+        notify = true;
+      }
+      if (cb == null) {
+        cb = (function() {});
+      }
+      return withCB(cb, this.service.post(INVITES, {
+        list: this.name,
+        to: recipient,
+        notify: !!notify
+      }));
+    };
+
+    return List;
+
+  })();
+
+  intermine.List = List;
+
+}).call(this);
+
+},{"./util":14}],7:[function(require,module,exports){
+(function() {
+  var Model, PathInfo, Table, error, find, flatten, intermine, liftToTable, omap, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  Table = require('./table').Table;
+
+  PathInfo = require('./path').PathInfo;
+
+  _ref = require('./util'), flatten = _ref.flatten, find = _ref.find, error = _ref.error, omap = _ref.omap;
+
+  intermine = exports;
+
+  liftToTable = omap(function(k, v) {
+    return [k, new Table(v)];
+  });
+
+  Model = (function() {
+
+    function Model(_arg) {
+      var classes;
+      this.name = _arg.name, classes = _arg.classes;
+      this.findCommonType = __bind(this.findCommonType, this);
+
+      this.findSharedAncestor = __bind(this.findSharedAncestor, this);
+
+      this.getAncestorsOf = __bind(this.getAncestorsOf, this);
+
+      this.getSubclassesOf = __bind(this.getSubclassesOf, this);
+
+      this.getPathInfo = __bind(this.getPathInfo, this);
+
+      this.classes = liftToTable(classes);
+    }
+
+    Model.prototype.getPathInfo = function(path, subcls) {
+      return PathInfo.parse(this, path, subcls);
+    };
+
+    Model.prototype.getSubclassesOf = function(cls) {
+      var cd, clazz, ret, _, _ref1, _ref2;
+      clazz = cls && cls.name ? cls : this.classes[cls];
+      if (clazz == null) {
+        throw new Error("" + cls + " is not a table");
+      }
+      ret = [clazz.name];
+      _ref1 = this.classes;
+      for (_ in _ref1) {
+        cd = _ref1[_];
+        if (_ref2 = clazz.name, __indexOf.call(cd.parents(), _ref2) >= 0) {
+          ret = ret.concat(this.getSubclassesOf(cd));
+        }
+      }
+      return ret;
+    };
+
+    Model.prototype.getAncestorsOf = function(cls) {
+      var ancestors, clazz, superC, _i, _len;
+      clazz = cls && cls.name ? cls : this.classes[cls];
+      if (clazz == null) {
+        throw new Error("" + cls + " is not a table");
+      }
+      ancestors = clazz.parents();
+      for (_i = 0, _len = ancestors.length; _i < _len; _i++) {
+        superC = ancestors[_i];
+        ancestors.push(this.getAncestorsOf(superC));
+      }
+      return flatten(ancestors);
+    };
+
+    Model.prototype.findSharedAncestor = function(classA, classB) {
+      var a_ancestry, b_ancestry, firstCommon;
+      if (classB === null || classA === null) {
+        return null;
+      }
+      if (classA === classB) {
+        return classA;
+      }
+      a_ancestry = this.getAncestorsOf(classA);
+      if (__indexOf.call(a_ancestry, classB) >= 0) {
+        return classB;
+      }
+      b_ancestry = this.getAncestorsOf(classB);
+      if (__indexOf.call(b_ancestry, classA) >= 0) {
+        return classA;
+      }
+      firstCommon = find(a_ancestry, function(a) {
+        return __indexOf.call(b_ancestry, a) >= 0;
+      });
+      return firstCommon;
+    };
+
+    Model.prototype.findCommonType = function(xs) {
+      if (xs == null) {
+        xs = [];
+      }
+      return xs.reduce(this.findSharedAncestor);
+    };
+
+    return Model;
+
+  })();
+
+  Model.prototype.makePath = Model.prototype.getPathInfo;
+
+  Model.prototype.findCommonTypeOfMultipleClasses = Model.prototype.findCommonType;
+
+  Model.load = function(data) {
+    try {
+      return new Model(data);
+    } catch (e) {
+      throw new Error("Error loading model: " + e);
+    }
+  };
+
+  Model.INTEGRAL_TYPES = ["int", "Integer", "long", "Long"];
+
+  Model.FRACTIONAL_TYPES = ["double", "Double", "float", "Float"];
+
+  Model.NUMERIC_TYPES = Model.INTEGRAL_TYPES.concat(Model.FRACTIONAL_TYPES);
+
+  Model.BOOLEAN_TYPES = ["boolean", "Boolean"];
+
+  intermine.Model = Model;
+
+}).call(this);
+
+},{"./path":8,"./table":12,"./util":14}],8:[function(require,module,exports){
 (function() {
   var NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -1354,622 +1250,34 @@
 
 }).call(this);
 
+},{"./util":14}],9:[function(require,module,exports){
 (function() {
-  var Model, PathInfo, Table, error, find, flatten, intermine, liftToTable, omap, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var Parent, Promise;
 
-  Table = require('./table').Table;
+  Parent = require('promise');
 
-  PathInfo = require('./path').PathInfo;
-
-  _ref = require('./util'), flatten = _ref.flatten, find = _ref.find, error = _ref.error, omap = _ref.omap;
-
-  intermine = exports;
-
-  liftToTable = omap(function(k, v) {
-    return [k, new Table(v)];
-  });
-
-  Model = (function() {
-
-    function Model(_arg) {
-      var classes;
-      this.name = _arg.name, classes = _arg.classes;
-      this.findCommonType = __bind(this.findCommonType, this);
-
-      this.findSharedAncestor = __bind(this.findSharedAncestor, this);
-
-      this.getAncestorsOf = __bind(this.getAncestorsOf, this);
-
-      this.getSubclassesOf = __bind(this.getSubclassesOf, this);
-
-      this.getPathInfo = __bind(this.getPathInfo, this);
-
-      this.classes = liftToTable(classes);
+  module.exports = Promise = function(fn) {
+    if (!(this instanceof Promise)) {
+      return new Promise(fn);
     }
-
-    Model.prototype.getPathInfo = function(path, subcls) {
-      return PathInfo.parse(this, path, subcls);
-    };
-
-    Model.prototype.getSubclassesOf = function(cls) {
-      var cd, clazz, ret, _, _ref1, _ref2;
-      clazz = cls && cls.name ? cls : this.classes[cls];
-      if (clazz == null) {
-        throw new Error("" + cls + " is not a table");
-      }
-      ret = [clazz.name];
-      _ref1 = this.classes;
-      for (_ in _ref1) {
-        cd = _ref1[_];
-        if (_ref2 = clazz.name, __indexOf.call(cd.parents(), _ref2) >= 0) {
-          ret = ret.concat(this.getSubclassesOf(cd));
-        }
-      }
-      return ret;
-    };
-
-    Model.prototype.getAncestorsOf = function(cls) {
-      var ancestors, clazz, superC, _i, _len;
-      clazz = cls && cls.name ? cls : this.classes[cls];
-      if (clazz == null) {
-        throw new Error("" + cls + " is not a table");
-      }
-      ancestors = clazz.parents();
-      for (_i = 0, _len = ancestors.length; _i < _len; _i++) {
-        superC = ancestors[_i];
-        ancestors.push(this.getAncestorsOf(superC));
-      }
-      return flatten(ancestors);
-    };
-
-    Model.prototype.findSharedAncestor = function(classA, classB) {
-      var a_ancestry, b_ancestry, firstCommon;
-      if (classB === null || classA === null) {
-        return null;
-      }
-      if (classA === classB) {
-        return classA;
-      }
-      a_ancestry = this.getAncestorsOf(classA);
-      if (__indexOf.call(a_ancestry, classB) >= 0) {
-        return classB;
-      }
-      b_ancestry = this.getAncestorsOf(classB);
-      if (__indexOf.call(b_ancestry, classA) >= 0) {
-        return classA;
-      }
-      firstCommon = find(a_ancestry, function(a) {
-        return __indexOf.call(b_ancestry, a) >= 0;
-      });
-      return firstCommon;
-    };
-
-    Model.prototype.findCommonType = function(xs) {
-      if (xs == null) {
-        xs = [];
-      }
-      return xs.reduce(this.findSharedAncestor);
-    };
-
-    return Model;
-
-  })();
-
-  Model.prototype.makePath = Model.prototype.getPathInfo;
-
-  Model.prototype.findCommonTypeOfMultipleClasses = Model.prototype.findCommonType;
-
-  Model.load = function(data) {
-    try {
-      return new Model(data);
-    } catch (e) {
-      throw new Error("Error loading model: " + e);
-    }
+    return Parent.call(this, fn);
   };
 
-  Model.INTEGRAL_TYPES = ["int", "Integer", "long", "Long"];
+  Promise.prototype = Object.create(Parent.prototype);
 
-  Model.FRACTIONAL_TYPES = ["double", "Double", "float", "Float"];
+  Promise.prototype.constructor = Promise;
 
-  Model.NUMERIC_TYPES = Model.INTEGRAL_TYPES.concat(Model.FRACTIONAL_TYPES);
+  Promise.prototype.fail = function(onError) {
+    return this.then(null, onError);
+  };
 
-  Model.BOOLEAN_TYPES = ["boolean", "Boolean"];
+  Promise.all = Parent.all;
 
-  intermine.Model = Model;
+  Promise.from = Parent.from;
 
 }).call(this);
 
-(function() {
-  var User, do_pref_req, error, intermine, isFunction, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  _ref = require('./util'), isFunction = _ref.isFunction, error = _ref.error;
-
-  intermine = exports;
-
-  do_pref_req = function(user, data, method, cb) {
-    return user.service.manageUserPreferences(method, data, cb).then(function(prefs) {
-      return user.preferences = prefs;
-    });
-  };
-
-  User = (function() {
-
-    function User(service, _arg) {
-      var _ref1;
-      this.service = service;
-      this.username = _arg.username, this.preferences = _arg.preferences;
-      this.refresh = __bind(this.refresh, this);
-
-      this.clearPreferences = __bind(this.clearPreferences, this);
-
-      this.clearPreference = __bind(this.clearPreference, this);
-
-      this.setPreferences = __bind(this.setPreferences, this);
-
-      this.setPreference = __bind(this.setPreference, this);
-
-      this.hasPreferences = this.preferences != null;
-      if ((_ref1 = this.preferences) == null) {
-        this.preferences = {};
-      }
-    }
-
-    User.prototype.setPreference = function(key, value, cb) {
-      var data, _ref1;
-      if (isFunction(value)) {
-        _ref1 = [null, value], value = _ref1[0], cb = _ref1[1];
-      }
-      if (typeof key === 'string') {
-        data = {};
-        data[key] = value;
-      } else if (!(value != null)) {
-        data = key;
-      } else {
-        return withCB(cb, error("Incorrect arguments to setPreference"));
-      }
-      return this.setPreferences(data, cb);
-    };
-
-    User.prototype.setPreferences = function(prefs, cb) {
-      return do_pref_req(this, prefs, 'POST', cb);
-    };
-
-    User.prototype.clearPreference = function(key, cb) {
-      return do_pref_req(this, {
-        key: key
-      }, 'DELETE', cb);
-    };
-
-    User.prototype.clearPreferences = function(cb) {
-      return do_pref_req(this, {}, 'DELETE', cb);
-    };
-
-    User.prototype.refresh = function(cb) {
-      return do_pref_req(this, {}, 'GET', cb);
-    };
-
-    return User;
-
-  })();
-
-  intermine.User = User;
-
-}).call(this);
-
-(function() {
-  var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  utils = require('./util');
-
-  intermine = exports;
-
-  merge = utils.merge, withCB = utils.withCB, get = utils.get, invoke = utils.invoke, REQUIRES_VERSION = utils.REQUIRES_VERSION, set = utils.set, dejoin = utils.dejoin;
-
-  TAGS_PATH = "list/tags";
-
-  SHARES = "lists/shares";
-
-  INVITES = 'lists/invitations';
-
-  isFolder = function(t) {
-    return t.substr(0, t.indexOf(':')) === '__folder__';
-  };
-
-  getFolderName = function(t) {
-    return s.substr(t.indexOf(':') + 1);
-  };
-
-  List = (function() {
-    var getTags;
-
-    function List(properties, service) {
-      var k, v;
-      this.service = service;
-      this._updateTags = __bind(this._updateTags, this);
-
-      this.hasTag = __bind(this.hasTag, this);
-
-      for (k in properties) {
-        if (!__hasProp.call(properties, k)) continue;
-        v = properties[k];
-        this[k] = v;
-      }
-      this.dateCreated = (this.dateCreated != null) ? new Date(this.dateCreated) : null;
-      this.folders = this.tags.filter(isFolder).map(getFolderName);
-    }
-
-    List.prototype.hasTag = function(t) {
-      return __indexOf.call(this.tags, t) >= 0;
-    };
-
-    List.prototype.query = function(view) {
-      if (view == null) {
-        view = ['*'];
-      }
-      return this.service.query({
-        select: view,
-        from: this.type,
-        where: [[this.type, 'IN', this.name]]
-      });
-    };
-
-    List.prototype.del = function(cb) {
-      return this.service.makeRequest('DELETE', 'lists', {
-        name: this.name
-      }, cb);
-    };
-
-    getTags = function(_arg) {
-      var tags;
-      tags = _arg.tags;
-      return tags;
-    };
-
-    List.prototype._updateTags = function(err, tags) {
-      if (err != null) {
-        return;
-      }
-      this.tags = tags.slice();
-      return this.folders = this.tags.filter(isFolder).map(getFolderName);
-    };
-
-    List.prototype.fetchTags = function(cb) {
-      return withCB(this._updateTags, cb, this.service.makeRequest('GET', 'list/tags', {
-        name: this.name
-      }).then(getTags));
-    };
-
-    List.prototype.addTags = function(tags, cb) {
-      var req;
-      req = {
-        name: this.name,
-        tags: tags
-      };
-      return withCB(this._updateTags, cb, this.service.makeRequest('POST', 'list/tags', req).then(getTags));
-    };
-
-    List.prototype.removeTags = function(tags, cb) {
-      var req;
-      req = {
-        name: this.name,
-        tags: tags
-      };
-      return withCB(this._updateTags, cb, this.service.makeRequest('DELETE', 'list/tags', req).then(getTags));
-    };
-
-    List.prototype.contents = function(cb) {
-      return withCB(cb, this.query().then(dejoin).then(invoke('records')));
-    };
-
-    List.prototype.rename = function(newName, cb) {
-      var req,
-        _this = this;
-      req = {
-        oldname: this.name,
-        newname: newName
-      };
-      return withCB(cb, this.service.post('lists/rename', req).then(get('listName')).then(function(n) {
-        return _this.name = n;
-      }).then(this.service.fetchList));
-    };
-
-    List.prototype.copy = function(opts, cb) {
-      var baseName, name, query, tags, _ref, _ref1, _ref2,
-        _this = this;
-      if (opts == null) {
-        opts = {};
-      }
-      if (cb == null) {
-        cb = (function() {});
-      }
-      if (arguments.length === 1 && utils.isFunction(opts)) {
-        _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
-      }
-      if (typeof opts === 'string') {
-        opts = {
-          name: opts
-        };
-      }
-      name = baseName = (_ref1 = opts.name) != null ? _ref1 : "" + this.name + "_copy";
-      tags = this.tags.concat((_ref2 = opts.tags) != null ? _ref2 : []);
-      query = this.query(['id']);
-      return withCB(cb, this.service.fetchLists().then(invoke('map', get('name'))).then(function(names) {
-        var c;
-        c = 1;
-        while (__indexOf.call(names, name) >= 0) {
-          name = "" + baseName + "-" + (c++);
-        }
-        return query.then(invoke('saveAsList', {
-          name: name,
-          tags: tags,
-          description: _this.description
-        }));
-      }));
-    };
-
-    List.prototype.enrichment = function(opts, cb) {
-      return this.service.enrichment(merge({
-        list: this.name
-      }, opts), cb);
-    };
-
-    List.prototype.shareWithUser = function(recipient, cb) {
-      return withCB(cb, this.service.post(SHARES, {
-        'list': this.name,
-        'with': recipient
-      }));
-    };
-
-    List.prototype.inviteUserToShare = function(recipient, notify, cb) {
-      if (notify == null) {
-        notify = true;
-      }
-      if (cb == null) {
-        cb = (function() {});
-      }
-      return withCB(cb, this.service.post(INVITES, {
-        list: this.name,
-        to: recipient,
-        notify: !!notify
-      }));
-    };
-
-    return List;
-
-  })();
-
-  intermine.List = List;
-
-}).call(this);
-
-(function() {
-  var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, fold, funcutils, get, id, intermine, withCB,
-    __hasProp = {}.hasOwnProperty,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  funcutils = require('./util');
-
-  intermine = exports;
-
-  defer = funcutils.defer, withCB = funcutils.withCB, id = funcutils.id, get = funcutils.get, fold = funcutils.fold, concatMap = funcutils.concatMap;
-
-  ONE_MINUTE = 60 * 1000;
-
-  CategoryResults = (function() {
-    var getIssueMatches;
-
-    function CategoryResults(results) {
-      var k, v;
-      for (k in results) {
-        if (!__hasProp.call(results, k)) continue;
-        v = results[k];
-        this[k] = v;
-      }
-    }
-
-    getIssueMatches = concatMap(get('matches'));
-
-    CategoryResults.prototype.getMatches = function(k) {
-      var _ref;
-      if (k === 'MATCH') {
-        return this.matches[k];
-      } else {
-        return (_ref = getIssueMatches(this.matches[k])) != null ? _ref : [];
-      }
-    };
-
-    CategoryResults.prototype.getMatchIds = function(k) {
-      if (k != null) {
-        return this.getMatches(k).map(get('id'));
-      } else {
-        return this.allMatchIds();
-      }
-    };
-
-    CategoryResults.prototype.goodMatchIds = function() {
-      return this.getMatchIds('MATCH');
-    };
-
-    CategoryResults.prototype.allMatchIds = function() {
-      var combineIds,
-        _this = this;
-      combineIds = fold(function(res, issueSet) {
-        return res.concat(_this.getMatchIds(issueSet));
-      });
-      return combineIds(this.goodMatchIds(), ['DUPLICATE', 'WILDCARD', 'TYPE_CONVERTED', 'OTHER']);
-    };
-
-    return CategoryResults;
-
-  })();
-
-  IdResults = (function() {
-    var flatten, getReasons, isGood;
-
-    function IdResults(results) {
-      var k, v;
-      for (k in results) {
-        if (!__hasProp.call(results, k)) continue;
-        v = results[k];
-        this[k] = v;
-      }
-    }
-
-    flatten = concatMap(id);
-
-    getReasons = function(match) {
-      var k, vals;
-      return flatten((function() {
-        var _ref, _results;
-        _ref = match.identifiers;
-        _results = [];
-        for (k in _ref) {
-          vals = _ref[k];
-          _results.push(vals);
-        }
-        return _results;
-      })());
-    };
-
-    isGood = function(match, k) {
-      return !(k != null) || __indexOf.call(getReasons(match), k) >= 0;
-    };
-
-    IdResults.prototype.getMatches = function(k) {
-      var match, _results;
-      _results = [];
-      for (id in this) {
-        if (!__hasProp.call(this, id)) continue;
-        match = this[id];
-        if (isGood(match, k)) {
-          _results.push(match);
-        }
-      }
-      return _results;
-    };
-
-    IdResults.prototype.getMatchIds = function(k) {
-      var match, _results;
-      _results = [];
-      for (id in this) {
-        if (!__hasProp.call(this, id)) continue;
-        match = this[id];
-        if (isGood(match, k)) {
-          _results.push(id);
-        }
-      }
-      return _results;
-    };
-
-    IdResults.prototype.goodMatchIds = function() {
-      return this.getMatchIds('MATCH');
-    };
-
-    IdResults.prototype.allMatchIds = function() {
-      return this.getMatchIds();
-    };
-
-    return IdResults;
-
-  })();
-
-  IDResolutionJob = (function() {
-
-    function IDResolutionJob(uid, service) {
-      this.uid = uid;
-      this.service = service;
-      this.del = __bind(this.del, this);
-
-      this.fetchResults = __bind(this.fetchResults, this);
-
-      this.fetchErrorMessage = __bind(this.fetchErrorMessage, this);
-
-      this.fetchStatus = __bind(this.fetchStatus, this);
-
-    }
-
-    IDResolutionJob.prototype.fetchStatus = function(cb) {
-      return withCB(cb, this.service.get("ids/" + this.uid + "/status").then(get('status')));
-    };
-
-    IDResolutionJob.prototype.fetchErrorMessage = function(cb) {
-      return withCB(cb, this.service.get("ids/" + this.uid + "/status").then(get('message')));
-    };
-
-    IDResolutionJob.prototype.fetchResults = function(cb) {
-      var gettingRes, gettingVer;
-      gettingRes = this.service.get("ids/" + this.uid + "/result").then(get('results'));
-      gettingVer = this.service.fetchVersion();
-      return gettingVer.then(function(v) {
-        return gettingRes.then(function(results) {
-          if (v >= 16) {
-            return new CategoryResults(results);
-          } else {
-            return new IdResults(results);
-          }
-        });
-      });
-    };
-
-    IDResolutionJob.prototype.del = function(cb) {
-      return this.service.makeRequest('DELETE', "ids/" + this.uid, {}, cb);
-    };
-
-    IDResolutionJob.prototype.decay = 50;
-
-    IDResolutionJob.prototype.poll = function(onSuccess, onError, onProgress) {
-      var backOff, notify, promise, reject, resolve, resp, _ref,
-        _this = this;
-      _ref = defer(), promise = _ref.promise, resolve = _ref.resolve, reject = _ref.reject;
-      promise.then(onSuccess, onError);
-      notify = onProgress != null ? onProgress : (function() {});
-      resp = this.fetchStatus();
-      resp.then(null, reject);
-      backOff = this.decay;
-      this.decay = Math.min(ONE_MINUTE, backOff * 1.25);
-      resp.then(function(status) {
-        notify(status);
-        switch (status) {
-          case 'SUCCESS':
-            return _this.fetchResults().then(resolve, reject);
-          case 'ERROR':
-            return _this.fetchErrorMessage().then(reject, reject);
-          default:
-            return setTimeout((function() {
-              return _this.poll(resolve, reject, notify);
-            }), backOff);
-        }
-      });
-      return promise;
-    };
-
-    return IDResolutionJob;
-
-  })();
-
-  IDResolutionJob.prototype.wait = IDResolutionJob.prototype.poll;
-
-  IDResolutionJob.create = function(service) {
-    return function(uid) {
-      return new IDResolutionJob(uid, service);
-    };
-  };
-
-  intermine.IDResolutionJob = IDResolutionJob;
-
-  intermine.CategoryResults = CategoryResults;
-
-  intermine.IdResults = IdResults;
-
-}).call(this);
-
+},{"promise":21}],10:[function(require,module,exports){
 (function() {
   var BASIC_ATTRS, CODES, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -2241,7 +1549,7 @@
   };
 
   Query = (function() {
-    var addPI, cAttrs, getPaths, kids, parseSummary, qAttrs, scFold, toAttrPairs, toPathAndType, xmlAttr;
+    var addPI, cAttrs, kids, parseSummary, qAttrs, scFold, toAttrPairs, toPathAndType, xmlAttr;
 
     Query.JOIN_STYLES = ['INNER', 'OUTER'];
 
@@ -2300,8 +1608,6 @@
       'ISA': 'ISA',
       'isa': 'ISA'
     };
-
-    getPaths = function() {};
 
     Query.prototype.on = function(events, callback, context) {
       var calls, ev, list, tail, _ref, _ref1, _ref2;
@@ -2545,8 +1851,7 @@
 
       this.select = __bind(this.select, this);
 
-      var prop, _i, _len, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
-        _this = this;
+      var prop, _i, _len, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
       if (properties == null) {
         properties = {};
       }
@@ -2574,25 +1879,6 @@
       if (properties.constraintLogic != null) {
         this.constraintLogic = properties.constraintLogic;
       }
-      getPaths = function(root, depth) {
-        var cd, field, name, others, ret, subPaths;
-        cd = _this.getPathInfo(root).getEndClass();
-        ret = [root];
-        subPaths = concatMap(function(r) {
-          return getPaths("" + root + "." + r.name, depth - 1);
-        });
-        others = cd && depth > 0 ? subPaths((function() {
-          var _ref10, _results;
-          _ref10 = cd.fields;
-          _results = [];
-          for (name in _ref10) {
-            field = _ref10[name];
-            _results.push(field);
-          }
-          return _results;
-        })()) : [];
-        return ret.concat(others);
-      };
       this.on('change:views', removeIrrelevantSortOrders, this);
     }
 
@@ -2669,7 +1955,7 @@
       this.constraints = reduced;
       if (!silent) {
         this.trigger('change:constraints');
-        return this.trigger('removed:constraints', utils.difference(orig, reduced));
+        return this.trigger('removed:constraint', utils.find(orig, iscon));
       }
     };
 
@@ -2757,10 +2043,35 @@
     };
 
     Query.prototype.getPossiblePaths = function(depth) {
-      var _base, _ref, _ref1;
+      var getPaths, _base, _ref, _ref1,
+        _this = this;
       if (depth == null) {
         depth = 3;
       }
+      getPaths = function(root, d) {
+        var cd, field, name, others, path, ret, subPaths;
+        ret = [root];
+        path = _this.getPathInfo(root);
+        if (path.isAttribute()) {
+          return ret;
+        } else {
+          cd = _this.getPathInfo(root).getType();
+          subPaths = concatMap(function(ref) {
+            return getPaths("" + root + "." + ref.name, d - 1);
+          });
+          others = cd && (d > 0) ? subPaths((function() {
+            var _ref, _results;
+            _ref = cd.fields;
+            _results = [];
+            for (name in _ref) {
+              field = _ref[name];
+              _results.push(field);
+            }
+            return _results;
+          })()) : [];
+          return ret.concat(others);
+        }
+      };
       if ((_ref = this._possiblePaths) == null) {
         this._possiblePaths = {};
       }
@@ -3687,13 +2998,14 @@
 
 }).call(this);
 
+},{"./util":14,"./xml":16}],11:[function(require,module,exports){
 (function() {
-  var DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDENTITY, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, omap, pairsToObj, set, success, to_query_string, utils, version, withCB, _get_or_fetch,
+  var CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, base64, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, set, success, to_query_string, utils, version, withCB, _get_or_fetch,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __slice = [].slice;
 
-  Promise = require('promise');
+  Promise = require('./promise');
 
   Model = require('./model').Model;
 
@@ -3705,6 +3017,8 @@
 
   IDResolutionJob = require('./id-resolution-job').IDResolutionJob;
 
+  base64 = require('./base64');
+
   version = require('./version');
 
   utils = require('./util');
@@ -3715,9 +3029,13 @@
 
   intermine = exports;
 
-  withCB = utils.withCB, map = utils.map, merge = utils.merge, pairsToObj = utils.pairsToObj, omap = utils.omap, get = utils.get, set = utils.set, invoke = utils.invoke, success = utils.success, error = utils.error, REQUIRES_VERSION = utils.REQUIRES_VERSION, dejoin = utils.dejoin;
+  withCB = utils.withCB, map = utils.map, merge = utils.merge, get = utils.get, set = utils.set, invoke = utils.invoke, success = utils.success, error = utils.error, REQUIRES_VERSION = utils.REQUIRES_VERSION, dejoin = utils.dejoin;
 
   VERSIONS = {};
+
+  CLASSKEYS = {};
+
+  RELEASES = {};
 
   MODELS = {};
 
@@ -3730,6 +3048,10 @@
   VERSION_PATH = "version";
 
   TEMPLATES_PATH = "templates";
+
+  RELEASE_PATH = "version/release";
+
+  CLASSKEY_PATH = "classkeys";
 
   LISTS_PATH = "lists";
 
@@ -3763,10 +3085,6 @@
 
   PATH_VALUES_PATH = 'path/values';
 
-  IDENTITY = function(x) {
-    return x;
-  };
-
   HAS_PROTOCOL = /^https?:\/\//i;
 
   HAS_SUFFIX = /service\/?$/i;
@@ -3780,14 +3098,16 @@
   };
 
   _get_or_fetch = function(propName, store, path, key, cb) {
-    var promise, value, _ref,
-      _this = this;
-    promise = (_ref = this[propName]) != null ? _ref : this[propName] = this.useCache && (value = store[this.root]) ? success(value) : this.get(path).then(function(x) {
-      var o;
-      o = x[key];
-      return store[_this.root] = o;
+    var promise, root, useCache, value, _ref;
+    root = this.root, useCache = this.useCache;
+    promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : this.doReq({
+      url: this.root + path,
+      type: 'GET',
+      dataType: 'json'
+    }).then(function(x) {
+      return store[root] = x[key];
     });
-    return promise.nodeify(cb);
+    return withCB(cb, promise);
   };
 
   getListFinder = function(name) {
@@ -3827,7 +3147,7 @@
   };
 
   Service = (function() {
-    var toMapByName;
+    var FIVE_MIN, getNewUserToken, toMapByName;
 
     Service.prototype.doReq = http.doReq;
 
@@ -3835,11 +3155,23 @@
       var noCache, _ref, _ref1,
         _this = this;
       this.root = _arg.root, this.token = _arg.token, this.errorHandler = _arg.errorHandler, this.DEBUG = _arg.DEBUG, this.help = _arg.help, noCache = _arg.noCache;
+      this.connectAs = __bind(this.connectAs, this);
+
       this.createList = __bind(this.createList, this);
 
       this.resolveIds = __bind(this.resolveIds, this);
 
       this.query = __bind(this.query, this);
+
+      this.fetchRelease = __bind(this.fetchRelease, this);
+
+      this.fetchClassKeys = __bind(this.fetchClassKeys, this);
+
+      this.fetchVersion = __bind(this.fetchVersion, this);
+
+      this.fetchSummaryFields = __bind(this.fetchSummaryFields, this);
+
+      this.fetchModel = __bind(this.fetchModel, this);
 
       this.fetchWidgetMap = __bind(this.fetchWidgetMap, this);
 
@@ -3916,7 +3248,7 @@
     };
 
     Service.prototype.makeRequest = function(method, path, data, cb, indiv) {
-      var dataType, errBack, opts, url, _ref, _ref1;
+      var _this = this;
       if (method == null) {
         method = 'GET';
       }
@@ -3932,41 +3264,57 @@
       if (indiv == null) {
         indiv = false;
       }
-      if (utils.isArray(cb)) {
-        _ref = cb, cb = _ref[0], errBack = _ref[1];
-      }
-      if (utils.isArray(data)) {
-        data = pairsToObj(data);
-      }
-      url = this.root + path;
-      if (errBack == null) {
-        errBack = this.errorHandler;
-      }
-      if (this.token) {
-        data.token = this.token;
-      }
-      data.format = this.getFormat(data.format);
-      if (/jsonp/.test(data.format)) {
-        data.method = method;
-        method = 'GET';
-        url += '?callback=?';
-      }
-      dataType = /json/.test(data.format) ? 'json' : 'text';
-      if (!http.supports(method)) {
-        _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
-      }
-      if (method === 'DELETE') {
-        url += '?' + to_query_string(data);
-      }
-      opts = {
-        data: data,
-        dataType: dataType,
-        success: cb,
-        error: errBack,
-        url: url,
-        type: method
-      };
-      return this.doReq(opts, indiv);
+      return this.fetchVersion().then(function(version) {
+        var dataType, errBack, opts, timeout, url, _ref, _ref1, _ref2, _ref3;
+        if (utils.isArray(cb)) {
+          _ref = cb, cb = _ref[0], errBack = _ref[1];
+        }
+        if (utils.isArray(data)) {
+          data = utils.pairsToObj(data);
+        }
+        url = _this.root + path;
+        if (errBack == null) {
+          errBack = _this.errorHandler;
+        }
+        data = utils.copy(data);
+        data.format = _this.getFormat(data.format);
+        if (/jsonp/.test(data.format)) {
+          data.method = method;
+          method = 'GET';
+          url += '?callback=?';
+        }
+        dataType = /json/.test(data.format) ? 'json' : 'text';
+        if (!http.supports(method)) {
+          _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
+        }
+        opts = {
+          data: data,
+          dataType: dataType,
+          success: cb,
+          error: errBack,
+          url: url,
+          type: method
+        };
+        if ('headers' in data) {
+          opts.headers = utils.copy(data.headers);
+          delete opts.data.headers;
+        }
+        if (_this.token != null) {
+          if (version >= 14) {
+            if ((_ref2 = opts.headers) == null) {
+              opts.headers = {};
+            }
+            opts.headers.Authorization = "Token " + _this.token;
+          } else {
+            opts.data.token = _this.token;
+          }
+        }
+        if (timeout = (_ref3 = data.timeout) != null ? _ref3 : _this.timeout) {
+          opts.timeout = timeout;
+          delete data.timeout;
+        }
+        return _this.doReq(opts, indiv);
+      });
     };
 
     Service.prototype.enrichment = function(opts, cb) {
@@ -4290,7 +3638,7 @@
       });
     };
 
-    toMapByName = omap(function(w) {
+    toMapByName = utils.omap(function(w) {
       return [w.name, w];
     });
 
@@ -4316,6 +3664,14 @@
       return _get_or_fetch.call(this, 'version', VERSIONS, VERSION_PATH, 'version', cb);
     };
 
+    Service.prototype.fetchClassKeys = function(cb) {
+      return _get_or_fetch.call(this, 'classkeys', CLASSKEYS, CLASSKEY_PATH, 'classes', cb);
+    };
+
+    Service.prototype.fetchRelease = function(cb) {
+      return _get_or_fetch.call(this, 'release', RELEASES, RELEASE_PATH, 'version', cb);
+    };
+
     Service.prototype.query = function(options, cb) {
       var buildQuery, deps,
         _this = this;
@@ -4328,7 +3684,7 @@
           summaryFields: summaryFields
         }), _this);
       };
-      return Promise.all(deps).then(buildQuery).nodeify(cb);
+      return withCB(cb, Promise.all(deps).then(buildQuery));
     };
 
     Service.prototype.manageUserPreferences = function(method, data, cb) {
@@ -4383,6 +3739,74 @@
       return withCB(cb, this.doReq(req).then(LIST_PIPE(this)));
     };
 
+    getNewUserToken = function(resp) {
+      return resp.user.temporaryToken;
+    };
+
+    Service.prototype.connectAs = function(token) {
+      return Service.connect(merge(this, {
+        token: token,
+        noCache: !this.useCache
+      }));
+    };
+
+    Service.prototype.register = function(name, password, cb) {
+      var _this = this;
+      return REQUIRES_VERSION(this, 9, function() {
+        return withCB(cb, _this.post('users', {
+          name: name,
+          password: password
+        }).then(getNewUserToken).then(_this.connectAs));
+      });
+    };
+
+    FIVE_MIN = 5 * 60;
+
+    Service.prototype.getDeregistrationToken = function(validity, cb) {
+      var _this = this;
+      if (validity == null) {
+        validity = FIVE_MIN;
+      }
+      return REQUIRES_VERSION(this, 16, function() {
+        var promise;
+        promise = _this.token != null ? _this.post('user/deregistration', {
+          validity: validity
+        }).then(get('token')) : error("Not registered");
+        return withCB(cb, promise);
+      });
+    };
+
+    Service.prototype.deregister = function(token, cb) {
+      var _this = this;
+      return REQUIRES_VERSION(this, 16, function() {
+        return withCB(cb, _this.makeRequest('DELETE', 'user', {
+          deregistrationToken: token,
+          format: 'xml'
+        }));
+      });
+    };
+
+    Service.prototype.login = function(name, password, cb) {
+      var _this = this;
+      return REQUIRES_VERSION(this, 9, function() {
+        var headers, service;
+        headers = {
+          'Authorization': "Basic " + base64.encode("" + name + ":" + password)
+        };
+        service = _this.connectAs(null);
+        return withCB(cb, service.get('user/token', {
+          headers: headers
+        }).then(get('token')).then(function(token) {
+          service.token = token;
+          return service;
+        }));
+      });
+    };
+
+    Service.prototype.logout = function(cb) {
+      return withCB(cb, success(this.connectAs()));
+    };
+
     return Service;
 
   })();
@@ -4432,13 +3856,15 @@
   Service.flushCaches = function() {
     MODELS = {};
     VERSIONS = {};
+    RELEASES = {};
+    CLASSKEYS = {};
     SUMMARY_FIELDS = {};
     return WIDGETS = {};
   };
 
   Service.connect = function(opts) {
-    if (opts == null) {
-      opts = {};
+    if ((opts != null ? opts.root : void 0) == null) {
+      throw new Error("Invalid options provided: " + (JSON.stringify(opts)));
     }
     return new Service(opts);
   };
@@ -4452,3 +3878,2525 @@
   intermine.imjs = version;
 
 }).call(this);
+
+},{"./base64":1,"./http":"zlU5Ni","./id-resolution-job":5,"./lists":6,"./model":7,"./promise":9,"./query":10,"./user":13,"./util":14,"./version":15}],12:[function(require,module,exports){
+(function() {
+  var Table, merge, properties;
+
+  merge = function(src, dest) {
+    var k, v, _results;
+    _results = [];
+    for (k in src) {
+      v = src[k];
+      _results.push(dest[k] = v);
+    }
+    return _results;
+  };
+
+  properties = ['attributes', 'references', 'collections'];
+
+  Table = (function() {
+
+    function Table(_arg) {
+      var c, prop, _, _i, _len, _ref, _ref1;
+      this.name = _arg.name, this.attributes = _arg.attributes, this.references = _arg.references, this.collections = _arg.collections;
+      this.fields = {};
+      this.__parents__ = (_ref = arguments[0]['extends']) != null ? _ref : [];
+      for (_i = 0, _len = properties.length; _i < _len; _i++) {
+        prop = properties[_i];
+        if (this[prop] == null) {
+          throw new Error("Bad model data: missing " + prop);
+        }
+        merge(this[prop], this.fields);
+      }
+      _ref1 = this.collections;
+      for (_ in _ref1) {
+        c = _ref1[_];
+        c.isCollection = true;
+      }
+    }
+
+    Table.prototype.toString = function() {
+      var n, _;
+      return "[Table name=" + this.name + ", fields=[" + ((function() {
+        var _ref, _results;
+        _ref = this.fields;
+        _results = [];
+        for (n in _ref) {
+          _ = _ref[n];
+          _results.push(n);
+        }
+        return _results;
+      }).call(this)) + "]]";
+    };
+
+    Table.prototype.parents = function() {
+      var _ref;
+      return ((_ref = this.__parents__) != null ? _ref : []).slice();
+    };
+
+    return Table;
+
+  })();
+
+  exports.Table = Table;
+
+}).call(this);
+
+},{}],13:[function(require,module,exports){
+(function() {
+  var User, do_pref_req, error, get, intermine, isFunction, withCB, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  _ref = require('./util'), withCB = _ref.withCB, get = _ref.get, isFunction = _ref.isFunction, error = _ref.error;
+
+  intermine = exports;
+
+  do_pref_req = function(user, data, method, cb) {
+    return user.service.manageUserPreferences(method, data, cb).then(function(prefs) {
+      return user.preferences = prefs;
+    });
+  };
+
+  User = (function() {
+
+    function User(service, _arg) {
+      var _ref1;
+      this.service = service;
+      this.username = _arg.username, this.preferences = _arg.preferences;
+      this.refresh = __bind(this.refresh, this);
+
+      this.clearPreferences = __bind(this.clearPreferences, this);
+
+      this.clearPreference = __bind(this.clearPreference, this);
+
+      this.setPreferences = __bind(this.setPreferences, this);
+
+      this.setPreference = __bind(this.setPreference, this);
+
+      this.hasPreferences = this.preferences != null;
+      if ((_ref1 = this.preferences) == null) {
+        this.preferences = {};
+      }
+    }
+
+    User.prototype.setPreference = function(key, value, cb) {
+      var data, _ref1;
+      if (isFunction(value)) {
+        _ref1 = [null, value], value = _ref1[0], cb = _ref1[1];
+      }
+      if (typeof key === 'string') {
+        data = {};
+        data[key] = value;
+      } else if (!(value != null)) {
+        data = key;
+      } else {
+        return withCB(cb, error("Incorrect arguments to setPreference"));
+      }
+      return this.setPreferences(data, cb);
+    };
+
+    User.prototype.setPreferences = function(prefs, cb) {
+      return do_pref_req(this, prefs, 'POST', cb);
+    };
+
+    User.prototype.clearPreference = function(key, cb) {
+      return do_pref_req(this, {
+        key: key
+      }, 'DELETE', cb);
+    };
+
+    User.prototype.clearPreferences = function(cb) {
+      return do_pref_req(this, {}, 'DELETE', cb);
+    };
+
+    User.prototype.refresh = function(cb) {
+      return do_pref_req(this, {}, 'GET', cb);
+    };
+
+    User.prototype.getToken = function(type, cb) {
+      if (type == null) {
+        type = 'day';
+      }
+      if (cb == null) {
+        cb = null;
+      }
+      return withCB(cb, this.service.get('user/token', {
+        type: type
+      }).then(get('token')));
+    };
+
+    return User;
+
+  })();
+
+  intermine.User = User;
+
+}).call(this);
+
+},{"./util":14}],14:[function(require,module,exports){
+(function() {
+  var Promise, REQUIRES, comp, curry, entities, error, flatten, fold, id, invoke, invokeWith, isArray, merge, pairFold, qsFromList, root, success, thenFold, _ref,
+    __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __hasProp = {}.hasOwnProperty;
+
+  Promise = require('./promise');
+
+  root = exports;
+
+  root.defer = function() {
+    var deferred;
+    deferred = {};
+    deferred.promise = new Promise(function(resolve, reject) {
+      deferred.resolve = resolve;
+      return deferred.reject = reject;
+    });
+    return deferred;
+  };
+
+  qsFromList = function(pairs) {
+    var pair;
+    return ((function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
+        pair = pairs[_i];
+        _results.push(pair.map(encodeURIComponent).join('='));
+      }
+      return _results;
+    })()).join('&');
+  };
+
+  root.querystring = function(obj) {
+    var k, p, pairs, subList, sv, v;
+    if (isArray(obj)) {
+      pairs = obj.slice();
+    } else {
+      pairs = [];
+      for (k in obj) {
+        v = obj[k];
+        if (isArray(v)) {
+          subList = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = v.length; _i < _len; _i++) {
+              sv = v[_i];
+              _results.push([k, sv]);
+            }
+            return _results;
+          })();
+          pairs = pairs.concat(subList);
+        } else {
+          pairs.push([k, v]);
+        }
+      }
+    }
+    return qsFromList((function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
+        p = pairs[_i];
+        if (p[1] != null) {
+          _results.push(p);
+        }
+      }
+      return _results;
+    })());
+  };
+
+  root.curry = curry = function() {
+    var args, f;
+    f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return function() {
+      var rest;
+      rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return f.apply(null, args.concat(rest));
+    };
+  };
+
+  root.error = error = function(e) {
+    return new Promise(function(_, reject) {
+      return reject(new Error(e));
+    });
+  };
+
+  root.success = success = Promise.from;
+
+  root.parallel = Promise.all;
+
+  root.withCB = function() {
+    var f, fs, p, _i, _j, _len;
+    fs = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), p = arguments[_i++];
+    for (_j = 0, _len = fs.length; _j < _len; _j++) {
+      f = fs[_j];
+      if (f != null) {
+        (function(f) {
+          var onErr, onSucc;
+          onSucc = function(res) {
+            return f(null, res);
+          };
+          onErr = function(err) {
+            return f(err);
+          };
+          return p.then(onSucc, onErr);
+        })(f);
+      }
+    }
+    return p;
+  };
+
+  root.fold = fold = function(f) {
+    return function(init, xs) {
+      var k, ret, v;
+      if (arguments.length === 1) {
+        xs = (init != null ? init.slice() : void 0) || init;
+        init = (xs != null ? xs.shift() : void 0) || {};
+      }
+      if (xs == null) {
+        throw new Error("xs is null");
+      }
+      if (xs.reduce != null) {
+        return xs.reduce(f, init);
+      } else {
+        ret = init;
+        for (k in xs) {
+          v = xs[k];
+          ret = ret != null ? f(ret, k, v) : {
+            k: v
+          };
+        }
+        return ret;
+      }
+    };
+  };
+
+  root.take = function(n) {
+    return function(xs) {
+      if (n != null) {
+        return xs.slice(0, (n - 1) + 1 || 9e9);
+      } else {
+        return xs.slice();
+      }
+    };
+  };
+
+  root.filter = function(f) {
+    return function(xs) {
+      var x, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = xs.length; _i < _len; _i++) {
+        x = xs[_i];
+        if (f(x)) {
+          _results.push(x);
+        }
+      }
+      return _results;
+    };
+  };
+
+  root.uniqBy = function(f, xs) {
+    var k, keys, values, x, _i, _len;
+    if (arguments.length === 1) {
+      return curry(root.uniqBy, f);
+    }
+    keys = [];
+    values = [];
+    if (xs == null) {
+      return values;
+    }
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      k = f(x);
+      if (__indexOf.call(keys, k) < 0) {
+        keys.push(k);
+        values.push(x);
+      }
+    }
+    return values;
+  };
+
+  root.find = function(xs, f) {
+    var x, _i, _len;
+    if (arguments.length === 1) {
+      f = xs;
+      return function(xs) {
+        return root.find(xs, f);
+      };
+    }
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (f(x)) {
+        return x;
+      }
+    }
+    return null;
+  };
+
+  isArray = (_ref = Array.isArray) != null ? _ref : function(xs) {
+    return ((xs != null ? xs.splice : void 0) != null) && ((xs != null ? xs.push : void 0) != null) && ((xs != null ? xs.pop : void 0) != null) && ((xs != null ? xs.slice : void 0) != null);
+  };
+
+  root.isArray = isArray;
+
+  root.isFunction = typeof /./ !== 'function' ? function(f) {
+    return typeof f === 'function';
+  } : function(f) {
+    return (f != null) && (f.call != null) && (f.apply != null) && f.toString() === '[object Function]';
+  };
+
+  entities = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;'
+  };
+
+  root.escape = function(str) {
+    if (!(str != null)) {
+      return '';
+    }
+    return String(str).replace(/[&<>"']/g, function(entity) {
+      return entities[entity];
+    });
+  };
+
+  root.omap = function(f) {
+    var merger;
+    merger = fold(function(a, oldk, oldv) {
+      var newk, newv, _ref1;
+      _ref1 = f(oldk, oldv), newk = _ref1[0], newv = _ref1[1];
+      a[newk] = newv;
+      return a;
+    });
+    return function(xs) {
+      return merger({}, xs);
+    };
+  };
+
+  root.copy = root.omap(function(k, v) {
+    return [k, v];
+  });
+
+  root.partition = function(f) {
+    return function(xs) {
+      var divide;
+      divide = fold(function(_arg, x) {
+        var falses, trues;
+        trues = _arg[0], falses = _arg[1];
+        if (f(x)) {
+          return [trues.concat([x]), falses];
+        } else {
+          return [trues, falses.concat([x])];
+        }
+      });
+      return divide([[], []], xs);
+    };
+  };
+
+  root.id = id = function(x) {
+    return x;
+  };
+
+  root.concatMap = function(f) {
+    return function(xs) {
+      var fx, ret, x, _i, _len;
+      ret = void 0;
+      for (_i = 0, _len = xs.length; _i < _len; _i++) {
+        x = xs[_i];
+        fx = f(x);
+        ret = ret === void 0 ? fx : typeof ret === 'number' ? ret + fx : ret.concat != null ? ret.concat(fx) : merge(ret, fx);
+      }
+      return ret;
+    };
+  };
+
+  root.map = function(f) {
+    return invoke('map', f);
+  };
+
+  comp = fold(function(f, g) {
+    return function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return f(g.apply(null, args));
+    };
+  });
+
+  root.compose = function() {
+    var fs;
+    fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return comp(fs);
+  };
+
+  root.flatMap = root.concatMap;
+
+  root.difference = function(xs, remove) {
+    var x, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (__indexOf.call(remove, x) < 0) {
+        _results.push(x);
+      }
+    }
+    return _results;
+  };
+
+  root.stringList = function(x) {
+    if (typeof x === 'string') {
+      return [x];
+    } else {
+      return x;
+    }
+  };
+
+  root.flatten = flatten = function() {
+    var ret, x, xs, xx, _i, _j, _len, _len1, _ref1;
+    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    ret = [];
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (isArray(x)) {
+        _ref1 = flatten.apply(null, x);
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          xx = _ref1[_j];
+          ret.push(xx);
+        }
+      } else {
+        ret.push(x);
+      }
+    }
+    return ret;
+  };
+
+  root.sum = root.concatMap(id);
+
+  root.merge = merge = function() {
+    var k, newObj, o, objs, v, _i, _len;
+    objs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    newObj = {};
+    for (_i = 0, _len = objs.length; _i < _len; _i++) {
+      o = objs[_i];
+      for (k in o) {
+        if (!__hasProp.call(o, k)) continue;
+        v = o[k];
+        newObj[k] = v;
+      }
+    }
+    return newObj;
+  };
+
+  root.any = function(xs, f) {
+    var x, _i, _len;
+    if (f == null) {
+      f = id;
+    }
+    for (_i = 0, _len = xs.length; _i < _len; _i++) {
+      x = xs[_i];
+      if (f(x)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  root.invoke = invoke = function() {
+    var args, name;
+    name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return invokeWith(name, args);
+  };
+
+  root.invokeWith = invokeWith = function(name, args, ctx) {
+    if (args == null) {
+      args = [];
+    }
+    if (ctx == null) {
+      ctx = null;
+    }
+    return function(o) {
+      if (!(o != null)) {
+        throw new Error("Cannot call method \"" + name + "\" of null");
+      }
+      if (!o[name]) {
+        throw new Error("Cannot call undefined method \"" + name + " of " + o);
+      } else {
+        return o[name].apply(ctx || o, args);
+      }
+    };
+  };
+
+  root.get = function(name) {
+    return function(obj) {
+      return obj[name];
+    };
+  };
+
+  root.set = function(name, value) {
+    return function(obj) {
+      var k, v;
+      if (arguments.length === 2) {
+        obj[name] = value;
+      } else {
+        for (k in name) {
+          if (!__hasProp.call(name, k)) continue;
+          v = name[k];
+          obj[k] = v;
+        }
+      }
+      return obj;
+    };
+  };
+
+  REQUIRES = function(required, got) {
+    return "This service requires a service at version " + required + " or above. This one is at " + got;
+  };
+
+  root.REQUIRES_VERSION = function(s, n, f) {
+    return s.fetchVersion().then(function(v) {
+      if (v >= n) {
+        return f();
+      } else {
+        return error(REQUIRES(n, v));
+      }
+    });
+  };
+
+  root.dejoin = function(q) {
+    var parts, view, _i, _len, _ref1;
+    _ref1 = q.views;
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      view = _ref1[_i];
+      parts = view.split('.');
+      if (parts.length > 2) {
+        q.addJoin(parts.slice(1, -1).join('.'));
+      }
+    }
+    return q;
+  };
+
+  thenFold = fold(function(p, f) {
+    return p.then(f);
+  });
+
+  root.sequence = function() {
+    var fns;
+    fns = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return thenFold(success(), fns);
+  };
+
+  pairFold = fold(function(o, _arg) {
+    var k, v;
+    k = _arg[0], v = _arg[1];
+    if (o[k] != null) {
+      throw new Error("Duplicate key: " + k);
+    }
+    o[k] = v;
+    return o;
+  });
+
+  root.pairsToObj = function(pairs) {
+    return pairFold({}, pairs);
+  };
+
+}).call(this);
+
+},{"./promise":9}],15:[function(require,module,exports){
+(function() {
+  var imjs, pkg;
+
+  imjs = exports;
+
+  pkg = require("../package.json");
+
+  imjs.VERSION = pkg.version;
+
+}).call(this);
+
+},{"../package.json":23}],16:[function(require,module,exports){
+(function() {
+  var DOMParser, sanitize;
+
+  try {
+    DOMParser = window.DOMParser;
+  } catch (e) {
+    DOMParser = require('xmldom').DOMParser;
+  }
+
+  sanitize = function(xml) {
+    xml = xml.replace(/^\s*/g, '');
+    xml = xml.replace(/\s$/g, '');
+    if (xml.length === 0) {
+      return xml;
+    } else if (xml[xml.length - 1] !== '>') {
+      return xml + '>';
+    } else {
+      return xml;
+    }
+  };
+
+  exports.parse = function(xml) {
+    var dom, parser;
+    if (typeof xml !== 'string') {
+      throw new Error("Expected a string - got " + xml);
+    }
+    xml = sanitize(xml);
+    if (!xml) {
+      throw new Error("Expected content - got empty string");
+    }
+    dom = (function() {
+      try {
+        parser = new DOMParser();
+        return parser.parseFromString(xml, 'text/xml');
+      } catch (_error) {}
+    })();
+    if ((!dom) || (!dom.documentElement) || dom.getElementsByTagName('parsererror').length) {
+      throw new Error("Invalid XML: " + xml);
+    }
+    return dom;
+  };
+
+}).call(this);
+
+},{"xmldom":17}],17:[function(require,module,exports){
+
+},{}],18:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],19:[function(require,module,exports){
+if(typeof process !== 'undefined' && typeof process.versions !== 'undefined' && typeof process.versions.node !== 'undefined') {
+;var http = require('http');
+var url = require('url');
+var zlib = require('zlib');
+
+;;var isArrayBufferView = function(input) {
+    return typeof input === 'object' && input !== null && (
+        (global.ArrayBufferView && input instanceof ArrayBufferView) ||
+        (global.Int8Array && input instanceof Int8Array) ||
+        (global.Uint8Array && input instanceof Uint8Array) ||
+        (global.Uint8ClampedArray && input instanceof Uint8ClampedArray) ||
+        (global.Int16Array && input instanceof Int16Array) ||
+        (global.Uint16Array && input instanceof Uint16Array) ||
+        (global.Int32Array && input instanceof Int32Array) ||
+        (global.Uint32Array && input instanceof Uint32Array) ||
+        (global.Float32Array && input instanceof Float32Array) ||
+        (global.Float64Array && input instanceof Float64Array)
+    );
+}, isArray = function(object) {
+    return Object.prototype.toString.call(object) === '[object Array]';
+}, isByteArray = function(input) {
+    return typeof input === 'object' && input !== null && (
+        (global.Buffer && input instanceof Buffer) ||
+        (global.Blob && input instanceof Blob) ||
+        (global.File && input instanceof File) ||
+        (global.ArrayBuffer && input instanceof ArrayBuffer) ||
+        isArrayBufferView(input) ||
+        isArray(input)
+    );
+}, bytearrayMessage = 'an instance of Buffer, nor Blob, nor File, nor ArrayBuffer, nor ArrayBufferView, nor Int8Array, nor Uint8Array, nor Uint8ClampedArray, nor Int16Array, nor Uint16Array, nor Int32Array, nor Uint32Array, nor Float32Array, nor Float64Array, nor Array', supportedMethods = ',GET,HEAD,PATCH,POST,PUT,DELETE,', pass = function(value) {
+    return value;
+}, nextTick = (global.process && global.process.nextTick) || global.setImmediate || global.setTimeout, _undefined;
+;
+
+var decompress = function(output, encoding, cb) {
+    if(encoding === 'gzip') {
+        zlib.gunzip(output, cb);
+    } else if(encoding === 'deflate') {
+        zlib.inflate(output, function(err, out) {
+            if(err) {
+                return zlib.inflateRaw(output, cb);
+            }
+            cb(null, out);
+        });
+    } else if(encoding === 'identity') {
+        process.nextTick(function() {
+            cb(null, output);
+        });
+    } else {
+        process.nextTick(function() {
+            cb(new Error('unsupported encoding ' + encoding));
+        });
+    }
+};
+
+// http://www.w3.org/TR/XMLHttpRequest/#the-setrequestheader()-method
+var forbiddenInputHeaders = ['accept-charset', 'accept-encoding', 'access-control-request-headers', 'access-control-request-method', 'connection', 'content-length', 'content-transfer-encoding', 'cookie', 'cookie2', 'date', 'dnt', 'expect', 'host', 'keep-alive', 'origin', 'referer', 'te', 'trailer', 'transfer-encoding', 'upgrade', 'user-agent', 'via'];
+var validateInputHeaders = function(headers) {
+    for(var header in headers) {
+        if(headers.hasOwnProperty(header)) {
+            var headerl = header.toLowerCase();
+            if(forbiddenInputHeaders.indexOf(headerl) >= 0) {
+                throw new Error('Input header ' + header + ' is forbidden to be set programmatically');
+            }
+            if(headerl.substr(0, 'proxy-'.length) === 'proxy-') {
+                throw new Error('Input header ' + header + ' (to be precise, all Proxy-*) is forbidden to be set programmatically');
+            }
+            if(headerl.substr(0, 'sec-'.length) === 'sec-') {
+                throw new Error('Input header ' + header + ' (to be precise, all Sec-*) is forbidden to be set programmatically');
+            }
+        }
+    }
+};
+
+var copy = function(from, to) {
+    Object.keys(from).forEach(function(key) {
+        to[key] = from[key];
+    });
+    return to;
+};
+
+var httpinvoke = function(uri, method, options, cb) {
+    ;var mixInPromise, promise, failWithoutRequest, uploadProgressCb, inputLength, noData, timeout, inputHeaders, statusCb, initDownload, updateDownload, outputHeaders, exposedHeaders, status, outputBinary, input, outputLength, outputConverter;
+/*************** COMMON initialize parameters **************/
+if(!method) {
+    // 1 argument
+    // method, options, cb skipped
+    method = 'GET';
+    options = {};
+} else if(!options) {
+    // 2 arguments
+    if(typeof method === 'string') {
+        // options. cb skipped
+        options = {};
+    } else if(typeof method === 'object') {
+        // method, cb skipped
+        options = method;
+        method = 'GET';
+    } else {
+        // method, options skipped
+        options = {
+            finished: method
+        };
+        method = 'GET';
+    }
+} else if(!cb) {
+    // 3 arguments
+    if(typeof method === 'object') {
+        // method skipped
+        method.finished = options;
+        options = method;
+        method = 'GET';
+    } else if(typeof options === 'function') {
+        // options skipped
+        options = {
+            finished: options
+        };
+    }
+    // cb skipped
+} else {
+    // 4 arguments
+    options.finished = cb;
+}
+var safeCallback = function(name, aspect) {
+    if(name in options) {
+        return function(a, b, c, d) {
+            try {
+                options[name](a, b, c, d);
+            } catch(_) {
+            }
+            aspect(a, b, c, d);
+        };
+    }
+    return aspect;
+};
+var chain = function(a, b) {
+    a && a.then && a.then(function() {
+        b[resolve].apply(null, arguments);
+    }, function() {
+        b[reject].apply(null, arguments);
+    }, function() {
+        b[progress].apply(null, arguments);
+    });
+};
+var resolve = 0, reject = 1, progress = 2;
+mixInPromise = function(o) {
+    var value, queue = [], state = progress;
+    var makeState = function(newstate) {
+        o[newstate] = function(newvalue) {
+            var i, p;
+            if(queue) {
+                value = newvalue;
+                state = newstate;
+
+                for(i = 0; i < queue.length; i++) {
+                    if(typeof queue[i][state] === 'function') {
+                        try {
+                            p = queue[i][state].call(null, value);
+                            if(state < progress) {
+                                chain(p, queue[i]._);
+                            }
+                        } catch(err) {
+                            queue[i]._[reject](err);
+                        }
+                    } else if(state < progress) {
+                        queue[i]._[state](value);
+                    }
+                }
+                if(state < progress) {
+                    queue = null;
+                }
+            }
+        };
+    };
+    makeState(progress);
+    makeState(resolve);
+    makeState(reject);
+    o.then = function() {
+        var item = [].slice.call(arguments);
+        item._ = mixInPromise({});
+        if(queue) {
+            queue.push(item);
+        } else if(typeof item[state] === 'function') {
+            nextTick(function() {
+                chain(item[state](value), item._);
+            });
+        }
+        return item._;
+    };
+    return o;
+};
+failWithoutRequest = function(cb, err) {
+    nextTick(function() {
+        if(cb === null) {
+            return;
+        }
+        cb(err);
+    });
+    promise = function() {
+    };
+    return mixInPromise(promise);
+};
+
+uploadProgressCb = safeCallback('uploading', function(current, total) {
+    promise[progress]({
+        type: 'upload',
+        current: current,
+        total: total
+    });
+});
+var downloadProgressCb = safeCallback('downloading', function(current, total) {
+    promise[progress]({
+        type: 'download',
+        current: current,
+        total: total
+    });
+});
+statusCb = safeCallback('gotStatus', function(statusCode, headers) {
+    promise[progress]({
+        type: 'headers',
+        statusCode: statusCode,
+        headers: headers
+    });
+});
+cb = safeCallback('finished', function(err, body, statusCode, headers) {
+    if(err) {
+        return promise[reject](err);
+    }
+    promise[resolve]({
+        body: body,
+        statusCode: statusCode,
+        headers: headers
+    });
+});
+timeout = options.timeout || 0;
+var converters = options.converters || {};
+var inputConverter;
+inputLength = 0;
+inputHeaders = options.headers || {};
+outputHeaders = {};
+exposedHeaders = options.corsExposedHeaders || [];
+exposedHeaders.push.apply(exposedHeaders, ['Cache-Control', 'Content-Language', 'Content-Type', 'Content-Length', 'Expires', 'Last-Modified', 'Pragma', 'Content-Range']);
+/*************** COMMON convert and validate parameters **************/
+if(method.indexOf(',') >= 0 || supportedMethods.indexOf(',' + method + ',') < 0) {
+    return failWithoutRequest(cb, new Error('Unsupported method ' + method));
+}
+outputBinary = options.outputType === 'bytearray';
+if(!options.outputType || options.outputType === 'text' || outputBinary) {
+    outputConverter = pass;
+} else if(converters['text ' + options.outputType]) {
+    outputConverter = converters['text ' + options.outputType];
+    outputBinary = false;
+} else if(converters['bytearray ' + options.outputType]) {
+    outputConverter = converters['bytearray ' + options.outputType];
+    outputBinary = true;
+} else {
+    return failWithoutRequest(cb, new Error('Unsupported outputType ' + options.outputType));
+}
+inputConverter = pass;
+if('input' in options) {
+    input = options.input;
+    if(!options.inputType || options.inputType === 'auto') {
+        if(typeof input !== 'string' && !isByteArray(input)) {
+            return failWithoutRequest(cb, new Error('inputType is undefined or auto and input is neither string, nor ' + bytearrayMessage));
+        }
+    } else if(options.inputType === 'text') {
+        if(typeof input !== 'string') {
+            return failWithoutRequest(cb, new Error('inputType is text, but input is not a string'));
+        }
+    } else if (options.inputType === 'bytearray') {
+        if(!isByteArray(input)) {
+            return failWithoutRequest(cb, new Error('inputType is bytearray, but input is neither ' + bytearrayMessage));
+        }
+    } else if(converters[options.inputType + ' text']) {
+        inputConverter = converters[options.inputType + ' text'];
+    } else if(converters[options.inputType + ' bytearray']) {
+        inputConverter = converters[options.inputType + ' bytearray'];
+    } else {
+        return failWithoutRequest(cb, new Error('There is no converter for specified inputType'));
+    }
+    if(typeof input === 'object') {
+        if(global.ArrayBuffer && input instanceof ArrayBuffer) {
+            input = new Uint8Array(input);
+        } else if(isArrayBufferView(input)) {
+            input = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+        }
+    }
+    try {
+        input = inputConverter(input);
+    } catch(err) {
+        return failWithoutRequest(cb, err);
+    }
+} else {
+    if(options.inputType) {
+        return failWithoutRequest(cb, new Error('"input" is undefined, but inputType is defined'));
+    }
+    if(inputHeaders['Content-Type']) {
+        return failWithoutRequest(cb, new Error('"input" is undefined, but Content-Type request header is defined'));
+    }
+}
+
+/*************** COMMON initialize helper variables **************/
+var downloaded;
+initDownload = function(total) {
+    if(typeof outputLength === 'undefined') {
+        downloadProgressCb(downloaded, outputLength = total);
+    }
+};
+updateDownload = function(value) {
+    if(value !== downloaded) {
+        downloadProgressCb(downloaded = value, outputLength);
+    }
+};
+noData = function() {
+    initDownload(0);
+    if(cb) {
+        cb(null, _undefined, status, outputHeaders);
+        cb = null;
+    }
+};
+;
+    /*************** initialize helper variables **************/
+    try {
+        validateInputHeaders(inputHeaders);
+    } catch(err) {
+        return failWithoutRequest(cb, err);
+    }
+    inputHeaders = copy(inputHeaders, {});
+    inputHeaders['Accept-Encoding'] = 'gzip, deflate, identity';
+
+    var ignorantlyConsume = function(res) {
+        res.on('data', pass);
+        res.on('end', pass);
+    };
+    uri = url.parse(uri);
+    if(timeout > 0) {
+        setTimeout(function() {
+            cb(new Error('Timeout of ' + timeout + 'ms exceeded'));
+            cb = null;
+        }, timeout);
+    }
+    var req = http.request({
+        hostname: uri.hostname,
+        port: Number(uri.port),
+        path: uri.path,
+        method: method,
+        headers: inputHeaders
+    }, function(res) {
+        var contentEncoding;
+        if(cb === null) {
+            ignorantlyConsume(res);
+            return;
+        }
+
+        outputHeaders = res.headers;
+        if('content-encoding' in outputHeaders) {
+            contentEncoding = outputHeaders['content-encoding'];
+            delete outputHeaders['content-encoding'];
+        } else {
+            contentEncoding = 'identity';
+        }
+
+        status = res.statusCode;
+
+        uploadProgressCb(inputLength, inputLength);
+        if(cb === null) {
+            ignorantlyConsume(res);
+            return;
+        }
+
+        statusCb(status, outputHeaders);
+        if(cb === null) {
+            ignorantlyConsume(res);
+            return;
+        }
+
+        updateDownload(0);
+        if(cb === null) {
+            ignorantlyConsume(res);
+            return;
+        }
+        if(typeof outputHeaders['content-length'] !== 'undefined') {
+            initDownload(Number(outputHeaders['content-length']));
+            if(cb === null) {
+                ignorantlyConsume(res);
+                return;
+            }
+        }
+        if(method === 'HEAD' || typeof outputHeaders['content-type'] === 'undefined') {
+            ignorantlyConsume(res);
+            return noData();
+        }
+
+        var output = [], downloaded = 0;
+        res.on('data', function(chunk) {
+            if(cb === null) {
+                return;
+            }
+            downloaded += chunk.length;
+            output.push(chunk);
+            updateDownload(downloaded);
+            if(cb === null) {
+                return;
+            }
+        });
+        res.on('end', function() {
+            if(cb === null) {
+                return;
+            }
+            updateDownload(downloaded);
+            if(cb === null) {
+                return;
+            }
+
+            if(typeof outputLength === 'undefined') {
+                outputLength = downloaded;
+            }
+
+            decompress(Buffer.concat(output, downloaded), contentEncoding, function(err, output) {
+                if(!cb) {
+                    return;
+                }
+                if(err) {
+                    cb(err);
+                    cb = null;
+                    return;
+                }
+                if(!outputBinary) {
+                    output = output.toString('utf8');
+                }
+                try {
+                    cb(null, outputConverter(output), status, outputHeaders);
+                } catch(err) {
+                    cb(err);
+                }
+                cb = null;
+            });
+        });
+    });
+
+    nextTick(function() {
+        if(cb === null) {
+            return;
+        }
+        uploadProgressCb(0, inputLength);
+    });
+    if(typeof input !== 'undefined') {
+        input = new Buffer(input);
+        inputLength = input.length;
+        req.write(input);
+    }
+    req.on('error', function(e) {
+        if(cb === null) {
+            return;
+        }
+        cb(e);
+        cb = null;
+    });
+    req.end();
+    promise = function() {
+        if(cb === null) {
+            return;
+        }
+
+        // these statements are in case "abort" is called in "finished" callback
+        var _cb = cb;
+        cb = null;
+        _cb(new Error('abort'));
+    };
+    return mixInPromise(promise);
+};
+httpinvoke.corsResponseContentTypeOnly = false;
+httpinvoke.corsRequestHeaders = true;
+httpinvoke.corsCredentials = true;
+httpinvoke.cors = true;
+httpinvoke.corsDELETE = true;
+httpinvoke.corsHEAD = true;
+httpinvoke.corsPATCH = true;
+httpinvoke.corsPUT = true;
+httpinvoke.corsStatus = true;
+httpinvoke.corsResponseTextOnly = false;
+httpinvoke.requestTextOnly = false;
+
+module.exports = httpinvoke;
+;
+} else {
+;(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(factory);
+    } else if (typeof exports === 'object') {
+        module.exports = factory();
+    } else {
+        root.httpinvoke = factory();
+  }
+}(this, function () {
+    var global;
+    ;global = window;;var isArrayBufferView = function(input) {
+    return typeof input === 'object' && input !== null && (
+        (global.ArrayBufferView && input instanceof ArrayBufferView) ||
+        (global.Int8Array && input instanceof Int8Array) ||
+        (global.Uint8Array && input instanceof Uint8Array) ||
+        (global.Uint8ClampedArray && input instanceof Uint8ClampedArray) ||
+        (global.Int16Array && input instanceof Int16Array) ||
+        (global.Uint16Array && input instanceof Uint16Array) ||
+        (global.Int32Array && input instanceof Int32Array) ||
+        (global.Uint32Array && input instanceof Uint32Array) ||
+        (global.Float32Array && input instanceof Float32Array) ||
+        (global.Float64Array && input instanceof Float64Array)
+    );
+}, isArray = function(object) {
+    return Object.prototype.toString.call(object) === '[object Array]';
+}, isByteArray = function(input) {
+    return typeof input === 'object' && input !== null && (
+        (global.Buffer && input instanceof Buffer) ||
+        (global.Blob && input instanceof Blob) ||
+        (global.File && input instanceof File) ||
+        (global.ArrayBuffer && input instanceof ArrayBuffer) ||
+        isArrayBufferView(input) ||
+        isArray(input)
+    );
+}, bytearrayMessage = 'an instance of Buffer, nor Blob, nor File, nor ArrayBuffer, nor ArrayBufferView, nor Int8Array, nor Uint8Array, nor Uint8ClampedArray, nor Int16Array, nor Uint16Array, nor Int32Array, nor Uint32Array, nor Float32Array, nor Float64Array, nor Array', supportedMethods = ',GET,HEAD,PATCH,POST,PUT,DELETE,', pass = function(value) {
+    return value;
+}, nextTick = (global.process && global.process.nextTick) || global.setImmediate || global.setTimeout, _undefined;
+;
+    // this could be a simple map, but with this "compression" we save about 100 bytes, if minified (50 bytes, if also gzipped)
+    var statusTextToCode = (function() {
+        for(var group = arguments.length, map = {};group--;) {
+            for(var texts = arguments[group].split(','), index = texts.length;index--;) {
+                map[texts[index]] = (group + 1) * 100 + index;
+            }
+        }
+        return map;
+    })(
+        'Continue,Switching Protocols',
+        'OK,Created,Accepted,Non-Authoritative Information,No Content,Reset Content,Partial Content',
+        'Multiple Choices,Moved Permanently,Found,See Other,Not Modified,Use Proxy,_,Temporary Redirect',
+        'Bad Request,Unauthorized,Payment Required,Forbidden,Not Found,Method Not Allowed,Not Acceptable,Proxy Authentication Required,Request Timeout,Conflict,Gone,Length Required,Precondition Failed,Request Entity Too Large,Request-URI Too Long,Unsupported Media Type,Requested Range Not Satisfiable,Expectation Failed',
+        'Internal Server Error,Not Implemented,Bad Gateway,Service Unavailable,Gateway Time-out,HTTP Version Not Supported'
+    );
+    var bufferSlice = function(buffer, begin, end) {
+        if(begin === 0 && end === buffer.byteLength) {
+            return buffer;
+        }
+        return buffer.slice ? buffer.slice(begin, end) : new Uint8Array(Array.prototype.slice.call(new Uint8Array(buffer), begin, end)).buffer;
+    };
+    var responseBodyToBytes, responseBodyLength;
+    try {
+        execScript('Function httpinvoke0(B,A)\r\nDim i\r\nFor i=1 to LenB(B)\r\nA.push(AscB(MidB(B,i,1)))\r\nNext\r\nEnd Function\r\nFunction httpinvoke1(B)\r\nhttpinvoke1=LenB(B)\r\nEnd Function', 'vbscript');
+        responseBodyToBytes = function(binary) {
+            var bytes = [];
+            httpinvoke0(binary, bytes);
+            return bytes;
+        };
+        // cannot just assign the function, because httpinvoke1 is not a javascript 'function'
+        responseBodyLength = function(binary) {
+            return httpinvoke1(binary);
+        };
+    } catch(err) {
+    }
+    var getOutputText = function(xhr) {
+        return xhr.response || xhr.responseText;
+    };
+    var binaryStringToByteArray = function(str) {
+        for(var n = str.length, bytearray = new Array(n);n--;) {
+            bytearray[n] = str.charCodeAt(n) & 255;
+        }
+        return bytearray;
+    };
+    var getOutputBinary = function(xhr) {
+        if('response' in xhr) {
+            return new Uint8Array(xhr.response || []);
+        }
+        // responseBody must be checked this way, because otherwise
+        // it is falsy and then accessing responseText for binary data
+        // results in the "c00ce514" error
+        if('responseBody' in xhr) {
+            return responseBodyToBytes(xhr.responseBody);
+        }
+        var bytearray = binaryStringToByteArray(xhr.responseText);
+        // firefox 4 supports typed arrays but not xhr2
+        return global.Uint8Array ? new global.Uint8Array(bytearray) : bytearray;
+    };
+    var getOutputLengthText = function(xhr) {
+        return countStringBytes(getOutputText(xhr));
+    };
+    var getOutputLengthBinary = function(xhr) {
+        if('response' in xhr) {
+            return xhr.response ? xhr.response.byteLength : 0;
+        }
+        // responseBody must be checked this way, because otherwise
+        // it is falsy and then accessing responseText for binary data
+        // results in the "c00ce514" error
+        if('responseBody' in xhr) {
+            return responseBodyLength(xhr.responseBody);
+        }
+        return xhr.responseText.length;
+    };
+
+    var countStringBytes = function(string) {
+        for(var c, n = 0, i = string.length;i--;) {
+            c = string.charCodeAt(i);
+            n += c < 128 ? 1 : (c < 2048 ? 2 : 3);
+        }
+        return n;
+    };
+
+    var fillOutputHeaders = function(xhr, outputHeaders) {
+        var headers = xhr.getAllResponseHeaders().split(/\r?\n/);
+        var atLeastOne = false;
+        for(var i = headers.length, colon, header; i--;) {
+            if((colon = headers[i].indexOf(':')) >= 0) {
+                outputHeaders[headers[i].substr(0, colon).toLowerCase()] = headers[i].substr(colon + 2);
+                atLeastOne = true;
+            }
+        }
+        return atLeastOne;
+    };
+
+    var urlPartitioningRegExp = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/;
+    var isCrossDomain = function(location, uri) {
+        uri = urlPartitioningRegExp.exec(uri.toLowerCase());
+        location = urlPartitioningRegExp.exec(location.toLowerCase()) || [];
+        return !!(uri && (uri[1] !== location[1] || uri[2] !== location[2] || (uri[3] || (uri[1] === 'http:' ? '80' : '443')) !== (location[3] || (location[1] === 'http:' ? '80' : '443'))));
+    };
+    var createXHR;
+    var httpinvoke = function(uri, method, options, cb) {
+        ;var mixInPromise, promise, failWithoutRequest, uploadProgressCb, inputLength, noData, timeout, inputHeaders, statusCb, initDownload, updateDownload, outputHeaders, exposedHeaders, status, outputBinary, input, outputLength, outputConverter;
+/*************** COMMON initialize parameters **************/
+if(!method) {
+    // 1 argument
+    // method, options, cb skipped
+    method = 'GET';
+    options = {};
+} else if(!options) {
+    // 2 arguments
+    if(typeof method === 'string') {
+        // options. cb skipped
+        options = {};
+    } else if(typeof method === 'object') {
+        // method, cb skipped
+        options = method;
+        method = 'GET';
+    } else {
+        // method, options skipped
+        options = {
+            finished: method
+        };
+        method = 'GET';
+    }
+} else if(!cb) {
+    // 3 arguments
+    if(typeof method === 'object') {
+        // method skipped
+        method.finished = options;
+        options = method;
+        method = 'GET';
+    } else if(typeof options === 'function') {
+        // options skipped
+        options = {
+            finished: options
+        };
+    }
+    // cb skipped
+} else {
+    // 4 arguments
+    options.finished = cb;
+}
+var safeCallback = function(name, aspect) {
+    if(name in options) {
+        return function(a, b, c, d) {
+            try {
+                options[name](a, b, c, d);
+            } catch(_) {
+            }
+            aspect(a, b, c, d);
+        };
+    }
+    return aspect;
+};
+var chain = function(a, b) {
+    a && a.then && a.then(function() {
+        b[resolve].apply(null, arguments);
+    }, function() {
+        b[reject].apply(null, arguments);
+    }, function() {
+        b[progress].apply(null, arguments);
+    });
+};
+var resolve = 0, reject = 1, progress = 2;
+mixInPromise = function(o) {
+    var value, queue = [], state = progress;
+    var makeState = function(newstate) {
+        o[newstate] = function(newvalue) {
+            var i, p;
+            if(queue) {
+                value = newvalue;
+                state = newstate;
+
+                for(i = 0; i < queue.length; i++) {
+                    if(typeof queue[i][state] === 'function') {
+                        try {
+                            p = queue[i][state].call(null, value);
+                            if(state < progress) {
+                                chain(p, queue[i]._);
+                            }
+                        } catch(err) {
+                            queue[i]._[reject](err);
+                        }
+                    } else if(state < progress) {
+                        queue[i]._[state](value);
+                    }
+                }
+                if(state < progress) {
+                    queue = null;
+                }
+            }
+        };
+    };
+    makeState(progress);
+    makeState(resolve);
+    makeState(reject);
+    o.then = function() {
+        var item = [].slice.call(arguments);
+        item._ = mixInPromise({});
+        if(queue) {
+            queue.push(item);
+        } else if(typeof item[state] === 'function') {
+            nextTick(function() {
+                chain(item[state](value), item._);
+            });
+        }
+        return item._;
+    };
+    return o;
+};
+failWithoutRequest = function(cb, err) {
+    nextTick(function() {
+        if(cb === null) {
+            return;
+        }
+        cb(err);
+    });
+    promise = function() {
+    };
+    return mixInPromise(promise);
+};
+
+uploadProgressCb = safeCallback('uploading', function(current, total) {
+    promise[progress]({
+        type: 'upload',
+        current: current,
+        total: total
+    });
+});
+var downloadProgressCb = safeCallback('downloading', function(current, total) {
+    promise[progress]({
+        type: 'download',
+        current: current,
+        total: total
+    });
+});
+statusCb = safeCallback('gotStatus', function(statusCode, headers) {
+    promise[progress]({
+        type: 'headers',
+        statusCode: statusCode,
+        headers: headers
+    });
+});
+cb = safeCallback('finished', function(err, body, statusCode, headers) {
+    if(err) {
+        return promise[reject](err);
+    }
+    promise[resolve]({
+        body: body,
+        statusCode: statusCode,
+        headers: headers
+    });
+});
+timeout = options.timeout || 0;
+var converters = options.converters || {};
+var inputConverter;
+inputLength = 0;
+inputHeaders = options.headers || {};
+outputHeaders = {};
+exposedHeaders = options.corsExposedHeaders || [];
+exposedHeaders.push.apply(exposedHeaders, ['Cache-Control', 'Content-Language', 'Content-Type', 'Content-Length', 'Expires', 'Last-Modified', 'Pragma', 'Content-Range']);
+/*************** COMMON convert and validate parameters **************/
+if(method.indexOf(',') >= 0 || supportedMethods.indexOf(',' + method + ',') < 0) {
+    return failWithoutRequest(cb, new Error('Unsupported method ' + method));
+}
+outputBinary = options.outputType === 'bytearray';
+if(!options.outputType || options.outputType === 'text' || outputBinary) {
+    outputConverter = pass;
+} else if(converters['text ' + options.outputType]) {
+    outputConverter = converters['text ' + options.outputType];
+    outputBinary = false;
+} else if(converters['bytearray ' + options.outputType]) {
+    outputConverter = converters['bytearray ' + options.outputType];
+    outputBinary = true;
+} else {
+    return failWithoutRequest(cb, new Error('Unsupported outputType ' + options.outputType));
+}
+inputConverter = pass;
+if('input' in options) {
+    input = options.input;
+    if(!options.inputType || options.inputType === 'auto') {
+        if(typeof input !== 'string' && !isByteArray(input)) {
+            return failWithoutRequest(cb, new Error('inputType is undefined or auto and input is neither string, nor ' + bytearrayMessage));
+        }
+    } else if(options.inputType === 'text') {
+        if(typeof input !== 'string') {
+            return failWithoutRequest(cb, new Error('inputType is text, but input is not a string'));
+        }
+    } else if (options.inputType === 'bytearray') {
+        if(!isByteArray(input)) {
+            return failWithoutRequest(cb, new Error('inputType is bytearray, but input is neither ' + bytearrayMessage));
+        }
+    } else if(converters[options.inputType + ' text']) {
+        inputConverter = converters[options.inputType + ' text'];
+    } else if(converters[options.inputType + ' bytearray']) {
+        inputConverter = converters[options.inputType + ' bytearray'];
+    } else {
+        return failWithoutRequest(cb, new Error('There is no converter for specified inputType'));
+    }
+    if(typeof input === 'object') {
+        if(global.ArrayBuffer && input instanceof ArrayBuffer) {
+            input = new Uint8Array(input);
+        } else if(isArrayBufferView(input)) {
+            input = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+        }
+    }
+    try {
+        input = inputConverter(input);
+    } catch(err) {
+        return failWithoutRequest(cb, err);
+    }
+} else {
+    if(options.inputType) {
+        return failWithoutRequest(cb, new Error('"input" is undefined, but inputType is defined'));
+    }
+    if(inputHeaders['Content-Type']) {
+        return failWithoutRequest(cb, new Error('"input" is undefined, but Content-Type request header is defined'));
+    }
+}
+
+/*************** COMMON initialize helper variables **************/
+var downloaded;
+initDownload = function(total) {
+    if(typeof outputLength === 'undefined') {
+        downloadProgressCb(downloaded, outputLength = total);
+    }
+};
+updateDownload = function(value) {
+    if(value !== downloaded) {
+        downloadProgressCb(downloaded = value, outputLength);
+    }
+};
+noData = function() {
+    initDownload(0);
+    if(cb) {
+        cb(null, _undefined, status, outputHeaders);
+        cb = null;
+    }
+};
+;
+        /*************** initialize helper variables **************/
+        var xhr, i, j, currentLocation, crossDomain, output,
+            getOutput = outputBinary ? getOutputBinary : getOutputText,
+            getOutputLength = outputBinary ? getOutputLengthBinary : getOutputLengthText,
+            uploadProgressCbCalled = false;
+        var uploadProgress = function(uploaded) {
+            if(!uploadProgressCb) {
+                return;
+            }
+            if(!uploadProgressCbCalled) {
+                uploadProgressCbCalled = true;
+                uploadProgressCb(0, inputLength);
+                if(!cb) {
+                    return;
+                }
+            }
+            uploadProgressCb(uploaded, inputLength);
+            if(uploaded === inputLength) {
+                uploadProgressCb = null;
+            }
+        };
+        try {
+            // IE may throw an exception when accessing
+            // a field from location if document.domain has been set
+            currentLocation = location.href;
+        } catch(_) {
+            // Use the href attribute of an A element
+            // since IE will modify it given document.location
+            currentLocation = document.createElement('a');
+            currentLocation.href = '';
+            currentLocation = currentLocation.href;
+        }
+        crossDomain = isCrossDomain(currentLocation, uri);
+        /*************** start XHR **************/
+        if(typeof input === 'object' && httpinvoke.requestTextOnly) {
+            return failWithoutRequest(cb, new Error('bytearray inputType is not supported on this platform, please always test using requestTextOnly feature flag'));
+        }
+        if(crossDomain && !httpinvoke.cors) {
+            return failWithoutRequest(cb, new Error('Cross-origin requests are not supported'));
+        }
+        for(j = ['DELETE', 'PATCH', 'PUT', 'HEAD'], i = j.length;i-- > 0;) {
+            if(crossDomain && method === j[i] && !httpinvoke['cors' + j[i]]) {
+                return failWithoutRequest(cb, new Error(j[i] + ' method in cross-origin requests is not supported in this browser'));
+            }
+        }
+        if(!createXHR) {
+            return failWithoutRequest(cb, new Error('unable to construct XMLHttpRequest object'));
+        }
+        xhr = createXHR(crossDomain);
+        xhr.open(method, uri, true);
+        if(timeout > 0) {
+            if('timeout' in xhr) {
+                xhr.timeout = timeout;
+            } else {
+                setTimeout(function() {
+                    cb(new Error('download timeout'));
+                    cb = null;
+                }, timeout);
+            }
+        }
+        if(options.corsCredentials && httpinvoke.corsCredentials && typeof xhr.withCredentials === 'boolean') {
+            xhr.withCredentials = true;
+        }
+        if(crossDomain && options.corsOriginHeader) {
+            // on some Android devices CORS implementations are buggy
+            // that is why there needs to be two workarounds:
+            // 1. custom header with origin has to be passed, because they do not send Origin header on the actual request
+            // 2. caching must be avoided, because of unknown reasons
+            // read more: http://www.kinvey.com/blog/107/how-to-build-a-service-that-supports-every-android-browser
+
+            // workaraound for #1: sending origin in custom header, also see the server-side part of the workaround in dummyserver.js
+            inputHeaders[options.corsOriginHeader] = location.protocol + '//' + location.host;
+        }
+
+        /*************** bind XHR event listeners **************/
+        var makeErrorCb = function(message) {
+            return function() {
+                // must check, because some callbacks are called synchronously, thus throwing exceptions and breaking code
+                if(cb) {
+                    cb(new Error(message));
+                    cb = null;
+                }
+            };
+        };
+        var onuploadprogress = function(progressEvent) {
+            if(cb && progressEvent.lengthComputable) {
+                uploadProgress(progressEvent.loaded);
+            }
+        };
+        if('upload' in xhr) {
+            xhr.upload.ontimeout = makeErrorCb('upload timeout');
+            xhr.upload.onerror = makeErrorCb('upload error');
+            xhr.upload.onprogress = onuploadprogress;
+        } else if('onuploadprogress' in xhr) {
+            xhr.onuploadprogress = onuploadprogress;
+        }
+
+        if('ontimeout' in xhr) {
+            xhr.ontimeout = makeErrorCb('download timeout');
+        }
+        if('onerror' in xhr) {
+            xhr.onerror = function() {
+                //inspect('onerror', arguments[0]);
+                //dbg('onerror');
+                // For 4XX and 5XX response codes Firefox 3.6 cross-origin request ends up here, but has correct statusText, but no status and headers
+                onLoad();
+            };
+        }
+        if('onloadstart' in xhr) {
+            xhr.onloadstart = function() {
+                //dbg('onloadstart');
+                onHeadersReceived(false);
+            };
+        }
+        if('onloadend' in xhr) {
+            xhr.onloadend = function() {
+                //dbg('onloadend');
+                onHeadersReceived(false);
+            };
+        }
+        if('onprogress' in xhr) {
+            xhr.onprogress = function(progressEvent) {
+                //dbg('onprogress');
+                if(!cb) {
+                    return;
+                }
+                onHeadersReceived(false);
+                if(statusCb) {
+                    return;
+                }
+                // There is a bug in Chrome 10 on 206 response with Content-Range=0-4/12 - total must be 5
+                // 'total', 12, 'totalSize', 12, 'loaded', 5, 'position', 5, 'lengthComputable', true, 'status', 206
+                // console.log('total', progressEvent.total, 'totalSize', progressEvent.totalSize, 'loaded', progressEvent.loaded, 'position', progressEvent.position, 'lengthComputable', progressEvent.lengthComputable, 'status', status);
+                // httpinvoke does not work around this bug, because Chrome 10 is practically not used at all, as Chrome agressively auto-updates itself to latest version
+                var total = progressEvent.total || progressEvent.totalSize || 0,
+                    current = progressEvent.loaded || progressEvent.position || 0;
+                if(progressEvent.lengthComputable) {
+                    initDownload(total);
+                }
+                if(!cb) {
+                    return;
+                }
+                if(current > total) {
+                    // Opera 12 progress events has a bug - .loaded can be higher than .total
+                    // see http://dev.opera.com/articles/view/xhr2/#comment-96081222
+                    return;
+                }
+                updateDownload(current);
+            };
+        }
+        /*
+        var inspect = function(name, obj) {
+            return;
+            console.log('INSPECT ----- ', name, uri);
+            for(var i in obj) {
+                try {
+                    console.log(name, 'PASS', i, typeof obj[i], typeof obj[i] === 'function' ? '[code]' : obj[i]);
+                } catch(_) {
+                    console.log(name, 'FAIL', i);
+                }
+            }
+        };
+        var dbg = function(name) {
+            console.log('DBG ----- ', name, uri);
+            inspect('xhr', xhr);
+            try {
+                console.log('PASS', 'headers', xhr.getAllResponseHeaders());
+            } catch(_) {
+                console.log('FAIL', 'headers');
+            }
+            try {
+                console.log('PASS', 'cache-control', xhr.getResponseHeader('Cache-Control'));
+            } catch(_) {
+                console.log('FAIL', 'cache-control');
+            }
+        };
+        */
+        var received = {
+            success: false,
+            status: false,
+            entity: false,
+            headers: false
+        };
+        var onHeadersReceived = function(lastTry) {
+            if(!cb) {
+                return;
+            }
+
+            try {
+                if(xhr.status) {
+                    received.status = true;
+                }
+            } catch(_) {
+            }
+            try {
+                if(xhr.statusText) {
+                    received.status = true;
+                }
+            } catch(_) {
+            }
+            try {
+                if(xhr.responseText) {
+                    received.entity = true;
+                }
+            } catch(_) {
+            }
+            try {
+                if(xhr.response) {
+                    received.entity = true;
+                }
+            } catch(_) {
+            }
+
+            if(!statusCb) {
+                return;
+            }
+
+            if(received.status || received.entity || received.success || lastTry) {
+                if(typeof xhr.contentType === 'string') {
+                    if(xhr.contentType !== 'text/html' || xhr.responseText !== '') {
+                        // When no entity body and/or no Content-Type header is sent,
+                        // XDomainRequest on IE-8 defaults to text/html xhr.contentType.
+                        // Also, empty string is not a valid 'text/html' entity.
+                        outputHeaders['content-type'] = xhr.contentType;
+                        received.headers = true;
+                    }
+                }
+                for(var i = 0; i < exposedHeaders.length; i += 1) {
+                    var header;
+                    try {
+                        if(header = xhr.getResponseHeader(exposedHeaders[i])) {
+                            outputHeaders[exposedHeaders[i].toLowerCase()] = header;
+                            received.headers = true;
+                        }
+                    } catch(err) {
+                    }
+                }
+                try {
+                    // note - on Opera 11.10 and 11.50 calling getAllResponseHeaders may introduce side effects on xhr and responses will timeout when server responds with some HTTP status codes
+                    if(fillOutputHeaders(xhr, outputHeaders)) {
+                        received.headers = true;
+                    }
+                } catch(err) {
+                }
+
+                if(!status && (!crossDomain || httpinvoke.corsStatus)) {
+                    // Sometimes on IE 9 accessing .status throws an error, but .statusText does not.
+                    try {
+                        if(xhr.status) {
+                            status = xhr.status;
+                        }
+                    } catch(_) {
+                    }
+                    if(!status) {
+                        try {
+                            status = statusTextToCode[xhr.statusText];
+                        } catch(_) {
+                        }
+                    }
+                    // sometimes IE returns 1223 when it should be 204
+                    if(status === 1223) {
+                        status = 204;
+                    }
+                }
+            }
+
+            if(!lastTry && !(received.status && received.headers)) {
+                return;
+            }
+
+            uploadProgress(inputLength);
+            if(!cb) {
+                return;
+            }
+
+            statusCb(status, outputHeaders);
+            statusCb = null;
+            if(!cb) {
+                return;
+            }
+
+            if(method === 'HEAD') {
+                return noData();
+            }
+
+            updateDownload(0);
+            if(!cb) {
+                return;
+            }
+
+            if('content-length' in outputHeaders && (!crossDomain || 'content-encoding' in outputHeaders) && (!outputHeaders['content-encoding'] || outputHeaders['content-encoding'] === 'identity')) {
+                initDownload(Number(outputHeaders['content-length']));
+                if(!cb) {
+                    return;
+                }
+            }
+        };
+        var onLoad = function() {
+            if(!cb) {
+                return;
+            }
+
+            onHeadersReceived(true);
+            if(!cb) {
+                return;
+            }
+
+            if(!received.success && !status) {
+                // 'finished in onerror and status code is undefined'
+                cb(new Error('download error'));
+                cb = null;
+                return;
+            }
+
+            var length;
+            try {
+                length = getOutputLength(xhr);
+            } catch(_) {
+                return noData();
+            }
+            if(!outputLength) {
+                initDownload(length);
+            } else if(length !== outputLength) {
+                // 'output length ' + outputLength + ' is not equal to actually received entity length ' + length
+                cb(new Error('download error'));
+                cb = null;
+            }
+            if(!cb) {
+                return;
+            }
+
+            updateDownload(outputLength);
+            if(!cb) {
+                return;
+            }
+
+            try {
+                cb(null, !received.entity && outputLength === 0 && typeof outputHeaders['content-type'] === 'undefined' ? _undefined : outputConverter(getOutput(xhr)), status, outputHeaders);
+            } catch(err) {
+                cb(err);
+            }
+            cb = null;
+        };
+        var onloadBound = false;
+        if(typeof xhr.onload !== 'undefined') {
+            onloadBound = true;
+            xhr.onload = function() {
+                received.success = true;
+                //dbg('onload');
+                onLoad();
+            };
+        }
+        if(typeof xhr.onreadystatechange !== 'undefined') {
+            xhr.onreadystatechange = function() {
+                //dbg('onreadystatechange ' + xhr.readyState);
+                if(xhr.readyState === 2) {
+                    // HEADERS_RECEIVED
+                    onHeadersReceived(false);
+                } else if(xhr.readyState === 3) {
+                    // LOADING
+                    received.success = true;
+                    onHeadersReceived(false);
+                    if(statusCb) {
+                        return;
+                    }
+                    try {
+                        updateDownload(getOutputLength(xhr));
+                    } catch(err) {
+                    }
+                // Instead of 'typeof xhr.onload === "undefined"', we must use
+                // onloadBound variable, because otherwise Firefox 3.5 synchronously
+                // throws a "Permission denied for <> to create wrapper for
+                // object of class UnnamedClass" error
+                } else if(xhr.readyState === 4 && !onloadBound) {
+                    // DONE
+                    onLoad();
+                }
+            };
+        }
+
+        /*************** set XHR request headers **************/
+        if(!crossDomain || httpinvoke.corsRequestHeaders) {
+            for(var inputHeaderName in inputHeaders) {
+                if(inputHeaders.hasOwnProperty(inputHeaderName)) {
+                    try {
+                        xhr.setRequestHeader(inputHeaderName, inputHeaders[inputHeaderName]);
+                    } catch(err) {
+                        return failWithoutRequest(cb, err);
+                    }
+                }
+            }
+        }
+        /*************** invoke XHR request process **************/
+        nextTick(function() {
+            if(!cb) {
+                return;
+            }
+            if('response' in xhr) {
+                try {
+                    xhr.responseType = outputBinary ? 'arraybuffer' : 'text';
+                } catch(err) {
+                }
+            } else {
+                try {
+                    // mime type override must be done before receiving headers - at least for Safari 5.0.4
+                    if(outputBinary) {
+                        xhr.overrideMimeType('text/plain; charset=x-user-defined');
+                    }
+                } catch(err) {
+                }
+            }
+            if(typeof input === 'object') {
+                var triedSendArrayBufferView = false;
+                var triedSendBlob = false;
+                var triedSendBinaryString = false;
+
+                var BlobBuilder = global.BlobBuilder || global.WebKitBlobBuilder || global.MozBlobBuilder || global.MSBlobBuilder;
+                if(isArray(input)) {
+                    input = global.Uint8Array ? new Uint8Array(input) : String.fromCharCode.apply(String, input);
+                }
+                var toBlob = BlobBuilder ? function() {
+                    var bb = new BlobBuilder();
+                    bb.append(input);
+                    input = bb.getBlob(inputHeaders['Content-Type'] || 'application/octet-stream');
+                } : function() {
+                    try {
+                        input = new Blob([input], {
+                            type: inputHeaders['Content-Type'] || 'application/octet-stream'
+                        });
+                    } catch(_) {
+                        triedSendBlob = true;
+                    }
+                };
+                var go = function() {
+                    var reader;
+                    if(triedSendBlob && triedSendArrayBufferView && triedSendBinaryString) {
+                        return failWithoutRequest(cb, new Error('Unable to send'));
+                    }
+                    if(isArrayBufferView(input)) {
+                        if(triedSendArrayBufferView) {
+                            if(!triedSendBinaryString) {
+                                try {
+                                    input = String.fromCharCode.apply(String, input);
+                                } catch(_) {
+                                    triedSendBinaryString = true;
+                                }
+                            } else if(!triedSendBlob) {
+                                toBlob();
+                            }
+                        } else {
+                            try {
+                                inputLength = input.byteLength;
+                                // if there is ArrayBufferView, then the browser supports sending instances of subclasses of ArayBufferView, otherwise we must send an ArrayBuffer
+                                xhr.send(global.ArrayBufferView ? input : bufferSlice(input.buffer, input.byteOffset, input.byteOffset + input.byteLength));
+                                return;
+                            } catch(_) {
+                                triedSendArrayBufferView = true;
+                            }
+                        }
+                    } else if(global.Blob && input instanceof Blob) {
+                        if(triedSendBlob) {
+                            if(!triedSendArrayBufferView) {
+                                try {
+                                    reader = new FileReader();
+                                    reader.onerror = function() {
+                                        triedSendArrayBufferView = true;
+                                        go();
+                                    };
+                                    reader.onload = function() {
+                                        try {
+                                            input = new Uint8Array(reader.result);
+                                        } catch(_) {
+                                            triedSendArrayBufferView = true;
+                                        }
+                                        go();
+                                    };
+                                    reader.readAsArrayBuffer(input);
+                                    return;
+                                } catch(_) {
+                                    triedSendArrayBufferView = true;
+                                }
+                            } else if(!triedSendBinaryString) {
+                                try {
+                                    reader = new FileReader();
+                                    reader.onerror = function() {
+                                        triedSendBinaryString = true;
+                                        go();
+                                    };
+                                    reader.onload = function() {
+                                        input = reader.result;
+                                        go();
+                                    };
+                                    reader.readAsBinaryString(input);
+                                    return;
+                                } catch(_) {
+                                    triedSendBinaryString = true;
+                                }
+                            }
+                        } else {
+                            try {
+                                inputLength = input.size;
+                                xhr.send(input);
+                                return;
+                            } catch(_) {
+                                triedSendBlob = true;
+                            }
+                        }
+                    } else {
+                        if(triedSendBinaryString) {
+                            if(!triedSendArrayBufferView) {
+                                try {
+                                    input = binaryStringToByteArray(input);
+                                } catch(_) {
+                                    triedSendArrayBufferView = true;
+                                }
+                            } else if(!triedSendBlob) {
+                                toBlob();
+                            }
+                        } else {
+                            try {
+                                inputLength = input.length;
+                                xhr.sendAsBinary(input);
+                                return;
+                            } catch(_) {
+                                triedSendBinaryString = true;
+                            }
+                        }
+                    }
+                    nextTick(go);
+                };
+                go();
+            } else {
+                try {
+                    if(typeof input === 'string') {
+                        inputLength = countStringBytes(input);
+                        xhr.send(input);
+                    } else {
+                        xhr.send(null);
+                    }
+                } catch(err) {
+                    var _cb = cb;
+                    cb = null;
+                    return failWithoutRequest(cb, new Error('Unable to send'));
+                }
+            }
+            uploadProgress(0);
+        });
+
+        /*************** return "abort" function **************/
+        promise = function() {
+            if(!cb) {
+                return;
+            }
+
+            // these statements are in case "abort" is called in "finished" callback
+            var _cb = cb;
+            cb = null;
+            _cb(new Error('abort'));
+
+            try {
+                xhr.abort();
+            } catch(err){
+            }
+        };
+        return mixInPromise(promise);
+    };
+    httpinvoke.corsResponseContentTypeOnly = false;
+    httpinvoke.corsRequestHeaders = false;
+    httpinvoke.corsCredentials = false;
+    httpinvoke.cors = false;
+    httpinvoke.corsDELETE = false;
+    httpinvoke.corsHEAD = false;
+    httpinvoke.corsPATCH = false;
+    httpinvoke.corsPUT = false;
+    httpinvoke.corsStatus = false;
+    httpinvoke.corsResponseTextOnly = false;
+    httpinvoke.requestTextOnly = false;
+    (function() {
+        try {
+            createXHR = function() {
+                return new XMLHttpRequest();
+            };
+            var tmpxhr = createXHR();
+            httpinvoke.requestTextOnly = typeof Uint8Array === 'undefined' && typeof tmpxhr.sendAsBinary === 'undefined';
+            httpinvoke.cors = 'withCredentials' in tmpxhr;
+            if(httpinvoke.cors) {
+                httpinvoke.corsRequestHeaders = true;
+                httpinvoke.corsCredentials = true;
+                httpinvoke.corsDELETE = true;
+                httpinvoke.corsPATCH = true;
+                httpinvoke.corsPUT = true;
+                httpinvoke.corsHEAD = true;
+                httpinvoke.corsStatus = true;
+                return;
+            }
+        } catch(err) {
+        }
+        try {
+            if(typeof XDomainRequest === 'undefined') {
+                createXHR = function() {
+                    return new XMLHttpRequest();
+                };
+                createXHR();
+            } else {
+                createXHR = function(cors) {
+                    return cors ? new XDomainRequest() : new XMLHttpRequest();
+                };
+                createXHR(true);
+                httpinvoke.cors = true;
+                httpinvoke.corsResponseContentTypeOnly = true;
+                httpinvoke.corsResponseTextOnly = true;
+            }
+            return;
+        } catch(err) {
+        }
+        try {
+            createXHR();
+            return;
+        } catch(err) {
+        }
+        var candidates = ['Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.3.0', 'Msxml2.XMLHTTP'];
+        for(var i = candidates.length; i--;) {
+            try {
+                createXHR = function() {
+                    return new ActiveXObject(candidates[i]);
+                };
+                createXHR();
+                httpinvoke.requestTextOnly = true;
+                return;
+            } catch(err) {
+            }
+            i -= 1;
+        }
+        createXHR = _undefined;
+    })();
+
+    return httpinvoke;
+}));
+;
+}
+
+},{}],20:[function(require,module,exports){
+'use strict'
+
+var nextTick = require('./lib/next-tick')
+
+module.exports = Promise
+function Promise(fn) {
+  if (!(this instanceof Promise)) return new Promise(fn)
+  if (typeof fn !== 'function') throw new TypeError('not a function')
+  var state = null
+  var delegating = false
+  var value = null
+  var deferreds = []
+  var self = this
+
+  this.then = function(onFulfilled, onRejected) {
+    return new Promise(function(resolve, reject) {
+      handle(new Handler(onFulfilled, onRejected, resolve, reject))
+    })
+  }
+
+  function handle(deferred) {
+    if (state === null) {
+      deferreds.push(deferred)
+      return
+    }
+    nextTick(function() {
+      var cb = state ? deferred.onFulfilled : deferred.onRejected
+      if (cb === null) {
+        (state ? deferred.resolve : deferred.reject)(value)
+        return
+      }
+      var ret
+      try {
+        ret = cb(value)
+      }
+      catch (e) {
+        deferred.reject(e)
+        return
+      }
+      deferred.resolve(ret)
+    })
+  }
+
+  function resolve(newValue) {
+    if (delegating)
+      return
+    resolve_(newValue)
+  }
+
+  function resolve_(newValue) {
+    if (state !== null)
+      return
+    try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.')
+      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+        var then = newValue.then
+        if (typeof then === 'function') {
+          delegating = true
+          then.call(newValue, resolve_, reject_)
+          return
+        }
+      }
+      state = true
+      value = newValue
+      finale()
+    } catch (e) { reject_(e) }
+  }
+
+  function reject(newValue) {
+    if (delegating)
+      return
+    reject_(newValue)
+  }
+
+  function reject_(newValue) {
+    if (state !== null)
+      return
+    state = false
+    value = newValue
+    finale()
+  }
+
+  function finale() {
+    for (var i = 0, len = deferreds.length; i < len; i++)
+      handle(deferreds[i])
+    deferreds = null
+  }
+
+  try { fn(resolve, reject) }
+  catch(e) { reject(e) }
+}
+
+
+function Handler(onFulfilled, onRejected, resolve, reject){
+  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null
+  this.onRejected = typeof onRejected === 'function' ? onRejected : null
+  this.resolve = resolve
+  this.reject = reject
+}
+
+},{"./lib/next-tick":22}],21:[function(require,module,exports){
+'use strict'
+
+//This file contains then/promise specific extensions to the core promise API
+
+var Promise = require('./core.js')
+var nextTick = require('./lib/next-tick')
+
+module.exports = Promise
+
+/* Static Functions */
+
+Promise.from = function (value) {
+  if (value instanceof Promise) return value
+  return new Promise(function (resolve) { resolve(value) })
+}
+Promise.denodeify = function (fn) {
+  return function () {
+    var self = this
+    var args = Array.prototype.slice.call(arguments)
+    return new Promise(function (resolve, reject) {
+      args.push(function (err, res) {
+        if (err) reject(err)
+        else resolve(res)
+      })
+      fn.apply(self, args)
+    })
+  }
+}
+Promise.nodeify = function (fn) {
+  return function () {
+    var args = Array.prototype.slice.call(arguments)
+    var callback = typeof args[args.length - 1] === 'function' ? args.pop() : null
+    try {
+      return fn.apply(this, arguments).nodeify(callback)
+    } catch (ex) {
+      if (callback == null) {
+        return new Promise(function (resolve, reject) { reject(ex) })
+      } else {
+        nextTick(function () {
+          callback(ex)
+        })
+      }
+    }
+  }
+}
+
+Promise.all = function () {
+  var args = Array.prototype.slice.call(arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments)
+
+  return new Promise(function (resolve, reject) {
+    if (args.length === 0) return resolve([])
+    var remaining = args.length
+    function res(i, val) {
+      try {
+        if (val && (typeof val === 'object' || typeof val === 'function')) {
+          var then = val.then
+          if (typeof then === 'function') {
+            then.call(val, function (val) { res(i, val) }, reject)
+            return
+          }
+        }
+        args[i] = val
+        if (--remaining === 0) {
+          resolve(args);
+        }
+      } catch (ex) {
+        reject(ex)
+      }
+    }
+    for (var i = 0; i < args.length; i++) {
+      res(i, args[i])
+    }
+  })
+}
+
+/* Prototype Methods */
+
+Promise.prototype.done = function (onFulfilled, onRejected) {
+  var self = arguments.length ? this.then.apply(this, arguments) : this
+  self.then(null, function (err) {
+    nextTick(function () {
+      throw err
+    })
+  })
+}
+Promise.prototype.nodeify = function (callback) {
+  if (callback == null) return this
+
+  this.then(function (value) {
+    nextTick(function () {
+      callback(null, value)
+    })
+  }, function (err) {
+    nextTick(function () {
+      callback(err)
+    })
+  })
+}
+},{"./core.js":20,"./lib/next-tick":22}],22:[function(require,module,exports){
+var process=require("__browserify_process");'use strict'
+
+if (typeof setImmediate === 'function') { // IE >= 10 & node.js >= 0.10
+  module.exports = function(fn){ setImmediate(fn) }
+} else if (typeof process !== 'undefined' && process && typeof process.nextTick === 'function') { // node.js before 0.10
+  module.exports = function(fn){ process.nextTick(fn) }
+} else {
+  module.exports = function(fn){ setTimeout(fn, 0) }
+}
+
+},{"__browserify_process":18}],23:[function(require,module,exports){
+module.exports={
+  "name": "imjs",
+  "version": "3.0.0-pre",
+  "description": "Client library for communication with InterMine web-services",
+  "main": "js/index",
+  "keywords": [
+    "javascript",
+    "webservice",
+    "InterMine",
+    "Bio-Informatics"
+  ],
+  "author": {
+    "name": "Alex Kalderimis",
+    "email": "alex@intermine.org",
+    "twitter": "alexkalderimis"
+  },
+  "license": "LGPL",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexkalderimis/imjs.git"
+  },
+  "dependencies": {
+    "JSONStream": "~0.7.1",
+    "promise": "~3.2.0",
+    "xmldom": "~0.1.16"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "directories": {
+    "tests": "test"
+  },
+  "scripts": {
+    "prepublish": "make",
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "bower": "latest",
+    "codo": "~1.6.0",
+    "coffee-script": "~1.3.3",
+    "grunt": "~0.4.1",
+    "grunt-browserify": "~1.2.11",
+    "grunt-bump": "0.0.11",
+    "grunt-cli": "~0.1.11",
+    "grunt-coffeelint": "0.0.7",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-jshint": "~0.7.1",
+    "grunt-contrib-symlink": "~0.2.0",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-mocha-phantomjs": "~0.3.1",
+    "grunt-simple-mocha": "~0.4.0",
+    "httpinvoke": "~1.0.4",
+    "mocha": "latest",
+    "oboe": "~1.11.0",
+    "should": "latest",
+    "coffeeify": "~0.5.2",
+    "grunt-jscoverage": "0.0.3"
+  }
+}
+
+},{}]},{},[11])
+(11)
+});
+;

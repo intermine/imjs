@@ -2,7 +2,7 @@
 # exports object (if we are in node) or onto the global
 # intermine.funcutils namespace
 
-Promise = require 'promise'
+Promise = require './promise'
 
 root = exports
 

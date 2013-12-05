@@ -139,6 +139,26 @@ module.exports = function (grunt) {
     },
     CDN: process.env.CDN,
     copy: {
+      dist: {
+        files: [{
+          expand: true,
+          src: ['*.js'],
+          cwd: 'dist',
+          dest: 'js/',
+          flatten: true,
+          filter: 'isFile'
+        }]
+      },
+      version: {
+        files: [{
+          expand: true,
+          src: ['*.js'],
+          cwd: 'dist',
+          flatten: true,
+          dest: 'js/<%= pkg.version %>/',
+          filter: 'isFile'
+        }]
+      },
       cdn: {
         files: [{
           expand: true,
@@ -368,7 +388,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink'])
   grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit'])
-  grunt.registerTask('build', ['clean:build', 'compile', 'browserify', 'uglify'])
+  grunt.registerTask('build', ['clean:build', 'compile', 'browserify', 'uglify', 'copy:dist', 'copy:version'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob'])
   grunt.registerTask('test', ['build', 'test-node', 'phantomjs'])
   grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])

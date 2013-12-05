@@ -2,7 +2,7 @@
   "name": "imjs",
   "version": "3.0.0-pre",
   "description": "Client library for communication with InterMine web-services",
-  "main": "dist/im.js",
+  "main": "js/im.js",
   "dependencies": {},
   "devDependencies": {
     "mocha": ">=1.8.1",
@@ -14,6 +14,7 @@
     "build/",
     "src/",
     "components",
+    "bower_components",
     "examples",
     "Makefile",
     "bin/",
@@ -22,7 +23,7 @@
     "node_modules/",
     "*.json",
     "tasks/",
-    "grunt.js",
+    "Gruntfile.js",
     "BUILD_ORDER",
     "CHANGES",
     "TODO"

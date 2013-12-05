@@ -6,7 +6,7 @@
 #
 # @author: Alex Kalderimis
 
-{isFunction, error}    = require './util'
+{withCB, get, isFunction, error}    = require './util'
 intermine  = exports
 
 # Simple utility to take the returned value from manageUserPreferences and
@@ -57,6 +57,9 @@ class User
   clearPreferences: (cb) => do_pref_req @, {}, 'DELETE', cb
 
   refresh: (cb) => do_pref_req @, {}, 'GET', cb
+
+  getToken: (type = 'day', cb = null) ->
+    withCB cb, @service.get('user/token', {type}).then(get 'token')
 
 intermine.User = User
 

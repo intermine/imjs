@@ -1,1 +1,1 @@
-perl -ne 'if (/```/ ... /```/) { s/```.*//; s|imjs|./bin/index|; print }' README.md | node
+perl -ne 'if (/```/ ... /```/) { s/```.*//; s|imjs|./js/index|; print }' README.md | node

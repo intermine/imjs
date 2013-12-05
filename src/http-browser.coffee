@@ -1,5 +1,5 @@
-Promise                 = require 'promise'
 httpinvoke              = require 'httpinvoke'
+Promise                 = require './promise'
 {ACCEPT_HEADER}         = require './constants'
 {withCB, success, error, merge} = utils = require('./util')
 
@@ -78,7 +78,8 @@ CONVERTERS = 'text json': JSON.parse
 exports.doReq = (opts, iter) ->
   method = opts.type
   url = opts.url
-  headers = 'Accept': ACCEPT_HEADER[opts.dataType]
+  headers = (opts.headers ? {})
+  headers.Accept = ACCEPT_HEADER[opts.dataType]
   isJSON = (/json/.test(opts.dataType) or /json/.test(opts.data?.format))
 
   if opts.data?

@@ -44,7 +44,7 @@ streaming = (opts, resolve, reject) -> (resp) ->
 
 # Get a message that explains what went wrong.
 getMsg = ({type, url}, text, e, code) ->
-  "Could not parse response to #{ type } #{ url }: #{ text } (#{ code }: #{ e })"
+  """Could not parse response to #{ type } #{ url }: "#{ text }" (#{ code }: #{ e })"""
 
 blocking = (opts, resolve, reject) -> (resp) ->
   containerBuffer = ''
@@ -116,6 +116,9 @@ exports.doReq = (opts, iter) ->
   else
     url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
     url.headers['Content-Length'] = postdata.length
+
+  if 'headers' of opts
+    url.headers[k] = v for k, v of opts.headers
 
   handler = (if iter then streaming else blocking) opts, resolve, reject
   req = http.request url, handler
