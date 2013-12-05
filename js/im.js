@@ -238,7 +238,7 @@
 module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
-  var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
+  var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
 
   httpinvoke = require('httpinvoke');
 
@@ -352,6 +352,12 @@ module.exports=require('zlU5Ni');
     'text json': JSON.parse
   };
 
+  annotateError = function(url) {
+    return function(err) {
+      throw new Error("Request to " + url + " failed: " + err);
+    };
+  };
+
   exports.doReq = function(opts, iter) {
     var headers, isJSON, method, options, postdata, resp, url, _ref1, _ref2;
     method = opts.type;
@@ -379,7 +385,7 @@ module.exports=require('zlU5Ni');
       options.inputType = 'text';
       options.input = postdata;
     }
-    resp = Promise.from(httpinvoke(url, method, options)).then(check);
+    resp = Promise.from(httpinvoke(url, method, options)).then(check, annotateError(url));
     resp.then(opts.success, opts.error);
     if (iter) {
       return resp.then(streaming);
@@ -3080,18 +3086,17 @@ module.exports=require('zlU5Ni');
   _get_or_fetch = function(propName, store, path, key, cb) {
     var opts, promise, root, useCache, value, _ref;
     root = this.root, useCache = this.useCache;
-    opts = {
+    promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : (opts = {
       type: 'GET',
       dataType: 'json',
       data: {
         format: 'json'
       }
-    };
-    promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : this.doReq(merge(opts, {
+    }, this.doReq(merge(opts, {
       url: this.root + path
     })).then(function(x) {
       return store[root] = x[key];
-    });
+    }));
     return withCB(cb, promise);
   };
 

@@ -129,7 +129,8 @@ exports.doReq = (opts, iter) ->
   handler = (if iter then streaming else blocking) opts, resolve, reject
   req = http.request url, handler
 
-  req.on 'error', reject
+  req.on 'error', (err) ->
+    reject new Error("Error: #{ url.method } #{ opts.url }: #{ err }")
 
   if url.method in [ 'POST', 'PUT' ]
     req.write postdata

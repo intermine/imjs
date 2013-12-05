@@ -75,6 +75,9 @@ check = (response) ->
 CHARSET = "; charset=UTF-8"
 CONVERTERS = 'text json': JSON.parse
 
+annotateError = (url) -> (err) ->
+  throw new Error("Request to #{ url } failed: #{ err }")
+
 exports.doReq = (opts, iter) ->
   method = opts.type
   url = opts.url
@@ -107,7 +110,7 @@ exports.doReq = (opts, iter) ->
     options.inputType = 'text'
     options.input = postdata
 
-  resp = Promise.from(httpinvoke url, method, options).then check
+  resp = Promise.from(httpinvoke url, method, options).then check, annotateError url
   resp.then(opts.success, opts.error)
 
   if iter
