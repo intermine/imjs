@@ -173,6 +173,63 @@ describe 'utils', ->
     it 'should be a resolved promise', (done) ->
       s.then (-> done()), (-> done "Failed")
 
+  describe 'defer', ->
+
+    {defer} = utils
+
+    describe 'resolution', ->
+
+      {promise, resolve} = defer()
+      resolve "FOO"
+
+      it 'should be a thenable', ->
+        should.exist promise.then
+
+      it 'should have a "done" method', ->
+        should.exist promise.done
+
+      it 'should have been resolved', (done) ->
+        promise.then( (res) -> res.should.equal 'FOO' )
+               .then( (-> done()), done )
+      
+    describe 'rejection', ->
+
+      {promise, reject} = defer()
+      reject "BAR"
+
+      it 'should be a thenable', ->
+        should.exist promise.then
+
+      it 'should have a "done" method', ->
+        should.exist promise.done
+
+      it 'should have been rejected', (done) ->
+        promise.then(
+                  ((res) -> done new Error("Expected failure, got #{ res }")),
+                  ((err) ->
+                    err.should.equal 'BAR'
+                    done()))
+
+  describe 'the result of thenning a rejected promise', ->
+
+    {defer} = utils
+
+    {promise, reject} = defer()
+    child = promise.then (x) -> x * 2
+    reject 'FOO'
+
+    it 'should be a thenable', ->
+      should.exist child.then
+
+    it 'should have a "done" method', ->
+      should.exist child.done
+
+    it 'should have been rejected', (done) ->
+      child.then ((res) -> done new Error("Expected failure, got #{ res }")),
+                 ((err) ->
+                   err.should.equal 'FOO'
+                   done())
+
   describe 'fold', ->
 
     {fold} = utils

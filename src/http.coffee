@@ -94,6 +94,10 @@ exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->),
     error sc
   @makeRequest(method, path, req, null, true).then attach, readErrors
 
+rejectAfter = (timeout, reject, promise) ->
+  to = setTimeout (-> reject "Request timed out."), timeout
+  promise.then -> cancelTimeout to
+
 exports.doReq = (opts, iter) ->
   {promise, resolve, reject} = defer()
   promise.then null, opts.error
@@ -129,9 +133,9 @@ exports.doReq = (opts, iter) ->
     req.write postdata
   req.end()
 
-  if opts.timeout > 0
-    to = setTimeout (-> reject "Request timed out."), opts.timeout
-    promise.then -> cancelTimeout to
+  timeout = opts.timeout
+  if timeout > 0
+    rejectAfter timeout, reject, promise
 
   return promise
 

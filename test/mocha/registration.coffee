@@ -4,11 +4,14 @@ should = require 'should'
 
 describe 'Service#register', ->
 
+  username = 'mr foo'
+  password = 'pæssw0rd'
+
   {service} = new Fixture
   service.errorHandler = ->
 
   removeMrFoo = ->
-    service.login('mr foo', 'passw0rd')
+    service.login(username, password)
             .then (fooService) ->
               p = fooService.getDeregistrationToken()
               p.then (token) -> fooService.deregister token.uuid
@@ -17,15 +20,15 @@ describe 'Service#register', ->
 
   describe 'registering a new user', ->
 
-    @beforeAll prepare -> service.register 'mr foo', 'passw0rd'
+    @beforeAll prepare -> service.register username, password
     @afterAll always removeMrFoo
 
     it 'should be able to register a new user', eventually (s) ->
-      s.fetchUser().then (user) -> user.username.should.eql 'mr foo'
+      s.fetchUser().then (user) -> user.username.should.eql username
 
   describe 'deregistering a user', ->
 
-    @beforeAll prepare -> service.register 'mr foo', 'passw0rd'
+    @beforeAll prepare -> service.register username, password
     @afterAll always removeMrFoo
 
     it 'should be able to deregister a user', eventually (s) ->

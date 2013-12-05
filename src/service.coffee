@@ -804,12 +804,9 @@ class Service
   # @return [Promise<Service>] A promise to yield a service.
   login: (name, password, cb) -> REQUIRES_VERSION @, 9, =>
     headers = {'Authorization': "Basic " + base64.encode("#{ name }:#{ password }")}
-    service = @connectAs null
-    withCB cb, service.get('user/token', {headers})
-                      .then(get 'token')
-                      .then (token) ->
-                        service.token = token
-                        return service
+    withCB cb, @logout().then((service) -> service.get('user/token', {headers}))
+                        .then(get 'token')
+                        .then(@connectAs)
 
   # Promise to return a service with the same root as this one, but not associated with any
   # user account. Attempts to use the yielded service to make list requests and

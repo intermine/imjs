@@ -34,8 +34,58 @@ describe 'Static service properties:', ->
 
     it 'should support callbacks', (done) ->
       service.fetchVersion (err, v) ->
-        v.should.be.above 0 if v?
-        done(err)
+        return done err if err?
+        try
+          v.should.be.above 0 if v?
+          done()
+        catch e
+          done e
+
+  describe 'the release', ->
+    
+    promise = service.fetchRelease()
+
+    it 'should return a usable value', is_usable promise
+
+    it 'should resolve successfully', resolves promise
+
+    it 'should equal "test"', (done) ->
+      promise.then( (r) -> r.should.equal 'test' )
+             .then (-> done()), done
+
+    it 'should support callbacks', (done) ->
+      service.fetchRelease (err, r) ->
+        return done err if err?
+        try
+          r.should.equal 'test'
+          done()
+        catch e
+          done e
+
+  describe 'the classkeys', ->
+
+    promise = service.fetchClassKeys()
+
+    it 'should return a usable value', is_usable promise
+
+    it 'should resolve successfully', resolves promise
+
+    it 'should have the classes property', (done) ->
+      promise.then( (ck) -> ck.should.have.property 'Employee' )
+             .then (-> done()), done
+
+    it 'should have a keys for employee', (done) ->
+      promise.then( (ck) -> ck.Employee.should.have.lengthOf 1 )
+             .then (-> done()), done
+
+    it 'should support callbacks', (done) ->
+      service.fetchRelease (err, ck) ->
+        return done err if err?
+        try
+          ck.should.have.property 'classes' if m?
+          done()
+        catch e
+          done e
 
   describe 'the model', ->
 

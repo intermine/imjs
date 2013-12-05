@@ -4,6 +4,8 @@ should = require 'should'
 
 describe 'Service', ->
 
+  @slow 5000
+
   {service} = new Fixture()
   
   describe '#whoami()', ->

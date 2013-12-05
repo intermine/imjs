@@ -234,6 +234,8 @@
 
 }).call(this);
 
+},{}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -387,9 +389,7 @@
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
-},{}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -1252,28 +1252,8 @@ module.exports=require('zlU5Ni');
 
 },{"./util":14}],9:[function(require,module,exports){
 (function() {
-  var Parent, Promise;
 
-  Parent = require('promise');
-
-  module.exports = Promise = function(fn) {
-    if (!(this instanceof Promise)) {
-      return new Promise(fn);
-    }
-    return Parent.call(this, fn);
-  };
-
-  Promise.prototype = Object.create(Parent.prototype);
-
-  Promise.prototype.constructor = Promise;
-
-  Promise.prototype.fail = function(onError) {
-    return this.then(null, onError);
-  };
-
-  Promise.all = Parent.all;
-
-  Promise.from = Parent.from;
+  module.exports = require('promise');
 
 }).call(this);
 
@@ -3789,17 +3769,15 @@ module.exports=require('zlU5Ni');
     Service.prototype.login = function(name, password, cb) {
       var _this = this;
       return REQUIRES_VERSION(this, 9, function() {
-        var headers, service;
+        var headers;
         headers = {
           'Authorization': "Basic " + base64.encode("" + name + ":" + password)
         };
-        service = _this.connectAs(null);
-        return withCB(cb, service.get('user/token', {
-          headers: headers
-        }).then(get('token')).then(function(token) {
-          service.token = token;
-          return service;
-        }));
+        return withCB(cb, _this.logout().then(function(service) {
+          return service.get('user/token', {
+            headers: headers
+          });
+        }).then(get('token')).then(_this.connectAs));
       });
     };
 
