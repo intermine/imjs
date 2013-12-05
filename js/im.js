@@ -234,6 +234,8 @@
 
 }).call(this);
 
+},{}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -387,9 +389,7 @@
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
-},{}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -3083,7 +3083,9 @@ module.exports=require('zlU5Ni');
     opts = {
       type: 'GET',
       dataType: 'json',
-      format: 'json'
+      data: {
+        format: 'json'
+      }
     };
     promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : this.doReq(merge(opts, {
       url: this.root + path
