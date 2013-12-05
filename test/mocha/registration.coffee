@@ -34,9 +34,11 @@ describe 'Service#register', ->
     it 'should be able to deregister a user', eventually (s) ->
       accessToken = s.token
       tokP = s.getDeregistrationToken()
-      tokP.then((token) ->
-            token.secondsRemaining.should.be.above 0
-            s.deregister token.uuid)
+      checkTokenAndDeregister = (token) ->
+        token.secondsRemaining.should.be.above 0
+        s.deregister token.uuid
+
+      tokP.then(checkTokenAndDeregister)
           .then(-> s.fetchUser())
           .then(
             (-> throw new Error "Token is still valid" ),

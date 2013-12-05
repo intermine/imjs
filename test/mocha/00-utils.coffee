@@ -205,10 +205,10 @@ describe 'utils', ->
 
       it 'should have been rejected', (done) ->
         promise.then(
-                  ((res) -> done new Error("Expected failure, got #{ res }")),
-                  ((err) ->
-                    err.should.equal 'BAR'
-                    done()))
+          ((res) -> done new Error("Expected failure, got #{ res }")),
+          ((err) ->
+            err.should.equal 'BAR'
+            done()))
 
   describe 'the result of thenning a rejected promise', ->
 

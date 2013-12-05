@@ -32,7 +32,7 @@
   },
   "scripts": {
     "prepublish": "make",
-    "test": "grunt test"
+    "test": "make test"
   },
   "devDependencies": {
     "bower": "latest",
