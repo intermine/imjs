@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-pre - 2013-12-05 */
+/*! imjs - v3.0.0-beta - 2013-12-05 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -234,8 +234,6 @@
 
 }).call(this);
 
-},{}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -389,7 +387,9 @@ module.exports=require('zlU5Ni');
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -3078,13 +3078,16 @@ module.exports=require('zlU5Ni');
   };
 
   _get_or_fetch = function(propName, store, path, key, cb) {
-    var promise, root, useCache, value, _ref;
+    var opts, promise, root, useCache, value, _ref;
     root = this.root, useCache = this.useCache;
-    promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : this.doReq({
-      url: this.root + path,
+    opts = {
       type: 'GET',
-      dataType: 'json'
-    }).then(function(x) {
+      dataType: 'json',
+      format: 'json'
+    };
+    promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : this.doReq(merge(opts, {
+      url: this.root + path
+    })).then(function(x) {
       return store[root] = x[key];
     });
     return withCB(cb, promise);
@@ -6314,7 +6317,7 @@ if (typeof setImmediate === 'function') { // IE >= 10 & node.js >= 0.10
 },{"__browserify_process":18}],23:[function(require,module,exports){
 module.exports={
   "name": "imjs",
-  "version": "3.0.0-pre",
+  "version": "3.0.0-beta",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/index",
   "keywords": [
@@ -6346,7 +6349,7 @@ module.exports={
   },
   "scripts": {
     "prepublish": "make",
-    "test": "grunt test"
+    "test": "make test"
   },
   "devDependencies": {
     "bower": "latest",

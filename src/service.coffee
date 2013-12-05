@@ -93,10 +93,11 @@ DEFAULT_ERROR_HANDLER = (e) ->
 # @param [->] cb A callback that accepts this kind of thing. (optional)
 _get_or_fetch = (propName, store, path, key, cb) ->
   {root, useCache} = @
+  opts = type: 'GET', dataType: 'json', format: 'json'
   promise = @[propName] ?= if (useCache and value = store[root])
     success(value)
   else
-    @doReq(url: @root + path, type: 'GET', dataType: 'json').then (x) -> store[root] = x[key]
+    @doReq(merge opts, url: @root + path).then (x) -> store[root] = x[key]
 
   withCB cb, promise
 

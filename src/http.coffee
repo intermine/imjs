@@ -109,12 +109,14 @@ exports.doReq = (opts, iter) ->
       return promise
   else
     postdata = qs.stringify opts.data
+
   url = URL.parse(opts.url, true)
   url.method = opts.type
   url.port = url.port || 80
   url.headers =
     'User-Agent': USER_AGENT
     'Accept': ACCEPT_HEADER[opts.dataType]
+
   if url.method in ['GET', 'DELETE'] and postdata?.length
     url.path += '?' + postdata
   else
