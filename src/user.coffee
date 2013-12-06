@@ -6,8 +6,8 @@
 #
 # @author: Alex Kalderimis
 
-{withCB, get, isFunction, error}    = require './util'
-intermine  = exports
+{withCB, get, isFunction, any, error}    = require './util'
+intermine                                = exports
 
 # Simple utility to take the returned value from manageUserPreferences and
 # update the preferences property on this object.
@@ -58,8 +58,16 @@ class User
 
   refresh: (cb) => do_pref_req @, {}, 'GET', cb
 
-  getToken: (type = 'day', cb) ->
-    withCB cb, @service.get('user/token', {type}).then(get 'token')
+  getToken: (type = 'day', message, cb) ->
+    if not cb? and any [type, message], isFunction
+      if isFunction type
+        [type, message, cb] = [null, null, type]
+      else if isFunction message
+        [message, cb] = [null, message]
+    withCB cb, @service.get('user/token', {type, message}).then(get 'token')
+
+  fetchCurrentTokens: (cb) ->
+    withCB cb, @service.get('user/tokens').then(get 'tokens')
 
 intermine.User = User
 
