@@ -821,10 +821,11 @@ class Query
       clone.start = 0
     clone
 
-  getSortDirection: (path) ->
-    path = @adjustPath(path)
-    dir = so.direction for so in @sortOrder when (so.path is path)
-    return dir
+  getSortDirection: (sorted) ->
+    a = @adjustPath(sorted)
+    throw new Error("#{ sorted } is not in the query") unless @isInQuery(a) or @isRelevant(a)
+    so = utils.find @sortOrder, ({path}) -> a is path
+    so?.direction
 
   isOuterJoined: (path) ->
     path = @adjustPath(path)
@@ -858,9 +859,10 @@ class Query
     if not currentDirection?
       @addSortOrder(so)
     else if currentDirection isnt so.direction
-      for oe in @sortOrder when (oe.path is so.path)
-        oe.direction = so.direction
+      oe = utils.find @sortOrder, ({path}) -> path is so.path
+      oe.direction = so.direction
       @trigger 'change:sortorder', @sortOrder
+    return @
 
   addSortOrder: (so) ->
     @sortOrder.push @_parse_sort_order so
@@ -882,16 +884,13 @@ class Query
   addJoin: (join) ->
     if typeof join is 'string'
       join = {path: join, style: 'OUTER'}
-    join.path = @adjustPath(join.path)
-    join.style = join.style?.toUpperCase() ? join.style
-    unless join.style in Query.JOIN_STYLES
-      throw new Error "Invalid join style: #{ join.style }"
-    @joins[join.path] = join.style
-    @trigger 'set:join', join.path, join.style
+    return @setJoinStyle join.path, join.style
 
   setJoinStyle: (path, style = 'OUTER') ->
     path = @adjustPath(path)
     style = style.toUpperCase()
+    unless style in Query.JOIN_STYLES
+      throw new Error "Invalid join style: #{ style }"
     if @joins[path] isnt style
       @joins[path] = style
       @trigger 'change:joins', path: path, style: style

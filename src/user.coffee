@@ -58,7 +58,7 @@ class User
 
   refresh: (cb) => do_pref_req @, {}, 'GET', cb
 
-  getToken: (type = 'day', cb = null) ->
+  getToken: (type = 'day', cb) ->
     withCB cb, @service.get('user/token', {type}).then(get 'token')
 
 intermine.User = User
