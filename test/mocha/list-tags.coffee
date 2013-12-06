@@ -38,7 +38,7 @@ describe 'List', ->
     it 'should have updated the list itself', eventually (ret) ->
       list.tags.should.eql ret
 
-  describe '#fetchTags() after update', ->
+  describe '#fetchTags() following update', ->
 
     tags = ['test', 'mocha', 'addTags']
     list = null

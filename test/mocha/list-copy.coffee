@@ -1,4 +1,4 @@
-{prepare, after, eventually, always, clear} = require './lib/utils'
+{prepare, parallel, eventually, always, clear} = require './lib/utils'
 should = require 'should'
 Fixture = require './lib/fixture'
 {invoke, success} = Fixture.funcutils
@@ -8,7 +8,7 @@ describe 'List', ->
   {service} = new Fixture()
 
   @beforeAll always -> service.fetchLists().then (lists) ->
-    after (l.del() for l in lists when l.name.match(/_copy/) or l.hasTag('copy'))
+    parallel (l.del() for l in lists when l.name.match(/_copy/) or l.hasTag('copy'))
 
   @slow 400
 

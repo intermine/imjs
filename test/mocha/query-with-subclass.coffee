@@ -1,5 +1,5 @@
 Fixture                      = require './lib/fixture'
-{eventually, prepare, after} = require './lib/utils'
+{eventually, prepare, parallel} = require './lib/utils'
 
 describe 'Query', ->
 
@@ -29,7 +29,7 @@ describe 'Query', ->
         select: ['name']
         where: {'Employable': { isa: ['Contractor', 'CEO'] }}
 
-      @beforeAll prepare -> after (service.count q for q in [ceos, contractors, union])
+      @beforeAll prepare -> parallel (service.count q for q in [ceos, contractors, union])
 
       it 'ceos + contractors should = union', eventually ([a, b, c]) ->
         (a + b).should.equal c

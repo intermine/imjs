@@ -3,20 +3,22 @@ Promise = require 'promise'
 {funcutils: {error, invoke}} = require './fixture'
 
 clear = (service, name) -> () -> new Promise (resolve, reject) ->
-    eh = service.errorHandler # Fetch list logs errors, which we don't care about.
-    service.errorHandler = ->
-    replaceErrorHandler = ->
-      service.errorHandler = eh
-      resolve()
-    service.fetchList(name)
-           .then(invoke 'del')
-           .then(replaceErrorHandler, replaceErrorHandler)
+  eh = service.errorHandler # Fetch list logs errors, which we don't care about.
+  service.errorHandler = ->
+  replaceErrorHandler = ->
+    service.errorHandler = eh
+    resolve()
+  service.fetchList(name)
+         .then(invoke 'del')
+         .then(replaceErrorHandler, replaceErrorHandler)
 
 cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))
 
-after = (promises) ->
+after = (promises...) ->
   if promises?.length then Promise.all(promises) else Promise.from(true)
+
+parallel = Promise.all
 
 report = (done, promise) -> promise.done (-> done()), done
 
@@ -49,6 +51,7 @@ module.exports = {
   always,
   shouldFail,
   shouldBeRejected,
-  needs
+  needs,
+  parallel
 }
 

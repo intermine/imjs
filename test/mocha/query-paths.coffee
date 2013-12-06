@@ -133,3 +133,117 @@ describe 'Query#isOuterJoin', ->
     it 'should however return false', ->
       attempt().should.not.be.true
 
+describe 'Query#getSortDirection', ->
+
+  model = Model.load TESTMODEL.model
+  root = 'Employee'
+  select = ['name', 'department.name']
+  sortOrder = [['age', 'DESC'], ['name', 'ASC']]
+  where = {'address.address': 'foo', 'department.manager': {in: 'bad-manager-list'}}
+  joins = ['address']
+  query = new Query {model, root, select, where, joins, sortOrder}
+
+  describe 'direction of "age"', ->
+
+    direction = query.getSortDirection 'Employee.age'
+
+    it 'should be "DESC"', ->
+      direction.should.equal "DESC"
+
+  describe 'direction of "name"', ->
+
+    direction = query.getSortDirection 'Employee.name'
+
+    it 'should be "ASC"', ->
+      direction.should.equal "ASC"
+
+  describe 'direction of "age", short path', ->
+
+    direction = query.getSortDirection 'age'
+
+    it 'should be "DESC"', ->
+      direction.should.equal "DESC"
+
+  describe 'direction of "name", short path', ->
+
+    direction = query.getSortDirection 'name'
+
+    it 'should be "ASC"', ->
+      direction.should.equal "ASC"
+
+  describe 'the direction of "address.address"', ->
+    
+    direction = query.getSortDirection 'Employee.address.address'
+
+    it 'should not exist', ->
+      should.not.exist direction
+
+  describe 'Attempting to get the direction of nonsense', ->
+
+    attempt = -> query.getSortDirection 'Foo.bar'
+
+    it 'should throw a helpful error', ->
+      attempt.should.throwError /Foo.bar/
+
+  describe 'Attempting to get the direction of irrelevant path', ->
+
+    attempt = -> query.getSortDirection 'Employee.department.company.name'
+
+    it 'should throw a helpful error', ->
+      attempt.should.throwError /not in the query/
+
+describe 'Query#addOrSetSortOrder', ->
+
+  model = Model.load TESTMODEL.model
+  root = 'Employee'
+  select = ['name', 'department.name']
+  sortOrder = [['age', 'DESC'], ['name', 'ASC']]
+  where = {'address.address': 'foo', 'department.manager': {in: 'bad-manager-list'}}
+  joins = ['address']
+  query = new Query {model, root, select, where, joins, sortOrder}
+
+  describe 'change direction of "age"', ->
+
+    query.addOrSetSortOrder ['age', 'ASC']
+    direction = query.getSortDirection 'Employee.age'
+
+    it 'should have toggled the sort order', ->
+      direction.should.equal 'ASC'
+
+  describe 'change direction of "name"', ->
+
+    query.addOrSetSortOrder ['name', 'DESC']
+    direction = query.getSortDirection 'Employee.name'
+
+    it 'should have toggled the sort order', ->
+      direction.should.equal 'DESC'
+
+  describe 'add direction for address.address', ->
+
+    query.addOrSetSortOrder ['address.address', 'DESC']
+    direction = query.getSortDirection 'Employee.address.address'
+
+    it 'should have set the sort order', ->
+      direction.should.equal 'DESC'
+
+describe 'Query#setJoinStyle', ->
+
+  model = Model.load TESTMODEL.model
+  root = 'Employee'
+  select = ['name', 'department.name']
+  where = {'address.address': 'foo', 'department.manager': {in: 'bad-manager-list'}}
+
+  describe 'setting the default join style', ->
+    query = new Query {model, root, select, where}
+    query.setJoinStyle 'address'
+    styleOfAddress = query.joins['Employee.address']
+
+    it 'should now be an outer join', ->
+      styleOfAddress.should.equal 'OUTER'
+
+  describe 'attempting to add an invalid join style', ->
+    query = new Query {model, root, select, where}
+    attempt = -> query.setJoinStyle 'address', 'FUNKY'
+
+    it 'should throw a helpful error message', ->
+      attempt.should.throwError /Invalid join style/
