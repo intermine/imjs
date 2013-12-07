@@ -49,6 +49,38 @@ describe 'User#getToken', ->
         unless isNaN d.getTime() # issue with phantomjs
           d.getTime().should.be.above start
 
+    describe 'create a token using the callback api', ->
+
+      @afterAll always revokeAll
+      @beforeAll always revokeAll
+
+      it 'should be able to use the callback api', (done) ->
+        service.fetchUser (err, user) ->
+          return done err if err?
+          user.createToken (err, dayToken) ->
+            return done err if err?
+            try
+              should.exist dayToken
+            catch e
+              return done e
+            user.createToken 'once', (err, singleUseToken) ->
+              return done err if err?
+              try
+                should.exist singleUseToken
+                singleUseToken.should.not.equal dayToken
+              catch e
+                return done e
+              user.createToken 'perm', 'some message', (err, permToken) ->
+                return done err if err?
+                try
+                  should.exist permToken
+                  permToken.should.not.equal singleUseToken
+                  permToken.should.not.equal dayToken
+                  permToken.should.not.equal service.token
+                  done()
+                catch e
+                  done e
+
     describe 'create a couple of tokens', ->
 
       @afterAll always revokeAll
