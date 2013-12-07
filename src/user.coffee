@@ -58,7 +58,7 @@ class User
 
   refresh: (cb) => do_pref_req @, {}, 'GET', cb
 
-  getToken: (type = 'day', message, cb) ->
+  createToken: (type = 'day', message, cb) ->
     if not cb? and any [type, message], isFunction
       if isFunction type
         [type, message, cb] = [null, null, type]
@@ -68,6 +68,12 @@ class User
 
   fetchCurrentTokens: (cb) ->
     withCB cb, @service.get('user/tokens').then(get 'tokens')
+
+  revokeAllTokens: (cb) ->
+    withCB cb, @service.makeRequest('DELETE', 'user/tokens')
+
+  revokeToken: (token, cb) ->
+    withCB cb, @service.makeRequest('DELETE', "user/tokens/#{ token }")
 
 intermine.User = User
 
