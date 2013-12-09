@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-beta - 2013-12-05 */
+/*! imjs - v3.0.0-beta - 2013-12-09 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -235,8 +235,8 @@
 }).call(this);
 
 },{}],"./http":[function(require,module,exports){
-module.exports=require('j+v/Vf');
-},{}],"j+v/Vf":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
 
@@ -2417,17 +2417,18 @@ module.exports=require('j+v/Vf');
       return clone;
     };
 
-    Query.prototype.getSortDirection = function(path) {
-      var dir, so, _i, _len, _ref;
-      path = this.adjustPath(path);
-      _ref = this.sortOrder;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        so = _ref[_i];
-        if (so.path === path) {
-          dir = so.direction;
-        }
+    Query.prototype.getSortDirection = function(sorted) {
+      var a, so;
+      a = this.adjustPath(sorted);
+      if (!(this.isInQuery(a) || this.isRelevant(a))) {
+        throw new Error("" + sorted + " is not in the query");
       }
-      return dir;
+      so = utils.find(this.sortOrder, function(_arg) {
+        var path;
+        path = _arg.path;
+        return a === path;
+      });
+      return so != null ? so.direction : void 0;
     };
 
     Query.prototype.isOuterJoined = function(path) {
@@ -2492,21 +2493,21 @@ module.exports=require('j+v/Vf');
     };
 
     Query.prototype.addOrSetSortOrder = function(so) {
-      var currentDirection, oe, _i, _len, _ref;
+      var currentDirection, oe;
       so = this._parse_sort_order(so);
       currentDirection = this.getSortDirection(so.path);
       if (!(currentDirection != null)) {
-        return this.addSortOrder(so);
+        this.addSortOrder(so);
       } else if (currentDirection !== so.direction) {
-        _ref = this.sortOrder;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          oe = _ref[_i];
-          if (oe.path === so.path) {
-            oe.direction = so.direction;
-          }
-        }
-        return this.trigger('change:sortorder', this.sortOrder);
+        oe = utils.find(this.sortOrder, function(_arg) {
+          var path;
+          path = _arg.path;
+          return path === so.path;
+        });
+        oe.direction = so.direction;
+        this.trigger('change:sortorder', this.sortOrder);
       }
+      return this;
     };
 
     Query.prototype.addSortOrder = function(so) {
@@ -2548,20 +2549,13 @@ module.exports=require('j+v/Vf');
     };
 
     Query.prototype.addJoin = function(join) {
-      var _ref, _ref1, _ref2;
       if (typeof join === 'string') {
         join = {
           path: join,
           style: 'OUTER'
         };
       }
-      join.path = this.adjustPath(join.path);
-      join.style = (_ref = (_ref1 = join.style) != null ? _ref1.toUpperCase() : void 0) != null ? _ref : join.style;
-      if (_ref2 = join.style, __indexOf.call(Query.JOIN_STYLES, _ref2) < 0) {
-        throw new Error("Invalid join style: " + join.style);
-      }
-      this.joins[join.path] = join.style;
-      return this.trigger('set:join', join.path, join.style);
+      return this.setJoinStyle(join.path, join.style);
     };
 
     Query.prototype.setJoinStyle = function(path, style) {
@@ -2570,6 +2564,9 @@ module.exports=require('j+v/Vf');
       }
       path = this.adjustPath(path);
       style = style.toUpperCase();
+      if (__indexOf.call(Query.JOIN_STYLES, style) < 0) {
+        throw new Error("Invalid join style: " + style);
+      }
       if (this.joins[path] !== style) {
         this.joins[path] = style;
         this.trigger('change:joins', {
@@ -3859,7 +3856,7 @@ module.exports=require('j+v/Vf');
 
 }).call(this);
 
-},{"./base64":1,"./http":"j+v/Vf","./id-resolution-job":5,"./lists":6,"./model":7,"./promise":9,"./query":10,"./user":13,"./util":14,"./version":15}],12:[function(require,module,exports){
+},{"./base64":1,"./http":"zlU5Ni","./id-resolution-job":5,"./lists":6,"./model":7,"./promise":9,"./query":10,"./user":13,"./util":14,"./version":15}],12:[function(require,module,exports){
 (function() {
   var Table, merge, properties;
 
@@ -3925,10 +3922,10 @@ module.exports=require('j+v/Vf');
 
 },{}],13:[function(require,module,exports){
 (function() {
-  var User, do_pref_req, error, get, intermine, isFunction, withCB, _ref,
+  var User, any, do_pref_req, error, get, intermine, isFunction, withCB, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  _ref = require('./util'), withCB = _ref.withCB, get = _ref.get, isFunction = _ref.isFunction, error = _ref.error;
+  _ref = require('./util'), withCB = _ref.withCB, get = _ref.get, isFunction = _ref.isFunction, any = _ref.any, error = _ref.error;
 
   intermine = exports;
 
@@ -3994,16 +3991,34 @@ module.exports=require('j+v/Vf');
       return do_pref_req(this, {}, 'GET', cb);
     };
 
-    User.prototype.getToken = function(type, cb) {
+    User.prototype.createToken = function(type, message, cb) {
+      var _ref1, _ref2;
       if (type == null) {
         type = 'day';
       }
-      if (cb == null) {
-        cb = null;
+      if (!(cb != null) && any([type, message], isFunction)) {
+        if (isFunction(type)) {
+          _ref1 = [null, null, type], type = _ref1[0], message = _ref1[1], cb = _ref1[2];
+        } else if (isFunction(message)) {
+          _ref2 = [null, message], message = _ref2[0], cb = _ref2[1];
+        }
       }
       return withCB(cb, this.service.get('user/token', {
-        type: type
+        type: type,
+        message: message
       }).then(get('token')));
+    };
+
+    User.prototype.fetchCurrentTokens = function(cb) {
+      return withCB(cb, this.service.get('user/tokens').then(get('tokens')));
+    };
+
+    User.prototype.revokeAllTokens = function(cb) {
+      return withCB(cb, this.service.makeRequest('DELETE', 'user/tokens'));
+    };
+
+    User.prototype.revokeToken = function(token, cb) {
+      return withCB(cb, this.service.makeRequest('DELETE', "user/tokens/" + token));
     };
 
     return User;
@@ -5516,8 +5531,10 @@ noData = function() {
                 xhr.timeout = timeout;
             } else {
                 setTimeout(function() {
+                  if (cb) { // May have been deleted.
                     cb(new Error('download timeout'));
                     cb = null;
+                  }
                 }, timeout);
             }
         }
@@ -6319,6 +6336,7 @@ module.exports={
   "version": "3.0.0-beta",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/index",
+  "browser": "js/im.js",
   "keywords": [
     "javascript",
     "webservice",
@@ -6367,7 +6385,7 @@ module.exports={
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-mocha-phantomjs": "~0.3.1",
     "grunt-simple-mocha": "~0.4.0",
-    "httpinvoke": "~1.0.4",
+    "httpinvoke": "alexkalderimis/httpinvoke",
     "mocha": "latest",
     "oboe": "~1.11.0",
     "should": "latest",

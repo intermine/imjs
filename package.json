@@ -3,6 +3,7 @@
   "version": "3.0.0-beta",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/index",
+  "browser": "js/im.js",
   "keywords": [
     "javascript",
     "webservice",
