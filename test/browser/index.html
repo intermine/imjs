@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <!--[if lt IE 9]>
-            <script src="http://cdn.intermine.org/js/html5shiv/r29/html5.js"></script>
-        <![endif]-->
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta charset="utf-8">
+
         <title>IMJS Tests</title>
         <link rel="stylesheet" href="../../bower_components/mocha/mocha.css" type="text/css" media="screen"
               charset="utf-8">
         <!-- Dependencies -->
+        <!--[if lt IE 9]>
+            <script src="http://cdn.intermine.org/js/html5shiv/r29/html5.js"
+                    type="text/javascript"></script>
+            <script src="http://cdn.intermine.org/js/json3/3.2.2/json3.min.js"
+                    type="text/javascript"></script>
+        <![endif]-->
         <script src="../../bower_components/expect/expect.js" type="text/javascript"></script>
         <script src="../../bower_components/mocha/mocha.js"></script>
         <script src="../../bower_components/q/q.js"></script>
-        <script src="../../dist/im.js" type="text/javascript"></script>
+        <script src="../../js/im.js" type="text/javascript"></script>
     </head>
     <body>
         <!-- Browser Reporter Requires this Div -->
@@ -29,8 +33,10 @@
         </script>
 
         <script>
+            var host = ('localhost' || window.location.hostname);
+            var port = ('8080' || window.location.port);
             var service_args = {
-                root: 'http://localhost:8080/intermine-test',
+                root: 'http://' + host + ':' + port + '/intermine-test',
                 token: 'test-user-token',
                 errorHandler: function(err) {
                     if (!window.mochaPhantomJS) {

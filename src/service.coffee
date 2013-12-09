@@ -208,9 +208,11 @@ class Service
       url = @root + path
       errBack ?= @errorHandler
       data = utils.copy data
-      data.format = @getFormat(data.format)
-
-      dataType = if /json/.test(data.format) then 'json' else 'text'
+      dataType = @getFormat data.format
+      if version >= 14
+        delete data.format
+      else
+        data.format = dataType
 
       # IE requires that we tunnel DELETE and PUT
       unless http.supports method
@@ -688,9 +690,8 @@ class Service
   # @param [(Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) =>
-    deps = [@fetchModel(), @fetchSummaryFields()]
     buildQuery = ([model, summaryFields]) => new Query (merge options, {model, summaryFields}), @
-    withCB cb, Promise.all(deps).then(buildQuery)
+    withCB cb, Promise.all(@fetchModel(), @fetchSummaryFields()).then(buildQuery)
 
   # Perform operations on a user's preferences.
   #

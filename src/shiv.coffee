@@ -22,7 +22,11 @@ NOT_ENUM = [
 
 unless HAS_JSON
   # Try and fix this broken browser.
-  jQuery.getScript 'http://cdn.intermine.org/js/json3/3.2.2/json3.min.js'
+  script = document.createElement 'script'
+  script.src = 'http://cdn.intermine.org/js/json3/3.2.2/json3.min.js'
+  script.type = 'text/javascript'
+  head = document.getElementsByTagName('head')[0] # document.head is broken in ie9
+  head.appendChild script
 
 unless Object.keys?
   hasOwnProperty = Object.prototype.hasOwnProperty

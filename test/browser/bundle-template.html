@@ -28,8 +28,10 @@
         </script>
 
         <script>
+            var host = ('<%= args.host %>' || window.location.hostname);
+            var port = ('<%= args.port %>' || window.location.port);
             var service_args = {
-                root: '<%= args.root %>',
+                root: 'http://' + host + ':' + port + '/<%= args.path %>',
                 token: '<%= args.token %>',
                 errorHandler: function(err) {
                     if (!window.mochaPhantomJS) {
@@ -40,9 +42,8 @@
             };
         </script>
 
-
         <!-- Tests -->
-        <script src="<%= bundle.js %>"></script>
+        <script src="<%= load %>"></script>
         <script>
             if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
             else { mocha.run(); }

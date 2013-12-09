@@ -33,7 +33,7 @@ exports.supports = -> true
 streaming = (opts, resolve, reject) -> (resp) ->
   resp.pause() # Wait for handlers to attach...
   resp.on 'error', reject
-  if resp.statusCode isnt 200
+  if resp.statusCode? and resp.statusCode isnt 200
     errors = JSONStream.parse 'error'
     resp.pipe errors
     reject [resp.statusCode, errors]

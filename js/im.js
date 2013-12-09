@@ -8,7 +8,7 @@
 // The copyright is held by InterMine (www.intermine.org) and Alex Kalderimis (alex@intermine.org).
 
 (function() {
-  var HAS_CONSOLE, HAS_JSON, NOT_ENUM, hasDontEnumBug, hasOwnProperty, m, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
+  var HAS_CONSOLE, HAS_JSON, NOT_ENUM, hasDontEnumBug, hasOwnProperty, head, m, script, _fn, _i, _len, _ref, _ref1, _ref2, _ref3;
 
   HAS_CONSOLE = typeof console !== 'undefined';
 
@@ -17,7 +17,11 @@
   NOT_ENUM = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'];
 
   if (!HAS_JSON) {
-    jQuery.getScript('http://cdn.intermine.org/js/json3/3.2.2/json3.min.js');
+    script = document.createElement('script');
+    script.src = 'http://cdn.intermine.org/js/json3/3.2.2/json3.min.js';
+    script.type = 'text/javascript';
+    head = document.getElementsByTagName('head')[0];
+    head.appendChild(script);
   }
 
   if (Object.keys == null) {
@@ -220,6 +224,7 @@
   constants = exports;
 
   constants.ACCEPT_HEADER = {
+    'xml': 'application/xml',
     'json': 'application/json',
     'jsonobjects': 'application/json;type=objects',
     'jsontable': 'application/json;type=table',
@@ -333,8 +338,8 @@ module.exports=require('zlU5Ni');
 
   check = function(response) {
     var e, err, msg, sc, _ref1, _ref2;
-    sc = response.statusCode;
-    if ((200 <= sc && sc < 400)) {
+    sc = response != null ? response.statusCode : void 0;
+    if (((sc != null) && (200 <= sc && sc < 400)) || ((!(sc != null)) && ((response != null ? response.body : void 0) != null))) {
       return response.body;
     } else {
       msg = "Bad response: " + sc;
@@ -3261,8 +3266,12 @@ module.exports=require('zlU5Ni');
           errBack = _this.errorHandler;
         }
         data = utils.copy(data);
-        data.format = _this.getFormat(data.format);
-        dataType = /json/.test(data.format) ? 'json' : 'text';
+        dataType = _this.getFormat(data.format);
+        if (version >= 14) {
+          delete data.format;
+        } else {
+          data.format = dataType;
+        }
         if (!http.supports(method)) {
           _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
         }
@@ -3652,9 +3661,8 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.query = function(options, cb) {
-      var buildQuery, deps,
+      var buildQuery,
         _this = this;
-      deps = [this.fetchModel(), this.fetchSummaryFields()];
       buildQuery = function(_arg) {
         var model, summaryFields;
         model = _arg[0], summaryFields = _arg[1];
@@ -3663,7 +3671,7 @@ module.exports=require('zlU5Ni');
           summaryFields: summaryFields
         }), _this);
       };
-      return withCB(cb, Promise.all(deps).then(buildQuery));
+      return withCB(cb, Promise.all(this.fetchModel(), this.fetchSummaryFields()).then(buildQuery));
     };
 
     Service.prototype.manageUserPreferences = function(method, data, cb) {

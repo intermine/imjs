@@ -59,8 +59,8 @@ exports.iterReq = (method, path, format) -> (q, page = {}, cb, eb, onEnd) ->
   withCB eb, @makeRequest(method, path, req, null, true).then attach
 
 check = (response) ->
-  sc = response.statusCode
-  if 200 <= sc < 400
+  sc = response?.statusCode
+  if (sc? and 200 <= sc < 400) or ((not sc?) and response?.body?) #ie8 => no status code.
     response.body
   else
     msg = "Bad response: #{ sc }"

@@ -7,7 +7,8 @@ shouldHaveFailed = (done) -> (o) -> done new Error("Expected failure, got #{ o }
 describe 'parse failure', ->
 
   # An intentionally mis-configured service
-  service = Service.connect root: 'http://www.metabolicmine.org/the/return/of/meta'
+  # Currently using mockable for some of this - may need changing in the future.
+  service = Service.connect root: 'http://demo1503800.mockable.io'
 
   describe 'Attempt to fetch the Model', ->
 

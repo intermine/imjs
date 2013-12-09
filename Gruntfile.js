@@ -193,10 +193,14 @@ module.exports = function (grunt) {
             'build/http-browser.js:./http',
             'test/mocha/lib/utils.coffee:./lib/utils',
             'test/mocha/lib/fixture.coffee:./lib/fixture',
-            'test/mocha/lib/fixture.coffee:./fixture'
+            'test/mocha/lib/fixture.coffee:./fixture',
+            'node_modules/should/should.js:should'
           ],
           ignore: ['xmldom'],
-          noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js']
+          noParse: [
+            'node_modules/httpinvoke/httpinvoke-commonjs.js',
+            'node_modules/should/should.js'
+          ]
         }
       }
     },
@@ -250,91 +254,83 @@ module.exports = function (grunt) {
     global.should = require('should')
   })
 
-  grunt.registerTask(
-    'build-acceptance-index',
-    'Build a index.html page to run acceptance tests', function () {
-    var templ = grunt.file.read('test/browser/template.html', 'utf8')
-    var outf = 'test/browser/index.html'
-    var root = process.env.TESTMODEL_URL ||
-      grunt.option('root') ||
-      "http://localhost:8080/intermine-test"
+  function writeTestIndex(src, dest, options) {
+    var templ = grunt.file.read(src, 'utf8')
+    var outf = dest;
+    var host = getVar('host', null);
+    var port = getVar('port', null);
+    var load = getVar('load', null);
+    var path = getVar('path', 'intermine-test');
+    var tokn = getVar('token', 'test-user-token');
     var obj = {
+      args: {
+        host: host,
+        path: path,
+        port: port,
+        token: tokn
+      },
+      load: load,
       mocha: {
         css: "../../bower_components/mocha/mocha.css",
         js: "../../bower_components/mocha/mocha.js"
-      },
-      args: {
-        root: root,
-        token: "test-user-token"
       },
       expect: {
         js: "../../bower_components/expect/expect.js"
       },
       promise: {
         js: "../../bower_components/q/q.js"
-      },
-      imjs: "../../dist/im.js"
-    }
-    var processed = grunt.template.process(templ.toString(), {data: obj})
-    grunt.file.write(outf, processed)
-    grunt.log.writeln('Wrote ' + outf)
-  })
-
-  grunt.registerTask(
-    'build-bundle-test-index',
-    'Build a index.html page to run acceptance tests from browserified test bundle', function () {
-    var templ = grunt.file.read('test/browser/bundle-template.html', 'utf8');
-    var outf = 'test/browser/bundle-index.html';
-    var root = process.env.TESTMODEL_URL ||
-      grunt.option('root') ||
-      "http://localhost:8080/intermine-test";
-    var obj = {
-      mocha: {
-        css: "../../bower_components/mocha/mocha.css",
-        js: "../../bower_components/mocha/mocha.js"
-      },
-      args: {
-        root: root,
-        token: "test-user-token"
-      },
-      expect: {
-        js: "../../bower_components/expect/expect.js"
-      },
-      promise: {
-        js: "../../bower_components/q/q.js"
-      },
-      bundle: {
-        js: "mocha-test.js"
       }
     }
     var processed = grunt.template.process(templ.toString(), {data: obj})
     grunt.file.write(outf, processed)
     grunt.log.writeln('Wrote ' + outf)
+
+    function getVar(key, otherwise) {
+      return process.env['TESTMODEL_' + key.toUpperCase()] ||
+        grunt.option(key) ||
+        options[key] ||
+        otherwise;
+    }
+  }
+
+  grunt.registerTask(
+    'build-unit-test-suite',
+    'build the test suite loaded by phantom js', function () {
+    writeTestIndex('test/browser/bundle-template.html', 'test/browser/bundle-index.html', {
+      host: 'localhost',
+      port: '8080',
+      load: 'mocha-test.js'
+    })
+  })
+
+  grunt.registerTask(
+    'build-acceptance-index',
+    'Build a index.html page to run acceptance tests in the browser. Since by default this task generates an html file' +
+    ' that connects to a test server on the same host and port as the current browser location, the primary function' +
+    ' of this task is to generate a page that does not require cross-domain requests and enables ie8 to be tested.',
+    function () {
+    writeTestIndex('test/browser/template.html', 'test/browser/accept.html', {load: '../../js/im.js'})
+  })
+
+  grunt.registerTask(
+    'build-phantom-acceptance-index',
+    'Build a index.html page to run acceptance tests in phantomjs', function () {
+    writeTestIndex('test/browser/template.html', 'test/browser/index.html', {
+      host: 'localhost',
+      port: '8080',
+      load: '../../js/im.js'
+    })
   })
 
   grunt.registerTask(
     'build-static-acceptance-index',
-    'Build a index.html page to run acceptance tests', function () {
-    var templ = grunt.file.read('test/browser/template.html', 'utf8')
-    var outf = 'test/browser/acceptance.html'
-    var root = process.env.TESTMODEL_URL ||
-      grunt.option('root') ||
-      "http://localhost:8080/intermine-test"
-    var obj = {
-      mocha: {
-        css: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.css",
-        js: "http://cdn.intermine.org/js/mocha/1.8.1/mocha.js"
-      },
-      args: {
-        root: root,
-        token: grunt.option('token') || "test-user-token"
-      },
-      expect: "http://cdn.intermine.org/js/expect/latest/expect.js",
-      imjs: "http://ci.intermine.org/job/imjs/lastSuccessfulBuild/artifact/js/im.js"
-    }
-    var processed = grunt.template.process(templ.toString(), {data: obj})
-    grunt.file.write(outf, processed)
-    grunt.log.writeln('Wrote ' + outf)
+    'Build a index.html page to run acceptance tests as a static file', function () {
+    writeTestIndex('test/browser/template.html', 'test/browser/acceptance.html', {
+      host: 'demo.intermine.org',
+      port: '80',
+      path: 'testmine',
+      load: '../../js/im.js'
+    })
   })
 
   grunt.registerTask('docs', 'Generate API documentation', function () {
@@ -348,9 +344,14 @@ module.exports = function (grunt) {
   })
 
   grunt.registerTask('phantomjs', [
-    'build-acceptance-index',
-    'build-bundle-test-index',
+    'build-phantom-acceptance-index',
+    'build-unit-test-suite',
     'mocha_phantomjs'
+  ])
+
+  grunt.registerTask('browser-indices', [
+    'build-acceptance-index',
+    'build-static-acceptance-index'
   ])
 
   grunt.registerTask('test-node', 'Run tests in the nodejs VM', function () {
@@ -388,7 +389,16 @@ module.exports = function (grunt) {
 
   grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink'])
   grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit'])
-  grunt.registerTask('build', ['clean:build', 'compile', 'browserify', 'uglify', 'copy:dist', 'copy:version'])
+  grunt.registerTask('build', [
+    'clean:build',
+    'compile',
+    'browserify',
+    'uglify',
+    'copy:dist',
+    'copy:version',
+    'demo'
+  ])
+  grunt.registerTask('demo', ['browser-indices'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob'])
   grunt.registerTask('test', ['build', 'test-node', 'phantomjs'])
   grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])

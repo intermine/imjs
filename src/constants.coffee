@@ -4,6 +4,7 @@ constants = exports
 
 # The Accept headers that correspond to each data-type.
 constants.ACCEPT_HEADER =
+  'xml': 'application/xml'
   'json': 'application/json'
   'jsonobjects': 'application/json;type=objects'
   'jsontable': 'application/json;type=table'
