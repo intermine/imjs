@@ -279,7 +279,7 @@ module.exports=require('zlU5Ni');
   };
 
   exports.supports = function(x) {
-    if ((0 < IE_VERSION && IE_VERSION < 10) && x === 'PUT' || x === 'DELETE') {
+    if (((0 < IE_VERSION && IE_VERSION < 10)) && (x === 'PUT' || x === 'DELETE')) {
       return false;
     } else {
       return true;
@@ -4011,7 +4011,7 @@ module.exports=require('zlU5Ni');
           _ref2 = [null, message], message = _ref2[0], cb = _ref2[1];
         }
       }
-      return withCB(cb, this.service.get('user/token', {
+      return withCB(cb, this.service.post('user/tokens', {
         type: type,
         message: message
       }).then(get('token')));

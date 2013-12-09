@@ -64,7 +64,7 @@ class User
         [type, message, cb] = [null, null, type]
       else if isFunction message
         [message, cb] = [null, message]
-    withCB cb, @service.get('user/token', {type, message}).then(get 'token')
+    withCB cb, @service.post('user/tokens', {type, message}).then(get 'token')
 
   fetchCurrentTokens: (cb) ->
     withCB cb, @service.get('user/tokens').then(get 'tokens')

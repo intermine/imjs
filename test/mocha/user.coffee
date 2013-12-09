@@ -86,7 +86,7 @@ describe 'User#getToken', ->
       @afterAll always revokeAll
       @beforeAll always revokeAll
       @beforeAll prepare -> userPromise.then (user) ->
-        parallel(user.createToken('perm'), user.createToken('perm')).then ->
+        parallel(user.createToken('perm', 'A'), user.createToken('perm', 'B')).then ->
           user.fetchCurrentTokens()
 
       it 'should have created multiple tokens', eventually (tokens) ->
@@ -110,8 +110,9 @@ describe 'User#getToken', ->
       @afterAll always revokeAll
       @beforeAll always revokeAll
       @beforeAll prepare -> userPromise.then (user) ->
-        parallel(user.createToken('perm'), user.createToken('perm'))
-          .then( ([tokenA]) -> user.revokeToken tokenA )
+        ta = user.createToken 'perm', 'revoke one'
+        tb = user.createToken 'perm', 'revoke one'
+        parallel(ta, tb).then( ([tokenA]) -> user.revokeToken tokenA )
           .then -> user.fetchCurrentTokens()
 
       it 'should have created multiple tokens, and revoked one', eventually (tokens) ->

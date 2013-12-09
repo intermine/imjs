@@ -31,7 +31,7 @@ exports.getMethod = (x) ->
 # Whether or not this service supports the given method
 # The default implementation returns true for all inputs.
 exports.supports = (x) ->
-  if 0 < IE_VERSION < 10 and x is 'PUT' or x is 'DELETE'
+  if (0 < IE_VERSION < 10) and x in ['PUT', 'DELETE']
     false # IE's XDomainRequest object is awful.
   else
     true

@@ -64,6 +64,21 @@ describe('Acceptance', function() {
   describe('Data Requests', function() {
 
     var service = new Service(service_args);
+    this.beforeAll(function (done) {
+      var isDone = function () { done(); };
+      var deleting = service.fetchLists().then(deleteTempLists);
+
+      deleting.then(isDone, isDone);
+
+      function deleteTempLists(lists) {
+        lists.forEach(deleteIfTemp);
+      }
+      function deleteIfTemp(list) {
+        if (l.hasTag('temp') || /temp/.test(l.name)) {
+          l.del() 
+        }
+      }
+    });
 
     it('Should be able to count the employees', function(done) {
       service.count({select: ['id'], from: 'Employee'}).done(function(c) {
@@ -78,7 +93,8 @@ describe('Acceptance', function() {
         done();
       };
       service.fetchListsContaining({type: 'Employee', publicId: 'Brenda'})
-                      .then(onDone, done);
+             .then(onDone)
+             .then(null, done);
     });
 
 
