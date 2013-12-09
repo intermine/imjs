@@ -111,7 +111,7 @@ describe 'Service', ->
 
       {service, olderEmployees} = new Fixture()
 
-      it 'should fail', shouldFail -> service.rows olderEmployees, {timeout: 1}
+      it 'should fail', shouldFail -> service.rows olderEmployees, timeout: 1
 
     describe 'reasonable timeouts', ->
 
