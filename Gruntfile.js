@@ -188,7 +188,7 @@ module.exports = function (grunt) {
           'test/browser/mocha-test.js': ['test/mocha/*.coffee'],
         },
         options: {
-          transform: ['coffeeify'],
+          transform: ['coffeeify', 'envify'],
           alias: [
             'build/http-browser.js:./http',
             'test/mocha/lib/utils.coffee:./lib/utils',

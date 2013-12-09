@@ -57,6 +57,7 @@
     "oboe": "~1.11.0",
     "should": "latest",
     "coffeeify": "~0.5.2",
-    "grunt-jscoverage": "0.0.3"
+    "grunt-jscoverage": "0.0.3",
+    "envify": "~0.2.0"
   }
 }
