@@ -17,21 +17,6 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
-      options: {
-        banner: banner,
-        nonull: true,
-        process: processBuildFile
-      },
-      latest: {
-        src: grunt.file.readJSON('build-order.json'),
-        dest: 'js/im.js',
-      },
-      "in-version-dir": {
-        src: grunt.file.readJSON('build-order.json'),
-        dest: 'js/<%= pkg.version %>/im.js'
-      }
-    },
     uglify: {
       /*
       latest: {
@@ -236,11 +221,19 @@ module.exports = function (grunt) {
     }
   }
 
+  function injectVersion(file) {
+    var src, dest, temp, output;
+    src = dest = 'build/version.js';
+    temp = grunt.file.read(src);
+    output = grunt.template.process(temp);
+    grunt.file.write(dest, output, {encoding: 'utf8'});
+    grunt.log.writeln("Injected version");
+  }
+
   grunt.loadNpmTasks("grunt-jscoverage")
   grunt.loadNpmTasks('grunt-bump')
   grunt.loadNpmTasks('grunt-contrib-copy')
   grunt.loadNpmTasks('grunt-contrib-uglify')
-  grunt.loadNpmTasks('grunt-contrib-concat')
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-coffeelint')
   grunt.loadNpmTasks('grunt-simple-mocha')
@@ -292,6 +285,12 @@ module.exports = function (grunt) {
         otherwise;
     }
   }
+
+  grunt.registerTask(
+    '-inject-version',
+    'Inject the current version number into the build',
+    injectVersion
+  )
 
   grunt.registerTask(
     'build-unit-test-suite',
@@ -392,6 +391,7 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean:build',
     'compile',
+    '-inject-version',
     'browserify',
     'uglify',
     'copy:dist',

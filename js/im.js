@@ -4507,17 +4507,12 @@ module.exports=require('zlU5Ni');
 
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
-  var imjs, pkg;
 
-  imjs = exports;
-
-  pkg = require("../package.json");
-
-  imjs.VERSION = pkg.version;
+  exports.VERSION = '3.0.0-beta';
 
 }).call(this);
 
-},{"../package.json":23}],16:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function() {
   var DOMParser, sanitize;
 
@@ -6338,71 +6333,7 @@ if (typeof setImmediate === 'function') { // IE >= 10 & node.js >= 0.10
   module.exports = function(fn){ setTimeout(fn, 0) }
 }
 
-},{"__browserify_process":18}],23:[function(require,module,exports){
-module.exports={
-  "name": "imjs",
-  "version": "3.0.0-beta",
-  "description": "Client library for communication with InterMine web-services",
-  "main": "js/index",
-  "browser": "js/im.js",
-  "keywords": [
-    "javascript",
-    "webservice",
-    "InterMine",
-    "Bio-Informatics"
-  ],
-  "author": {
-    "name": "Alex Kalderimis",
-    "email": "alex@intermine.org",
-    "twitter": "alexkalderimis"
-  },
-  "license": "LGPL",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/alexkalderimis/imjs.git"
-  },
-  "dependencies": {
-    "JSONStream": "~0.7.1",
-    "promise": "~3.2.0",
-    "xmldom": "~0.1.16"
-  },
-  "engines": {
-    "node": ">= 0.8.0"
-  },
-  "directories": {
-    "tests": "test"
-  },
-  "scripts": {
-    "prepublish": "make",
-    "test": "make test"
-  },
-  "devDependencies": {
-    "bower": "latest",
-    "codo": "~1.6.0",
-    "coffee-script": "~1.3.3",
-    "grunt": "~0.4.1",
-    "grunt-browserify": "~1.2.11",
-    "grunt-bump": "0.0.11",
-    "grunt-cli": "~0.1.11",
-    "grunt-coffeelint": "0.0.7",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-copy": "~0.4.1",
-    "grunt-contrib-jshint": "~0.7.1",
-    "grunt-contrib-symlink": "~0.2.0",
-    "grunt-contrib-uglify": "~0.2.7",
-    "grunt-mocha-phantomjs": "~0.3.1",
-    "grunt-simple-mocha": "~0.4.0",
-    "httpinvoke": "alexkalderimis/httpinvoke",
-    "mocha": "latest",
-    "oboe": "~1.11.0",
-    "should": "latest",
-    "coffeeify": "~0.5.2",
-    "grunt-jscoverage": "0.0.3"
-  }
-}
-
-},{}]},{},[11])
+},{"__browserify_process":18}]},{},[11])
 (11)
 });
 ;
