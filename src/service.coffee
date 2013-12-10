@@ -523,9 +523,9 @@ class Service
 
   # Get the templates this user currently has access to.
   #
-  # @param [(Array<Object>) ->] cb A callback (optional).
-  # @return [Promise<Array<Object>>] A promise to yield an array of templates.
-  fetchTemplates: (cb) => withCB cb, @get(TEMPLATES_PATH).then(get 'templates')
+  # @param [(Error?, Array<Object>) ->] cb A callback (optional).
+  # @return [Promise<Object>] A promise to yield a mapping of templates.
+  fetchTemplates: (cb) => withCB cb, @get(TEMPLATES_PATH).then get 'templates'
 
   # Get the lists this user currently has access to.
   #
