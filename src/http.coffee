@@ -102,6 +102,9 @@ exports.doReq = (opts, iter) ->
   {promise, resolve, reject} = defer()
   promise.then null, opts.error
 
+  if not opts.url
+    throw new Error("No url provided in #{ JSON.stringify opts }")
+
   if typeof opts.data is 'string'
     postdata = opts.data
     if opts.type in [ 'GET', 'DELETE' ]
@@ -118,7 +121,8 @@ exports.doReq = (opts, iter) ->
     'Accept': ACCEPT_HEADER[opts.dataType]
 
   if url.method in ['GET', 'DELETE'] and postdata?.length
-    url.path += '?' + postdata
+    sep = if /\?/.test(url.path) then '&' else '?'
+    url.path += sep + postdata
   else
     url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
     url.headers['Content-Length'] = postdata.length

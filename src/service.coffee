@@ -66,6 +66,12 @@ TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
 PATH_VALUES_PATH = 'path/values'
 
+NO_AUTH = {}
+NO_AUTH[p] = true for p in [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH,
+  MODEL_PATH, SUMMARYFIELDS_PATH, QUICKSEARCH_PATH, PATH_VALUES_PATH]
+
+NEEDS_AUTH = (path) -> not NO_AUTH[path]
+
 # Pattern for detecting if URI has a protocol
 HAS_PROTOCOL = /^https?:\/\//i
 
@@ -96,7 +102,7 @@ _get_or_fetch = (propName, store, path, key, cb) ->
   promise = @[propName] ?= if (useCache and value = store[root])
     success(value)
   else
-    # Data only needed for old mines..., eventually remove?
+    # Data property only needed for old mines..., eventually remove!
     opts = type: 'GET', dataType: 'json', data: {format: 'json'}
     @doReq(merge opts, url: @root + path).then (x) -> store[root] = x[key]
 
@@ -199,49 +205,62 @@ class Service
   #
   # @return [Promise<Object>] A promise to yield a response object.
   makeRequest: (method = 'GET', path = '', data = {}, cb = (->), indiv = false) ->
-    @fetchVersion().then (version) =>
-      if utils.isArray cb
-        [cb, errBack] = cb
-      if utils.isArray data
-        data = utils.pairsToObj data
+    if utils.isArray cb
+      [cb, errBack] = cb
+    if utils.isArray data
+      data = utils.pairsToObj data
 
-      url = @root + path
-      errBack ?= @errorHandler
-      data = utils.copy data
-      dataType = @getFormat data.format
-      if version >= 14
-        delete data.format
+    errBack ?= @errorHandler
+    data = utils.copy data
+    dataType = @getFormat data.format
+
+    # IE requires that we tunnel DELETE and PUT
+    unless http.supports method
+      [data.method, method] = [method, http.getMethod(method)]
+
+    opts =
+      data: data,
+      dataType: dataType,
+      success: cb,
+      error: errBack,
+      path: path,
+      type: method
+
+    if 'headers' of data
+      opts.headers = utils.copy data.headers
+      delete opts.data.headers
+
+    if timeout = (data.timeout ? @timeout)
+      opts.timeout = timeout
+      delete data.timeout
+
+    @authorise(opts).then (authed) => @doReq authed, indiv
+
+  # TODO - when 14 is prevalent the fetchVersion can be removed.
+  authorise: (req) -> @fetchVersion().then (version) =>
+    opts = utils.copy req
+    opts.url = @root + opts.path
+    pathAdditions = []
+
+    if version < 14
+      if 'string' is typeof opts.data
+        pathAdditions.push ['format', opts.dataType]
       else
-        data.format = dataType
+        opts.data.format = opts.dataType
 
-      # IE requires that we tunnel DELETE and PUT
-      unless http.supports method
-        [data.method, method] = [method, http.getMethod(method)]
+    if @token? and NEEDS_AUTH req.path
+      if version >= 14
+        opts.headers ?= {}
+        opts.headers.Authorization = "Token #{ @token }"
+      else if 'string' is typeof opts.data
+        pathAdditions.push ['token', @token]
+      else
+        opts.data.token = @token
 
-      opts =
-        data: data,
-        dataType: dataType,
-        success: cb,
-        error: errBack,
-        url: url,
-        type: method
+    if pathAdditions.length
+      opts.url += '?' + to_query_string pathAdditions
 
-      if 'headers' of data
-        opts.headers = utils.copy data.headers
-        delete opts.data.headers
-
-      if @token?
-        if version >= 14
-          opts.headers ?= {}
-          opts.headers.Authorization = "Token #{ @token }"
-        else
-          opts.data.token = @token
-
-      if timeout = (data.timeout ? @timeout)
-        opts.timeout = timeout
-        delete data.timeout
-
-      return @doReq(opts, indiv)
+    return opts
 
   # Get the results of using a list enrichment widget to calculate
   # statistics for a set of objects. An enrichment calculation
@@ -506,7 +525,7 @@ class Service
   #
   # @param [(Array<Object>) ->] cb A callback (optional).
   # @return [Promise<Array<Object>>] A promise to yield an array of templates.
-  fetchTemplates: (cb) => @get(TEMPLATES_PATH).then(get 'templates').done(cb)
+  fetchTemplates: (cb) => withCB cb, @get(TEMPLATES_PATH).then(get 'templates')
 
   # Get the lists this user currently has access to.
   #

@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-beta - 2013-12-09 */
+/*! imjs - v3.0.0-beta - 2013-12-10 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -239,8 +239,6 @@
 
 }).call(this);
 
-},{}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -364,7 +362,7 @@ module.exports=require('zlU5Ni');
   };
 
   exports.doReq = function(opts, iter) {
-    var headers, isJSON, method, options, postdata, resp, url, _ref1, _ref2;
+    var headers, isJSON, method, options, postdata, resp, sep, url, _ref1, _ref2;
     method = opts.type;
     url = opts.url;
     headers = (_ref1 = opts.headers) != null ? _ref1 : {};
@@ -373,7 +371,8 @@ module.exports=require('zlU5Ni');
     if (opts.data != null) {
       postdata = typeof opts.data === 'string' ? opts.data : "application/json" === opts.contentType ? JSON.stringify(opts.data) : utils.querystring(opts.data);
       if ((method === 'GET' || method === 'DELETE') && (postdata != null ? postdata.length : void 0)) {
-        url += '?' + postdata;
+        sep = /\?/.test(url) ? '&' : '?';
+        url += sep + postdata;
         postdata = void 0;
       } else {
         headers['Content-Type'] = (opts.contentType || URLENC) + CHARSET;
@@ -400,7 +399,9 @@ module.exports=require('zlU5Ni');
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -1270,7 +1271,7 @@ module.exports=require('zlU5Ni');
 
 },{"promise":21}],10:[function(require,module,exports){
 (function() {
-  var BASIC_ATTRS, CODES, LIST_PIPE, Query, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
+  var BASIC_ATTRS, CODES, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, compose, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
@@ -1282,7 +1283,7 @@ module.exports=require('zlU5Ni');
 
   utils = require('./util');
 
-  withCB = utils.withCB, merge = utils.merge, pairsToObj = utils.pairsToObj, filter = utils.filter, partition = utils.partition, fold = utils.fold, take = utils.take, concatMap = utils.concatMap, id = utils.id, get = utils.get, invoke = utils.invoke;
+  REQUIRES_VERSION = utils.REQUIRES_VERSION, compose = utils.compose, withCB = utils.withCB, merge = utils.merge, pairsToObj = utils.pairsToObj, filter = utils.filter, partition = utils.partition, fold = utils.fold, take = utils.take, concatMap = utils.concatMap, id = utils.id, get = utils.get, invoke = utils.invoke;
 
   toQueryString = utils.querystring;
 
@@ -2775,23 +2776,62 @@ module.exports=require('zlU5Ni');
       return withCB(cb, this.service.post('query/code', req).then(this.service.VERIFIER).then(get('code')));
     };
 
+    Query.prototype.setName = function(name) {
+      this.name = name;
+    };
+
     Query.prototype.save = function(name, cb) {
-      var req, setName,
-        _this = this;
-      if (name != null) {
-        this.name = name;
-      }
-      req = {
-        data: this.toXML(),
-        contentType: "application/xml; charset=UTF-8",
-        url: this.service.root + 'query',
-        type: 'POST',
-        dataType: 'json'
-      };
-      setName = function(name) {
-        return _this.name = name;
-      };
-      return withCB(cb, setName, this.service.doReq(req).then(this.service.VERIFIER).then(get('name')));
+      var _this = this;
+      return REQUIRES_VERSION(this.service, 16, function() {
+        var req, _ref;
+        if (utils.isFunction(name)) {
+          _ref = [null, name], name = _ref[0], cb = _ref[1];
+        }
+        if (name != null) {
+          _this.setName(name);
+        }
+        req = {
+          type: 'PUT',
+          path: 'user/queries',
+          data: _this.toXML(),
+          contentType: 'application/xml',
+          dataType: 'json'
+        };
+        return withCB(cb, _this.service.authorise(req).then(function(authed) {
+          return _this.service.doReq(authed);
+        }).then(function(resp) {
+          return resp.queries;
+        }));
+      });
+    };
+
+    Query.prototype.store = function(name, cb) {
+      var _this = this;
+      return REQUIRES_VERSION(this.service, 16, function() {
+        var getName, req, updateName, _ref;
+        if (utils.isFunction(name)) {
+          _ref = [null, name], name = _ref[0], cb = _ref[1];
+        }
+        if (name != null) {
+          _this.setName(name);
+        }
+        updateName = function(err, name) {
+          if (err == null) {
+            return _this.setName(name);
+          }
+        };
+        getName = compose(get(_this.name), get('queries'));
+        req = {
+          type: 'POST',
+          path: 'user/queries',
+          data: _this.toXML(),
+          contentType: 'application/xml',
+          dataType: 'json'
+        };
+        return withCB(cb, updateName, _this.service.authorise(req).then(function(authed) {
+          return _this.service.doReq(authed);
+        }).then(getName));
+      });
     };
 
     Query.prototype.getCodeURI = function(lang) {
@@ -2988,7 +3028,7 @@ module.exports=require('zlU5Ni');
 
 },{"./util":14,"./xml":16}],11:[function(require,module,exports){
 (function() {
-  var CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, base64, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, set, success, to_query_string, utils, version, withCB, _get_or_fetch,
+  var CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, base64, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _len, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __slice = [].slice;
@@ -3073,6 +3113,18 @@ module.exports=require('zlU5Ni');
 
   PATH_VALUES_PATH = 'path/values';
 
+  NO_AUTH = {};
+
+  _ref = [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH, MODEL_PATH, SUMMARYFIELDS_PATH, QUICKSEARCH_PATH, PATH_VALUES_PATH];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    p = _ref[_i];
+    NO_AUTH[p] = true;
+  }
+
+  NEEDS_AUTH = function(path) {
+    return !NO_AUTH[path];
+  };
+
   HAS_PROTOCOL = /^https?:\/\//i;
 
   HAS_SUFFIX = /service\/?$/i;
@@ -3080,15 +3132,15 @@ module.exports=require('zlU5Ni');
   SUFFIX = "/service/";
 
   DEFAULT_ERROR_HANDLER = function(e) {
-    var f, _ref;
-    f = (_ref = console.error) != null ? _ref : console.log;
+    var f, _ref1;
+    f = (_ref1 = console.error) != null ? _ref1 : console.log;
     return f(e);
   };
 
   _get_or_fetch = function(propName, store, path, key, cb) {
-    var opts, promise, root, useCache, value, _ref;
+    var opts, promise, root, useCache, value, _ref1;
     root = this.root, useCache = this.useCache;
-    promise = (_ref = this[propName]) != null ? _ref : this[propName] = useCache && (value = store[root]) ? success(value) : (opts = {
+    promise = (_ref1 = this[propName]) != null ? _ref1 : this[propName] = useCache && (value = store[root]) ? success(value) : (opts = {
       type: 'GET',
       dataType: 'json',
       data: {
@@ -3125,15 +3177,15 @@ module.exports=require('zlU5Ni');
   };
 
   TO_NAMES = function(xs) {
-    var x, _i, _len, _ref, _ref1, _results;
+    var x, _j, _len1, _ref1, _ref2, _results;
     if (xs == null) {
       xs = [];
     }
-    _ref = (utils.isArray(xs) ? xs : [xs]);
+    _ref1 = (utils.isArray(xs) ? xs : [xs]);
     _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      x = _ref[_i];
-      _results.push((_ref1 = x.name) != null ? _ref1 : x);
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      x = _ref1[_j];
+      _results.push((_ref2 = x.name) != null ? _ref2 : x);
     }
     return _results;
   };
@@ -3144,7 +3196,7 @@ module.exports=require('zlU5Ni');
     Service.prototype.doReq = http.doReq;
 
     function Service(_arg) {
-      var noCache, _ref, _ref1,
+      var noCache, _ref1, _ref2,
         _this = this;
       this.root = _arg.root, this.token = _arg.token, this.errorHandler = _arg.errorHandler, this.DEBUG = _arg.DEBUG, this.help = _arg.help, noCache = _arg.noCache;
       this.connectAs = __bind(this.connectAs, this);
@@ -3213,10 +3265,10 @@ module.exports=require('zlU5Ni');
         this.root = this.root + SUFFIX;
       }
       this.root = this.root.replace(/ice$/, "ice/");
-      if ((_ref = this.errorHandler) == null) {
+      if ((_ref1 = this.errorHandler) == null) {
         this.errorHandler = DEFAULT_ERROR_HANDLER;
       }
-      if ((_ref1 = this.help) == null) {
+      if ((_ref2 = this.help) == null) {
         this.help = 'no.help.available@dev.null';
       }
       this.useCache = !noCache;
@@ -3237,7 +3289,8 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.makeRequest = function(method, path, data, cb, indiv) {
-      var _this = this;
+      var dataType, errBack, opts, timeout, _ref1, _ref2, _ref3,
+        _this = this;
       if (method == null) {
         method = 'GET';
       }
@@ -3253,55 +3306,71 @@ module.exports=require('zlU5Ni');
       if (indiv == null) {
         indiv = false;
       }
+      if (utils.isArray(cb)) {
+        _ref1 = cb, cb = _ref1[0], errBack = _ref1[1];
+      }
+      if (utils.isArray(data)) {
+        data = utils.pairsToObj(data);
+      }
+      if (errBack == null) {
+        errBack = this.errorHandler;
+      }
+      data = utils.copy(data);
+      dataType = this.getFormat(data.format);
+      if (!http.supports(method)) {
+        _ref2 = [method, http.getMethod(method)], data.method = _ref2[0], method = _ref2[1];
+      }
+      opts = {
+        data: data,
+        dataType: dataType,
+        success: cb,
+        error: errBack,
+        path: path,
+        type: method
+      };
+      if ('headers' in data) {
+        opts.headers = utils.copy(data.headers);
+        delete opts.data.headers;
+      }
+      if (timeout = (_ref3 = data.timeout) != null ? _ref3 : this.timeout) {
+        opts.timeout = timeout;
+        delete data.timeout;
+      }
+      return this.authorise(opts).then(function(authed) {
+        return _this.doReq(authed, indiv);
+      });
+    };
+
+    Service.prototype.authorise = function(req) {
+      var _this = this;
       return this.fetchVersion().then(function(version) {
-        var dataType, errBack, opts, timeout, url, _ref, _ref1, _ref2, _ref3;
-        if (utils.isArray(cb)) {
-          _ref = cb, cb = _ref[0], errBack = _ref[1];
+        var opts, pathAdditions, _ref1;
+        opts = utils.copy(req);
+        opts.url = _this.root + opts.path;
+        pathAdditions = [];
+        if (version < 14) {
+          if ('string' === typeof opts.data) {
+            pathAdditions.push(['format', opts.dataType]);
+          } else {
+            opts.data.format = opts.dataType;
+          }
         }
-        if (utils.isArray(data)) {
-          data = utils.pairsToObj(data);
-        }
-        url = _this.root + path;
-        if (errBack == null) {
-          errBack = _this.errorHandler;
-        }
-        data = utils.copy(data);
-        dataType = _this.getFormat(data.format);
-        if (version >= 14) {
-          delete data.format;
-        } else {
-          data.format = dataType;
-        }
-        if (!http.supports(method)) {
-          _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
-        }
-        opts = {
-          data: data,
-          dataType: dataType,
-          success: cb,
-          error: errBack,
-          url: url,
-          type: method
-        };
-        if ('headers' in data) {
-          opts.headers = utils.copy(data.headers);
-          delete opts.data.headers;
-        }
-        if (_this.token != null) {
+        if ((_this.token != null) && NEEDS_AUTH(req.path)) {
           if (version >= 14) {
-            if ((_ref2 = opts.headers) == null) {
+            if ((_ref1 = opts.headers) == null) {
               opts.headers = {};
             }
             opts.headers.Authorization = "Token " + _this.token;
+          } else if ('string' === typeof opts.data) {
+            pathAdditions.push(['token', _this.token]);
           } else {
             opts.data.token = _this.token;
           }
         }
-        if (timeout = (_ref3 = data.timeout) != null ? _ref3 : _this.timeout) {
-          opts.timeout = timeout;
-          delete data.timeout;
+        if (pathAdditions.length) {
+          opts.url += '?' + to_query_string(pathAdditions);
         }
-        return _this.doReq(opts, indiv);
+        return opts;
       });
     };
 
@@ -3326,9 +3395,9 @@ module.exports=require('zlU5Ni');
         cb = (function() {});
       }
       return REQUIRES_VERSION(this, 9, function() {
-        var k, req, v, _ref;
+        var k, req, v, _ref1;
         if (utils.isFunction(options)) {
-          _ref = [options, {}], cb = _ref[0], options = _ref[1];
+          _ref1 = [options, {}], cb = _ref1[0], options = _ref1[1];
         }
         if (typeof options === 'string') {
           req = {
@@ -3351,7 +3420,7 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.count = function(q, cb) {
-      var p, req;
+      var req;
       if (cb == null) {
         cb = (function() {});
       }
@@ -3372,9 +3441,9 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.lookup = function(type, term, context, cb) {
-      var _ref;
+      var _ref1;
       if (utils.isFunction(context)) {
-        _ref = [null, context], context = _ref[0], cb = _ref[1];
+        _ref1 = [null, context], context = _ref1[0], cb = _ref1[1];
       }
       return withCB(cb, this.query({
         from: type,
@@ -3384,9 +3453,9 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.find = function(type, term, context, cb) {
-      var _ref;
+      var _ref1;
       if (utils.isFunction(context)) {
-        _ref = [null, context], context = _ref[0], cb = _ref[1];
+        _ref1 = [null, context], context = _ref1[0], cb = _ref1[1];
       }
       return withCB(cb, this.lookup(type, term, context).then(function(found) {
         if (!(found != null) || found.length === 0) {
@@ -3420,13 +3489,13 @@ module.exports=require('zlU5Ni');
         typeConstraints = {};
       }
       return REQUIRES_VERSION(this, 6, function() {
-        var wanted, _pathValues, _ref, _ref1;
+        var wanted, _pathValues, _ref1, _ref2;
         if (typeof typeConstraints === 'string') {
           wanted = typeConstraints;
           typeConstraints = {};
         }
         if (utils.isFunction(typeConstraints)) {
-          _ref = [cb, typeConstraints], typeConstraints = _ref[0], cb = _ref[1];
+          _ref1 = [cb, typeConstraints], typeConstraints = _ref1[0], cb = _ref1[1];
         }
         if (wanted !== 'count') {
           wanted = 'results';
@@ -3442,7 +3511,7 @@ module.exports=require('zlU5Ni');
           return _this.post(PATH_VALUES_PATH, req).then(get(wanted));
         };
         try {
-          return withCB(cb, _this.fetchModel().then(invoke('makePath', path, (_ref1 = path.subclasses) != null ? _ref1 : typeConstraints)).then(_pathValues));
+          return withCB(cb, _this.fetchModel().then(invoke('makePath', path, (_ref2 = path.subclasses) != null ? _ref2 : typeConstraints)).then(_pathValues));
         } catch (e) {
           return error(e);
         }
@@ -3450,7 +3519,7 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.doPagedRequest = function(q, path, page, format, cb) {
-      var req, _ref,
+      var req, _ref1,
         _this = this;
       if (page == null) {
         page = {};
@@ -3460,7 +3529,7 @@ module.exports=require('zlU5Ni');
       }
       if (q.toXML != null) {
         if (utils.isFunction(page)) {
-          _ref = [page, {}], cb = _ref[0], page = _ref[1];
+          _ref1 = [page, {}], cb = _ref1[0], page = _ref1[1];
         }
         req = merge(page, {
           query: q.toXML(),
@@ -3487,10 +3556,10 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.values = function(q, opts, cb) {
-      var resp, _ref,
+      var resp, _ref1,
         _this = this;
       if (utils.isFunction(opts)) {
-        _ref = [opts, cb], cb = _ref[0], opts = _ref[1];
+        _ref1 = [opts, cb], cb = _ref1[0], opts = _ref1[1];
       }
       resp = !(q != null) ? error("No query term supplied") : (q.descriptors != null) || typeof q === 'string' ? this.pathValues(q, opts).then(map(get('value'))) : q.toXML != null ? q.views.length !== 1 ? error("Expected one column, got " + q.views.length) : this.rows(q, opts).then(map(get(0))) : this.query(q).then(function(query) {
         return _this.values(query, opts);
@@ -3503,7 +3572,7 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.fetchTemplates = function(cb) {
-      return this.get(TEMPLATES_PATH).then(get('templates')).done(cb);
+      return withCB(cb, this.get(TEMPLATES_PATH).then(get('templates')));
     };
 
     Service.prototype.fetchLists = function(cb) {
@@ -3521,10 +3590,10 @@ module.exports=require('zlU5Ni');
       return this.fetchVersion().then(function(v) {
         var fn;
         return withCB(cb, name && v < 13 ? error("Finding lists by name on the server requires version 13. This is only " + v) : (fn = function(ls) {
-          var data, _i, _len, _results;
+          var data, _j, _len1, _results;
           _results = [];
-          for (_i = 0, _len = ls.length; _i < _len; _i++) {
-            data = ls[_i];
+          for (_j = 0, _len1 = ls.length; _j < _len1; _j++) {
+            data = ls[_j];
             _results.push(new List(data, _this));
           }
           return _results;
@@ -3545,10 +3614,10 @@ module.exports=require('zlU5Ni');
       var fn,
         _this = this;
       fn = function(xs) {
-        var x, _i, _len, _results;
+        var x, _j, _len1, _results;
         _results = [];
-        for (_i = 0, _len = xs.length; _i < _len; _i++) {
-          x = xs[_i];
+        for (_j = 0, _len1 = xs.length; _j < _len1; _j++) {
+          x = xs[_j];
           _results.push(new List(x, _this));
         }
         return _results;
@@ -3557,16 +3626,16 @@ module.exports=require('zlU5Ni');
     };
 
     Service.prototype.combineLists = function(operation, options, cb) {
-      var description, lists, name, req, tags, _ref, _ref1;
-      _ref = merge({
+      var description, lists, name, req, tags, _ref1, _ref2;
+      _ref1 = merge({
         lists: [],
         tags: []
-      }, options), name = _ref.name, lists = _ref.lists, tags = _ref.tags, description = _ref.description;
+      }, options), name = _ref1.name, lists = _ref1.lists, tags = _ref1.tags, description = _ref1.description;
       req = {
         name: name,
         description: description
       };
-      if ((_ref1 = req.description) == null) {
+      if ((_ref2 = req.description) == null) {
         req.description = "" + operation + " of " + (lists.join(', '));
       }
       req.tags = tags.join(';');
@@ -3633,8 +3702,8 @@ module.exports=require('zlU5Ni');
     Service.prototype.fetchWidgetMap = function(cb) {
       var _this = this;
       return REQUIRES_VERSION(this, 8, function() {
-        var _ref;
-        return withCB(cb, ((_ref = _this.__wmap__) != null ? _ref : _this.__wmap__ = _this.fetchWidgets().then(toMapByName)));
+        var _ref1;
+        return withCB(cb, ((_ref1 = _this.__wmap__) != null ? _ref1 : _this.__wmap__ = _this.fetchWidgets().then(toMapByName)));
       });
     };
 

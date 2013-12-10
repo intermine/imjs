@@ -94,7 +94,8 @@ exports.doReq = (opts, iter) ->
       utils.querystring opts.data
 
     if method in ['GET', 'DELETE'] and postdata?.length
-      url += '?' + postdata
+      sep = if /\?/.test(url) then '&' else '?'
+      url += sep + postdata
       postdata = undefined
     else
       headers['Content-Type'] = (opts.contentType or URLENC) + CHARSET

@@ -12,7 +12,7 @@ intermine       = exports
 intermine.xml   = require('./xml')
 utils           = require './util'
 
-{withCB, merge, pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = utils
+{REQUIRES_VERSION, compose, withCB, merge, pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = utils
 toQueryString   = utils.querystring
 
 get_canonical_op = (orig) ->
@@ -970,17 +970,39 @@ class Query
       lang: lang
     withCB cb, @service.post('query/code', req).then(@service.VERIFIER).then(get 'code')
 
-  # Save a query to the server, with the name given.
-  save: (name, cb) ->
-    @name = name if name?
+  setName: (@name) ->
+
+  # Save a query to the server, overwriting any query of the same name.
+  save: (name, cb) -> REQUIRES_VERSION @service, 16, =>
+    if utils.isFunction name
+      [name, cb] = [null, name]
+    @setName name if name?
     req =
+      type: 'PUT'
+      path: 'user/queries'
       data: @toXML()
-      contentType: "application/xml; charset=UTF-8"
-      url: @service.root + 'query'
-      type: 'POST'
+      contentType: 'application/xml'
       dataType: 'json'
-    setName = (name) => @name = name
-    withCB cb, setName, @service.doReq(req).then(@service.VERIFIER).then(get 'name')
+    withCB cb, @service.authorise(req)
+                       .then((authed) => @service.doReq authed)
+                       .then((resp) -> resp.queries)
+
+  # Store this query for the first time, avoiding name collisions.
+  store: (name, cb) -> REQUIRES_VERSION @service, 16, =>
+    if utils.isFunction name
+      [name, cb] = [null, name]
+    @setName name if name?
+    updateName = (err, name) => @setName(name) unless err?
+    getName = compose (get @name), (get 'queries')
+    req =
+      type: 'POST'
+      path: 'user/queries'
+      data: @toXML()
+      contentType: 'application/xml'
+      dataType: 'json'
+    withCB cb, updateName, @service.authorise(req)
+                                   .then((authed) => @service.doReq authed)
+                                   .then(getName)
 
   # TODO: saveAsTemplate()
 
