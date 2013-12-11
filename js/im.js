@@ -1271,7 +1271,7 @@ module.exports=require('zlU5Ni');
 
 },{"promise":21}],10:[function(require,module,exports){
 (function() {
-  var BASIC_ATTRS, CODES, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, compose, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, pairsToObj, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, take, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
+  var BASIC_ATTRS, CODES, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
@@ -1283,7 +1283,7 @@ module.exports=require('zlU5Ni');
 
   utils = require('./util');
 
-  REQUIRES_VERSION = utils.REQUIRES_VERSION, compose = utils.compose, withCB = utils.withCB, merge = utils.merge, pairsToObj = utils.pairsToObj, filter = utils.filter, partition = utils.partition, fold = utils.fold, take = utils.take, concatMap = utils.concatMap, id = utils.id, get = utils.get, invoke = utils.invoke;
+  REQUIRES_VERSION = utils.REQUIRES_VERSION, withCB = utils.withCB, merge = utils.merge, filter = utils.filter, partition = utils.partition, fold = utils.fold, concatMap = utils.concatMap, id = utils.id, get = utils.get, invoke = utils.invoke;
 
   toQueryString = utils.querystring;
 
@@ -1751,7 +1751,7 @@ module.exports=require('zlU5Ni');
       }
       pathOf = xmlAttr('path');
       styleOf = xmlAttr('style');
-      q = pairsToObj(toAttrPairs(query, qAttrs));
+      q = utils.pairsToObj(toAttrPairs(query, qAttrs));
       q.view = q.view.split(/\s+/);
       q.sortOrder = stringToSortOrder(q.sortOrder);
       q.joins = (function() {
@@ -1774,7 +1774,7 @@ module.exports=require('zlU5Ni');
           con = _ref[_i];
           _results.push((function(con) {
             var c, tn, v, values, x;
-            c = pairsToObj(toAttrPairs(con, cAttrs));
+            c = utils.pairsToObj(toAttrPairs(con, cAttrs));
             if (c.ids != null) {
               c.ids = (function() {
                 var _j, _len1, _ref1, _results1;
@@ -1851,7 +1851,7 @@ module.exports=require('zlU5Ni');
       this.views = [];
       this.joins = {};
       this.displayNames = utils.copy((_ref = (_ref1 = properties.displayNames) != null ? _ref1 : properties.aliases) != null ? _ref : {});
-      _ref2 = ['name', 'title', 'comment', 'description'];
+      _ref2 = ['name', 'title', 'comment', 'description', 'type'];
       for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
         prop = _ref2[_i];
         if (properties[prop] != null) {
@@ -2086,7 +2086,7 @@ module.exports=require('zlU5Ni');
       return [c.path, c.type];
     };
 
-    scFold = utils.compose(pairsToObj, utils.map(toPathAndType), filter(get('type')));
+    scFold = utils.compose(utils.pairsToObj, utils.map(toPathAndType), filter(get('type')));
 
     Query.prototype.getSubclasses = function() {
       return scFold(this.constraints);
@@ -2820,7 +2820,7 @@ module.exports=require('zlU5Ni');
             return _this.setName(name);
           }
         };
-        getName = compose(get(_this.name), get('queries'));
+        getName = utils.compose(get(_this.name), get('queries'));
         req = {
           type: 'POST',
           path: 'user/queries',
@@ -2831,6 +2831,32 @@ module.exports=require('zlU5Ni');
         return withCB(cb, updateName, _this.service.authorise(req).then(function(authed) {
           return _this.service.doReq(authed);
         }).then(getName));
+      });
+    };
+
+    Query.prototype.saveAsTemplate = function(name, cb) {
+      var _this = this;
+      return REQUIRES_VERSION(this.service, 16, function() {
+        var req, _ref;
+        if (utils.isFunction(name)) {
+          _ref = [null, name], name = _ref[0], cb = _ref[1];
+        }
+        if (name != null) {
+          _this.setName(name);
+        }
+        if (!_this.name) {
+          throw new Error("Templates must have a name");
+        }
+        req = {
+          type: 'POST',
+          path: 'templates',
+          data: "<template " + (conAttrs(_this, ['name', 'title', 'comment'])) + ">" + (_this.toXML()) + "</template>",
+          contentType: 'application/xml',
+          dataType: 'json'
+        };
+        return withCB(cb, _this.service.authorise(req).then(function(authed) {
+          return _this.service.doReq(authed);
+        }));
       });
     };
 
@@ -2883,7 +2909,7 @@ module.exports=require('zlU5Ni');
           return p.isa(t);
         });
       };
-      toRun.views = take(n)((function() {
+      toRun.views = utils.take(n)((function() {
         var _i, _len, _ref, _results;
         _ref = this.getViewNodes();
         _results = [];
@@ -3191,7 +3217,7 @@ module.exports=require('zlU5Ni');
   };
 
   Service = (function() {
-    var FIVE_MIN, getNewUserToken, toMapByName;
+    var FIVE_MIN, checkNameParam, getNewUserToken, loadQ, toMapByName;
 
     Service.prototype.doReq = http.doReq;
 
@@ -3204,6 +3230,10 @@ module.exports=require('zlU5Ni');
       this.createList = __bind(this.createList, this);
 
       this.resolveIds = __bind(this.resolveIds, this);
+
+      this.templateQuery = __bind(this.templateQuery, this);
+
+      this.savedQuery = __bind(this.savedQuery, this);
 
       this.query = __bind(this.query, this);
 
@@ -3741,6 +3771,47 @@ module.exports=require('zlU5Ni');
         }), _this);
       };
       return withCB(cb, Promise.all(this.fetchModel(), this.fetchSummaryFields()).then(buildQuery));
+    };
+
+    loadQ = function(service, name) {
+      return function(q) {
+        if (!q) {
+          return error("No query found called " + name);
+        }
+        return service.query(q);
+      };
+    };
+
+    checkNameParam = function(name) {
+      if (name) {
+        if ('string' === typeof name) {
+          return success();
+        } else {
+          return error("Name must be a string");
+        }
+      } else {
+        return error("Name not provided");
+      }
+    };
+
+    Service.prototype.savedQuery = function(name, cb) {
+      var _this = this;
+      return REQUIRES_VERSION(this, 16, function() {
+        return checkNameParam(name).then(function() {
+          return withCB(cb, _this.get('user/queries', {
+            filter: name
+          }).then(function(r) {
+            return r.queries[name];
+          }).then(loadQ(_this, name)));
+        });
+      });
+    };
+
+    Service.prototype.templateQuery = function(name, cb) {
+      var _this = this;
+      return checkNameParam(name).then(function() {
+        return withCB(cb, _this.fetchTemplates().then(get(name)).then(set('type', 'TEMPLATE')).then(loadQ(_this, name)));
+      });
     };
 
     Service.prototype.manageUserPreferences = function(method, data, cb) {
