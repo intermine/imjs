@@ -52,12 +52,12 @@
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-mocha-phantomjs": "~0.3.1",
     "grunt-simple-mocha": "~0.4.0",
-    "httpinvoke": "alexkalderimis/httpinvoke",
     "mocha": "latest",
     "oboe": "~1.11.0",
     "should": "latest",
     "coffeeify": "~0.5.2",
     "grunt-jscoverage": "0.0.3",
-    "envify": "~0.2.0"
+    "envify": "~0.2.0",
+    "httpinvoke": "~1.1.3"
   }
 }
