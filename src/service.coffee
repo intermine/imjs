@@ -706,11 +706,37 @@ class Service
   #
   # @param [Object] options The JSON representation of the query. See {Query#constructor}
   #   for more information on the structure of these options.
-  # @param [(Query) ->] cb An optional callback to be called when the query is made.
+  # @param [(Error?, Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) =>
     buildQuery = ([model, summaryFields]) => new Query (merge options, {model, summaryFields}), @
     withCB cb, Promise.all(@fetchModel(), @fetchSummaryFields()).then(buildQuery)
+
+  loadQ = (service, name) -> (q) ->
+    return error "No query found called #{ name }" unless q
+    service.query q
+
+  checkNameParam = (name) ->
+    if name
+      if ('string' is typeof name) then success() else error "Name must be a string"
+    else
+      error "Name not provided"
+
+  # Load a saved query by name.
+  #
+  # @param [String] name The name of the query.
+  # @param [(Error?, Query) ->] cb An optional node-style callback.
+  # @return [Promise<Query>] A promise to yield a query.
+  savedQuery: (name, cb) => REQUIRES_VERSION @, 16, => checkNameParam(name).then =>
+    withCB cb, @get('user/queries', filter: name).then((r) -> r.queries[name]).then loadQ @, name
+
+  # Load a template query by name.
+  #
+  # @param [String] name The name of the template
+  # @param [(Error?, Query) ->] cb An optional node-style callback.
+  # @return [Promise<Query>] A promise to return a query.
+  templateQuery: (name, cb) => checkNameParam(name).then =>
+    withCB cb, @fetchTemplates().then(get name).then(set 'type', 'TEMPLATE').then loadQ @, name
 
   # Perform operations on a user's preferences.
   #

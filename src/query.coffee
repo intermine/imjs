@@ -12,7 +12,7 @@ intermine       = exports
 intermine.xml   = require('./xml')
 utils           = require './util'
 
-{REQUIRES_VERSION, compose, withCB, merge, pairsToObj, filter, partition, fold, take, concatMap, id, get, invoke} = utils
+{REQUIRES_VERSION, withCB, merge, filter, partition, fold, concatMap, id, get, invoke} = utils
 toQueryString   = utils.querystring
 
 get_canonical_op = (orig) ->
@@ -399,12 +399,12 @@ class Query
     pathOf = xmlAttr 'path'
     styleOf = xmlAttr 'style'
 
-    q = pairsToObj toAttrPairs query, qAttrs
+    q = utils.pairsToObj toAttrPairs query, qAttrs
     q.view = q.view.split /\s+/
     q.sortOrder = stringToSortOrder q.sortOrder
     q.joins = (pathOf j for j in kids(query, 'join') when styleOf(j) is 'OUTER')
     q.constraints = for con in kids(query, 'constraint') then do (con) ->
-      c = pairsToObj toAttrPairs con, cAttrs
+      c = utils.pairsToObj toAttrPairs con, cAttrs
       c.ids = (parseInt(x, 10) for x in c.ids.split(',')) if c.ids?
       values = kids(con, 'value')
       if values.length
@@ -453,7 +453,7 @@ class Query
     @displayNames = utils.copy (properties.displayNames ? properties.aliases ? {})
 
     # Copy over name, title, etc
-    for prop in ['name', 'title', 'comment', 'description'] when properties[prop]?
+    for prop in ['name', 'title', 'comment', 'description', 'type'] when properties[prop]?
       @[prop] = properties[prop]
 
     @service = service ? {}
@@ -570,7 +570,7 @@ class Query
   # Get the mapping from path to class-name that is defined by the
   # subtype constraints.
   toPathAndType = (c) -> [c.path, c.type]
-  scFold = utils.compose pairsToObj, utils.map(toPathAndType), filter get 'type'
+  scFold = utils.compose utils.pairsToObj, utils.map(toPathAndType), filter get 'type'
   getSubclasses: -> scFold @constraints
 
   # Get the type of a path.
@@ -993,7 +993,7 @@ class Query
       [name, cb] = [null, name]
     @setName name if name?
     updateName = (err, name) => @setName(name) unless err?
-    getName = compose (get @name), (get 'queries')
+    getName = utils.compose (get @name), (get 'queries')
     req =
       type: 'POST'
       path: 'user/queries'
@@ -1004,7 +1004,18 @@ class Query
                                    .then((authed) => @service.doReq authed)
                                    .then(getName)
 
-  # TODO: saveAsTemplate()
+  saveAsTemplate: (name, cb) -> REQUIRES_VERSION @service, 16, =>
+    if utils.isFunction name
+      [name, cb] = [null, name]
+    @setName name if name?
+    throw new Error("Templates must have a name") unless @name
+    req =
+      type: 'POST'
+      path: 'templates'
+      data: """<template #{ conAttrs @, ['name', 'title', 'comment'] }>#{ @toXML() }</template>"""
+      contentType: 'application/xml'
+      dataType: 'json'
+    withCB cb, @service.authorise(req).then((authed) => @service.doReq authed)
 
   getCodeURI: (lang) ->
     req =
@@ -1048,7 +1059,7 @@ class Query
     isSuitable = (p) -> utils.any types, (t) -> p.isa t
 
     # Only add the maximum number of suitable nodes to the query to run
-    toRun.views = take(n) (addPI n for n in @getViewNodes() when isSuitable n)
+    toRun.views = utils.take(n) (addPI n for n in @getViewNodes() when isSuitable n)
 
     query: toRun.toXML(), format: 'text'
 
