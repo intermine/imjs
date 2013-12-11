@@ -11,7 +11,7 @@ REPORTER = spec
 export PATH := $(shell find node_modules -name 'bin' -printf %p:)node_modules/.bin:${PATH}
 
 compile:
-	grunt clean:build compile jshint coffeelint browserify
+	grunt clean:build jshint coffeelint compile
 
 build:
 	grunt build
@@ -24,6 +24,9 @@ all:
 
 run:
 	grunt $(TASK)
+
+repl: compile
+	@node test/repl.js
 
 test-only:
 	grunt test --grep "$(GREP)"
