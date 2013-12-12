@@ -1,4 +1,3 @@
-{Deferred} = require 'underscore.deferred'
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 {invoke, get, flatMap} = Fixture.funcutils
