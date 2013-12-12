@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 if process.env.IMJS_COV
-  idresolution = require '../../build-cov/id-resolution-job'
+  covDir = '../../build-cov'
+  idresolution = require covDir + '/id-resolution-job'
 else
   idresolution = require '../../build/id-resolution-job'
 

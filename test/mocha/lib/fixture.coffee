@@ -1,6 +1,8 @@
+covDir = '../../../build-cov'
+
 if process.env.IMJS_COV
-  funcutils = require "../../../build-cov/util"
-  {Service, Query, Model} = require '../../../build-cov/service'
+  funcutils = require covDir + "/util"
+  {Service, Query, Model} = require covDir + '/service'
 else
   {Service, Query, Model} = require '../../../build/service'
   funcutils = require "../../../build/util"

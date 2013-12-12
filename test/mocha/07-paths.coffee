@@ -1,6 +1,7 @@
 if process.env.IMJS_COV
-  {Model} = require "../../build-cov/model"
-  {PathInfo} = require "../../build-cov/path"
+  covDir = '../../build-cov'
+  {Model} = require covDir + "/model"
+  {PathInfo} = require covDir + "/path"
 else
   {Model} = require "../../build/service"
   {PathInfo} = require "../../build/path"

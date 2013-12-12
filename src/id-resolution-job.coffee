@@ -89,7 +89,7 @@ class IDResolutionJob
     gettingVer.then (v) -> gettingRes.then (results) ->
       if v >= 16 then new CategoryResults(results) else new IdResults(results)
 
-  del: (cb) => @service.makeRequest 'DELETE', "ids/#{ @uid }", {}, cb
+  del: (cb) => withCB cb, @service.makeRequest 'DELETE', "ids/#{ @uid }"
 
   decay: 50 # ms
  

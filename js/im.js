@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-beta - 2013-12-11 */
+/*! imjs - v3.0.0-rc - 2013-12-12 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -653,7 +653,7 @@ module.exports=require('zlU5Ni');
     };
 
     IDResolutionJob.prototype.del = function(cb) {
-      return this.service.makeRequest('DELETE', "ids/" + this.uid, {}, cb);
+      return withCB(cb, this.service.makeRequest('DELETE', "ids/" + this.uid));
     };
 
     IDResolutionJob.prototype.decay = 50;
@@ -4648,7 +4648,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.0.0-beta';
+  exports.VERSION = '3.0.0-rc';
 
 }).call(this);
 

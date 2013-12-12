@@ -1,5 +1,6 @@
 if process.env.IMJS_COV
-  {Service} = require '../../build-cov/service'
+  covDir = '../../build-cov'
+  {Service} = require covDir + '/service'
 else
   {Service} = require '../../build/service'
 
