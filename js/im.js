@@ -1,4 +1,4 @@
-/*! imjs - v3.0.0-rc - 2013-12-12 */
+/*! imjs - v3.0.0 - 2013-12-13 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -239,8 +239,6 @@
 
 }).call(this);
 
-},{}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -401,7 +399,9 @@ module.exports=require('zlU5Ni');
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -4410,6 +4410,9 @@ module.exports=require('zlU5Ni');
     merger = fold(function(a, oldk, oldv) {
       var newk, newv, _ref1;
       _ref1 = f(oldk, oldv), newk = _ref1[0], newv = _ref1[1];
+      if (isArray(newv)) {
+        newv = newv.slice();
+      }
       a[newk] = newv;
       return a;
     });
@@ -4648,7 +4651,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.0.0-rc';
+  exports.VERSION = '3.0.0';
 
 }).call(this);
 
