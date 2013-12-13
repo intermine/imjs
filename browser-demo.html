@@ -1,10 +1,11 @@
 <DOCTYPE HTML>
 <html>
   <head>
-    <script type="text/javascript" charset="UTF-8" src="dist/im.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="js/im.js"></script>
   </head>
   <body>
       <script type="text/javascript">
+          flymine = intermine.Service.connect({root: "www.flymine.org/query"});
           print = console.log.bind(console, ">>");
           raise = function (e) { console.error(e, e.stack) };
       </script>
