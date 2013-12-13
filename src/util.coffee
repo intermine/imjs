@@ -124,9 +124,12 @@ root.escape = (str) ->
 # Until I can find a nicer name for this...
 # Basically a mapping over an object, taking a
 # function of the form (oldk, oldv) -> [newk, newv]
+# with the addition of shallowly copying any values
+# that are arrays.
 root.omap = (f) ->
   merger = fold (a, oldk, oldv) ->
     [newk, newv] = f oldk, oldv
+    newv = newv.slice() if isArray newv
     a[newk] = newv
     return a
   (xs) -> merger {}, xs
