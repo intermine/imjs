@@ -12,3 +12,8 @@ build/*.js
 js
 doc
 test/browser/mocha-test.js
+bower_components
+dist
+test/.repl-history
+test/browser/accept.html
+test/browser/bundle-index.html
