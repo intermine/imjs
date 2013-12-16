@@ -1,13 +1,8 @@
-if process.env.IMJS_COV
-  covDir = '../../build-cov'
-  {Service} = require covDir + '/service'
-else
-  {Service} = require '../../build/service'
-
 should = require 'should'
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
-{parallel} = Fixture.utils
+
+{Service} = Fixture
 
 describe 'Service', ->
 
@@ -45,7 +40,9 @@ describe 'Service', ->
       (-> Service.connect()).should.throw /Invalid/
 
   # Note, the model is not re-requested, but because it is instantiated
-  # from data, each service instance gets its own copy.
+  # from data, each service instance gets its own copy, so we test with
+  # the summary fields instead, which can provide us with a strict identity
+  # check (unlike the version and the release, which are primitives).
   describe 'caching', ->
 
     describe 'useCache', ->
@@ -57,7 +54,10 @@ describe 'Service', ->
       it 'should be true', ->
         service.useCache.should.be.true
 
-      it 'should should mean things like the summary fields are cached', eventually (fa) ->
+      it 'should be inherited in child services', ->
+        Service.connect(service).useCache.should.be.true
+
+      it 'should mean things like the summary fields are cached', eventually (fa) ->
         Service.connect(service).fetchSummaryFields().then (fb) -> fb.should.equal fa
 
     describe 'flushCaches', ->

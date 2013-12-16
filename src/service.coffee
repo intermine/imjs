@@ -9,21 +9,21 @@
 # and browsers.
 #
 
-Promise        = require('./promise')
-{Model}        = require('./model')
-{Query}        = require('./query')
-{List}         = require('./lists')
-{User}         = require('./user')
-{IDResolutionJob} = require('./id-resolution-job')
-base64       = require ('./base64')
-version      = require('./version')
-utils        = require('./util')
-to_query_string    = utils.querystring
-http           = require('./http')
+Promise           = require './promise'
+{Model}           = require './model'
+{Query}           = require './query'
+{List}            = require './lists'
+{User}            = require './user'
+{IDResolutionJob} = require './id-resolution-job'
+base64            = require './base64'
+version           = require './version'
+utils             = require './util'
+http              = require './http'
+
+to_query_string   = utils.querystring
+{withCB, map, merge, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
 
 intermine = exports
-
-{withCB, map, merge, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -71,14 +71,14 @@ ID_RESOLUTION_PATH = 'ids'
 NO_AUTH = {}
 NO_AUTH[p] = true for p in [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH, WIDGETS_PATH
   MODEL_PATH, SUMMARYFIELDS_PATH, QUICKSEARCH_PATH, PATH_VALUES_PATH]
-ALLWAYS_AUTH = {}
-ALLWAYS_AUTH[p] = true for p in [WHOAMI_PATH, PREF_PATH, LIST_OPERATION_PATHS,
+ALWAYS_AUTH = {}
+ALWAYS_AUTH[p] = true for p in [WHOAMI_PATH, PREF_PATH, LIST_OPERATION_PATHS,
   SUBTRACT_PATH, WITH_OBJ_PATH, ENRICHMENT_PATH, TEMPLATES_PATH, USER_TOKENS]
 
 NEEDS_AUTH = (path, q) ->
   if NO_AUTH[path]
     false
-  else if ALLWAYS_AUTH[path]
+  else if ALWAYS_AUTH[path]
     true
   else if not q?.needsAuthentication
     true # Not configured, and no query info => default true.
@@ -113,6 +113,7 @@ DEFAULT_ERROR_HANDLER = (e) ->
 _get_or_fetch = (propName, store, path, key, cb) ->
   {root, useCache} = @
   promise = @[propName] ?= if (useCache and value = store[root])
+    console.log "Fetching #{ propName } from cache"
     success(value)
   else
     # Data property only needed for old mines..., eventually remove!
@@ -954,9 +955,10 @@ Service.connect = (opts) ->
   throw new Error "Invalid options provided: #{ JSON.stringify opts }" unless opts?.root?
   new Service opts
 
-# Export the Service class to the world
+# This module serves as a main entry point, so re-export
+# the public parts of the API.
 intermine.Service = Service
 intermine.Model = Model
 intermine.Query = Query
+intermine.utils = utils
 intermine.imjs = version
-

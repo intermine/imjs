@@ -1,9 +1,4 @@
-var m = require('../build/model');
-var q = require('../build/query');
-var s = require('../build/service');
-var v = require('../build/version');
+var s;
+module.exports = s = require('../build/service');
 
-exports.Model = m.Model;
-exports.Query = q.Query;
-exports.Service = s.Service;
-exports.VERSION = v.VERSION;
+module.exports.VERSION = s.imjs.VERSION;

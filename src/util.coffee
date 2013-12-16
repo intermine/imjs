@@ -18,6 +18,7 @@ encode = (x) -> encodeURIComponent String x
 qsFromList = (pairs) ->
   (pair.map(encode).join('=') for pair in pairs).join('&')
 
+# Serialize an object or array as a query string.
 root.querystring = (obj) ->
   return '' unless obj
   if isArray obj

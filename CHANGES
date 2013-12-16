@@ -47,4 +47,5 @@
 3.0.0  Using node callbacks, new HTTP browser layer, removed
        dependencies on jQuery and underscore, proper Promises/A promises.
 3.1.0  Added Query#needsAuthentication.
+3.2.0  Expose utils module.
 **/

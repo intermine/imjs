@@ -1,4 +1,4 @@
-/*! imjs - v3.1.0 - 2013-12-16 */
+/*! imjs - v3.2.0 - 2013-12-16 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -239,6 +239,8 @@
 
 }).call(this);
 
+},{}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -399,9 +401,7 @@
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
-},{}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -3063,7 +3063,7 @@ module.exports=require('zlU5Ni');
 
 },{"./util":14,"./xml":16}],11:[function(require,module,exports){
 (function() {
-  var ALLWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, base64, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
+  var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, base64, dejoin, error, get, getListFinder, http, intermine, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __slice = [].slice;
@@ -3086,13 +3086,13 @@ module.exports=require('zlU5Ni');
 
   utils = require('./util');
 
-  to_query_string = utils.querystring;
-
   http = require('./http');
 
-  intermine = exports;
+  to_query_string = utils.querystring;
 
   withCB = utils.withCB, map = utils.map, merge = utils.merge, get = utils.get, set = utils.set, invoke = utils.invoke, success = utils.success, error = utils.error, REQUIRES_VERSION = utils.REQUIRES_VERSION, dejoin = utils.dejoin;
+
+  intermine = exports;
 
   VERSIONS = {};
 
@@ -3160,18 +3160,18 @@ module.exports=require('zlU5Ni');
     NO_AUTH[p] = true;
   }
 
-  ALLWAYS_AUTH = {};
+  ALWAYS_AUTH = {};
 
   _ref1 = [WHOAMI_PATH, PREF_PATH, LIST_OPERATION_PATHS, SUBTRACT_PATH, WITH_OBJ_PATH, ENRICHMENT_PATH, TEMPLATES_PATH, USER_TOKENS];
   for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
     p = _ref1[_j];
-    ALLWAYS_AUTH[p] = true;
+    ALWAYS_AUTH[p] = true;
   }
 
   NEEDS_AUTH = function(path, q) {
     if (NO_AUTH[path]) {
       return false;
-    } else if (ALLWAYS_AUTH[path]) {
+    } else if (ALWAYS_AUTH[path]) {
       return true;
     } else if (!(q != null ? q.needsAuthentication : void 0)) {
       return true;
@@ -3195,7 +3195,7 @@ module.exports=require('zlU5Ni');
   _get_or_fetch = function(propName, store, path, key, cb) {
     var opts, promise, root, useCache, value, _ref2;
     root = this.root, useCache = this.useCache;
-    promise = (_ref2 = this[propName]) != null ? _ref2 : this[propName] = useCache && (value = store[root]) ? success(value) : (opts = {
+    promise = (_ref2 = this[propName]) != null ? _ref2 : this[propName] = useCache && (value = store[root]) ? (console.log("Fetching " + propName + " from cache"), success(value)) : (opts = {
       type: 'GET',
       dataType: 'json',
       data: {
@@ -4029,6 +4029,8 @@ module.exports=require('zlU5Ni');
 
   intermine.Query = Query;
 
+  intermine.utils = utils;
+
   intermine.imjs = version;
 
 }).call(this);
@@ -4687,7 +4689,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.1.0';
+  exports.VERSION = '3.2.0';
 
 }).call(this);
 

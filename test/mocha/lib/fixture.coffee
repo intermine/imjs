@@ -1,11 +1,9 @@
 covDir = '../../../build-cov'
 
 if process.env.IMJS_COV
-  funcutils = require covDir + "/util"
-  {Service, Query, Model} = require covDir + '/service'
+  {Service, Query, Model, utils} = require covDir + '/service'
 else
-  {Service, Query, Model} = require '../../../build/service'
-  funcutils = require "../../../build/util"
+  {Service, Query, Model, utils} = require '../../../'
 
 args =
   root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'
@@ -47,8 +45,8 @@ class Fixture
                     le: 50
 
 
-Fixture.funcutils = funcutils
-Fixture.utils = funcutils
+Fixture.funcutils = utils
+Fixture.utils = utils
 Fixture.Query = Query
 Fixture.Model = Model
 Fixture.Service = Service

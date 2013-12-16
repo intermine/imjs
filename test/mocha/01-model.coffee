@@ -1,6 +1,5 @@
 should     = require 'should'
 {Model}    = require './lib/fixture'
-{PathInfo} = require '../../build/path'
 
 {TESTMODEL} = require './data/model'
 
@@ -153,7 +152,10 @@ describe 'Model', ->
     it 'should be able to make a path', ->
       path = testmodel.makePath('Employee.age')
       should.exist path
-      path.should.be.an.instanceOf PathInfo
+      path.should.have.properties [
+        'end', 'getType', 'getDisplayName', 'append', 'getParent',
+        'isAttribute', 'isReference', 'isCollection', 'isRoot'
+      ]
 
   describe 'NUMERIC_TYPES', ->
 

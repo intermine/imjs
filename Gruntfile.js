@@ -184,7 +184,8 @@ module.exports = function (grunt) {
           ignore: ['xmldom'],
           noParse: [
             'node_modules/httpinvoke/httpinvoke-commonjs.js',
-            'node_modules/should/should.js'
+            'node_modules/should/should.js',
+            'js/im.js'
           ]
         }
       }
