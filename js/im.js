@@ -151,7 +151,8 @@
 
 }).call(this);
 
-!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.intermine=e():"undefined"!=typeof global?global.intermine=e():"undefined"!=typeof self&&(self.intermine=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (intermine) {
+!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.imjs=e():"undefined"!=typeof global?global.imjs=e():"undefined"!=typeof self&&(self.imjs=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 /*
 *  Base64 encode / decode
@@ -3195,7 +3196,7 @@ module.exports=require('zlU5Ni');
   _get_or_fetch = function(propName, store, path, key, cb) {
     var opts, promise, root, useCache, value, _ref2;
     root = this.root, useCache = this.useCache;
-    promise = (_ref2 = this[propName]) != null ? _ref2 : this[propName] = useCache && (value = store[root]) ? (console.log("Fetching " + propName + " from cache"), success(value)) : (opts = {
+    promise = (_ref2 = this[propName]) != null ? _ref2 : this[propName] = useCache && (value = store[root]) ? success(value) : (opts = {
       type: 'GET',
       dataType: 'json',
       data: {
@@ -6741,3 +6742,26 @@ if (typeof setImmediate === 'function') { // IE >= 10 & node.js >= 0.10
 (11)
 });
 ;
+(function() {
+  var expose, merge;
+
+  if (typeof imjs !== 'undefined') {
+    merge = imjs.utils.merge;
+    expose = function(name, thing) {
+      if ('function' === typeof define && define.amd) {
+        return define(name, [], thing);
+      } else {
+        return window[name] = thing;
+      }
+    };
+    expose('imjs', imjs);
+    if (typeof intermine === 'undefined') {
+      expose('intermine', imjs);
+    } else {
+      expose('intermine', merge(intermine, imjs));
+    }
+  }
+
+}).call(this);
+
+})(window.intermine);
