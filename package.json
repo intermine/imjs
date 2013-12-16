@@ -32,7 +32,7 @@
     "tests": "test"
   },
   "scripts": {
-    "prepublish": "make",
+    "prepublish": "make test",
     "test": "make test"
   },
   "devDependencies": {
