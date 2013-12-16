@@ -44,4 +44,7 @@
         * Strip irrelevant sort-orders
         * Do not serialise irrelevent type constraints
         * Type constraints no longer contribute to notions of relevance.
+3.0.0  Using node callbacks, new HTTP browser layer, removed
+       dependencies on jQuery and underscore, proper Promises/A promises.
+3.1.0  Added Query#needsAuthentication.
 **/
