@@ -164,7 +164,7 @@ module.exports = function (grunt) {
           alias: ['build/http-browser.js:./http'],
           ignore: ['xmldom'],
           noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
-          standalone: 'intermine',
+          standalone: 'imjs',
           postBundleCB: bundled,
         }
       },
@@ -216,7 +216,10 @@ module.exports = function (grunt) {
     try {
       var bundleBanner = grunt.template.process(banner)
       var shiv = grunt.file.read("build/shiv.js")
-      next(null, [bundleBanner, shiv, src].join("\n"))
+      var openIFE = "(function (intermine) {";
+      var closeIFE ='})(window.intermine);';
+      var expose = grunt.file.read('build/export.js');
+      next(null, [bundleBanner, shiv, openIFE, src, expose, closeIFE].join("\n"))
     } catch (e) {
       next(e)
     }
@@ -397,9 +400,9 @@ module.exports = function (grunt) {
     'uglify',
     'copy:dist',
     'copy:version',
-    'demo'
+    'browser-indices'
   ])
-  grunt.registerTask('demo', ['browser-indices'])
+  grunt.registerTask('demo', ['build', 'browser-indices'])
   grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob'])
   grunt.registerTask('test', ['build', 'test-node', 'phantomjs'])
   grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])

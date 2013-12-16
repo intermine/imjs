@@ -113,7 +113,6 @@ DEFAULT_ERROR_HANDLER = (e) ->
 _get_or_fetch = (propName, store, path, key, cb) ->
   {root, useCache} = @
   promise = @[propName] ?= if (useCache and value = store[root])
-    console.log "Fetching #{ propName } from cache"
     success(value)
   else
     # Data property only needed for old mines..., eventually remove!

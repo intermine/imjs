@@ -22,6 +22,12 @@ describe('Acceptance', function() {
 
   var Service = intermine.Service;
 
+  describe('Overriding exisiting intermine', function () {
+    it('should not have overridden the existing intermine reference', function () {
+      expect(intermine.DO_NOT_OVERWRITE).to.eql('OK');
+    });
+  });
+
   describe('Instantiate service', function() {
     it('Should be able to create a service', function() {
       expect(new Service(service_args)).to.be.ok();

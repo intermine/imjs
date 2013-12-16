@@ -14,10 +14,11 @@
             <script src="http://cdn.intermine.org/js/json3/3.2.2/json3.min.js"
                     type="text/javascript"></script>
         <![endif]-->
+
+        <!-- Test infrastructure -->
         <script src="<%= expect.js %>" type="text/javascript"></script>
         <script src="<%= mocha.js %>"></script>
         <script src="<%= promise.js %>"></script>
-        <script src="<%= load %>" type="text/javascript"></script>
     </head>
     <body>
         <!-- Browser Reporter Requires this Div -->
@@ -27,12 +28,11 @@
         <!-- for local get from components, and do like this for jenkins -->
         <!-- Test Infrastructure -->
         <script>
+            window.intermine = {DO_NOT_OVERWRITE: "OK"};
             mocha.setup({
                 globals: ['navigator', 'getInterface', 'expect', 'JSON', 'intermine'],
-                ui: 'bdd'});
-        </script>
-
-        <script>
+                ui: 'bdd'
+            });
             var host = ('<%= args.host %>' || window.location.hostname);
             var port = ('<%= args.port %>' || window.location.port);
             var service_args = {
@@ -47,13 +47,17 @@
             };
         </script>
 
+        <!-- code under test -->
+        <script src="<%= load %>" type="text/javascript"></script>
 
         <!-- Tests -->
         <script src="acceptance.js"></script>
+
         <script>
             if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
             else { mocha.run(); }
         </script>
+
     </body>
 </html>
 
