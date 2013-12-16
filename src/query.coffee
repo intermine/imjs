@@ -1036,6 +1036,15 @@ class Query
       req.token = @service.token
     "#{ @service.root }query/results?#{ toQueryString req }"
 
+  # Return true if this query will require user authentication to run
+  # correctly.
+  #
+  # This currently means that this method returns true if the query:
+  #  * Contains any LIST constraints.
+  #
+  # @return [Boolean] Whether this query needs authentication.
+  needsAuthentication: -> utils.any @constraints, (c) -> c.op in ['NOT IN', 'IN']
+
   # Get a query id for referencing this query in subsequent requests.
   #
   # Note that this id represents a snapshot of the query at the time of
@@ -1068,6 +1077,8 @@ class Query
   _bed_req: Query::_gff3_req
 
 union = fold (xs, ys) -> xs.concat ys
+
+Query::toString = Query::toXML
 
 Query.ATTRIBUTE_OPS = union [Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS]
 Query.REFERENCE_OPS = union [Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS]

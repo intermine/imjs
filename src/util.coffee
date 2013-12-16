@@ -13,9 +13,13 @@ root.defer = ->
     deferred.reject = reject
   return deferred
 
-qsFromList = (pairs) -> (pair.map(encodeURIComponent).join('=') for pair in pairs).join('&')
+encode = (x) -> encodeURIComponent String x
+
+qsFromList = (pairs) ->
+  (pair.map(encode).join('=') for pair in pairs).join('&')
 
 root.querystring = (obj) ->
+  return '' unless obj
   if isArray obj
     pairs = obj.slice()
   else

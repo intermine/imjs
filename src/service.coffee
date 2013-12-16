@@ -65,12 +65,25 @@ WHOAMI_PATH = "user/whoami"
 TABLE_ROW_PATH = QUERY_RESULTS_PATH + '/tablerows'
 PREF_PATH = 'user/preferences'
 PATH_VALUES_PATH = 'path/values'
+USER_TOKENS = 'user/tokens'
+ID_RESOLUTION_PATH = 'ids'
 
 NO_AUTH = {}
-NO_AUTH[p] = true for p in [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH,
+NO_AUTH[p] = true for p in [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH, WIDGETS_PATH
   MODEL_PATH, SUMMARYFIELDS_PATH, QUICKSEARCH_PATH, PATH_VALUES_PATH]
+ALLWAYS_AUTH = {}
+ALLWAYS_AUTH[p] = true for p in [WHOAMI_PATH, PREF_PATH, LIST_OPERATION_PATHS,
+  SUBTRACT_PATH, WITH_OBJ_PATH, ENRICHMENT_PATH, TEMPLATES_PATH, USER_TOKENS]
 
-NEEDS_AUTH = (path) -> not NO_AUTH[path]
+NEEDS_AUTH = (path, q) ->
+  if NO_AUTH[path]
+    false
+  else if ALLWAYS_AUTH[path]
+    true
+  else if not q?.needsAuthentication
+    true # Not configured, and no query info => default true.
+  else
+    q.needsAuthentication()
 
 # Pattern for detecting if URI has a protocol
 HAS_PROTOCOL = /^https?:\/\//i
@@ -239,6 +252,7 @@ class Service
   # TODO - when 14 is prevalent the fetchVersion can be removed.
   authorise: (req) -> @fetchVersion().then (version) =>
     opts = utils.copy req
+    opts.headers ?= {}
     opts.url = @root + opts.path
     pathAdditions = []
 
@@ -248,9 +262,8 @@ class Service
       else
         opts.data.format = opts.dataType
 
-    if @token? and NEEDS_AUTH req.path
+    if @token? and NEEDS_AUTH req.path, opts.data?.query
       if version >= 14
-        opts.headers ?= {}
         opts.headers.Authorization = "Token #{ @token }"
       else if 'string' is typeof opts.data
         pathAdditions.push ['token', @token]
@@ -324,7 +337,7 @@ class Service
       p = if q.isClass() then q.append('id') else q
       @pathValues(p, 'count')
     else if q.toXML?
-      req = {query: q.toXML(), format: 'jsoncount'}
+      req = {query: q, format: 'jsoncount'}
       @post(QUERY_RESULTS_PATH, req).then(get 'count')
     else if typeof q is 'string'
       @fetchModel().then(invoke 'makePath', q.replace(/\.\*$/, '.id')).then(@count)
@@ -431,7 +444,7 @@ class Service
   doPagedRequest: (q, path, page = {}, format, cb = (->)) ->
     if q.toXML?
       [cb, page] = [page, {}] if utils.isFunction page
-      req = merge page, query: q.toXML(), format: format
+      req = merge page, query: q, format: format
       # TODO: Is there a good reason to want access to the envelope? How to expose...
       withCB cb, @post(path, req).then get 'results'
     else
@@ -762,7 +775,7 @@ class Service
   resolveIds: (opts, cb) => REQUIRES_VERSION @, 10, =>
     req =
       type: 'POST'
-      url: @root + 'ids'
+      url: @root + ID_RESOLUTION_PATH
       contentType: 'application/json'
       data: JSON.stringify(opts)
       dataType: 'json'

@@ -1,7 +1,6 @@
 URL                = require 'url'
 JSONStream         = require 'JSONStream'
 http               = require 'http'
-qs                 = require 'querystring'
 {ACCEPT_HEADER}    = require './constants'
 {VERSION}          = require './version'
 {error, defer, merge, invoke} = utils = require('./util')
@@ -111,7 +110,7 @@ exports.doReq = (opts, iter) ->
       reject("Invalid request. #{ opts.type } requests must not have bodies")
       return promise
   else
-    postdata = qs.stringify opts.data
+    postdata = utils.querystring opts.data
 
   url = URL.parse(opts.url, true)
   url.method = opts.type
