@@ -1,4 +1,4 @@
-/*! imjs - v2.10.6 - 2013-11-22 */
+/*! imjs - v2.10.7 - 2014-03-28 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.6";
+    imjs.VERSION = "2.10.7";
   }
 
 }).call(this);
@@ -3071,6 +3071,9 @@
         constraint = interpretConArray(constraint);
       } else {
         constraint = copyCon(constraint);
+      }
+      if (constraint.switchable && constraint.switched === 'OFF') {
+        return this;
       }
       constraint.path = this.adjustPath(constraint.path);
       if (constraint.type == null) {

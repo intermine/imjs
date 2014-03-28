@@ -896,6 +896,9 @@ class Query
     else
       constraint = copyCon constraint
 
+    # Do not add constraint if constraint is switched off.
+    return this if constraint.switchable and constraint.switched is 'OFF'
+
     constraint.path = @adjustPath constraint.path
     unless constraint.type?
       try

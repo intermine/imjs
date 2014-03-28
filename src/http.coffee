@@ -92,8 +92,8 @@ blocking = (ret, opts) -> (resp) ->
           else
             ret.reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
     else
-      if e = containerBuffer.match /\[Error\] (\d+)(.*)/m
-        ret.reject new Error(e[2])
+      if match = containerBuffer.match /\[Error\] (\d+)(.*)/m
+        ret.reject new Error(match[2])
       else
         ret.resolve containerBuffer
 

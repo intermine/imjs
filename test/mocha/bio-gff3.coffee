@@ -20,7 +20,7 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      q.summarise('symbol').then (_, stats) -> $.when stats, q.getGFF3()
+      q.summarise('symbol').then (x, stats) -> $.when stats, q.getGFF3()
 
     it 'should find only two genes, due to the pathways', eventually (stats, gff3) ->
       stats.uniqueValues.should.equal 2
