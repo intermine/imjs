@@ -62,7 +62,7 @@ describe 'Service', ->
         companies.should.have.a.lengthOf 7
 
       it 'should find Wernham-Hogg', eventually (companies) ->
-        companies.should.contain 'Wernham-Hogg'
+        companies.should.containEql 'Wernham-Hogg'
 
     describe 'for object paths', ->
       
@@ -74,4 +74,4 @@ describe 'Service', ->
         companies.should.have.a.lengthOf 7
 
       it 'should find Wernham-Hogg', eventually (companies) ->
-        companies.should.contain 'Wernham-Hogg'
+        companies.should.containEql 'Wernham-Hogg'

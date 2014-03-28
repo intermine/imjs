@@ -10,6 +10,17 @@ expected = [
   {path: 'Employee.address', op: 'LOOKUP', value: 'Springfield', extraValue: 'Illinois'}
 ]
 
+someSwitchedOff = [
+  {path: 'Employee.department.manager', type: 'CEO'},
+  {path: 'Employee.name', op: '=', value: 'methuselah'},
+  {path: 'Employee.age', op: '>', value: 1000},
+  {path: 'Employee.company', op: 'LOOKUP', value: 'W*', switchable: true, switched: 'OFF'}
+  {path: 'Employee.end', op: 'IS NULL'},
+  {path: 'Employee.department.name', op: 'ONE OF', values: ['Sales', 'Accounting']},
+  {path: 'Employee.address', op: 'LOOKUP', value: 'Springfield', extraValue: 'Illinois'},
+  {path: 'Employee.department.name', op: '=', value: 'Sales', switchable: true, switched: 'OFF'}
+]
+
 headless = [
   {path: 'department.manager', type: 'CEO'},
   {path: 'name', op: '=', value: 'methuselah'},
@@ -90,6 +101,8 @@ describe 'Defining Query constraints', ->
   describe 'using an mapping', constraintsTest mapping
 
   describe 'using a null value', constraintsTest mappingWithNull
+
+  describe 'including switched off constraints', constraintsTest someSwitchedOff
 
 describe 'Query', ->
 

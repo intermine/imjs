@@ -23,7 +23,7 @@ describe 'legacy service', ->
 
     it 'should return good data', eventually (creatures) ->
       should.exist creatures
-      creatures.should.contain 'Homo sapiens'
+      creatures.should.containEql 'Homo sapiens'
 
   describe 'fetch lists', ->
 
@@ -32,7 +32,6 @@ describe 'legacy service', ->
     it 'should get a bunch of lists', eventually (lists) ->
       should.exist lists
       lists.length.should.be.above 0
-
 
   describe 'find list', ->
 

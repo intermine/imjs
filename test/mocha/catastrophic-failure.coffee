@@ -20,7 +20,7 @@ describe 'parse failure', ->
     it 'should provide a reasonable message', (done) ->
       promise.then (shouldHaveFailed done), (err) ->
         try
-          String(err).should.contain service.root
+          String(err).should.containEql service.root
           done()
         catch e
           done e
@@ -40,7 +40,7 @@ describe 'not available failure', ->
     it 'should provide a reasonable message', (done) ->
       promise.then (shouldHaveFailed done), (err) ->
         try
-          String(err).should.contain service.root
+          String(err).should.containEql service.root
           done()
         catch e
           done e
