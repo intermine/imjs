@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Client library for communication with InterMine web-services",
   "main": "js/index",
   "browser": "js/im.js",
@@ -54,7 +54,7 @@
     "grunt-simple-mocha": "~0.4.0",
     "mocha": "latest",
     "oboe": "~1.11.0",
-    "should": "latest",
+    "should": "3.1.4",
     "coffeeify": "~0.5.2",
     "grunt-jscoverage": "0.0.3",
     "envify": "~0.2.0",
