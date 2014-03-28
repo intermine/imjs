@@ -68,8 +68,8 @@ blocking = (opts, resolve, reject) -> (resp) ->
           else
             reject new Error(getMsg opts, containerBuffer, e, resp.statusCode)
     else
-      if e = containerBuffer.match /\[ERROR\] (\d+)([\s\S]*)/
-        reject new Error(e[2])
+      if match = containerBuffer.match /\[ERROR\] (\d+)([\s\S]*)/
+        reject new Error(match[2])
       else
         f = if (200 <= resp.statusCode < 400) then resolve else reject
         f containerBuffer
