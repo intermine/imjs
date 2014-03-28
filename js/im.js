@@ -1,4 +1,4 @@
-/*! imjs - v2.10.7 - 2014-03-28 */
+/*! imjs - v2.10.8 - 2014-03-28 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -29,7 +29,7 @@
       imjs.VERSION = pkg.version;
     }
   } else {
-    imjs.VERSION = "2.10.7";
+    imjs.VERSION = "2.10.8";
   }
 
 }).call(this);
@@ -1948,8 +1948,8 @@
   };
 
   copyCon = function(con) {
-    var code, extraValue, ids, op, path, type, value, values;
-    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, extraValue = con.extraValue, ids = con.ids, code = con.code;
+    var code, editable, extraValue, ids, op, path, switchable, switched, type, value, values;
+    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, extraValue = con.extraValue, ids = con.ids, code = con.code, editable = con.editable, switched = con.switched, switchable = con.switchable;
     ids = ids != null ? ids.slice() : void 0;
     values = values != null ? values.slice() : void 0;
     return noUndefVals({
@@ -1960,7 +1960,10 @@
       values: values,
       extraValue: extraValue,
       ids: ids,
-      code: code
+      code: code,
+      editable: editable,
+      switched: switched,
+      switchable: switchable
     });
   };
 
@@ -3072,7 +3075,7 @@
       } else {
         constraint = copyCon(constraint);
       }
-      if (constraint.switchable && constraint.switched === 'OFF') {
+      if (constraint.switched === 'OFF') {
         return this;
       }
       constraint.path = this.adjustPath(constraint.path);
