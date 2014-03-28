@@ -119,10 +119,13 @@ headLess = (path) -> path.replace /^[^\.]+\./, ''
 # @param [Constraint] con The constraint to copy.
 # @return [Constraint] An identical copy of the constraint.
 copyCon = (con) ->
-  {path, type, op, value, values, extraValue, ids, code} = con
+  {path, type, op, value, values, extraValue, ids, code, editable, switched, switchable} = con
   ids = ids?.slice()
   values = values?.slice()
-  noUndefVals {path, type, op, value, values, extraValue, ids, code}
+  noUndefVals {
+    path, type, op, value, values, extraValue, ids, code,
+    editable, switched, switchable
+  }
 
 # Produce the JSON representation of a constraint.
 #
@@ -913,6 +916,9 @@ class Query
       constraint = interpretConArray constraint
     else
       constraint = copyCon constraint
+
+    # Don't add switched-off constraints
+    return this if constraint.switched is 'OFF'
 
     constraint.path = @adjustPath constraint.path
     unless constraint.type?
