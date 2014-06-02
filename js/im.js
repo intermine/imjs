@@ -1,4 +1,4 @@
-/*! imjs - v3.2.2 - 2014-03-28 */
+/*! imjs - v3.2.2 - 2014-06-02 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -240,8 +240,6 @@
 
 }).call(this);
 
-},{}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -402,7 +400,9 @@ module.exports=require('zlU5Ni');
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -1172,7 +1172,7 @@ module.exports=require('zlU5Ni');
         return success(custom);
       }
       if ((_ref = this.namePromise) == null) {
-        this.namePromise = (cached = NAMES[this.ident]) ? success(cached) : !(this.model.service != null) ? error("No service") : (path = 'model' + (concatMap(function(d) {
+        this.namePromise = (cached = NAMES[this.ident]) ? success(cached) : this.isRoot() && this.root.displayName ? success(this.root.displayName) : !(this.model.service != null) ? error("No service") : (path = 'model' + (concatMap(function(d) {
           return '/' + d.name;
         }))(this.allDescriptors()), params = (set({
           format: 'json'
@@ -4062,7 +4062,7 @@ module.exports=require('zlU5Ni');
 
     function Table(_arg) {
       var c, prop, _, _i, _len, _ref, _ref1;
-      this.name = _arg.name, this.attributes = _arg.attributes, this.references = _arg.references, this.collections = _arg.collections;
+      this.name = _arg.name, this.displayName = _arg.displayName, this.attributes = _arg.attributes, this.references = _arg.references, this.collections = _arg.collections;
       this.fields = {};
       this.__parents__ = (_ref = arguments[0]['extends']) != null ? _ref : [];
       for (_i = 0, _len = properties.length; _i < _len; _i++) {

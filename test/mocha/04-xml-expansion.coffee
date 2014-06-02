@@ -36,7 +36,7 @@ describe 'Query', ->
           'Employee.id'
         ]
         q.select ['**']
-        q.views.should.eql expected_views
+        q.views.sort().should.eql expected_views.sort()
 
       it 'should be able to expand paths ending in a star', eventually (q) ->
         expected_views = [ 'Employee.department.name' ]

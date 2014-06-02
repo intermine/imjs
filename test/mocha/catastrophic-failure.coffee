@@ -8,7 +8,7 @@ describe 'parse failure', ->
 
   # An intentionally mis-configured service
   # Currently using mockable for some of this - may need changing in the future.
-  service = Service.connect root: 'http://demo1503800.mockable.io'
+  service = Service.connect root: 'http://cdn.intermine.org/mox/intermine/testmodel/xml'
 
   describe 'Attempt to fetch the Model', ->
 

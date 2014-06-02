@@ -82,6 +82,8 @@ class PathInfo
     @namePromise ?=
       if cached = NAMES[@ident]
         success cached
+      else if @isRoot() and @root.displayName
+        success @root.displayName
       else if not @model.service?
         error "No service"
       else
