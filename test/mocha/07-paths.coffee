@@ -442,3 +442,12 @@ describe 'Two similar paths', ->
     it 'should be the same', eventually ([a, b]) ->
       a.should.eql b
 
+describe 'The path of a poor person', ->
+
+  path = testmodel.makePath 'Broke'
+
+  @beforeAll prepare -> path.getDisplayName()
+
+  it 'should say this person is poor', eventually (name) ->
+    name.should.eql 'Poor Person'
+

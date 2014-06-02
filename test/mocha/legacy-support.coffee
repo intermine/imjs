@@ -47,5 +47,3 @@ describe 'legacy service', ->
 
     it 'should fail', shouldFail -> service.fetchList 'non-existent-list'
 
-
-
