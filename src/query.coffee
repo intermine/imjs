@@ -1032,12 +1032,10 @@ class Query
       req.token = @service.token
     "#{@service.root}query/code?#{ toQueryString req }"
 
-  getExportURI: (format = 'tab') ->
+  getExportURI: (format = 'tab', options = {}) ->
     if format in Query.BIO_FORMATS
-      return @["get#{format.toUpperCase()}URI"]()
-    req =
-      query: @toXML()
-      format: format
+      return @["get#{format.toUpperCase()}URI"](options)
+    req = merge options, query: @toXML(), format: format
     if @service?.token? # hard to tell if necessary. Include it.
       req.token = @service.token
     "#{ @service.root }query/results?#{ toQueryString req }"
