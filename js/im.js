@@ -1,4 +1,4 @@
-/*! imjs - v3.3.0 - 2014-06-02 */
+/*! imjs - v3.4.0 - 2014-06-11 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -2880,18 +2880,21 @@ module.exports=require('zlU5Ni');
       return "" + this.service.root + "query/code?" + (toQueryString(req));
     };
 
-    Query.prototype.getExportURI = function(format) {
+    Query.prototype.getExportURI = function(format, options) {
       var req, _ref;
       if (format == null) {
         format = 'tab';
       }
-      if (__indexOf.call(Query.BIO_FORMATS, format) >= 0) {
-        return this["get" + (format.toUpperCase()) + "URI"]();
+      if (options == null) {
+        options = {};
       }
-      req = {
+      if (__indexOf.call(Query.BIO_FORMATS, format) >= 0) {
+        return this["get" + (format.toUpperCase()) + "URI"](options);
+      }
+      req = merge(options, {
         query: this.toXML(),
         format: format
-      };
+      });
       if (((_ref = this.service) != null ? _ref.token : void 0) != null) {
         req.token = this.service.token;
       }
@@ -4696,7 +4699,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.3.0';
+  exports.VERSION = '3.4.0';
 
 }).call(this);
 
