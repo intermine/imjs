@@ -1,4 +1,4 @@
-/*! imjs - v3.4.0 - 2014-06-11 */
+/*! imjs - v3.5.0 - 2014-06-11 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -2303,12 +2303,13 @@ module.exports=require('zlU5Ni');
       return withCB(updateTarget, cb, this.service.post('query/append/tolist', req).then(processor));
     };
 
-    Query.prototype.makeListQuery = function() {
+    Query.prototype.selectPreservingImpliedConstraints = function(paths) {
       var n, toRun, _i, _len, _ref;
-      toRun = this.clone();
-      if (toRun.views.length !== 1 || toRun.views[0] === null || !toRun.views[0].match(/\.id$/)) {
-        toRun.select(['id']);
+      if (paths == null) {
+        paths = [];
       }
+      toRun = this.clone();
+      toRun.select(paths);
       _ref = this.getViewNodes();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         n = _ref[_i];
@@ -2319,6 +2320,15 @@ module.exports=require('zlU5Ni');
         }
       }
       return toRun;
+    };
+
+    Query.prototype.makeListQuery = function() {
+      var paths, _ref;
+      paths = this.views.slice();
+      if (paths.length !== 1 || !((_ref = paths[0]) != null ? _ref.match(/\.id$/) : void 0)) {
+        paths = ['id'];
+      }
+      return this.selectPreservingImpliedConstraints(paths);
     };
 
     Query.prototype.saveAsList = function(options, cb) {
@@ -4699,7 +4709,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.4.0';
+  exports.VERSION = '3.5.0';
 
 }).call(this);
 
