@@ -680,6 +680,10 @@ class Query
     else
       throw new Error("This query has no service with count functionality attached.")
 
+  # Add the results of this query to a list on the server.
+  #
+  # @param [String|List] target The list to add results to.
+  # @returns [Promise<List>] A promise to yield the updated list information.
   appendToList: (target, cb) ->
     if target?.name # Target is list.
       name = target.name
@@ -696,20 +700,40 @@ class Query
 
     withCB updateTarget, cb, @service.post('query/append/tolist', req).then processor
 
-  makeListQuery: ->
+  # Get a clone of this query with the given paths selected.
+  #
+  # The clone may have constraints added to it to preserve the implied constraints
+  # that result from the default inner-join status of paths.
+  #
+  # We ensure we aren't changing the query by removing implicit
+  # join constraints; these implicit constraints are replaced with
+  # explicit constraints. This only works with joins on objects that
+  # have ids; you will have to handle simple objects yourself.
+  #
+  # @param  [Array] paths The paths to select.
+  # @return [Query] The query with the altered select list.
+  selectPreservingImpliedConstraints: (paths = []) ->
     toRun = @clone()
-    if toRun.views.length != 1 or toRun.views[0] is null or !toRun.views[0].match(/\.id$/)
-      toRun.select(['id'])
+    toRun.select paths
 
-    # Ensure we aren't changing the query by removing implicit
-    # join constraints; replace these implicit constraints with
-    # explicit constraints. This only works with joins on objects that
-    # have ids; you will have to handle simple objects yourself.
     for n in @getViewNodes() when not @isOuterJoined n
       if not (toRun.isInView n or toRun.isConstrained n) and n.getEndClass().fields.id?
         toRun.addConstraint [n.append('id'), 'IS NOT NULL']
 
     return toRun
+
+  # Get a clone of this query that can be used for list operations.
+  #
+  # A suitable query will have a single item in its select list, and that will refer to
+  # an object id. The cloned query is guaranteed to not include elements that would otherwise
+  # be excluded by implied inner joins on deleted view paths.
+  #
+  # @return [Query] The valid list query.
+  makeListQuery: ->
+    paths = @views.slice()
+    if paths.length != 1 or !paths[0]?.match(/\.id$/)
+      paths = ['id']
+    @selectPreservingImpliedConstraints paths
 
   saveAsList: (options, cb) ->
     toRun = @makeListQuery()
