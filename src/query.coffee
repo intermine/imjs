@@ -1111,21 +1111,23 @@ Query::toString = Query::toXML
 Query.ATTRIBUTE_OPS = union [Query.ATTRIBUTE_VALUE_OPS, Query.MULTIVALUE_OPS, Query.NULL_OPS]
 Query.REFERENCE_OPS = union [Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS]
 
+# Ensures the arguments are correctly handled, makes sure views are fully qualified
+# and applies the export view if given.
+bioUriArgs = (reqMeth, f) -> (opts = {}, cb = ->) ->
+  if utils.isFunction opts
+    [opts, cb] = [{}, opts]
+  opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
+  obj = if opts.export? then @selectPreservingImpliedConstraints(opts.export) else @
+  req = merge obj[reqMeth](), opts
+  f.call obj, req, cb
+
 for f in Query.BIO_FORMATS then do (f) ->
   reqMeth = "_#{ f }_req"
   getMeth = "get#{ f.toUpperCase() }"
   uriMeth = getMeth + "URI"
-  Query::[getMeth] = (opts = {}, cb = ->) ->
-    if utils.isFunction opts
-      [opts, cb] = [{}, opts]
-    opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
-    req = merge @[reqMeth](), opts
+  Query::[getMeth] = bioUriArgs reqMeth, (req, cb) ->
     withCB cb, @service.post 'query/results/' + f, req
-  Query::[uriMeth] = (opts = {}, cb) ->
-    if utils.isFunction opts
-      [opts, cb] = [{}, opts]
-    opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
-    req = merge @[reqMeth](), opts
+  Query::[uriMeth] = bioUriArgs reqMeth, (req, cb) ->
     if @service.token? # hard to tell if necessary. Include it.
       req.token = @service.token
     "#{ @service.root }query/results/#{ f }?#{ toQueryString req }"

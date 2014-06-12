@@ -1,7 +1,7 @@
 {Service, utils} = require './lib/fixture'
 Promise = require 'promise'
 {shouldFail, prepare, eventually} = require './lib/utils'
-{invoke} = utils
+{invoke, get} = utils
 should = require 'should'
 
 countRecords = (gff3) ->
@@ -43,6 +43,7 @@ describe 'GFF3 Queries', ->
               done()
             catch e
               done e
+
 
   describe 'outer joined', ->
     opts =
@@ -119,6 +120,20 @@ describe 'GFF3 Queries', ->
 
     it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.be.above 5
+
+  describe 'export paths', ->
+    opts =
+      from: 'Gene'
+      select: ['symbol', 'pathways.identifier']
+      where:
+        symbol: ['eve', 'zen', 'bib', 'r', 'h']
+    exons = 'exons.id'
+
+    @beforeAll prepare -> service.query(opts).then (q) ->
+      Promise.all [q.summarise(exons).then(get 'stats'), q.getGFF3(export: [exons])]
+
+    it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
+      countRecords(gff3).should.equal stats.uniqueValues
 
   describe 'bad request', ->
 
