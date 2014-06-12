@@ -1,4 +1,4 @@
-/*! imjs - v3.5.0 - 2014-06-11 */
+/*! imjs - v3.6.0 - 2014-06-12 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -240,8 +240,6 @@
 
 }).call(this);
 
-},{}],"./http":[function(require,module,exports){
-module.exports=require('zlU5Ni');
 },{}],"zlU5Ni":[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, CHARSET, CONVERTERS, IE_VERSION, PESKY_COMMA, Promise, URLENC, annotateError, check, error, httpinvoke, matches, merge, re, streaming, success, ua, utils, withCB, _ref;
@@ -402,7 +400,9 @@ module.exports=require('zlU5Ni');
 
 }).call(this);
 
-},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],5:[function(require,module,exports){
+},{"./constants":2,"./promise":9,"./util":14,"httpinvoke":19}],"./http":[function(require,module,exports){
+module.exports=require('zlU5Ni');
+},{}],5:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -1272,7 +1272,7 @@ module.exports=require('zlU5Ni');
 
 },{"promise":21}],10:[function(require,module,exports){
 (function() {
-  var BASIC_ATTRS, CODES, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
+  var BASIC_ATTRS, CODES, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
@@ -2978,14 +2978,9 @@ module.exports=require('zlU5Ni');
 
   Query.REFERENCE_OPS = union([Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS]);
 
-  _ref = Query.BIO_FORMATS;
-  _fn = function(f) {
-    var getMeth, reqMeth, uriMeth;
-    reqMeth = "_" + f + "_req";
-    getMeth = "get" + (f.toUpperCase());
-    uriMeth = getMeth + "URI";
-    Query.prototype[getMeth] = function(opts, cb) {
-      var req, v, _ref1;
+  bioUriArgs = function(reqMeth, f) {
+    return function(opts, cb) {
+      var obj, req, v, _ref;
       if (opts == null) {
         opts = {};
       }
@@ -2993,49 +2988,41 @@ module.exports=require('zlU5Ni');
         cb = function() {};
       }
       if (utils.isFunction(opts)) {
-        _ref1 = [{}, opts], opts = _ref1[0], cb = _ref1[1];
+        _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
       }
       if ((opts != null ? opts.view : void 0) != null) {
         opts.view = (function() {
-          var _j, _len1, _ref2, _results;
-          _ref2 = opts.view;
+          var _i, _len, _ref1, _results;
+          _ref1 = opts.view;
           _results = [];
-          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-            v = _ref2[_j];
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            v = _ref1[_i];
             _results.push(this.getPathInfo(v).toString());
           }
           return _results;
         }).call(this);
       }
-      req = merge(this[reqMeth](), opts);
-      return withCB(cb, this.service.post('query/results/' + f, req));
+      obj = opts["export"] != null ? this.selectPreservingImpliedConstraints(opts["export"]) : this;
+      req = merge(obj[reqMeth](), opts);
+      return f.call(obj, req, cb);
     };
-    return Query.prototype[uriMeth] = function(opts, cb) {
-      var req, v, _ref1;
-      if (opts == null) {
-        opts = {};
-      }
-      if (utils.isFunction(opts)) {
-        _ref1 = [{}, opts], opts = _ref1[0], cb = _ref1[1];
-      }
-      if ((opts != null ? opts.view : void 0) != null) {
-        opts.view = (function() {
-          var _j, _len1, _ref2, _results;
-          _ref2 = opts.view;
-          _results = [];
-          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-            v = _ref2[_j];
-            _results.push(this.getPathInfo(v).toString());
-          }
-          return _results;
-        }).call(this);
-      }
-      req = merge(this[reqMeth](), opts);
+  };
+
+  _ref = Query.BIO_FORMATS;
+  _fn = function(f) {
+    var getMeth, reqMeth, uriMeth;
+    reqMeth = "_" + f + "_req";
+    getMeth = "get" + (f.toUpperCase());
+    uriMeth = getMeth + "URI";
+    Query.prototype[getMeth] = bioUriArgs(reqMeth, function(req, cb) {
+      return withCB(cb, this.service.post('query/results/' + f, req));
+    });
+    return Query.prototype[uriMeth] = bioUriArgs(reqMeth, function(req, cb) {
       if (this.service.token != null) {
         req.token = this.service.token;
       }
       return "" + this.service.root + "query/results/" + f + "?" + (toQueryString(req));
-    };
+    });
   };
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     f = _ref[_i];
@@ -4709,7 +4696,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.5.0';
+  exports.VERSION = '3.6.0';
 
 }).call(this);
 
