@@ -1116,8 +1116,11 @@ Query.REFERENCE_OPS = union [Query.TERNARY_OPS, Query.LOOP_OPS, Query.LIST_OPS]
 bioUriArgs = (reqMeth, f) -> (opts = {}, cb = ->) ->
   if utils.isFunction opts
     [opts, cb] = [{}, opts]
+  ensureAttr = (p) =>
+    path = @getPathInfo(p)
+    if path.isAttribute() then path else path.append('id')
   opts.view = (@getPathInfo(v).toString() for v in opts.view) if opts?.view?
-  obj = if opts.export? then @selectPreservingImpliedConstraints(opts.export) else @
+  obj = if opts.export? then @selectPreservingImpliedConstraints(opts.export.map ensureAttr) else @
   req = merge obj[reqMeth](), opts
   f.call obj, req, cb
 

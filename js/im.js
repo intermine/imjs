@@ -1,4 +1,4 @@
-/*! imjs - v3.6.0 - 2014-06-12 */
+/*! imjs - v3.6.1 - 2014-06-13 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -2980,7 +2980,8 @@ module.exports=require('zlU5Ni');
 
   bioUriArgs = function(reqMeth, f) {
     return function(opts, cb) {
-      var obj, req, v, _ref;
+      var ensureAttr, obj, req, v, _ref,
+        _this = this;
       if (opts == null) {
         opts = {};
       }
@@ -2990,6 +2991,15 @@ module.exports=require('zlU5Ni');
       if (utils.isFunction(opts)) {
         _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
       }
+      ensureAttr = function(p) {
+        var path;
+        path = _this.getPathInfo(p);
+        if (path.isAttribute()) {
+          return path;
+        } else {
+          return path.append('id');
+        }
+      };
       if ((opts != null ? opts.view : void 0) != null) {
         opts.view = (function() {
           var _i, _len, _ref1, _results;
@@ -3002,7 +3012,7 @@ module.exports=require('zlU5Ni');
           return _results;
         }).call(this);
       }
-      obj = opts["export"] != null ? this.selectPreservingImpliedConstraints(opts["export"]) : this;
+      obj = opts["export"] != null ? this.selectPreservingImpliedConstraints(opts["export"].map(ensureAttr)) : this;
       req = merge(obj[reqMeth](), opts);
       return f.call(obj, req, cb);
     };
@@ -4696,7 +4706,7 @@ module.exports=require('zlU5Ni');
 },{"./promise":9}],15:[function(require,module,exports){
 (function() {
 
-  exports.VERSION = '3.6.0';
+  exports.VERSION = '3.6.1';
 
 }).call(this);
 

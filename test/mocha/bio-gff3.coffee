@@ -135,6 +135,20 @@ describe 'GFF3 Queries', ->
     it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal stats.uniqueValues
 
+  describe 'export nodes', ->
+    opts =
+      from: 'Gene'
+      select: ['symbol', 'pathways.identifier']
+      where:
+        symbol: ['eve', 'zen', 'bib', 'r', 'h']
+    exons = 'exons'
+
+    @beforeAll prepare -> service.query(opts).then (q) ->
+      Promise.all [q.summarise('exons.id').then(get 'stats'), q.getGFF3(export: [exons])]
+
+    it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
+      countRecords(gff3).should.equal stats.uniqueValues
+
   describe 'bad request', ->
 
     service = new Service root: 'www.flymine.org/query', errorHandler: ->
