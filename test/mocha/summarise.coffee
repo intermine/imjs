@@ -9,8 +9,11 @@ describe 'Query', ->
 
     {service, olderEmployees} = new Fixture()
 
-    @beforeEach prepare -> service.query(olderEmployees)
-        .then(invoke 'summarise', 'age')
+    getQuery = service.query olderEmployees
+    summariseAge = invoke 'summarise', 'age'
+    getSummary = getQuery.then summariseAge
+
+    @beforeEach prepare -> getSummary
 
     it 'should have fewer than 21 buckets', eventually ({results}) ->
       results.length.should.be.below 21
@@ -31,8 +34,11 @@ describe 'Query', ->
 
     {service, olderEmployees} = new Fixture()
 
-    @beforeEach prepare -> service.query(olderEmployees)
-        .then(invoke 'summarize', 'age')
+    getQuery = service.query olderEmployees
+    summariseAge = invoke 'summarize', 'age'
+    getSummary = getQuery.then summariseAge
+
+    @beforeEach prepare -> getSummary
 
     it 'should include all the results of the query', eventually ({results}) ->
       sumCounts(results).should.equal 46
@@ -41,8 +47,11 @@ describe 'Query', ->
 
     {service, olderEmployees} = new Fixture()
 
-    @beforeEach prepare -> service.query(olderEmployees)
-        .then(invoke 'summarise', 'department.company.name')
+    getQuery = service.query olderEmployees
+    summariseCompanyName = invoke 'summarise', 'department.company.name'
+    getSummary = getQuery.then summariseCompanyName
+
+    @beforeEach prepare -> getSummary
 
     it 'should have fewer than 21 buckets', eventually ({results}) ->
       results.length.should.equal 6

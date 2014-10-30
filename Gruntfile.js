@@ -16,6 +16,8 @@ module.exports = function (grunt) {
     }
   }
 
+  var shouldjs = require.resolve('should');
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     uglify: {
@@ -179,16 +181,17 @@ module.exports = function (grunt) {
           transform: ['coffeeify', 'envify'],
           alias: [
             './build/http-browser.js:./http',
-            './test/mocha/lib/utils.coffee:./lib/utils',
-            './test/mocha/lib/fixture.coffee:./lib/fixture',
-            './test/mocha/lib/fixture.coffee:./fixture',
-            './node_modules/should/should.js:should'
+            require.resolve('./test/mocha/lib/utils.coffee') + ':./lib/utils',
+            // require.resolve('./test/mocha/lib/utils.coffee') + ':./utils',
+            require.resolve('./test/mocha/lib/fixture.coffee') + ':./lib/fixture',
+            require.resolve('./test/mocha/lib/fixture.coffee') + ':./fixture',
+            shouldjs + ':should'
           ],
           ignore: ['xmldom'],
+          postBundleCB: bundled,
           browserifyOptions: {
             noParse: [
               'node_modules/httpinvoke/httpinvoke-commonjs.js',
-              require.resolve('./node_modules/should/should'),
               'js/im.js'
             ]
           }

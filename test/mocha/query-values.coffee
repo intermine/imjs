@@ -65,10 +65,13 @@ describe 'Service', ->
         companies.should.containEql 'Wernham-Hogg'
 
     describe 'for object paths', ->
+
+      getModel = service.fetchModel()
+      buildPath = invoke 'makePath', 'Company.name'
+      getPath = getModel.then buildPath
+      getValues = getPath.then service.values
       
-      @beforeAll prepare -> service.fetchModel()
-                                   .then(invoke 'makePath', 'Company.name')
-                                   .then(service.values)
+      @beforeAll prepare -> getValues
 
       it 'should find all the companies', eventually (companies) ->
         companies.should.have.a.lengthOf 7
