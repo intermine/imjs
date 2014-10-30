@@ -33,7 +33,7 @@ describe 'List', ->
       ret.length.should.equal 3
 
     it 'should yield the tags themselves', eventually (ret) ->
-      ret.should.include 'test'
+      ret.should.containEql 'test'
 
     it 'should have updated the list itself', eventually (ret) ->
       list.tags.should.eql ret
@@ -52,7 +52,7 @@ describe 'List', ->
       ret.length.should.equal 3
 
     it 'should yield the tags themselves', eventually (ret) ->
-      ret.should.include 'test'
+      ret.should.containEql 'test'
   
     it 'should have updated the list itself', eventually (ret) ->
       list.tags.should.eql ret
@@ -69,8 +69,8 @@ describe 'List', ->
       ret.length.should.equal 3
 
     it 'should yield the tags themselves', eventually (ret) ->
-      ret.should.include 'test'
-      ret.should.include 'removeTags'
+      ret.should.containEql 'test'
+      ret.should.containEql 'removeTags'
 
     it 'should no longer include the removed tag', eventually (ret) ->
-      ret.should.not.include 'toRemove'
+      ret.should.not.containEql 'toRemove'

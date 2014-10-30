@@ -18,7 +18,7 @@ describe 'Service#fetchListsContaining', ->
       ls.length.should.equal 2
 
     it 'should find "the great unknowns"', eventually (ls) ->
-      (l.name for l in ls).should.include 'The great unknowns'
+      (l.name for l in ls).should.containEql 'The great unknowns'
 
   describe 'searching with the callback api', ->
 
@@ -30,7 +30,7 @@ describe 'Service#fetchListsContaining', ->
         return done err if err?
         try
           lists.length.should.equal 2
-          (l.name for l in lists).should.include 'The great unknowns'
+          (l.name for l in lists).should.containEql 'The great unknowns'
           done()
         catch e
           done e
@@ -47,6 +47,6 @@ describe 'Service#fetchListsContaining', ->
       ls.length.should.equal 3
 
     it 'should find "My-Favourite-Employees"', eventually (ls) ->
-      (l.name for l in ls).should.include 'My-Favourite-Employees'
+      (l.name for l in ls).should.containEql 'My-Favourite-Employees'
 
 

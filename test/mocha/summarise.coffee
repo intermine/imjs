@@ -51,7 +51,7 @@ describe 'Query', ->
       sumCounts(results).should.equal 46
 
     it 'should contain the company names as the bucket labels', eventually ({results}) ->
-      (x.item for x in results).should.include 'Wernham-Hogg'
+      (x.item for x in results).should.containEql 'Wernham-Hogg'
 
     it 'should have a suitable total', eventually ({stats}) ->
       stats.uniqueValues.should.equal 6

@@ -47,7 +47,7 @@ describe 'Service', ->
 
     it "should contain #{expectedMember }", eventually (list) ->
       list.contents().then (members) ->
-        (m.name for m in members).should.include expectedMember
+        (m.name for m in members).should.containEql expectedMember
 
   describe '#complement(opts) {Array of list names}', ->
 
@@ -78,7 +78,7 @@ describe 'Service', ->
 
     it "should contain #{expectedMember }", eventually (list) ->
       list.contents().then (members) ->
-        (m.name for m in members).should.include expectedMember
+        (m.name for m in members).should.containEql expectedMember
 
   describe '#complement(opts) {Array of Lists}', ->
 
@@ -113,7 +113,7 @@ describe 'Service', ->
 
     it "should contain #{expectedMember }", eventually (list) ->
       list.contents().then (members) ->
-        (m.name for m in members).should.include expectedMember
+        (m.name for m in members).should.containEql expectedMember
 
   describe '#complement(opts, cb)', ->
 

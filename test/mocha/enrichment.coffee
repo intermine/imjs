@@ -8,6 +8,9 @@ there_is_one_and_it_is_vikram = (results) ->
   results.length.should.equal 1
   results[0].identifier.should.equal 'Vikram'
 
+there_are_seven = (results) ->
+  results.length.should.equal 7
+  results[0].identifier.should.equal 'Vikram'
 
 describe 'Service', ->
 
@@ -39,6 +42,16 @@ describe 'Service', ->
       maxp: 1
 
     it 'performs an enrichment calculation', eventually there_is_one_and_it_is_vikram
+
+  describe '#enrichment, specifying correction', ->
+
+    @beforeAll prepare -> service.enrichment
+      list: 'My-Favourite-Employees'
+      widget: 'contractor_enrichment'
+      maxp: 1
+      correction: 'Bonferroni'
+
+    it 'performs an enrichment calculation', eventually there_are_seven
 
   describe '#enrichment with callback', ->
 

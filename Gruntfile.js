@@ -2,6 +2,7 @@ module.exports = function (grunt) {
   'use strict';
 
   var path = require('path');
+  var derequire = require('derequire');
   var fs = require('fs');
   var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
                   '<%= grunt.template.today("yyyy-mm-dd") %> */\n' +
@@ -161,10 +162,12 @@ module.exports = function (grunt) {
           'dist/im.js': ['build/service.js']
         },
         options: {
-          alias: ['build/http-browser.js:./http'],
+          alias: ['./build/http-browser.js:./http'],
           ignore: ['xmldom'],
-          noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
-          standalone: 'imjs',
+          browserifyOptions: {
+            noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
+            standalone: 'imjs'
+          },
           postBundleCB: bundled,
         }
       },
@@ -175,18 +178,20 @@ module.exports = function (grunt) {
         options: {
           transform: ['coffeeify', 'envify'],
           alias: [
-            'build/http-browser.js:./http',
-            'test/mocha/lib/utils.coffee:./lib/utils',
-            'test/mocha/lib/fixture.coffee:./lib/fixture',
-            'test/mocha/lib/fixture.coffee:./fixture',
-            'node_modules/should/should.js:should'
+            './build/http-browser.js:./http',
+            './test/mocha/lib/utils.coffee:./lib/utils',
+            './test/mocha/lib/fixture.coffee:./lib/fixture',
+            './test/mocha/lib/fixture.coffee:./fixture',
+            './node_modules/should/should.js:should'
           ],
           ignore: ['xmldom'],
-          noParse: [
-            'node_modules/httpinvoke/httpinvoke-commonjs.js',
-            'node_modules/should/should.js',
-            'js/im.js'
-          ]
+          browserifyOptions: {
+            noParse: [
+              'node_modules/httpinvoke/httpinvoke-commonjs.js',
+              require.resolve('./node_modules/should/should'),
+              'js/im.js'
+            ]
+          }
         }
       }
     },
@@ -213,13 +218,16 @@ module.exports = function (grunt) {
   })
 
   function bundled (error, src, next) {
+    if (error) {
+      return next(error);
+    }
     try {
       var bundleBanner = grunt.template.process(banner)
       var shiv = grunt.file.read("build/shiv.js")
       var openIFE = "(function (intermine) {";
       var closeIFE ='})(window.intermine);';
       var expose = grunt.file.read('build/export.js');
-      next(null, [bundleBanner, shiv, openIFE, src, expose, closeIFE].join("\n"))
+      next(null, derequire([bundleBanner, shiv, openIFE, src, expose, closeIFE].join("\n")));
     } catch (e) {
       next(e)
     }

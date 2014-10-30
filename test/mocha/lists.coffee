@@ -14,7 +14,7 @@ describe 'Service', ->
       lists.length.should.be.above 0
 
     it 'should contain "My-Favourite-Employees"', eventually (lists) ->
-      (l.name for l in lists).should.include 'My-Favourite-Employees'
+      (l.name for l in lists).should.containEql 'My-Favourite-Employees'
 
 
   describe '#fetchLists (err, list) ->', ->
@@ -23,7 +23,7 @@ describe 'Service', ->
       service.fetchLists (err, lists) ->
         return done err if err?
         try
-          (l.name for l in lists).should.include 'My-Favourite-Employees'
+          (l.name for l in lists).should.containEql 'My-Favourite-Employees'
           done()
         catch e
           done e
@@ -69,7 +69,7 @@ describe 'Service', ->
 
     it 'should contain David', eventually (list) ->
       list.contents().then (members) ->
-        (m.name for m in members).should.include 'David Brent'
+        (m.name for m in members).should.containEql 'David Brent'
 
   describe '#fetchList (err, list) ->', ->
 

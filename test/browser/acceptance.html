@@ -33,10 +33,10 @@
                 globals: ['navigator', 'getInterface', 'expect', 'JSON', 'intermine'],
                 ui: 'bdd'
             });
-            var host = ('demo.intermine.org' || window.location.hostname);
-            var port = ('80' || window.location.port);
+            var host = ('squirrel.sq' || window.location.hostname);
+            var port = ('8080' || window.location.port);
             var service_args = {
-                root: 'http://' + host + ':' + port + '/testmine',
+                root: 'http://' + host + ':' + port + '/intermine-demo',
                 token: 'test-user-token',
                 errorHandler: function(err) {
                     if (!window.mochaPhantomJS) {

@@ -321,6 +321,17 @@ class Service
 
     withCB cb, @post(QUICKSEARCH_PATH, req)
 
+  # Make a PathInfo object from a string
+  #
+  # Sugar for `service.fetchModel().then (m) -> m.makePath path, subclasses`
+  #
+  # @param [String] path The path string.
+  # @param [Object<String, String>] subclasses The subclass info.
+  # @param [Function<Error, PathInfo, Void>] cb An optional callback.
+  # @return [Promise<PathInfo>] A promise to yield a PathInfo object.
+  makePath: (path, subclasses = {}, cb = (->)) ->
+    withCB cb, @fetchModel().then (m) -> m.makePath path, subclasses
+
   # Find out how many rows a given query would return when run.
   #
   # @param [Query|PathInfo|String|Object] The query to run. If it is not already instantiated
@@ -340,7 +351,11 @@ class Service
       req = {query: q, format: 'jsoncount'}
       @post(QUERY_RESULTS_PATH, req).then(get 'count')
     else if typeof q is 'string'
-      @fetchModel().then(invoke 'makePath', q.replace(/\.\*$/, '.id')).then(@count)
+      @fetchModel().then (m) =>
+        try
+          @count m.makePath q
+        catch e # could be star, try as a query
+          @query(select: [q]).then(@count)
     else
       @query(q).then(@count)
 
@@ -722,7 +737,7 @@ class Service
   # @param [(Error?, Query) ->] cb An optional callback to be called when the query is made.
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) =>
-    buildQuery = ([model, summaryFields]) => new Query (merge options, {model, summaryFields}), @
+    buildQuery = ([model, summaryFields]) => new Query options, @, {model, summaryFields}
     withCB cb, Promise.all(@fetchModel(), @fetchSummaryFields()).then(buildQuery)
 
   loadQ = (service, name) -> (q) ->

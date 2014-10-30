@@ -34,13 +34,13 @@ listOpTest = ({method, expectedMember, lists, size}) ->
 
       it "should contain #{ expectedMember }", eventually (list) ->
         list.contents().then (contents) ->
-          (x.name for x in contents).should.include expectedMember
+          (x.name for x in contents).should.containEql expectedMember
 
       it 'should have the test tags', eventually (list) ->
         list.hasTag(t).should.be.true for t in testTags
 
       it 'should be in the test folder', eventually (list) ->
-        list.folders.should.include 'test'
+        list.folders.should.containEql 'test'
 
     describe 'using the callback api', ->
 

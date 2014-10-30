@@ -36,8 +36,8 @@ describe 'Query', ->
       @beforeAll prepare -> service.records query
 
       it 'should only find employees in sales and accounting', eventually (emps) ->
-        allowed.should.include e.department.name for e in emps
+        allowed.should.containEql e.department.name for e in emps
 
       it 'should find David', eventually (emps) ->
-        emps.map(get 'name').should.include 'David Brent'
+        emps.map(get 'name').should.containEql 'David Brent'
 

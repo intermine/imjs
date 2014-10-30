@@ -30,7 +30,7 @@ describe 'Service', ->
       values.length.should.equal 7
 
     it 'should include Wernham-Hogg', eventually (values) ->
-      (v.value for v in values).should.include 'Wernham-Hogg'
+      (v.value for v in values).should.containEql 'Wernham-Hogg'
 
   describe '#pathValues("Company.name", cb)', ->
      
@@ -39,7 +39,7 @@ describe 'Service', ->
         return done err if err?
         try
           values.length.should.equal 7
-          (v.value for v in values).should.include 'Wernham-Hogg'
+          (v.value for v in values).should.containEql 'Wernham-Hogg'
           done()
         catch e
           done e
@@ -53,7 +53,7 @@ describe 'Service', ->
       values.length.should.equal 7
 
     it 'should include Wernham-Hogg', eventually (values) ->
-      (v.value for v in values).should.include 'Wernham-Hogg'
+      (v.value for v in values).should.containEql 'Wernham-Hogg'
 
   describe '#pathValues("Department.employees.name")', ->
 
@@ -63,7 +63,7 @@ describe 'Service', ->
       values.length.should.equal 132
       
     it 'should include David-Brent', eventually (values) ->
-      (v.value for v in values).should.include 'David Brent'
+      (v.value for v in values).should.containEql 'David Brent'
 
   describe '#pathValues("Department.employees.name")', ->
 
@@ -73,7 +73,7 @@ describe 'Service', ->
     it 'should get a list of 132 values', eventually (values) ->
       
     it 'should include David-Brent', eventually (values) ->
-      (v.value for v in values).should.include 'David Brent'
+      (v.value for v in values).should.containEql 'David Brent'
 
   describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"})', ->
 
@@ -83,10 +83,10 @@ describe 'Service', ->
       values.length.should.equal 6
     
     it 'should not include David-Brent', eventually (values) ->
-      (v.value for v in values).should.not.include 'David Brent'
+      (v.value for v in values).should.not.containEql 'David Brent'
 
     it "should include B'wah Hah Hah", eventually (values) ->
-      (v.value for v in values).should.include "Charles Miner"
+      (v.value for v in values).should.containEql "Charles Miner"
 
   describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"}, cb)', ->
 
@@ -96,8 +96,8 @@ describe 'Service', ->
         try
           vs.length.should.equal 6
           names = (v.value for v in vs)
-          names.should.not.include 'David Brent'
-          names.should.include "Charles Miner"
+          names.should.not.containEql 'David Brent'
+          names.should.containEql "Charles Miner"
           done()
         catch err
           done err
@@ -111,10 +111,10 @@ describe 'Service', ->
       values.length.should.equal 6
     
     it 'should not include David-Brent', eventually (values) ->
-      (v.value for v in values).should.not.include 'David Brent'
+      (v.value for v in values).should.not.containEql 'David Brent'
 
     it "should include B'wah Hah Hah", eventually (values) ->
-      (v.value for v in values).should.include "Charles Miner"
+      (v.value for v in values).should.containEql "Charles Miner"
 
   describe '#values("Department.employees.name", {"Department.employees": "CEO"})', ->
 
@@ -124,10 +124,10 @@ describe 'Service', ->
       values.length.should.equal 6
     
     it 'should not include David-Brent', eventually (values) ->
-      values.should.not.include 'David Brent'
+      values.should.not.containEql 'David Brent'
 
     it "should include B'wah Hah Hah", eventually (values) ->
-      values.should.include "Charles Miner"
+      values.should.containEql "Charles Miner"
 
   describe '#values(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 
@@ -138,8 +138,8 @@ describe 'Service', ->
       values.length.should.equal 6
     
     it 'should not include David-Brent', eventually (values) ->
-      values.should.not.include 'David Brent'
+      values.should.not.containEql 'David Brent'
 
     it "should include B'wah Hah Hah", eventually (values) ->
-      values.should.include "Charles Miner"
+      values.should.containEql "Charles Miner"
 

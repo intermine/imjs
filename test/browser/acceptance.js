@@ -1,5 +1,8 @@
 describe('Acceptance', function() {
 
+  'use strict';
+  // Expects service_args to be defined.
+
   // Handy helpers for dealing with summing rows in different ways.
   Array.prototype.mapSum = function(f) {
     return this.reduce(function(acc, e) { return acc + f(e); }, 0);
@@ -22,7 +25,7 @@ describe('Acceptance', function() {
 
   var Service = intermine.Service;
 
-  describe('Overriding exisiting intermine', function () {
+  describe('Overriding existing intermine', function () {
     it('should not have overridden the existing intermine reference', function () {
       expect(intermine.DO_NOT_OVERWRITE).to.eql('OK');
     });

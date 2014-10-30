@@ -23,7 +23,7 @@ class Table
   # @option opts [Object<String,Object>] attributes The descriptions of the table's fields.
   # @option opts [Object<String,Object>] references The descriptions of the N->1 relationships.
   # @option opts [Object<String,Object>] attributes The descriptions of the N->X relationships.
-  constructor: ({@name, @displayName, @attributes, @references, @collections}) ->
+  constructor: ({@name, @tags, @displayName, @attributes, @references, @collections}) ->
     @fields = {}
     @__parents__ = (arguments[0]['extends'] ? [])# avoiding js keywords
 

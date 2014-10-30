@@ -85,9 +85,9 @@ describe 'Query', ->
       j1 = q.toJSON()
       j2 = q.toJSON()
       j1.select.push 'foo'
-      j1.select.should.include 'foo'
-      j2.select.should.not.include 'foo'
-      q.views.should.not.include 'foo'
+      j1.select.should.containEql 'foo'
+      j2.select.should.not.containEql 'foo'
+      q.views.should.not.containEql 'foo'
 
     it 'should clone the values in multi-value constraints', ->
       q2 = new Query
@@ -96,13 +96,13 @@ describe 'Query', ->
       j = q2.toJSON()
       j.where[0].values.should.eql ['x', 'y', 'z']
       j.where[0].values.push 'foo'
-      q2.constraints[0].values.should.not.include 'foo'
+      q2.constraints[0].values.should.not.containEql 'foo'
 
     it 'should produce objects suitable as query arguments', ->
       j = q.toJSON()
       q2 = new Query j
       q2.toJSON().should.eql j
-      q2.views.should.include 'Employee.age'
+      q2.views.should.containEql 'Employee.age'
 
     it 'should then stringify correctly', -> (JSON.stringify q).should.eql asStr
 

@@ -87,28 +87,28 @@ describe 'Model', ->
       managerTypes = testmodel.getSubclassesOf 'Manager'
 
       it 'should include "CEO"', ->
-        managerTypes.should.include('CEO')
+        managerTypes.should.containEql('CEO')
 
     describe 'the subclasses of HasAddress', ->
       addressables = testmodel.getSubclassesOf 'HasAddress'
 
       it 'should include "CEO"', ->
-        addressables.should.include 'CEO'
+        addressables.should.containEql 'CEO'
 
       it 'should include "Company"', ->
-        addressables.should.include 'Company'
+        addressables.should.containEql 'Company'
 
     describe 'the subclasses of Employable', ->
       employables = testmodel.getSubclassesOf 'Employable'
 
       it 'should include "CEO"', ->
-        employables.should.include 'CEO'
+        employables.should.containEql 'CEO'
 
       it 'should include "Contractor"', ->
-        employables.should.include 'Contractor'
+        employables.should.containEql 'Contractor'
 
       it 'should not include "Address"', ->
-        employables.should.not.include 'Address'
+        employables.should.not.containEql 'Address'
 
     describe 'Things', ->
       foundThings = testmodel.getSubclassesOf 'Thing'
@@ -160,16 +160,16 @@ describe 'Model', ->
   describe 'NUMERIC_TYPES', ->
 
     it 'should include whole number types', ->
-      Model.NUMERIC_TYPES.should.include('int')
-      Model.NUMERIC_TYPES.should.include('Integer')
-      Model.NUMERIC_TYPES.should.include('long')
-      Model.NUMERIC_TYPES.should.include('Long')
+      Model.NUMERIC_TYPES.should.containEql('int')
+      Model.NUMERIC_TYPES.should.containEql('Integer')
+      Model.NUMERIC_TYPES.should.containEql('long')
+      Model.NUMERIC_TYPES.should.containEql('Long')
 
     it 'should include fractional types', ->
-      Model.NUMERIC_TYPES.should.include('float')
-      Model.NUMERIC_TYPES.should.include('Float')
-      Model.NUMERIC_TYPES.should.include('double')
-      Model.NUMERIC_TYPES.should.include('Double')
+      Model.NUMERIC_TYPES.should.containEql('float')
+      Model.NUMERIC_TYPES.should.containEql('Float')
+      Model.NUMERIC_TYPES.should.containEql('double')
+      Model.NUMERIC_TYPES.should.containEql('Double')
 
 
 

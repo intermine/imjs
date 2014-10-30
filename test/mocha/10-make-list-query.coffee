@@ -10,8 +10,8 @@ describe 'Query#selectPreservingImpliedConstraints', ->
 
   it 'should have the view we asked for', eventually (lq) ->
     lq.views.length.should.eql 2
-    lq.views.should.include 'Employee.name'
-    lq.views.should.include 'Employee.department.name'
+    lq.views.should.containEql 'Employee.name'
+    lq.views.should.containEql 'Employee.department.name'
 
   it 'should leave us with more constraints', eventually (lq) ->
     lq.constraints.length.should.be.above 1

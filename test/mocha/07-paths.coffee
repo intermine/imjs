@@ -62,7 +62,7 @@ describe 'PathInfo', ->
         path.getChildNodes().length.should.equal 10
 
       it 'should find Employee.department', ->
-        (n.toString() for n in path.getChildNodes()).should.include 'Employee.department'
+        (n.toString() for n in path.getChildNodes()).should.containEql 'Employee.department'
 
       it 'should produce nodes that can find their parent', ->
         n.getParent().equals(path).should.be.true for n in path.getChildNodes()

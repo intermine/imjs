@@ -21,7 +21,7 @@ describe 'Service', ->
 
     pathCountTest 'Employee',             132, 'employees'
     pathCountTest 'Employee.id',          132, 'employees'
-    pathCountTest 'Employee.*',           132, 'employees'
+    pathCountTest 'Employee.*',           131, 'employees' # Implied join constraint.
     pathCountTest 'Employee.fullTime',      2, 'times'
     pathCountTest 'Department.employees', 132, 'employees'
     pathCountTest 'Company.name',           7, 'names'

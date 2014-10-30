@@ -161,7 +161,7 @@ interpretConstraint = (path, con) ->
   else if utils.isArray con
     constraint.op = 'ONE OF'
     constraint.values = con
-  else if typeof con in ['string', 'number']
+  else if typeof con in ['string', 'number', 'boolean']
     if con.toUpperCase?() in Query.NULL_OPS
       constraint.op = con
     else
@@ -447,7 +447,7 @@ class Query
   #         paths to use to determine the sort-order.
   # @option properties [String] constraintLogic The constraint logic.
   #
-  constructor: (properties, service) ->
+  constructor: (properties, service, {model, summaryFields} = {}) ->
     properties ?= {}
     # Fresh containers collection properties.
     @constraints = []
@@ -459,9 +459,9 @@ class Query
     for prop in ['name', 'title', 'comment', 'description', 'type'] when properties[prop]?
       @[prop] = properties[prop]
 
-    @service = service ? {}
-    @model = properties.model ? {}
-    @summaryFields = properties.summaryFields ? {}
+    @service       = service ? {}
+    @model         = model ? properties.model ? {}
+    @summaryFields = summaryFields ? properties.summaryFields ? {}
     @root = properties.root ? properties.from
     @maxRows = properties.size ? properties.limit ? properties.maxRows
     @start = properties.start ? properties.offset ? 0
@@ -659,7 +659,7 @@ class Query
         if cd and @summaryFields[cd.name]
           fn = utils.compose expand, decapitate
           return (fn n for n in @summaryFields[cd.name] when (not @hasView(n)))
-      else if /\.\*\*$/.test(path)
+      else if /\.\*\*$/.test(path) # same as summary fields, plus all attributes.
         starViews = @expandStar(pathStem + '.*')
         attrViews = (expand ".#{ name }" for name of cd.attributes)
         return utils.uniqBy id, starViews.concat(attrViews)

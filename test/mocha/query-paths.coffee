@@ -22,13 +22,13 @@ describe 'Query#getPossiblePaths', ->
         should.exist query.makePath(path).getType
 
     it 'should include Company.department.employees.name', ->
-      paths.should.include 'Company.departments.employees.name'
+      paths.should.containEql 'Company.departments.employees.name'
 
     it 'should include Company.oldContracts.companys.address', ->
-      paths.should.include 'Company.oldContracts.companys.address'
+      paths.should.containEql 'Company.oldContracts.companys.address'
 
     it 'should not include very deep paths', ->
-      paths.should.not.include 'Company.departments.manager.department.employees.address.address'
+      paths.should.not.containEql 'Company.departments.manager.department.employees.address.address'
 
   describe 'The possible paths of a query rooted at Company, extra deep', ->
 
@@ -38,10 +38,10 @@ describe 'Query#getPossiblePaths', ->
     paths = query.getPossiblePaths( 6 )
 
     it 'should include very deep paths', ->
-      paths.should.include 'Company.departments.manager.department.employees.address.address'
+      paths.should.containEql 'Company.departments.manager.department.employees.address.address'
 
     it 'should not include silly paths', ->
-      paths.should.not.include 'Company.foo.bar.quux'
+      paths.should.not.containEql 'Company.foo.bar.quux'
 
 describe 'Query#canHaveMultipleValues', ->
 

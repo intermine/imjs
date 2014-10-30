@@ -18,5 +18,5 @@ describe 'Table', ->
     Employee.toString().should.equal expected
 
   it 'should know about its parents', ->
-    Employee.parents().should.include 'Employable'
+    Employee.parents().should.containEql 'Employable'
 
