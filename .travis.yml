@@ -1,0 +1,13 @@
+language: node_js
+sudo: false # use container based infrastructure
+env:
+    global:
+        - TESTMODEL_URL=http://localhost:8080/intermine-demo
+        - TESTMODEL_PATH=intermine-demo
+before_script:
+    - ./config/travis/init.sh
+script:
+    - make test
+node_js:
+    - '0.11'
+    - '0.10'
