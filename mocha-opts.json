@@ -1,7 +1,7 @@
 {
     "globals": ["should"],
     "compiler": "coffee:coffee-script",
-    "timeout": 3000,
+    "timeout": 30000,
     "ignoreLeaks": false,
     "ui": "bdd",
     "reporter": "spec"

@@ -1,4 +1,4 @@
-/*! imjs - v3.6.3 - 2014-10-30 */
+/*! imjs - v3.6.3 - 2014-11-26 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is

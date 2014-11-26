@@ -16,8 +16,11 @@ compile:
 build:
 	grunt build
 
-test:
+test: bower_components
 	grunt test
+
+bower_components:
+	bower install
 
 all:
 	grunt default
