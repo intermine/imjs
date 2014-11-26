@@ -10,7 +10,7 @@ else
 fi
 
 # Pull in the server code.
-git clone https://github.com/intermine/intermine.git server
+git clone --depth 1 https://github.com/intermine/intermine.git server
 
 # We need a running demo webapp
 source server/config/download_and_configure_tomcat.sh
