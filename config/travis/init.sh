@@ -14,11 +14,11 @@ git clone https://github.com/intermine/intermine.git server
 
 # We need a running demo webapp
 source server/config/download_and_configure_tomcat.sh
-sleep 10 # wait for tomcat to come on line
+sleep 5 # wait for tomcat to come on line
 # Get messages from 500 errors.
 echo 'i.am.a.dev = true' >> server/testmodel/testmodel.properties
 PSQL_USER=postgres sh server/testmodel/setup.sh
-sleep 10 # wait for the webapp to come on line
+sleep 15 # wait for the webapp to come on line
 
 # Warm up the keyword search by requesting results, but ignoring the results
 $GET $TESTMODEL_URL/service/search > /dev/null
