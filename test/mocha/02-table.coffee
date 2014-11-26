@@ -1,7 +1,7 @@
 should     = require 'should'
 {Model}    = require './lib/fixture'
 
-{TESTMODEL} = require './data/model'
+{TESTMODEL} = require '../data/model'
 
 describe 'Table', ->
 

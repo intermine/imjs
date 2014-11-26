@@ -11,7 +11,7 @@ Promise = require 'promise'
 {shouldFail, prepare, eventually} = require './lib/utils'
 Fixture = require './lib/fixture'
 
-{TESTMODEL} = require './data/model'
+{TESTMODEL} = require '../data/model'
 
 testmodel = new Model TESTMODEL.model
 {service} = new Fixture

@@ -4072,7 +4072,7 @@
 
 }).call(this);
 
-},{"./base64":1,"./http":undefined,"./id-resolution-job":3,"./lists":4,"./model":5,"./promise":7,"./query":8,"./user":11,"./util":12,"./version":13}],10:[function(_dereq_,module,exports){
+},{"./base64":1,"./http":"./http","./id-resolution-job":3,"./lists":4,"./model":5,"./promise":7,"./query":8,"./user":11,"./util":12,"./version":13}],10:[function(_dereq_,module,exports){
 (function() {
   var Table, merge, properties;
 
@@ -17864,13 +17864,17 @@ var zlib = _dereq_('zlib');
 /* jshint unused:true */
 ;;var resolve = 0, reject = 1, progress = 2, chain = function(a, b) {
     /* jshint expr:true */
-    a && a.then && a.then(function() {
-        b[resolve].apply(null, arguments);
-    }, function() {
-        b[reject].apply(null, arguments);
-    }, function() {
-        b[progress].apply(null, arguments);
-    });
+    if(a && a.then) {
+        a.then(function() {
+            b[resolve].apply(null, arguments);
+        }, function() {
+            b[reject].apply(null, arguments);
+        }, function() {
+            b[progress].apply(null, arguments);
+        });
+    } else {
+        b[resolve](a);
+    }
     /* jshint expr:false */
 }, nextTick = (global.process && global.process.nextTick) || global.setImmediate || global.setTimeout, mixInPromise = function(o) {
     var value, queue = [], state = progress;
@@ -18054,10 +18058,21 @@ if(!method) {
 }
 var safeCallback = function(name, aspectBefore, aspectAfter) {
     return function(a, b, c, d) {
+        var _cb;
         aspectBefore(a, b, c, d);
-        try {
-            options[name](a, b, c, d);
-        } catch(_) {
+        if(options[name]) {
+            try {
+                options[name](a, b, c, d);
+            } catch(err) {
+                _cb = cb;
+                cb = null;
+                nextTick(function() {
+                    /* jshint expr:true */
+                    _cb && _cb(err);
+                    /* jshint expr:false */
+                    promise();
+                });
+            }
         }
         aspectAfter(a, b, c, d);
     };
@@ -18254,6 +18269,13 @@ if(timeout) {
         return failWithoutRequest(cb, err);
     }
     inputHeaders = copy(inputHeaders, {});
+    if(typeof input !== 'undefined') {
+        input = new Buffer(input);
+        inputLength = input.length;
+        inputHeaders['Content-Length'] = String(inputLength);
+    } else {
+        inputLength = 0;
+    }
     inputHeaders['Accept-Encoding'] = 'gzip, deflate, identity';
 
     var ignorantlyConsume = function(res) {
@@ -18411,11 +18433,7 @@ if(timeout) {
         uploadProgressCb(0, inputLength);
     });
     if(typeof input !== 'undefined') {
-        input = new Buffer(input);
-        inputLength = input.length;
         req.write(input);
-    } else {
-        inputLength = 0;
     }
     req.on('error', function() {
         if(!cb) {
@@ -18471,13 +18489,17 @@ module.exports = httpinvoke;
     /* jshint unused:true */
     ;global = window;;var resolve = 0, reject = 1, progress = 2, chain = function(a, b) {
     /* jshint expr:true */
-    a && a.then && a.then(function() {
-        b[resolve].apply(null, arguments);
-    }, function() {
-        b[reject].apply(null, arguments);
-    }, function() {
-        b[progress].apply(null, arguments);
-    });
+    if(a && a.then) {
+        a.then(function() {
+            b[resolve].apply(null, arguments);
+        }, function() {
+            b[reject].apply(null, arguments);
+        }, function() {
+            b[progress].apply(null, arguments);
+        });
+    } else {
+        b[resolve](a);
+    }
     /* jshint expr:false */
 }, nextTick = (global.process && global.process.nextTick) || global.setImmediate || global.setTimeout, mixInPromise = function(o) {
     var value, queue = [], state = progress;
@@ -18685,10 +18707,21 @@ if(!method) {
 }
 var safeCallback = function(name, aspectBefore, aspectAfter) {
     return function(a, b, c, d) {
+        var _cb;
         aspectBefore(a, b, c, d);
-        try {
-            options[name](a, b, c, d);
-        } catch(_) {
+        if(options[name]) {
+            try {
+                options[name](a, b, c, d);
+            } catch(err) {
+                _cb = cb;
+                cb = null;
+                nextTick(function() {
+                    /* jshint expr:true */
+                    _cb && _cb(err);
+                    /* jshint expr:false */
+                    promise();
+                });
+            }
         }
         aspectAfter(a, b, c, d);
     };

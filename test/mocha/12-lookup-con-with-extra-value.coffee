@@ -1,4 +1,4 @@
-{TESTMODEL} = require './data/model'
+{TESTMODEL} = require '../data/model'
 Fixture = require './lib/fixture'
 {Query, Model} = Fixture
 {get} = Fixture.funcutils

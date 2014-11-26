@@ -47,7 +47,6 @@ module.exports = function (grunt) {
       return cb(new Error("No source files found."));
     }
 
-
     // Ensure that the destination exists.
     grunt.file.mkdir(dest);
 

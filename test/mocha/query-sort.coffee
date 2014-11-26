@@ -1,6 +1,6 @@
 {Query, Model} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
-{TESTMODEL} = require './data/model'
+{TESTMODEL} = require '../data/model'
 
 describe 'Query#select', ->
 

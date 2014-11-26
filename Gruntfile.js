@@ -47,6 +47,14 @@ module.exports = function (grunt) {
       source: {
         src: 'src/*',
         dest: 'build'
+      },
+      tests: {
+        src: 'test/mocha/*.coffee',
+        dest: 'test/compiled'
+      },
+      testlib: { // This is ugly - should be one task.
+        src: 'test/mocha/lib/*.coffee',
+        dest: 'test/compiled/lib'
       }
     },
     jshint: {
@@ -102,6 +110,7 @@ module.exports = function (grunt) {
     clean: {
       qunit: ['test/qunit/build'],
       build: ['build'],
+      tests: ['test/compiled'],
       cdnlinks: {
         src: ['<%= CDN %>/js/intermine/imjs/latest', '<%= CDN %>/js/intermine/imjs/<%= pkg.version.replace(/\\d+$/, "x") %>'],
         options: {force: true}
@@ -175,19 +184,16 @@ module.exports = function (grunt) {
       },
       tests: {
         files: {
-          'test/browser/mocha-test.js': ['test/mocha/*.coffee'],
+          'test/browser/mocha-test.js': ['test/compiled/**/*.js'],
         },
         options: {
-          transform: ['coffeeify', 'envify'],
+          transform: ['envify'],
           alias: [
             './build/http-browser.js:./http',
-            require.resolve('./test/mocha/lib/utils.coffee') + ':./lib/utils',
-            require.resolve('./test/mocha/lib/fixture.coffee') + ':./lib/fixture',
-            require.resolve('./test/mocha/lib/fixture.coffee') + ':./fixture',
             shouldjs + ':should'
           ],
           ignore: ['xmldom'],
-          postBundleCB: bundled,
+          // postBundleCB: bundled,
           browserifyOptions: {
             noParse: [
               'node_modules/httpinvoke/httpinvoke-commonjs.js',
@@ -236,12 +242,12 @@ module.exports = function (grunt) {
   }
 
   function injectVersion(file) {
-    var src, dest, temp, output;
-    src = dest = 'build/version.js';
-    temp = grunt.file.read(src);
-    output = grunt.template.process(temp);
-    grunt.file.write(dest, output, {encoding: 'utf8'});
-    grunt.log.writeln("Injected version");
+    var src, dest, temp, output
+    src = dest = 'build/version.js'
+    temp = grunt.file.read(src)
+    output = grunt.template.process(temp)
+    grunt.file.write(dest, output, {encoding: 'utf8'})
+    grunt.log.writeln("Injected version")
   }
 
   grunt.loadNpmTasks("grunt-jscoverage")
@@ -404,6 +410,7 @@ module.exports = function (grunt) {
   grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit'])
   grunt.registerTask('build', [
     'clean:build',
+    'clean:tests',
     'compile',
     '-inject-version',
     'browserify',

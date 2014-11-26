@@ -1,6 +1,6 @@
 Fixture = require './lib/fixture'
 should = require 'should'
-{TESTMODEL} = require './data/model'
+{TESTMODEL} = require '../data/model'
 {Query, Model, utils: {any}} = Fixture
 
 describe 'Query#getPossiblePaths', ->
