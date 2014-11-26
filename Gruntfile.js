@@ -182,7 +182,6 @@ module.exports = function (grunt) {
           alias: [
             './build/http-browser.js:./http',
             require.resolve('./test/mocha/lib/utils.coffee') + ':./lib/utils',
-            // require.resolve('./test/mocha/lib/utils.coffee') + ':./utils',
             require.resolve('./test/mocha/lib/fixture.coffee') + ':./lib/fixture',
             require.resolve('./test/mocha/lib/fixture.coffee') + ':./fixture',
             shouldjs + ':should'
