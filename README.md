@@ -1,6 +1,8 @@
 IMJS
 ====
 
+[![Build Status][status]][ci]
+
 InterMine Web-Services Communication Client Library
 
 SYNOPSIS
@@ -53,23 +55,23 @@ Functionality
  * Data Queries
 
    Users may make arbitrarily complex queries against an intermine data-warehouse. See the
-   [Query] [3] class for more information.
+   [Query][3] class for more information.
 
  * List Management
 
    Users may authenticate to their accounts (through the use of web-service tokens) and then
-   have full freedom to create, edit and delete lists they have access to. See the [List] [2] class 
+   have full freedom to create, edit and delete lists they have access to. See the [List][2] class 
    for more information.
 
  * Analysis
 
-   Users may perform enrichment analysis over lists they have access to. See [Service#enrichment] [4]
+   Users may perform enrichment analysis over lists they have access to. See [Service#enrichment][4]
    and [List#enrichment] [5] for more information.
 
  * Data Model Introspection
 
    The structure of the data available in the data model is available for instropection through
-   the [Model] [1] class. This is particularly useful for constructing dynamic data-driven interfaces.
+   the [Model][1] class. This is particularly useful for constructing dynamic data-driven interfaces.
 
 LICENCE
 =======
@@ -84,7 +86,8 @@ SUPPORT
 
 For help with this library, or the use of intermine in general, please contact <dev@intermine.org>.
 
-
+[status]: https://travis-ci.org/alexkalderimis/imjs.svg?branch=master
+[ci]: https://travis-ci.org/alexkalderimis/imjs
 [1]: classes/Model.html
 [2]: classes/List.html
 [3]: classes/Query.html
