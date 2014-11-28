@@ -31,6 +31,7 @@
             window.intermine = {DO_NOT_OVERWRITE: "OK"};
             mocha.setup({
                 globals: ['navigator', 'getInterface', 'expect', 'JSON', 'intermine'],
+                timeout: 30000,
                 ui: 'bdd'
             });
             var host = ('<%= args.host %>' || window.location.hostname);

@@ -24,6 +24,7 @@
         <script>
             mocha.setup({
                 globals: ['navigator', 'getInterface', 'expect', 'JSON', 'intermine'],
+                timeout: 30000, // embarrassingly generous timeout
                 ui: 'bdd'});
         </script>
 

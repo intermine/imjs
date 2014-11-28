@@ -104,6 +104,25 @@ describe 'Defining Query constraints', ->
 
   describe 'including switched off constraints', constraintsTest someSwitchedOff
 
+describe 'range constraints', ->
+
+  {service} = new Fixture()
+
+  @beforeAll prepare -> service.query
+    from: 'Employee'
+    select: 'name'
+    where: [
+      ['age', 'OVERLAPS', ['20..30']],
+      ['age', 'DOES NOT OVERLAP', ['10..20', '30..40']],
+      ['age', 'WITHIN', ['20..30']],
+      ['age', 'OUTSIDE', ['20..30']],
+      ['age', 'CONTAINS', ['20..30']],
+      ['age', 'DOES NOT CONTAIN', ['20..30']]
+    ]
+
+    it 'should have made a query with 6 constraints', eventually (q) ->
+      q.constraints.length.should.eql 6
+
 describe 'Query', ->
 
   describe '#isConstrained', ->
