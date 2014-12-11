@@ -75,7 +75,7 @@ class PathInfo
   getEndClass: () => (@model.classes[@subclasses[@toString()] or @end?.referencedType]) or @root
 
   # Get the parent of this path. i.e., for `Gene.proteins.name` returns `Gene.proteins`
-  # 
+  #
   #   exonSymbols = model.makePath('Gene.exons.symbol')
   #   exons = model.makePath('Gene.exons')
   #   exons.equals(exonSymbols.getParent()) //=> true
@@ -110,14 +110,14 @@ class PathInfo
 
   # Analyses the inheritance hierarchy to determine if this path represents
   # an instance of the provided class. eg:
-  # 
+  #
   #   path = model.makePath('Gene.proteins')
   #   path.isa('Protein') //=> true
   #   path.isa('BioEntity') //=> true
   #   path.isa('Organism') //=> false
   #   path.append('name').isa('String') //=> true
   #
-  # @param [String|Table] The purported parent class. 
+  # @param [String|Table] The purported parent class.
   # @return [boolean] If the path represents the provided class or one of its subclasses
   isa: (clazz) =>
     if @isAttribute()
@@ -157,7 +157,8 @@ class PathInfo
   # @return [Array<Descriptor>] the root and the segment descriptors in a single array.
   allDescriptors: => [@root].concat(@descriptors)
 
-  # @return [String] The string representation of this path, the same as that passed to {Model::makePath} 
+  # @return [String] The string representation of this path, the same as that passed
+  #                  to {Model::makePath}
   toString: () -> @allDescriptors().map(get 'name').join('.')
 
   # Overriden equals.
