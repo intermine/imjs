@@ -66,12 +66,19 @@ Functionality
  * Analysis
 
    Users may perform enrichment analysis over lists they have access to. See [Service#enrichment][4]
-   and [List#enrichment] [5] for more information.
+   and [List#enrichment][5] for more information.
 
  * Data Model Introspection
 
    The structure of the data available in the data model is available for instropection through
    the [Model][1] class. This is particularly useful for constructing dynamic data-driven interfaces.
+
+DOCUMENTATION
+=============
+
+For API documentation see <https://intermine.github.io/imjs>. For general useage
+documentation and information about InterMine, see
+<http://intermine.readthedocs.org/en/latest/>.
 
 LICENCE
 =======
@@ -80,6 +87,7 @@ All intermine code is free software released under the LGPL licence <http://www.
 You are free to modify and redistribute this software.
 
 The copyright is held by Alex Kalderimis <alex@intermine.org>.
+
 
 SUPPORT
 =======
