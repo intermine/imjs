@@ -1,4 +1,4 @@
-/*! imjs - v3.7.0 - 2014-11-28 */
+/*! imjs - v3.7.1 - 2014-12-11 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -1202,7 +1202,7 @@
     };
 
     PathInfo.prototype.equals = function(other) {
-      return other && (other.ident != null) && this.ident === other.ident;
+      return this === other || (this.ident && (other != null ? other.ident : void 0) === this.ident);
     };
 
     PathInfo.prototype.getType = function() {
@@ -4732,7 +4732,7 @@
 },{"./promise":7}],13:[function(_dereq_,module,exports){
 (function() {
 
-  exports.VERSION = '3.7.0';
+  exports.VERSION = '3.7.1';
 
 }).call(this);
 
