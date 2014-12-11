@@ -420,8 +420,8 @@ module.exports = function (grunt) {
     'browser-indices'
   ])
   grunt.registerTask('demo', ['build', 'browser-indices'])
-  grunt.registerTask('justtest',['build', '-load-test-globals', '-testglob'])
-  grunt.registerTask('test', ['build', 'test-node', 'phantomjs'])
-  grunt.registerTask('default', ['jshint', 'coffeelint', 'test'])
+  grunt.registerTask('justtest',['jshint', 'coffeelint', 'build', '-load-test-globals', '-testglob'])
+  grunt.registerTask('test', ['jshint', 'coffeelint', 'build', 'test-node', 'phantomjs'])
+  grunt.registerTask('default', ['test'])
 
 }
