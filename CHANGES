@@ -51,4 +51,5 @@
 3.2.1  Don't overwrite the intermine ref.
 3.2.3  Work in dojo AMD loader.
 3.7.0  More range constraints
+3.7.1  Docs, plus a more efficient PathInfo equals.
 **/
