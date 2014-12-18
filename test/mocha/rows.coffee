@@ -65,7 +65,7 @@ describe 'Query', ->
 
     it 'should allow iteration per item', (done) ->
       cbs = Counter.forOlderEmployees done
-      service.query(query).done invokeWith 'eachRow', cbs
+      service.query(query).then (invokeWith 'eachRow', cbs), done
 
     it 'should allow iteration per item with a single callback', (done) ->
       [count, error, end] = Counter.forOlderEmployees done
@@ -99,7 +99,7 @@ describe 'Service', ->
 
       it 'accepts a query options object, and can run it as it would a query', (done) ->
         check = test done
-        service.rows(query).done check, done
+        service.rows(query).then check, done
         
       it 'accepts a query options object, and can run it, accepting callbacks', (done) ->
         check = test done
@@ -124,7 +124,7 @@ describe 'Service', ->
 
       it 'should succeed and get results', (done) ->
         check = test done
-        service.rows(query, timeout: 2000).done check, done
+        service.rows(query, timeout: 2000).then check, done
 
     describe 'bad requests', ->
 
@@ -151,11 +151,11 @@ describe 'Service', ->
 
       it 'can run a query and yield each row', (done) ->
         cbs = Counter.forOlderEmployees done
-        service.query(query).done (q) -> service.eachRow q, {}, cbs...
+        service.query(query).then ((q) -> service.eachRow q, {}, cbs...), done
 
       it 'can run a query and yield each row, and does not need a page', (done) ->
         cbs = Counter.forOlderEmployees done
-        service.query(query).done (q) -> service.eachRow q, cbs...
+        service.query(query).then ((q) -> service.eachRow q, cbs...), done
 
       it 'accepts a query options object and can run it as a query, callbacks', (done) ->
         cbs = Counter.forOlderEmployees done
@@ -167,18 +167,20 @@ describe 'Service', ->
 
       it 'accepts a query options object and can run it as it would a query, callback', (done) ->
         [count, error, end] = Counter.forOlderEmployees done
-        service.eachRow(query, count).done (stream) ->
+        test = (stream) ->
           stream.on 'error', error
           stream.on 'end', end
           stream.resume()
+        service.eachRow(query, count).then test, done
 
       it 'accepts a query options object and can run it as it would a query, promise', (done) ->
         [count, error, end] = Counter.forOlderEmployees done
-        service.eachRow(query).done (stream) ->
+        test =  (stream) ->
           stream.on 'data', count
           stream.on 'error', error
           stream.on 'end', end
           stream.resume()
+        service.eachRow(query).then test, done
 
     describe 'bad requests', ->
 
@@ -197,7 +199,7 @@ describe 'Service', ->
         failed = service.eachRow badQuery
         failed.then (res) ->
           return done new Error("Should have failed")
-        failed.then null, (status) ->
+        failed.then null, ([status, stream]) ->
           try
             status.should.match /400/
             done()

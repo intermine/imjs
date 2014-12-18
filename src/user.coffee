@@ -7,7 +7,6 @@
 # @author: Alex Kalderimis
 
 {withCB, get, isFunction, any, error}    = require './util'
-intermine                                = exports
 
 # Simple utility to take the returned value from manageUserPreferences and
 # update the preferences property on this object.
@@ -15,7 +14,7 @@ do_pref_req = (user, data, method, cb) ->
   user.service.manageUserPreferences(method, data, cb).then (prefs) -> user.preferences = prefs
 
 # A representation of the user we are logged in as.
-class User
+class exports.User
 
   # Save references to the service, as well as
   # extracting the user's preferences from the options.
@@ -74,6 +73,3 @@ class User
 
   revokeToken: (token, cb) ->
     withCB cb, @service.makeRequest('DELETE', "user/tokens/#{ token }")
-
-intermine.User = User
-

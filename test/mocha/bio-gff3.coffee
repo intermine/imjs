@@ -1,5 +1,5 @@
 {Service, utils} = require './lib/fixture'
-Promise = require 'promise'
+{Promise} = require 'es6-promise'
 {shouldFail, prepare, eventually} = require './lib/utils'
 {invoke, get} = utils
 should = require 'should'

@@ -5,7 +5,8 @@ should = require 'should'
 
 MSG = 'some message'
 
-start = new Date().getTime()
+# Subtract a second because the remote time is floored to the nearest second.
+start = new Date().getTime() - 1000
 
 describe 'User#getToken', ->
 
@@ -15,7 +16,7 @@ describe 'User#getToken', ->
 
   describe 'A day token', ->
 
-    @beforeAll prepare -> after userPromise, userPromise.then invoke 'createToken'
+    @beforeAll prepare -> parallel userPromise, userPromise.then invoke 'createToken'
 
     it 'should not be the same as the permanent token', eventually ([_, token]) ->
       token.should.not.equal service.token

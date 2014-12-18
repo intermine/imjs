@@ -34,6 +34,7 @@ root.querystring = (obj) ->
   # Remove undefined values, and serialise.
   qsFromList (p for p in pairs when p[1]?)
 
+# Bind which always sets the context to null.
 # Simply because this is a whole load cleaner and less ugly than
 # calls to `_.bind(f, null, arg1, arg2, ...)`.
 # @param [->] f The function to curry.
@@ -48,21 +49,21 @@ root.error = error = (e) -> new Promise (_, reject) -> reject new Error e
 
 # Helper for wrapping a value in a promise.
 # @param args the The resolution.
-# @return [Promise<args...>] A promise to resolve with the resolution.
-root.success = success = Promise.from
+# @return [Promise<arg>] A promise to resolve with the resolution.
+root.success = success = (x) -> new Promise (resolve, _) -> resolve x
 
 # Helper for performing promises in parallel. Mostly so we can
 # change promise library as we see fit...
-root.parallel = Promise.all
+root.parallel = (promises...) -> Promise.all promises
 
-# Attach a node-style callback (err, result), yielding the original promise.
+# Attach one or more node-style callbacks (err, result), returning the original promise.
 # @param f The callback
 # @param p The promise
 # @return [Promise] The promise
 root.withCB = (fs..., p) ->
-  for f in fs when f? then do (f) ->
-    onSucc = (res) -> f null, res
-    onErr = (err) -> f err
+  for f in fs when f?
+    onSucc = curry f, null # called as (res) -> f null, res
+    onErr  = f             # called as (err) -> f err
     p.then onSucc, onErr
   return p
 
@@ -306,3 +307,4 @@ pairFold = fold (o, [k, v]) ->
   o
 
 root.pairsToObj = (pairs) -> pairFold {}, pairs
+

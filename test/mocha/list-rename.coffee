@@ -53,5 +53,5 @@ describe 'List', ->
             done()
           catch e
             done e
-      service.fetchList(FAVS).then(invoke 'copy', {tags, name}).done test, done
+      service.fetchList(FAVS).then(invoke 'copy', {tags, name}).then test, done
 

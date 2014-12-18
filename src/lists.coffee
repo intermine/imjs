@@ -110,11 +110,11 @@ class List
   # @param [(List) ->] cb An optional callback.
   # @return [Promise<List>] A promise to yield the new state of the list.
   rename: (newName, cb) ->
-    req = oldname: @name, newname: newName
-    withCB cb, @service.post('lists/rename', req)
-                       .then(get 'listName')
-                       .then((n) => @name = n)
-                       .then(@service.fetchList)
+    promise = @service.post 'lists/rename', oldname: @name, newname: newName
+                      .then get 'listName'
+                      .then (n) => @name = n
+                      .then @service.fetchList
+    withCB cb, promise
 
   # Copy this list to an exact duplicate with a different name.
   #

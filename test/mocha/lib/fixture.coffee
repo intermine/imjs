@@ -17,32 +17,32 @@ console.log "Testing against #{ args.root }" if process.env.DEBUG
 
 class Fixture
 
-    constructor: ->
-        [@service, @legacy] = [args, legacy].map Service.connect
+  constructor: ->
+    [@service, @legacy] = [args, legacy].map Service.connect
 
-        @allEmployees =
-            select: ['*']
-            from: 'Employee'
+    @allEmployees =
+      select: ['*']
+      from: 'Employee'
 
-        @badQuery =
-          select: ['name']
-          from: 'Employee'
-          where:
-            id: 'foo'
+    @badQuery =
+      select: ['name']
+      from: 'Employee'
+      where:
+        id: 'foo'
 
-        @olderEmployees =
-            select: ['*']
-            from: 'Employee'
-            where:
-                age:
-                    gt: 50
+    @olderEmployees =
+      select: ['*']
+      from: 'Employee'
+      where:
+        age:
+          gt: 50
 
-        @youngerEmployees =
-            select: ['*']
-            from: 'Employee'
-            where:
-                age:
-                    le: 50
+    @youngerEmployees =
+      select: ['*']
+      from: 'Employee'
+      where:
+        age:
+          le: 50
 
 
 Fixture.funcutils = utils

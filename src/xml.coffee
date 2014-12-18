@@ -1,7 +1,4 @@
-try
-  DOMParser = window.DOMParser
-catch e
-  {DOMParser} = require('xmldom')
+{DOMParser} = require('xmldom')
 
 sanitize = (xml) ->
   xml = xml.replace /^\s*/g, ''

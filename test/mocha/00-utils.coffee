@@ -185,9 +185,6 @@ describe 'utils', ->
       it 'should be a thenable', ->
         should.exist promise.then
 
-      it 'should have a "done" method', ->
-        should.exist promise.done
-
       it 'should have been resolved', (done) ->
         promise.then( (res) -> res.should.equal 'FOO' )
                .then( (-> done()), done )
@@ -199,9 +196,6 @@ describe 'utils', ->
 
       it 'should be a thenable', ->
         should.exist promise.then
-
-      it 'should have a "done" method', ->
-        should.exist promise.done
 
       it 'should have been rejected', (done) ->
         promise.then(
@@ -220,9 +214,6 @@ describe 'utils', ->
 
     it 'should be a thenable', ->
       should.exist child.then
-
-    it 'should have a "done" method', ->
-      should.exist child.done
 
     it 'should have been rejected', (done) ->
       child.then ((res) -> done new Error("Expected failure, got #{ res }")),

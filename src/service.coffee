@@ -15,15 +15,12 @@ Promise           = require './promise'
 {List}            = require './lists'
 {User}            = require './user'
 {IDResolutionJob} = require './id-resolution-job'
-base64            = require './base64'
 version           = require './version'
 utils             = require './util'
 http              = require './http'
 
 to_query_string   = utils.querystring
 {withCB, map, merge, get, set, invoke, success, error, REQUIRES_VERSION, dejoin} = utils
-
-intermine = exports
 
 # Set up all the private closed over variables
 # that the service will want, but don't need
@@ -239,7 +236,11 @@ class Service
       path: path,
       type: method
 
-    if 'headers' of data
+    if data.auth?
+      opts.auth = data.auth
+      delete opts.data.auth
+
+    if data.headers?
       opts.headers = utils.copy data.headers
       delete opts.data.headers
 
@@ -291,9 +292,7 @@ class Service
   # @return [Promise<Array<Object>>] A promise to get results.
   enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
     req = merge {maxp: 0.05, correction: 'Holm-Bonferroni'}, opts
-    @get(ENRICHMENT_PATH, req)
-      .then(get 'results')
-      .nodeify cb
+    withCB cb, @get(ENRICHMENT_PATH, req).then(get 'results')
 
   # Search for items in the database by any term or facet.
   #
@@ -342,7 +341,7 @@ class Service
   # @param [(Number) ->] cb A callback that receives a number. Optional.
   # @return [Promise<Number>] A promise to yield a count.
   count: (q, cb = (->)) =>
-    withCB cb, if not q
+    promise = if not q
       error "Not enough arguments"
     else if q.toPathString?
       p = if q.isClass() then q.append('id') else q
@@ -359,16 +358,20 @@ class Service
     else
       @query(q).then(@count)
 
+    withCB cb, promise
+
   # Retrieve a representation of a specific object.
   # @param [String] type The type of the object to find (eg: Gene)
   # @param [Number] id The internal DB id of the object.
   # @param [(obj) ->] A callback that receives an object. (optional).
   # @return [Promise<Object>] A promise to yield an object.
   findById: (type, id, cb) =>
-    withCB cb, @query(from: type, select: ['**'], where: {id: id})
-      .then(dejoin)
-      .then(invoke 'records')
-      .then(get 0)
+    promise = @query from: type, select: ['**'], where: {id: id}
+      .then dejoin
+      .then invoke 'records'
+      .then get 0
+
+    withCB cb, promise
 
   # Find all the objects in the database that match the search term.
   # @param [String] type The type of the object to find (eg: Gene)
@@ -379,9 +382,11 @@ class Service
   lookup: (type, term, context, cb) ->
     if utils.isFunction context
       [context, cb] = [null, context]
-    withCB cb, @query(from: type, select: ['**'], where: [[type, 'LOOKUP', term, context]])
-      .then(dejoin)
-      .then(invoke 'records')
+    promise = @query from: type, select: ['**'], where: [[type, 'LOOKUP', term, context]]
+      .then dejoin
+      .then invoke 'records'
+
+    withCB cb, promise
 
   # Find the single object that matches the given term, or report an error if none is
   # found, or more than one is found.
@@ -410,6 +415,9 @@ class Service
   # Alias for {Service#whoami}
   fetchUser: (args...) => @whoami args...
 
+  pathValuesReq = (format, path) ->
+    {format, path: String(path), typeConstraints: JSON.stringify(path.subclasses)}
+
   # Retrieve a list of values that a path can have.
   # This functionality is expected to be of use when developing auto-completion interfaces.
   # @see {Query#summarise}
@@ -427,17 +435,17 @@ class Service
       [typeConstraints, cb] = [cb, typeConstraints]
 
     wanted = 'results' unless wanted is 'count'
+    format = if wanted is 'count' then 'jsoncount' else 'json'
 
-    _pathValues = (path) =>
-      format = if wanted is 'count' then 'jsoncount' else 'json'
-      req = {format, path: path.toString(), typeConstraints: JSON.stringify(path.subclasses)}
-      @post(PATH_VALUES_PATH, req).then(get wanted)
-
-    try
-      withCB cb, @fetchModel().then(invoke 'makePath', path, (path.subclasses ? typeConstraints))
-                   .then(_pathValues)
+    promise = try
+      @fetchModel().then invoke 'makePath', path, (path.subclasses ? typeConstraints)
+          .then (path) -> pathValuesReq format, path
+          .then (req) => @post PATH_VALUES_PATH, req
+          .then get wanted
     catch e
       error e
+
+    withCB cb, promise
 
 
   # Perform a request for results that accepts a parameter specifying the
@@ -707,10 +715,10 @@ class Service
   # Fetch the description of the data model for this service.
   # @return [Promise<Model>] A promise to yield metadata about this service.
   fetchModel: (cb) =>
-    _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
+    ret = _get_or_fetch.call(@, 'model', MODELS, MODEL_PATH, 'model')
       .then(Model.load)
       .then(set service: @)
-      .nodeify(cb)
+    withCB cb, ret
 
   # Fetch the configured summary-fields.
   # The summary fields describe which fields should be used to summarise each class.
@@ -738,7 +746,7 @@ class Service
   # @return [Promise<Query>] A promise to yield a new {Query}.
   query: (options, cb) =>
     buildQuery = ([model, summaryFields]) => new Query options, @, {model, summaryFields}
-    withCB cb, Promise.all(@fetchModel(), @fetchSummaryFields()).then(buildQuery)
+    withCB cb, utils.parallel(@fetchModel(), @fetchSummaryFields()).then(buildQuery)
 
   loadQ = (service, name) -> (q) ->
     return error "No query found called #{ name }" unless q
@@ -873,8 +881,9 @@ class Service
   # @param [(Error, Service) -> Any] cb An optional callback
   # @return [Promise<Service>] A promise to yield a service.
   login: (name, password, cb) -> REQUIRES_VERSION @, 9, =>
-    headers = {'Authorization': "Basic " + base64.encode("#{ name }:#{ password }")}
-    withCB cb, @logout().then((service) -> service.get('user/token', {headers}))
+    #headers = {'Authorization': "Basic " + base64.encode("#{ name }:#{ password }")}
+    auth = "#{ name }:#{ password }"
+    withCB cb, @logout().then((service) -> service.get('user/token', {auth}))
                         .then(get 'token')
                         .then(@connectAs)
 
@@ -971,8 +980,9 @@ Service.connect = (opts) ->
 
 # This module serves as a main entry point, so re-export
 # the public parts of the API.
-intermine.Service = Service
-intermine.Model = Model
-intermine.Query = Query
-intermine.utils = utils
-intermine.imjs = version
+exports.Service = Service
+exports.Model = Model
+exports.Query = Query
+exports.utils = utils
+exports.VERSION = version.VERSION
+exports.imjs = version

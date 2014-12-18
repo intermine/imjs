@@ -113,7 +113,7 @@ describe 'List', ->
         catch e
           done e
 
-      service.fetchList('My-Favourite-Employees').done testCopy, done
+      service.fetchList('My-Favourite-Employees').then testCopy, done
 
   describe '#copy({name, tags}, cb)', ->
 
@@ -137,7 +137,7 @@ describe 'List', ->
         catch e
           done e
 
-      service.fetchList('My-Favourite-Employees').done testCopy, done
+      service.fetchList('My-Favourite-Employees').then testCopy, done
 
   describe '#copy(cb)', ->
 
@@ -160,5 +160,5 @@ describe 'List', ->
         catch e
           done e
 
-      service.fetchList('My-Favourite-Employees').done testCopy, done
+      service.fetchList('My-Favourite-Employees').then testCopy, done
 

@@ -30,14 +30,21 @@ exports.supports = -> true
 # one from the connection, rather than buffering them all
 # in memory.
 streaming = (opts, resolve, reject) -> (resp) ->
-  resp.pause() # Wait for handlers to attach...
+  if not resp.pipe?
+    return reject new Error 'response is not a stream'
+
   resp.on 'error', reject
+
+  # We pause streams because all our handlers are probably not attched yet.
+
   if resp.statusCode? and resp.statusCode isnt 200
     errors = JSONStream.parse 'error'
+    errors.pause()
     resp.pipe errors
     reject [resp.statusCode, errors]
   else
     results = JSONStream.parse 'results.*'
+    results.pause()
     resp.pipe(results)
     resolve results
 
@@ -83,65 +90,81 @@ exports.iterReq = (method, path, format) -> (q, page = {}, cb = (->), eb = (->),
     stream.on 'data', cb
     stream.on 'error', eb
     stream.on 'end', onEnd
-    setTimeout (-> stream.resume()), 3 # Allow handlers in promises to attach.
+    setTimeout (-> stream.resume() if stream.resume?), 3 # Allow handlers in promises to attach.
     return stream
   readErrors = ([sc, errors]) ->
     errors.on 'data', eb
     errors.on 'error', eb
     errors.on 'end', onEnd
-    errors.resume()
+    errors.resume() if errors.resume?
     error sc
-  @makeRequest(method, path, req, null, true).then attach, readErrors
+  promise = @makeRequest(method, path, req, null, true)
+  promise.then attach, readErrors
+  return promise
 
 rejectAfter = (timeout, reject, promise) ->
   to = setTimeout (-> reject "Request timed out."), timeout
   promise.then -> cancelTimeout to
 
-exports.doReq = (opts, iter) ->
-  {promise, resolve, reject} = defer()
-  promise.then null, opts.error
-
+parseOptions = (opts) ->
   if not opts.url
     throw new Error("No url provided in #{ JSON.stringify opts }")
 
   if typeof opts.data is 'string'
     postdata = opts.data
     if opts.type in [ 'GET', 'DELETE' ]
-      reject("Invalid request. #{ opts.type } requests must not have bodies")
-      return promise
+      throw new Error("Invalid request. #{ opts.type } requests must not have bodies")
   else
     postdata = utils.querystring opts.data
 
-  url = URL.parse(opts.url, true)
-  url.method = opts.type
-  url.port = url.port || 80
-  url.headers =
+  parsed = URL.parse(opts.url, true)
+  parsed.method = (opts.type || 'GET')
+  parsed.port   = opts.port || parsed.port || 80
+  parsed.headers =
     'User-Agent': USER_AGENT
     'Accept': ACCEPT_HEADER[opts.dataType]
 
-  if url.method in ['GET', 'DELETE'] and postdata?.length
-    sep = if /\?/.test(url.path) then '&' else '?'
-    url.path += sep + postdata
+  if parsed.method in ['GET', 'DELETE'] and postdata?.length
+    sep = if /\?/.test(parsed.path) then '&' else '?'
+    parsed.path += sep + postdata
+    postdata = null
   else
-    url.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
-    url.headers['Content-Length'] = postdata.length
+    parsed.headers['Content-Type'] = (opts.contentType or URLENC) + '; charset=UTF-8'
+    parsed.headers['Content-Length'] = postdata.length
 
-  if 'headers' of opts
-    url.headers[k] = v for k, v of opts.headers
+  if opts.headers?
+    parsed.headers[k] = v for k, v of opts.headers
+  if opts.auth?
+    parsed.auth = opts.auth
 
-  handler = (if iter then streaming else blocking) opts, resolve, reject
-  req = http.request url, handler
+  return [parsed, postdata]
 
-  req.on 'error', (err) ->
-    reject new Error("Error: #{ url.method } #{ opts.url }: #{ err }")
+exports.doReq = (opts, iter) ->
+  {promise, resolve, reject} = defer()
+  promise.then null, opts.error
 
-  if url.method in [ 'POST', 'PUT' ]
-    req.write postdata
-  req.end()
+  try
+    [url, postdata] = parseOptions opts
+    handler = (if iter then streaming else blocking) opts, resolve, reject
 
-  timeout = opts.timeout
-  if timeout > 0
-    rejectAfter timeout, reject, promise
+    # We construct the request here.
+    req = http.request url, handler
+
+    req.on 'error', (err) -> reject new Error "Error: #{ url.method } #{ opts.url }: #{ err }"
+
+    if postdata?
+      req.write postdata
+
+    # And sent it off here.
+    req.end()
+
+    timeout = opts.timeout
+
+    if timeout > 0
+      rejectAfter timeout, reject, promise
+
+  catch e
+    reject e
 
   return promise
 

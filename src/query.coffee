@@ -224,6 +224,7 @@ class Query
   @NULL_OPS = ['IS NULL', 'IS NOT NULL']
   @ATTRIBUTE_VALUE_OPS = ["=", "!=", ">", ">=", "<", "<=", "CONTAINS", "LIKE", "NOT LIKE"]
   @MULTIVALUE_OPS = ['ONE OF', 'NONE OF']
+  @RANGE_OPS = ['OVERLAPS', 'DOES NOT OVERLAP', 'OUTSIDE', 'WITHIN', 'CONTAINS', 'DOES NOT CONTAIN']
   @TERNARY_OPS = ['LOOKUP']
   @LOOP_OPS = ['=', '!=']
   @LIST_OPS = ['IN', 'NOT IN']

@@ -1,9 +1,12 @@
 {
   "name": "imjs",
-  "version": "3.7.2",
+  "version": "3.8.0",
   "description": "Client library for communication with InterMine web-services",
-  "main": "js/index",
-  "browser": "js/im.js",
+  "main": "build/service",
+  "browser": {
+    "xmldom": "./build/shims/xmldom.js",
+    "http": "http-browserify"
+  },
   "keywords": [
     "javascript",
     "webservice",
@@ -21,8 +24,8 @@
     "url": "git://github.com/alexkalderimis/imjs.git"
   },
   "dependencies": {
-    "JSONStream": "~0.7.1",
-    "promise": "~3.2.0",
+    "JSONStream": "~0.10.0",
+    "es6-promise": "^2.0.1",
     "xmldom": "~0.1.16"
   },
   "engines": {
@@ -37,8 +40,12 @@
   },
   "devDependencies": {
     "bower": "latest",
+    "browser-request": "^0.3.3",
     "codo": "~1.6.0",
-    "coffee-script": "~1.3.3",
+    "coffee-script": "~1.8.0",
+    "derequire": "~1.2.0",
+    "envify": "~0.2.0",
+    "event-stream": "^3.1.7",
     "grunt": "~0.4.1",
     "grunt-browserify": "~3.2.1",
     "grunt-bump": "0.0.11",
@@ -50,16 +57,17 @@
     "grunt-contrib-jshint": "~0.7.1",
     "grunt-contrib-symlink": "~0.2.0",
     "grunt-contrib-uglify": "~0.2.7",
+    "grunt-jscoverage": "0.0.3",
     "grunt-mocha-phantomjs": "~0.6.0",
+    "grunt-mocha-test": "^0.12.4",
     "grunt-simple-mocha": "~0.4.0",
+    "http-browserify": "^1.7.0",
+    "httpinvoke": "~1.1.3",
+    "insert-module-globals": "^6.1.0",
     "mocha": "latest",
     "oboe": "~1.11.0",
-    "should": "~4.1.x",
-    "coffeeify": "~0.7.0",
-    "grunt-jscoverage": "0.0.3",
-    "envify": "~0.2.0",
-    "httpinvoke": "~1.1.3",
     "repl.history": "~0.1.1",
-    "derequire": "~1.2.0"
+    "should": "~4.1.x",
+    "stream-reduce": "^1.0.3"
   }
 }

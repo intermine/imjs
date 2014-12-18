@@ -3,10 +3,18 @@ module.exports = function (grunt) {
 
   var path = require('path');
   var derequire = require('derequire');
+  var insertModuleGlobals = require('insert-module-globals');
   var fs = require('fs');
   var banner = '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
                   '<%= grunt.template.today("yyyy-mm-dd") %> */\n' +
                   grunt.file.read('LICENCE');
+
+  function insertVars (names) {
+    return names.reduce(function (vars, name) {
+      vars[name] = insertModuleGlobals.vars[name];
+      return vars;
+    }, {});
+  }
 
   function processBuildFile (src, filepath) {
     if (filepath === 'build/version.js') { // please tell me there is a saner way to do this.
@@ -21,22 +29,11 @@ module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     uglify: {
-      /*
-      latest: {
-        files: {
-          'js/im.min.js': ['js/im.js']
-        }
-      },
-      */
       bundle: {
         files: {
           'dist/im.min.js': ['dist/im.js']
         }
-      } /*,
-      version: {
-        src: 'js/<%= pkg.version %>/im.js',
-        dest: 'js/<%= pkg.version %>/im.min.js'
-      } */
+      }
     },
     coffeelint: {
       options: grunt.file.readJSON('coffeelint.json'),
@@ -47,6 +44,10 @@ module.exports = function (grunt) {
       source: {
         src: 'src/*',
         dest: 'build'
+      },
+      shims: {
+        src: 'src/shims/*',
+        dest: 'build/shims'
       },
       tests: {
         src: 'test/mocha/*.coffee',
@@ -116,6 +117,12 @@ module.exports = function (grunt) {
         options: {force: true}
       }
     },
+    mochaTest: {
+      unit: {
+        src: ['test/compiled/*.js'],
+        options: grunt.file.readJSON('mocha-opts.json')
+      }
+    },
     simplemocha: {
       all: {
         src: 'test/mocha/*.coffee',
@@ -170,14 +177,12 @@ module.exports = function (grunt) {
     browserify: {
       dist: {
         files: {
-          'dist/im.js': ['build/service.js']
+          'dist/im.js': ['build/export.js']
         },
         options: {
-          alias: ['./build/http-browser.js:./http'],
-          ignore: ['xmldom'],
           browserifyOptions: {
-            noParse: ['node_modules/httpinvoke/httpinvoke-commonjs.js'],
-            standalone: 'imjs'
+            standalone: 'imjs',
+            insertGlobalVars: insertVars(['process', 'global', '__filename', '__dirname'])
           },
           postBundleCB: bundled,
         }
@@ -189,16 +194,10 @@ module.exports = function (grunt) {
         options: {
           transform: ['envify'],
           alias: [
-            './build/http-browser.js:./http',
             shouldjs + ':should'
           ],
-          ignore: ['xmldom'],
-          // postBundleCB: bundled,
           browserifyOptions: {
-            noParse: [
-              'node_modules/httpinvoke/httpinvoke-commonjs.js',
-              'js/im.js'
-            ]
+            insertGlobalVars: insertVars(['process', 'global', '__filename', '__dirname'])
           }
         }
       }
@@ -231,11 +230,9 @@ module.exports = function (grunt) {
     }
     try {
       var bundleBanner = grunt.template.process(banner)
-      var shiv = grunt.file.read("build/shiv.js")
       var openIFE = "(function (intermine) {";
       var closeIFE ='})(window.intermine);';
-      var expose = grunt.file.read('build/export.js');
-      next(null, derequire([bundleBanner, shiv, openIFE, src, expose, closeIFE].join("\n")));
+      next(null, derequire([bundleBanner, openIFE, src, closeIFE].join("\n")));
     } catch (e) {
       next(e)
     }
@@ -256,7 +253,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify')
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-coffeelint')
-  grunt.loadNpmTasks('grunt-simple-mocha')
+  grunt.loadNpmTasks('grunt-mocha-test')
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-mocha-phantomjs')
   grunt.loadNpmTasks('grunt-contrib-symlink')
@@ -373,16 +370,9 @@ module.exports = function (grunt) {
     'build-static-acceptance-index'
   ])
 
-  grunt.registerTask('test-node', 'Run tests in the nodejs VM', function () {
-    var grep = grunt.option('grep')
-    var reporter = grunt.option('reporter')
-    if (grep) {
-      grunt.config('simplemocha.all.options.grep', grep)
-    }
-    if (reporter) {
-      grunt.config('simplemocha.all.options.reporter', reporter)
-    }
-    grunt.task.run('simplemocha:all')
+  grunt.registerTask('mocha-node', 'Run tests in the nodejs VM', function () {
+    grunt.task.run('-set-test-files')
+    grunt.task.run('mochaTest:unit')
   })
 
   grunt.registerTask('-checkcdn', 'Check that the CDN is initialised', function () {
@@ -405,6 +395,21 @@ module.exports = function (grunt) {
       }
     })
   })
+  grunt.registerTask(
+      '-set-test-files',
+      'Set the value of the browserify test files', function () {
+    var grep = grunt.option('grep')
+    var reporter = grunt.option('reporter')
+    if (grep) {
+      grunt.config('mochaTest.unit.options.grep', grep)
+      grunt.config('browserify.tests.files', {
+        'test/browser/mocha-test.js': ['test/compiled/*' + grep + '*.js']
+      })
+    }
+    if (reporter) {
+      grunt.config('mochaTest.unit.options.reporter', reporter)
+    }
+  })
 
   grunt.registerTask('cdn', ['default', '-checkcdn', 'copy:cdn', 'clean:cdnlinks', 'symlink'])
   grunt.registerTask('bmp', ['bump-only', 'default', 'bump-commit'])
@@ -416,12 +421,13 @@ module.exports = function (grunt) {
     'browserify',
     'uglify',
     'copy:dist',
-    'copy:version',
-    'browser-indices'
+    'copy:version'
   ])
   grunt.registerTask('demo', ['build', 'browser-indices'])
-  grunt.registerTask('justtest',['jshint', 'coffeelint', 'build', '-load-test-globals', '-testglob'])
-  grunt.registerTask('test', ['jshint', 'coffeelint', 'build', 'test-node', 'phantomjs'])
+  grunt.registerTask('test-node', ['compile', 'mocha-node'])
+  grunt.registerTask('test-browser', ['-set-test-files', 'build', 'browser-indices', 'phantomjs'])
+  grunt.registerTask('lint', ['jshint', 'coffeelint'])
+  grunt.registerTask('test', ['lint', 'build', 'browser-indices', 'mocha-node', 'phantomjs'])
   grunt.registerTask('default', ['test'])
 
 }

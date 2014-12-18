@@ -1,4 +1,4 @@
-Promise = require 'promise'
+{Promise} = require 'es6-promise'
 
 {funcutils: {error, invoke}} = require './fixture'
 
@@ -15,12 +15,16 @@ clear = (service, name) -> () -> new Promise (resolve, reject) ->
 cleanSlate = (service) -> always -> service.fetchLists().then (lists) ->
     after (l.del() for l in lists when l.hasTag('test'))
 
+parallel = (promises...) ->
+  if promises.length is 1 and promises[0].length # called with an array
+    Promise.all promises[0]
+  else
+    Promise.all promises
+
 after = (promises...) ->
-  if promises?.length then Promise.all(promises) else Promise.from(true)
+  if promises?.length then Promise.all(promises) else Promise.resolve(true)
 
-parallel = Promise.all
-
-report = (done, promise) -> promise.done (-> done()), done
+report = (done, promise) -> promise.then (-> done()), done
 
 prepare = (promiser) -> (done) -> report done, @promise = promiser()
 

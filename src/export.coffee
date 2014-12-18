@@ -1,19 +1,19 @@
-# Snippet for exposing code in the browser.
-#
-if typeof imjs isnt 'undefined'
+# Snippet for re-exposing code in the browser under the intermine name.
 
-  merge = imjs.utils.merge
+require './shiv'
+module.exports = imjs = require './service'
+merge = imjs.utils.merge
 
-  expose = (name, thing) ->
-    if 'function' is typeof define and define.amd
-      define name, [], thing
-    else
-      window[name] = thing
-
-  expose('imjs', imjs)
-
-  if (typeof intermine is 'undefined')
-    expose 'intermine', imjs
+expose = (name, thing) ->
+  if 'function' is typeof define and define.amd
+    define name, [], thing
   else
-    expose 'intermine', merge(intermine, imjs)
+    global[name] = thing
+
+expose 'imjs', imjs
+
+if (typeof intermine is 'undefined')
+  expose 'intermine', imjs
+else
+  expose 'intermine', merge(intermine, imjs)
 

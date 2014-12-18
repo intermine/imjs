@@ -42,7 +42,7 @@ describe('Acceptance', function() {
     var service = new Service(service_args);
 
     it('Should be able to get a sensible version', function(done) {
-      service.fetchVersion().done(function(v) {
+      service.fetchVersion().then(function(v) {
         expect(v).to.be.above(8);
         done();
       }, done);
@@ -90,7 +90,7 @@ describe('Acceptance', function() {
     });
 
     it('Should be able to count the employees', function(done) {
-      service.count({select: ['id'], from: 'Employee'}).done(function(c) {
+      service.count({select: ['id'], from: 'Employee'}).then(function(c) {
         expect(c).to.eql(132);
         done();
       }, done);
@@ -153,7 +153,7 @@ describe('Acceptance', function() {
         expect(stats.uniqueValues).to.be.above(summary.length);
         done();
       };
-      service.query(oldies).then(invoke('summarise', 'age')).done(test, done);
+      service.query(oldies).then(invoke('summarise', 'age')).then(test, done);
     });
 
     it('Should be able to summarise a string path', function(done) {
@@ -165,7 +165,7 @@ describe('Acceptance', function() {
         expect(stats.uniqueValues).to.equal(6);
         done();
       };
-      service.query(oldies).then(invoke('summarise', 'department.company.name')).done(test, done);
+      service.query(oldies).then(invoke('summarise', 'department.company.name')).then(test, done);
     });
 
     it('should be able to fetch widgets', function(done) {
@@ -175,7 +175,7 @@ describe('Acceptance', function() {
         expect(widgets.filter(function(w) { return w.name === 'contractor_enrichment' }).length).to.equal(1);
         done();
       };
-      service.fetchWidgets().done(test, done);
+      service.fetchWidgets().then(test, done);
     });
 
     it('should be able to fetch widget mapping', function(done) {
@@ -185,7 +185,7 @@ describe('Acceptance', function() {
         expect(widgets.contractor_enrichment.widgetType).to.equal('enrichment');
         done();
       };
-      service.fetchWidgetMap().done(test, done);
+      service.fetchWidgetMap().then(test, done);
     });
 
     it('should be able to perform an enrichment calculation', function(done) {
@@ -199,7 +199,7 @@ describe('Acceptance', function() {
         expect(results[0].identifier).to.equal('Vikram');
         done();
       };
-      service.enrichment(args).done(test, done);
+      service.enrichment(args).then(test, done);
     });
 
     describe('Paging', function() {
@@ -224,12 +224,12 @@ describe('Acceptance', function() {
 
       it('Should support paging forwards via Query#next', function(done) {
         var query = {select: ['Employee.name'], where: { age: { gt: 50 } }, limit: 10, start: 0 };
-        service.query(query).then(invoke('next')).then(invoke('records')).done(test(done), done);
+        service.query(query).then(invoke('next')).then(invoke('records')).then(test(done), done);
       });
 
       it('Should support paging backwards via Query#previous', function(done) {
         var query = {select: ['Employee.name'], where: { age: { gt: 50 } }, limit: 10, start: 20 };
-        service.query(query).then(invoke('previous')).then(invoke('records')).done(test(done), done);
+        service.query(query).then(invoke('previous')).then(invoke('records')).then(test(done), done);
       });
     });
   });
@@ -242,14 +242,14 @@ describe('Acceptance', function() {
       var expected   = 3
       var request = { type: 'Employee', identifiers: ['anne', 'brenda', 'carol'] };
 
-      Q.all([service.fetchVersion(), service.resolveIds(request)]).done(testJob, done);
+      Q.all([service.fetchVersion(), service.resolveIds(request)]).then(testJob, done);
       
       function testJob (args) {
         var v = args[0];
         var job = args[1];
         var poll = job.poll();
         
-        poll.then(check(v), done).done(job.del, job.del);
+        poll.then(check(v), done).then(job.del, job.del);
       }
 
       function check (version) {
@@ -318,7 +318,7 @@ describe('Acceptance', function() {
           });
           done();
         };
-        service.createList(opts, idents).done(test, done);
+        service.createList(opts, idents).then(test, done);
       });
 
     });
@@ -347,7 +347,7 @@ describe('Acceptance', function() {
           }).then(function() {done()}, done);
         };
 
-        service.intersect(options).done(test, done);
+        service.intersect(options).then(test, done);
       });
 
     });
