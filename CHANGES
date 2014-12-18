@@ -52,4 +52,5 @@
 3.2.3  Work in dojo AMD loader.
 3.7.0  More range constraints
 3.7.1  Docs, plus a more efficient PathInfo equals.
+3.8.0  Changed underlying libraries, removed .done method of promises, and added RANGE_OPS
 **/
