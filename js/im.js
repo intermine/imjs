@@ -1,4 +1,4 @@
-/*! imjs - v3.8.0 - 2014-12-18 */
+/*! imjs - v3.8.1 - 2014-12-18 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -231,6 +231,7 @@
       postdata = utils.querystring(opts.data);
     }
     parsed = URL.parse(opts.url, true);
+    parsed.withCredentials = false;
     parsed.method = opts.type || 'GET';
     parsed.port = opts.port || parsed.port || 80;
     parsed.headers = {
@@ -4776,7 +4777,7 @@
 
 },{"./promise":8}],16:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.8.0';
+  exports.VERSION = '3.8.1';
 
 }).call(this);
 

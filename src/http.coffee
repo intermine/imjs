@@ -118,6 +118,7 @@ parseOptions = (opts) ->
     postdata = utils.querystring opts.data
 
   parsed = URL.parse(opts.url, true)
+  parsed.withCredentials = false
   parsed.method = (opts.type || 'GET')
   parsed.port   = opts.port || parsed.port || 80
   parsed.headers =
