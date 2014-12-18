@@ -1,7 +1,6 @@
 # Test that the two syntaxes of defining queries are equivalent.
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
-Promise = require 'promise'
 
 trad =
   view: ["Employee.name", "Employee.age", "Employee.department.name"]
@@ -21,7 +20,7 @@ describe 'The equivalence of syntaxes', ->
 
   {service} = new Fixture()
 
-  @beforeAll prepare -> Promise.all [ service.query(trad), service.query(sqlish) ]
+  @beforeAll prepare -> Fixture.utils.parallel service.query(trad), service.query(sqlish)
 
   it 'should mean that both syntaxes produce the same XML', eventually ([q1, q2]) ->
     q1.toXML().should.equal q2.toXML()

@@ -54,7 +54,11 @@ root.success = success = (x) -> new Promise (resolve, _) -> resolve x
 
 # Helper for performing promises in parallel. Mostly so we can
 # change promise library as we see fit...
-root.parallel = (promises...) -> Promise.all promises
+root.parallel = (promises...) ->
+  if promises.length is 1 and (not promises[0].then) and promises[0].length # an array
+    Promise.all promises[0]
+  else
+    Promise.all promises
 
 # Attach one or more node-style callbacks (err, result), returning the original promise.
 # @param f The callback

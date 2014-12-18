@@ -1,10 +1,9 @@
 Fixture              = require './lib/fixture'
 {needs, prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
-Promise              = require 'promise'
-{invoke} = Fixture.funcutils
+{invoke, parallel}   = Fixture.funcutils
 
-once = Promise.all
+once = parallel
 
 atV = needs 12
 

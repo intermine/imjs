@@ -1,7 +1,6 @@
 {Service, utils} = require './lib/fixture'
-{Promise} = require 'es6-promise'
 {shouldFail, prepare, eventually} = require './lib/utils'
-{invoke, get} = utils
+{parallel, invoke, get} = utils
 should = require 'should'
 
 countRecords = (gff3) ->
@@ -23,7 +22,7 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      parallel [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
     it 'should find only two genes, due to the pathways', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 2
@@ -54,7 +53,7 @@ describe 'GFF3 Queries', ->
       joins: ['pathways']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      parallel q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()
 
     it 'should find 5 genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -70,7 +69,7 @@ describe 'GFF3 Queries', ->
         symbol: ['eve', 'zen', 'bib', 'r', 'h']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      parallel q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()
 
     it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -90,7 +89,7 @@ describe 'GFF3 Queries', ->
       qp = beta.query(opts)
       statsp = qp.then (q) -> q.summarise('symbol').then ({stats}) -> stats
       gff3p = qp.then (q) -> q.getGFF3 view: ['organism.name', 'length']
-      Promise.all [statsp, gff3p]
+      parallel statsp, gff3p
 
     it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -113,7 +112,7 @@ describe 'GFF3 Queries', ->
       joins: ['exons']
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      Promise.all [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
+      parallel q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()
 
     it 'should find all genes', eventually ([stats, gff3]) ->
       stats.uniqueValues.should.equal 5
@@ -130,7 +129,7 @@ describe 'GFF3 Queries', ->
     exons = 'exons.id'
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      Promise.all [q.summarise(exons).then(get 'stats'), q.getGFF3(export: [exons])]
+      parallel q.summarise(exons).then(get 'stats'), q.getGFF3(export: [exons])
 
     it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal stats.uniqueValues
@@ -144,7 +143,7 @@ describe 'GFF3 Queries', ->
     exons = 'exons'
 
     @beforeAll prepare -> service.query(opts).then (q) ->
-      Promise.all [q.summarise('exons.id').then(get 'stats'), q.getGFF3(export: [exons])]
+      parallel q.summarise('exons.id').then(get 'stats'), q.getGFF3(export: [exons])
 
     it 'should find more than 5 gff3 records', eventually ([stats, gff3]) ->
       countRecords(gff3).should.equal stats.uniqueValues

@@ -1,8 +1,7 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
-Promise = require 'promise'
 
-{invoke} = Fixture.funcutils
+{parallel, invoke} = Fixture.funcutils
 
 describe 'Query#appendToList', ->
 
@@ -18,7 +17,7 @@ describe 'Query#appendToList', ->
 
   describe 'target: List', ->
 
-    @beforeAll prepare -> clearList().then -> Promise.all([
+    @beforeAll prepare -> clearList().then -> parallel([
       service.count(youngerEmployees),
       service.count(olderEmployees),
       service.query(youngerEmployees),
@@ -37,7 +36,7 @@ describe 'Query#appendToList', ->
 
   describe 'target: String', ->
 
-    @beforeAll prepare -> clearList().then -> Promise.all([
+    @beforeAll prepare -> clearList().then -> parallel([
       service.count(youngerEmployees),
       service.count(olderEmployees),
       service.query(youngerEmployees),

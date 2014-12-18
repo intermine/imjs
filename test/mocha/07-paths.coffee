@@ -6,8 +6,6 @@ else
   {Model} = require "../../build/service"
   {PathInfo} = require "../../build/path"
 
-Promise = require 'promise'
-
 {shouldFail, prepare, eventually} = require './lib/utils'
 Fixture = require './lib/fixture'
 
@@ -437,7 +435,7 @@ describe 'Two similar paths', ->
 
   describe 'their names', ->
 
-    @beforeAll prepare -> Promise.all (p.getDisplayName() for p in [pathA, pathB])
+    @beforeAll prepare -> Fixture.utils.parallel(p.getDisplayName() for p in [pathA, pathB])
 
     it 'should be the same', eventually ([a, b]) ->
       a.should.eql b
