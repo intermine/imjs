@@ -55,4 +55,5 @@
 3.8.0  Changed underlying libraries, removed .done method of promises, and added RANGE_OPS
 3.8.1  Missing dependency for browserify builds.
 3.8.2  Fixes for CORS
+3.8.3  Better event support
 **/
