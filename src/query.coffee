@@ -8,6 +8,8 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
+Events = require 'backbone-events-standalone'
+
 intermine       = exports
 intermine.xml   = require('./xml')
 utils           = require './util'
@@ -275,118 +277,6 @@ class Query
     'outside': 'OUTSIDE'
     'ISA': 'ISA'
     'isa': 'ISA'
-
-  # Bind a callback to an event.
-  #
-  # An implementation of the EventEmitter API, allowing clients to subscribe
-  # to events on {Query}s.
-  # @param [String] events A space separated set of events to subscribe to.
-  # @param [Function] callback The event-handler.
-  # @param [Object] context The context to bind as this for the callback (optional).
-  # @return [Query] This query, for chaining.
-  on: (events, callback, context) ->
-    events = events.split /\s+/
-    calls = (@_callbacks ?= {})
-    while ev = events.shift()
-      list = (calls[ev] ?= {})
-      tail = (list.tail ?= (list.next = {}))
-      tail.callback = callback
-      tail.context = context
-      list.tail = tail.next = {}
-    this
-
-  # alias for {#on}
-  bind: (args...) -> @on.apply(@, args)
-
-  # Remove a particular event handler, or a more general collection.
-  #
-  # @overload off()
-  #   Unbinds all event handlers.
-  #   @return [Query] this query, for chaining.
-  #
-  # @overload off(events)
-  #   Unbinds all event handlers for the given events.
-  #   @param [String] events A space separated set of event names.
-  #   @return [Query] this query, for chaining.
-  #
-  # @overload off(events, handler)
-  #   Unbinds the given handler for the given events.
-  #   @param [String] events A space separated set of event names.
-  #   @param [Function] handler The event handler to unbind.
-  #   @return [Query] this query, for chaining.
-  #
-  # @overload off(events, handler, context)
-  #   Unbinds the given handler from all the given events where is it is bound with
-  #   the given context.
-  #   @param [String] events A space separated set of event names.
-  #   @param [Function] handler The event handler to unbind.
-  #   @param [Object] context The `this` for the handler.
-  #   @return [Query] this query, for chaining.
-  #
-  off: (events, callback , context) ->
-    unless events?
-      @_callbacks = {}
-      return this
-
-    events = events.split /\s+/
-    calls = (@_callbacks ?= {})
-    for ev in events
-      if callback?
-        current = linkedList = (calls[ev] or {})
-        last = linkedList.tail
-        while ((node = current.next) isnt last)
-          remove = (not context? or node.context is context) and (callback is node.callback)
-          if remove
-            current.next = (node.next or last)
-            node = current
-          else
-            current = node
-      else
-        delete calls[ev]
-
-    return this
-
-  # alias for {#off}
-  unbind: (args...) -> @off args...
-
-  # Bind an event to be executed once, and then unbound.
-  #
-  # @param [String] events A space separated set of event names.
-  # @param [Function] callback The event handler.
-  # @param [Object] context The `this` for the event handler.
-  # @return [Query] this query, for chaining.
-  # @see #on
-  once: (events, callback, context) ->
-    f = (args...) =>
-      callback.apply(context, args)
-      @off(events, f)
-    @on(events, f)
-
-  # Alias for {#trigger}
-  emit: (args...) -> @trigger args...
-
-  # Trigger a given set of events.
-  # @param [String] events A space separated set of event names.
-  # @param [Array<Object>] args The arguments to send to the handlers.
-  # @return [Query] this query, for chaining.
-  trigger: (events, rest...) ->
-    calls = @_callbacks
-    unless calls
-      return @
-    all = calls['all']
-    (events = events.split(/\s+/)).push null
-    while event = events.shift()
-      events.push(next: all.next, tail: all.tail, event: event) if all
-      continue unless (node = calls[event])
-      events.push(next: node.next, tail: node.tail)
-
-    while node = events.pop()
-      tail = node.tail
-      args = if node.event then [node.event].concat(rest) else rest
-      while ((node = node.next) isnt tail)
-        node.callback.apply(node.context || this, args)
-
-    this
 
   qAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment']
   cAttrs = ['path', 'type', 'op', 'code', 'value', 'ids']
@@ -1156,5 +1046,11 @@ _get_data_fetcher = (server_fn) -> (page, cbs...) ->
 
 for mth in RESULTS_METHODS
   Query.prototype[mth] = _get_data_fetcher mth
+
+# Queries are event emitters, using the backbone API
+Events.mixin Query.prototype
+
+Query::emit = Query::trigger
+Query::bind = Query::on
 
 intermine.Query = Query

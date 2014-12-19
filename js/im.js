@@ -1,4 +1,4 @@
-/*! imjs - v3.8.2 - 2014-12-18 */
+/*! imjs - v3.8.2 - 2014-12-19 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -287,7 +287,7 @@
 
 }).call(this);
 
-},{"./constants":1,"./util":15,"./version":16,"JSONStream":18,"http":48,"url":45}],4:[function(_dereq_,module,exports){
+},{"./constants":1,"./util":15,"./version":16,"JSONStream":18,"http":50,"url":47}],4:[function(_dereq_,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -1137,13 +1137,15 @@
 
 }).call(this);
 
-},{"es6-promise":20}],9:[function(_dereq_,module,exports){
+},{"es6-promise":22}],9:[function(_dereq_,module,exports){
 (function() {
-  var BASIC_ATTRS, CODES, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
+  var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty;
+
+  Events = _dereq_('backbone-events-standalone');
 
   intermine = exports;
 
@@ -1478,115 +1480,6 @@
       'outside': 'OUTSIDE',
       'ISA': 'ISA',
       'isa': 'ISA'
-    };
-
-    Query.prototype.on = function(events, callback, context) {
-      var calls, ev, list, tail;
-      events = events.split(/\s+/);
-      calls = (this._callbacks != null ? this._callbacks : this._callbacks = {});
-      while (ev = events.shift()) {
-        list = (calls[ev] != null ? calls[ev] : calls[ev] = {});
-        tail = (list.tail != null ? list.tail : list.tail = (list.next = {}));
-        tail.callback = callback;
-        tail.context = context;
-        list.tail = tail.next = {};
-      }
-      return this;
-    };
-
-    Query.prototype.bind = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return this.on.apply(this, args);
-    };
-
-    Query.prototype.off = function(events, callback, context) {
-      var calls, current, ev, last, linkedList, node, remove, _i, _len;
-      if (events == null) {
-        this._callbacks = {};
-        return this;
-      }
-      events = events.split(/\s+/);
-      calls = (this._callbacks != null ? this._callbacks : this._callbacks = {});
-      for (_i = 0, _len = events.length; _i < _len; _i++) {
-        ev = events[_i];
-        if (callback != null) {
-          current = linkedList = calls[ev] || {};
-          last = linkedList.tail;
-          while ((node = current.next) !== last) {
-            remove = ((context == null) || node.context === context) && (callback === node.callback);
-            if (remove) {
-              current.next = node.next || last;
-              node = current;
-            } else {
-              current = node;
-            }
-          }
-        } else {
-          delete calls[ev];
-        }
-      }
-      return this;
-    };
-
-    Query.prototype.unbind = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return this.off.apply(this, args);
-    };
-
-    Query.prototype.once = function(events, callback, context) {
-      var f;
-      f = (function(_this) {
-        return function() {
-          var args;
-          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          callback.apply(context, args);
-          return _this.off(events, f);
-        };
-      })(this);
-      return this.on(events, f);
-    };
-
-    Query.prototype.emit = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return this.trigger.apply(this, args);
-    };
-
-    Query.prototype.trigger = function() {
-      var all, args, calls, event, events, node, rest, tail;
-      events = arguments[0], rest = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      calls = this._callbacks;
-      if (!calls) {
-        return this;
-      }
-      all = calls['all'];
-      (events = events.split(/\s+/)).push(null);
-      while (event = events.shift()) {
-        if (all) {
-          events.push({
-            next: all.next,
-            tail: all.tail,
-            event: event
-          });
-        }
-        if (!(node = calls[event])) {
-          continue;
-        }
-        events.push({
-          next: node.next,
-          tail: node.tail
-        });
-      }
-      while (node = events.pop()) {
-        tail = node.tail;
-        args = node.event ? [node.event].concat(rest) : rest;
-        while ((node = node.next) !== tail) {
-          node.callback.apply(node.context || this, args);
-        }
-      }
-      return this;
     };
 
     qAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment'];
@@ -2959,11 +2852,17 @@
     Query.prototype[mth] = _get_data_fetcher(mth);
   }
 
+  Events.mixin(Query.prototype);
+
+  Query.prototype.emit = Query.prototype.trigger;
+
+  Query.prototype.bind = Query.prototype.on;
+
   intermine.Query = Query;
 
 }).call(this);
 
-},{"./util":15,"./xml":17}],10:[function(_dereq_,module,exports){
+},{"./util":15,"./xml":17,"backbone-events-standalone":21}],10:[function(_dereq_,module,exports){
 (function() {
   var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -5023,7 +4922,7 @@ if(!module.parent && process.title !== 'browser') {
 }
 
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53,"buffer":21,"jsonparse":19,"through":54}],19:[function(_dereq_,module,exports){
+},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"buffer":23,"jsonparse":19,"through":56}],19:[function(_dereq_,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -5428,7 +5327,289 @@ proto.onToken = function (token, value) {
 module.exports = Parser;
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":21}],20:[function(_dereq_,module,exports){
+},{"buffer":23}],20:[function(_dereq_,module,exports){
+/**
+ * Standalone extraction of Backbone.Events, no external dependency required.
+ * Degrades nicely when Backone/underscore are already available in the current
+ * global context.
+ *
+ * Note that docs suggest to use underscore's `_.extend()` method to add Events
+ * support to some given object. A `mixin()` method has been added to the Events
+ * prototype to avoid using underscore for that sole purpose:
+ *
+ *     var myEventEmitter = BackboneEvents.mixin({});
+ *
+ * Or for a function constructor:
+ *
+ *     function MyConstructor(){}
+ *     MyConstructor.prototype.foo = function(){}
+ *     BackboneEvents.mixin(MyConstructor.prototype);
+ *
+ * (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
+ * (c) 2013 Nicolas Perriault
+ */
+/* global exports:true, define, module */
+(function() {
+  var root = this,
+      breaker = {},
+      nativeForEach = Array.prototype.forEach,
+      hasOwnProperty = Object.prototype.hasOwnProperty,
+      slice = Array.prototype.slice,
+      idCounter = 0;
+
+  // Returns a partial implementation matching the minimal API subset required
+  // by Backbone.Events
+  function miniscore() {
+    return {
+      keys: Object.keys || function (obj) {
+        if (typeof obj !== "object" && typeof obj !== "function" || obj === null) {
+          throw new TypeError("keys() called on a non-object");
+        }
+        var key, keys = [];
+        for (key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            keys[keys.length] = key;
+          }
+        }
+        return keys;
+      },
+
+      uniqueId: function(prefix) {
+        var id = ++idCounter + '';
+        return prefix ? prefix + id : id;
+      },
+
+      has: function(obj, key) {
+        return hasOwnProperty.call(obj, key);
+      },
+
+      each: function(obj, iterator, context) {
+        if (obj == null) return;
+        if (nativeForEach && obj.forEach === nativeForEach) {
+          obj.forEach(iterator, context);
+        } else if (obj.length === +obj.length) {
+          for (var i = 0, l = obj.length; i < l; i++) {
+            if (iterator.call(context, obj[i], i, obj) === breaker) return;
+          }
+        } else {
+          for (var key in obj) {
+            if (this.has(obj, key)) {
+              if (iterator.call(context, obj[key], key, obj) === breaker) return;
+            }
+          }
+        }
+      },
+
+      once: function(func) {
+        var ran = false, memo;
+        return function() {
+          if (ran) return memo;
+          ran = true;
+          memo = func.apply(this, arguments);
+          func = null;
+          return memo;
+        };
+      }
+    };
+  }
+
+  var _ = miniscore(), Events;
+
+  // Backbone.Events
+  // ---------------
+
+  // A module that can be mixed in to *any object* in order to provide it with
+  // custom events. You may bind with `on` or remove with `off` callback
+  // functions to an event; `trigger`-ing an event fires all callbacks in
+  // succession.
+  //
+  //     var object = {};
+  //     _.extend(object, Backbone.Events);
+  //     object.on('expand', function(){ alert('expanded'); });
+  //     object.trigger('expand');
+  //
+  Events = {
+
+    // Bind an event to a `callback` function. Passing `"all"` will bind
+    // the callback to all events fired.
+    on: function(name, callback, context) {
+      if (!eventsApi(this, 'on', name, [callback, context]) || !callback) return this;
+      this._events || (this._events = {});
+      var events = this._events[name] || (this._events[name] = []);
+      events.push({callback: callback, context: context, ctx: context || this});
+      return this;
+    },
+
+    // Bind an event to only be triggered a single time. After the first time
+    // the callback is invoked, it will be removed.
+    once: function(name, callback, context) {
+      if (!eventsApi(this, 'once', name, [callback, context]) || !callback) return this;
+      var self = this;
+      var once = _.once(function() {
+        self.off(name, once);
+        callback.apply(this, arguments);
+      });
+      once._callback = callback;
+      return this.on(name, once, context);
+    },
+
+    // Remove one or many callbacks. If `context` is null, removes all
+    // callbacks with that function. If `callback` is null, removes all
+    // callbacks for the event. If `name` is null, removes all bound
+    // callbacks for all events.
+    off: function(name, callback, context) {
+      var retain, ev, events, names, i, l, j, k;
+      if (!this._events || !eventsApi(this, 'off', name, [callback, context])) return this;
+      if (!name && !callback && !context) {
+        this._events = {};
+        return this;
+      }
+
+      names = name ? [name] : _.keys(this._events);
+      for (i = 0, l = names.length; i < l; i++) {
+        name = names[i];
+        if (events = this._events[name]) {
+          this._events[name] = retain = [];
+          if (callback || context) {
+            for (j = 0, k = events.length; j < k; j++) {
+              ev = events[j];
+              if ((callback && callback !== ev.callback && callback !== ev.callback._callback) ||
+                  (context && context !== ev.context)) {
+                retain.push(ev);
+              }
+            }
+          }
+          if (!retain.length) delete this._events[name];
+        }
+      }
+
+      return this;
+    },
+
+    // Trigger one or many events, firing all bound callbacks. Callbacks are
+    // passed the same arguments as `trigger` is, apart from the event name
+    // (unless you're listening on `"all"`, which will cause your callback to
+    // receive the true name of the event as the first argument).
+    trigger: function(name) {
+      if (!this._events) return this;
+      var args = slice.call(arguments, 1);
+      if (!eventsApi(this, 'trigger', name, args)) return this;
+      var events = this._events[name];
+      var allEvents = this._events.all;
+      if (events) triggerEvents(events, args);
+      if (allEvents) triggerEvents(allEvents, arguments);
+      return this;
+    },
+
+    // Tell this object to stop listening to either specific events ... or
+    // to every object it's currently listening to.
+    stopListening: function(obj, name, callback) {
+      var listeners = this._listeners;
+      if (!listeners) return this;
+      var deleteListener = !name && !callback;
+      if (typeof name === 'object') callback = this;
+      if (obj) (listeners = {})[obj._listenerId] = obj;
+      for (var id in listeners) {
+        listeners[id].off(name, callback, this);
+        if (deleteListener) delete this._listeners[id];
+      }
+      return this;
+    }
+
+  };
+
+  // Regular expression used to split event strings.
+  var eventSplitter = /\s+/;
+
+  // Implement fancy features of the Events API such as multiple event
+  // names `"change blur"` and jQuery-style event maps `{change: action}`
+  // in terms of the existing API.
+  var eventsApi = function(obj, action, name, rest) {
+    if (!name) return true;
+
+    // Handle event maps.
+    if (typeof name === 'object') {
+      for (var key in name) {
+        obj[action].apply(obj, [key, name[key]].concat(rest));
+      }
+      return false;
+    }
+
+    // Handle space separated event names.
+    if (eventSplitter.test(name)) {
+      var names = name.split(eventSplitter);
+      for (var i = 0, l = names.length; i < l; i++) {
+        obj[action].apply(obj, [names[i]].concat(rest));
+      }
+      return false;
+    }
+
+    return true;
+  };
+
+  // A difficult-to-believe, but optimized internal dispatch function for
+  // triggering events. Tries to keep the usual cases speedy (most internal
+  // Backbone events have 3 arguments).
+  var triggerEvents = function(events, args) {
+    var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
+    switch (args.length) {
+      case 0: while (++i < l) (ev = events[i]).callback.call(ev.ctx); return;
+      case 1: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1); return;
+      case 2: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2); return;
+      case 3: while (++i < l) (ev = events[i]).callback.call(ev.ctx, a1, a2, a3); return;
+      default: while (++i < l) (ev = events[i]).callback.apply(ev.ctx, args);
+    }
+  };
+
+  var listenMethods = {listenTo: 'on', listenToOnce: 'once'};
+
+  // Inversion-of-control versions of `on` and `once`. Tell *this* object to
+  // listen to an event in another object ... keeping track of what it's
+  // listening to.
+  _.each(listenMethods, function(implementation, method) {
+    Events[method] = function(obj, name, callback) {
+      var listeners = this._listeners || (this._listeners = {});
+      var id = obj._listenerId || (obj._listenerId = _.uniqueId('l'));
+      listeners[id] = obj;
+      if (typeof name === 'object') callback = this;
+      obj[implementation](name, callback, this);
+      return this;
+    };
+  });
+
+  // Aliases for backwards compatibility.
+  Events.bind   = Events.on;
+  Events.unbind = Events.off;
+
+  // Mixin utility
+  Events.mixin = function(proto) {
+    var exports = ['on', 'once', 'off', 'trigger', 'stopListening', 'listenTo',
+                   'listenToOnce', 'bind', 'unbind'];
+    _.each(exports, function(name) {
+      proto[name] = this[name];
+    }, this);
+    return proto;
+  };
+
+  // Export Events as BackboneEvents depending on current context
+  if (typeof define === "function") {
+    define(function() {
+      return Events;
+    });
+  } else if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = Events;
+    }
+    exports.BackboneEvents = Events;
+  } else {
+    root.BackboneEvents = Events;
+  }
+})(this);
+
+},{}],21:[function(_dereq_,module,exports){
+module.exports = _dereq_('./backbone-events-standalone');
+
+},{"./backbone-events-standalone":20}],22:[function(_dereq_,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -6391,7 +6572,7 @@ module.exports = Parser;
     }
 }).call(this);
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53}],21:[function(_dereq_,module,exports){
+},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55}],23:[function(_dereq_,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -7445,7 +7626,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":22,"ieee754":23,"is-array":24}],22:[function(_dereq_,module,exports){
+},{"base64-js":24,"ieee754":25,"is-array":26}],24:[function(_dereq_,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -7567,7 +7748,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -7653,7 +7834,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],24:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 
 /**
  * isArray
@@ -7688,7 +7869,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7991,7 +8172,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -8016,12 +8197,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8532,7 +8713,7 @@ module.exports = Array.isArray || function (arr) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8618,7 +8799,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8705,16 +8886,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 'use strict';
 
 exports.decode = exports.parse = _dereq_('./decode');
 exports.encode = exports.stringify = _dereq_('./encode');
 
-},{"./decode":29,"./encode":30}],32:[function(_dereq_,module,exports){
+},{"./decode":31,"./encode":32}],34:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":33}],33:[function(_dereq_,module,exports){
+},{"./lib/_stream_duplex.js":35}],35:[function(_dereq_,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8807,7 +8988,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_readable":35,"./_stream_writable":37,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53,"core-util-is":38,"inherits":26}],34:[function(_dereq_,module,exports){
+},{"./_stream_readable":37,"./_stream_writable":39,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"core-util-is":40,"inherits":28}],36:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8855,7 +9036,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":36,"core-util-is":38,"inherits":26}],35:[function(_dereq_,module,exports){
+},{"./_stream_transform":38,"core-util-is":40,"inherits":28}],37:[function(_dereq_,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9841,7 +10022,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53,"buffer":21,"core-util-is":38,"events":25,"inherits":26,"isarray":27,"stream":43,"string_decoder/":44}],36:[function(_dereq_,module,exports){
+},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"buffer":23,"core-util-is":40,"events":27,"inherits":28,"isarray":29,"stream":45,"string_decoder/":46}],38:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10053,7 +10234,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":33,"core-util-is":38,"inherits":26}],37:[function(_dereq_,module,exports){
+},{"./_stream_duplex":35,"core-util-is":40,"inherits":28}],39:[function(_dereq_,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10443,7 +10624,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_duplex":33,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53,"buffer":21,"core-util-is":38,"inherits":26,"stream":43}],38:[function(_dereq_,module,exports){
+},{"./_stream_duplex":35,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"buffer":23,"core-util-is":40,"inherits":28,"stream":45}],40:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10553,10 +10734,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":21}],39:[function(_dereq_,module,exports){
+},{"buffer":23}],41:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":34}],40:[function(_dereq_,module,exports){
+},{"./lib/_stream_passthrough.js":36}],42:[function(_dereq_,module,exports){
 var Stream = _dereq_('stream'); // hack to fix a circular dependency issue when used with browserify
 exports = module.exports = _dereq_('./lib/_stream_readable.js');
 exports.Stream = Stream;
@@ -10566,13 +10747,13 @@ exports.Duplex = _dereq_('./lib/_stream_duplex.js');
 exports.Transform = _dereq_('./lib/_stream_transform.js');
 exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":33,"./lib/_stream_passthrough.js":34,"./lib/_stream_readable.js":35,"./lib/_stream_transform.js":36,"./lib/_stream_writable.js":37,"stream":43}],41:[function(_dereq_,module,exports){
+},{"./lib/_stream_duplex.js":35,"./lib/_stream_passthrough.js":36,"./lib/_stream_readable.js":37,"./lib/_stream_transform.js":38,"./lib/_stream_writable.js":39,"stream":45}],43:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":36}],42:[function(_dereq_,module,exports){
+},{"./lib/_stream_transform.js":38}],44:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":37}],43:[function(_dereq_,module,exports){
+},{"./lib/_stream_writable.js":39}],45:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10701,7 +10882,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":25,"inherits":26,"readable-stream/duplex.js":32,"readable-stream/passthrough.js":39,"readable-stream/readable.js":40,"readable-stream/transform.js":41,"readable-stream/writable.js":42}],44:[function(_dereq_,module,exports){
+},{"events":27,"inherits":28,"readable-stream/duplex.js":34,"readable-stream/passthrough.js":41,"readable-stream/readable.js":42,"readable-stream/transform.js":43,"readable-stream/writable.js":44}],46:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10924,7 +11105,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":21}],45:[function(_dereq_,module,exports){
+},{"buffer":23}],47:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11633,14 +11814,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":28,"querystring":31}],46:[function(_dereq_,module,exports){
+},{"punycode":30,"querystring":33}],48:[function(_dereq_,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],47:[function(_dereq_,module,exports){
+},{}],49:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12230,7 +12411,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":46,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53,"inherits":26}],48:[function(_dereq_,module,exports){
+},{"./support/isBuffer":48,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"inherits":28}],50:[function(_dereq_,module,exports){
 var http = module.exports;
 var EventEmitter = _dereq_('events').EventEmitter;
 var Request = _dereq_('./lib/request');
@@ -12376,7 +12557,7 @@ http.STATUS_CODES = {
     510 : 'Not Extended',               // RFC 2774
     511 : 'Network Authentication Required' // RFC 6585
 };
-},{"./lib/request":49,"events":25,"url":45}],49:[function(_dereq_,module,exports){
+},{"./lib/request":51,"events":27,"url":47}],51:[function(_dereq_,module,exports){
 var Stream = _dereq_('stream');
 var Response = _dereq_('./response');
 var Base64 = _dereq_('Base64');
@@ -12587,7 +12768,7 @@ var isXHR2Compatible = function (obj) {
     if (typeof FormData !== 'undefined' && obj instanceof FormData) return true;
 };
 
-},{"./response":50,"Base64":51,"inherits":52,"stream":43}],50:[function(_dereq_,module,exports){
+},{"./response":52,"Base64":53,"inherits":54,"stream":45}],52:[function(_dereq_,module,exports){
 var Stream = _dereq_('stream');
 var util = _dereq_('util');
 
@@ -12709,7 +12890,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":43,"util":47}],51:[function(_dereq_,module,exports){
+},{"stream":45,"util":49}],53:[function(_dereq_,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -12771,9 +12952,9 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],52:[function(_dereq_,module,exports){
-module.exports=_dereq_(26)
-},{"/home/alex/projects/javascript/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":26}],53:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
+module.exports=_dereq_(28)
+},{"/home/alex/projects/javascript/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":28}],55:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -12835,7 +13016,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],54:[function(_dereq_,module,exports){
+},{}],56:[function(_dereq_,module,exports){
 (function (process){
 var Stream = _dereq_('stream')
 
@@ -12947,6 +13128,6 @@ function through (write, end, opts) {
 
 
 }).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":53,"stream":43}]},{},[2])(2)
+},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"stream":45}]},{},[2])(2)
 });
 })(window.intermine);

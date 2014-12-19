@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "JSONStream": "~0.10.0",
+    "backbone-events-standalone": "^0.2.4",
     "es6-promise": "^2.0.1",
     "http-browserify": "^1.7.0",
     "xmldom": "~0.1.16"
