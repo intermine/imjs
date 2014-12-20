@@ -6,6 +6,8 @@ else
   {Model} = require "../../build/service"
   {PathInfo} = require "../../build/path"
 
+should = require 'should'
+
 {shouldFail, prepare, eventually} = require './lib/utils'
 Fixture = require './lib/fixture'
 
@@ -448,4 +450,36 @@ describe 'The path of a poor person', ->
 
   it 'should say this person is poor', eventually (name) ->
     name.should.eql 'Poor Person'
+
+describe 'PathInfo::isReverseReference', ->
+
+  root_path = testmodel.makePath 'Employee'
+  # Straight ref.
+  sr_path = testmodel.makePath 'Employee.department.company'
+  a_path = testmodel.makePath 'Employee.department.name'
+  rr_path_0 = testmodel.makePath 'Employee.department.employees'
+  rr_path_1 = testmodel.makePath 'Employee.department.company.departments'
+  rr_path_2 = testmodel.makePath 'Company.departments.company'
+  inner_rev_ref = testmodel.makePath 'Employee.department.employees.address'
+
+  it 'should say that Employee is not a reverse reference', ->
+    root_path.isReverseReference().should.not.be.true
+
+  it 'should say that Employee.department.company is not a reverse reference', ->
+    sr_path.isReverseReference().should.not.be.true
+
+  it 'should say that Employee.department.name is not a reverse reference', ->
+    a_path.isReverseReference().should.not.be.true
+
+  it 'should say that Employee.department.employees.address is not a reverse reference', ->
+    inner_rev_ref.isReverseReference().should.not.be.true
+
+  it 'should say that Employee.department.employees is a reverse reference', ->
+    rr_path_0.isReverseReference().should.be.true
+
+  it 'should say that Employee.department.company.departments is a reverse reference', ->
+    rr_path_1.isReverseReference().should.be.true
+
+  it 'should say that Company.departments.company is a reverse reference', ->
+    rr_path_2.isReverseReference().should.be.true
 

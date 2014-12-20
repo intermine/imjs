@@ -43,7 +43,7 @@ class PathInfo
   # @option options [String] displayName The display name to use in preference to fetching.
   # @option options [String] ident A key used to index this path.
   constructor: ({ @root, @model, @descriptors, @subclasses, @displayName, @ident}) ->
-    @end = @descriptors[@descriptors.length - 1]
+    [@mid..., @end] = @descriptors
     @ident ?= makeKey(@model, @, @subclasses)
 
   # Whether or not this is a root path.
@@ -52,15 +52,25 @@ class PathInfo
 
   # Whether or not this is a leaf path.
   # @return [boolean] Whether this path represents a data value.
-  isAttribute: () => @end? and not @end.referencedType?
+  isAttribute: () => @end? and not @isReference()
 
   # Whether or not this path represents one or more objects (i.e. is not a leaf).
   # @return [boolean] Whether or not this path represents a class of objects.
-  isClass: () => @isRoot() or @end.referencedType?
+  isClass: () => @isRoot() or @isReference()
 
   # Whether or not this path is a reference field (could be collection).
   # @return [boolean] True if not root, and not a leaf.
   isReference: () => @end?.referencedType?
+
+  # Whether or not this path is a reverse reference.
+  # @return [boolean] True if this path is a reverse reference.
+  isReverseReference: =>
+    if @isReference() and (@mid.length > 0) # Is at least 3 segments long.
+      {reverseReference, referencedType} = @end
+      p = @getParent()
+      gp = p.getParent()
+      return referencedType? and (gp.isa referencedType) and (p.end.name is reverseReference)
+    return false
 
   # Whether or not this path refers to a collection.
   # @return [boolean] True if a reference which is a collection.
@@ -88,7 +98,7 @@ class PathInfo
     data =
       root: @root
       model: @model
-      descriptors: @descriptors.slice(0, @descriptors.length - 1)
+      descriptors: @mid.slice()
       subclasses: @subclasses
     return new PathInfo(data)
 
