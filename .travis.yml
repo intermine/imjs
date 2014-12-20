@@ -6,6 +6,8 @@ env:
         - TESTMODEL_PATH=intermine-demo
 before_install:
     - ./config/travis/init.sh
+    - npm install bower
+    - ./node_modules/.bin/bower install
 script: 
     # Tests are run by npm install - no test script is needed.
     - echo "All tests passed"
