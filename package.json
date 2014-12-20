@@ -37,7 +37,8 @@
   },
   "scripts": {
     "prepublish": "grunt test",
-    "test": "grunt test"
+    "test": "grunt test",
+    "grunt": "grunt"
   },
   "devDependencies": {
     "bower": "latest",
