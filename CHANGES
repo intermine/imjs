@@ -56,4 +56,8 @@
 3.8.1  Missing dependency for browserify builds.
 3.8.2  Fixes for CORS
 3.8.3  Better event support
+3.9.0  Minorly backwards compatible changes to Query::getPossiblePaths and PathInfo
+        - now returns an array of PathInfo, rather than strings
+        - support for predication (#16, #17)
+        - PathInfo now has a 'isReverseReference()' method.
 **/
