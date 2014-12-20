@@ -270,7 +270,7 @@ module.exports = function (grunt) {
     var host = getVar('host', null);
     var port = getVar('port', null);
     var load = getVar('load', null);
-    var path = getVar('path', 'intermine-test');
+    var path = getVar('path', 'intermine-demo');
     var tokn = getVar('token', 'test-user-token');
     var obj = {
       args: {
