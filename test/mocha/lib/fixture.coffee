@@ -6,7 +6,7 @@ else
   {Service, Query, Model, utils} = require '../../../'
 
 args =
-  root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-test'
+  root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-demo'
   token: 'test-user-token'
 
 legacy =
