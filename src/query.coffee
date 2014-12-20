@@ -443,21 +443,23 @@ class Query
       @root = path.split('.')[0]
     path
 
-  getPossiblePaths: (depth = 3) ->
+  getPossiblePaths: (depth = 3, allowReverseReferences = true) ->
     getPaths = (root, d) =>
-      ret = [root]
       path = @getPathInfo(root)
       if path.isAttribute()
-        ret
+        [root]
+      else if (not allowReverseReferences) and path.isReverseReference()
+        []
       else
         cd = @getPathInfo(root).getType()
         subPaths = concatMap (ref) -> getPaths "#{ root }.#{ ref.name }", d - 1
         others = if cd and (d > 0) then (subPaths (field for name, field of cd.fields)) else []
 
-        ret.concat others
+        [root].concat others
 
+    key = "#{ depth }-#{ allowReverseReferences }"
     @_possiblePaths ?= {}
-    @_possiblePaths[depth] ?= getPaths @root, depth
+    @_possiblePaths[key] ?= getPaths @root, depth
 
   getPathInfo: (path) ->
     adjusted = @adjustPath path

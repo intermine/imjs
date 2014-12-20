@@ -24,11 +24,31 @@ describe 'Query#getPossiblePaths', ->
     it 'should include Company.department.employees.name', ->
       paths.should.containEql 'Company.departments.employees.name'
 
+    it 'should include a reverse reference', ->
+      paths.should.containEql 'Company.departments.company'
+
     it 'should include Company.oldContracts.companys.address', ->
       paths.should.containEql 'Company.oldContracts.companys.address'
 
     it 'should not include very deep paths', ->
       paths.should.not.containEql 'Company.departments.manager.department.employees.address.address'
+
+  describe 'restricting paths to ortho-references', ->
+
+    model = Model.load TESTMODEL.model
+    query = new Query {model, root: 'Company'}
+
+    paths = query.getPossiblePaths depth = 3, allowReverseReferences = false
+
+    it 'should include Company.department.employees.name', ->
+      paths.should.containEql 'Company.departments.employees.name'
+
+    it 'should not include a reverse reference', ->
+      paths.should.not.containEql 'Company.departments.company'
+
+    for path in paths
+      it "a path it returns (#{ path }) should not be a reverse reference", ->
+        query.makePath(path).isReverseReference().should.not.be.true
 
   describe 'The possible paths of a query rooted at Company, extra deep', ->
 
