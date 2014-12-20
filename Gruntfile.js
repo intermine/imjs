@@ -424,10 +424,10 @@ module.exports = function (grunt) {
     'copy:version'
   ])
   grunt.registerTask('demo', ['build', 'browser-indices'])
-  grunt.registerTask('test-node', ['compile', 'mocha-node'])
-  grunt.registerTask('test-browser', ['-set-test-files', 'build', 'browser-indices', 'phantomjs'])
   grunt.registerTask('lint', ['jshint', 'coffeelint'])
   grunt.registerTask('test', ['lint', 'build', 'browser-indices', 'mocha-node', 'phantomjs'])
+  grunt.registerTask('test:node', ['compile', 'mocha-node'])
+  grunt.registerTask('test:browser', ['-set-test-files', 'build', 'browser-indices', 'phantomjs'])
   grunt.registerTask('default', ['test'])
 
 }
