@@ -1,7 +1,12 @@
 Fixture = require './lib/fixture'
 should = require 'should'
+
 {TESTMODEL} = require '../data/model'
 {Query, Model, utils: {any}} = Fixture
+
+containsPath = (paths, target) -> paths.some (p) -> p.toString() is target
+
+VERY_LONG = 'Company.departments.manager.department.employees.address.address'
 
 describe 'Query#getPossiblePaths', ->
 
@@ -12,26 +17,26 @@ describe 'Query#getPossiblePaths', ->
 
     paths = query.getPossiblePaths()
 
-    it 'should be an array of strings', ->
+    it 'should find some paths', ->
+      paths.length.should.be.ok
+
+    it 'should be an array of PathInfo', ->
       paths.should.be.an.Array
       for path in paths
-        path.should.be.a.String
-
-    it 'should only include valid paths', ->
-      for path in paths
-        should.exist query.makePath(path).getType
+        should.exist path.isAttribute
+        should.exist path.getType
 
     it 'should include Company.department.employees.name', ->
-      paths.should.containEql 'Company.departments.employees.name'
+      (containsPath paths, 'Company.departments.employees.name').should.be.true
 
     it 'should include a reverse reference', ->
-      paths.should.containEql 'Company.departments.company'
+      (containsPath paths, 'Company.departments.company').should.be.true
 
     it 'should include Company.oldContracts.companys.address', ->
-      paths.should.containEql 'Company.oldContracts.companys.address'
+      (containsPath paths, 'Company.oldContracts.companys.address').should.be.true
 
     it 'should not include very deep paths', ->
-      paths.should.not.containEql 'Company.departments.manager.department.employees.address.address'
+      (containsPath paths, VERY_LONG).should.not.be.true
 
   describe 'restricting paths to ortho-references', ->
 
@@ -40,15 +45,66 @@ describe 'Query#getPossiblePaths', ->
 
     paths = query.getPossiblePaths depth = 3, allowReverseReferences = false
 
+    it 'should find some paths', ->
+      paths.length.should.be.ok
+
     it 'should include Company.department.employees.name', ->
-      paths.should.containEql 'Company.departments.employees.name'
+      (containsPath paths, 'Company.departments.employees.name').should.be.true
+
+    it 'should include Company.department.employees.address', ->
+      (containsPath paths, 'Company.departments.employees.name').should.be.true
 
     it 'should not include a reverse reference', ->
-      paths.should.not.containEql 'Company.departments.company'
+      (containsPath paths, 'Company.departments.company').should.not.be.true
 
-    for path in paths
+    for path in paths then do (path) ->
       it "a path it returns (#{ path }) should not be a reverse reference", ->
-        query.makePath(path).isReverseReference().should.not.be.true
+        path.isReverseReference().should.not.be.true
+
+  describe 'using predicates - strings', ->
+
+    model = Model.load TESTMODEL.model
+    query = new Query {model, root: 'Company'}
+
+    paths = query.getPossiblePaths depth = 3, false, 'isAttribute'
+
+    it 'should return some paths', ->
+      paths.length.should.be.above 0
+
+    it 'should include Company.name', ->
+      (containsPath paths, 'Company.name').should.be.true
+
+    it 'should not include Company.name', ->
+      (containsPath paths, 'Company.departments').should.not.be.true
+
+    it 'should include Company.department.employees.name', ->
+      (containsPath paths, 'Company.departments.employees.name').should.be.true
+
+    it 'should not include Company.department.employees.address', ->
+      (containsPath paths, 'Company.departments.employees.address').should.not.be.true
+
+    for path in paths then do (path) ->
+      it "a path it returns (#{ path }) should be an attribute", ->
+        path.isAttribute().should.be.true
+
+  describe 'using predicates - functions', ->
+
+    model = Model.load TESTMODEL.model
+    query = new Query {model, root: 'Company'}
+
+    paths = query.getPossiblePaths depth = 2, false, (p) -> /r/.test p.toString()
+
+    it 'should return some paths', ->
+      paths.length.should.be.above 0
+
+    it 'should include Company.vatNumber', ->
+      (containsPath paths, 'Company.vatNumber').should.be.true
+
+    it 'should not include Company.name', ->
+      (containsPath paths, 'Company.name').should.not.be.true
+
+    it 'should include Company.departments.employees', ->
+      (containsPath paths, 'Company.departments.employees').should.be.true
 
   describe 'The possible paths of a query rooted at Company, extra deep', ->
 
@@ -58,10 +114,10 @@ describe 'Query#getPossiblePaths', ->
     paths = query.getPossiblePaths( 6 )
 
     it 'should include very deep paths', ->
-      paths.should.containEql 'Company.departments.manager.department.employees.address.address'
+      (containsPath paths, VERY_LONG).should.be.true
 
     it 'should not include silly paths', ->
-      paths.should.not.containEql 'Company.foo.bar.quux'
+      (containsPath paths, 'Company.foo.bar.quux').should.not.be.true
 
 describe 'Query#canHaveMultipleValues', ->
 
