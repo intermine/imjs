@@ -12,11 +12,6 @@
 {flatten, find, error, omap}   = require('./util')
 intermine = exports
 
-# Either mocha or should is breaking the reference to _
-
-# Lift classes to Tables
-liftToTable = omap (k, v) -> [k, new Table(v)]
-
 # A representation of the metadata for an InterMine. This class
 # allows the user to inspect what kinds of data a mine is configured
 # with, allowing us to verify existing queries, as well as constructing
@@ -29,6 +24,9 @@ class Model
   # @option options [String] name The name of this model.
   # @option options [Object<String, Object>] classes A description of the classes.
   constructor: ({@name, classes}) ->
+    # Lift classes to Tables
+    liftToTable = omap (k, v) => [k, new Table(v, @)]
+
     @classes = liftToTable classes
 
   # Construct a PathInfo object representing the given path, given the
