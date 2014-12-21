@@ -1,4 +1,4 @@
-/*! imjs - v3.9.0 - 2014-12-21 */
+/*! imjs - v3.10.0 - 2014-12-21 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -779,7 +779,7 @@
 
 },{"./util":15}],6:[function(_dereq_,module,exports){
 (function() {
-  var Model, PathInfo, Table, error, find, flatten, intermine, liftToTable, omap, _ref,
+  var Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -791,19 +791,20 @@
 
   intermine = exports;
 
-  liftToTable = omap(function(k, v) {
-    return [k, new Table(v)];
-  });
-
   Model = (function() {
     function Model(_arg) {
-      var classes;
+      var classes, liftToTable;
       this.name = _arg.name, classes = _arg.classes;
       this.findCommonType = __bind(this.findCommonType, this);
       this.findSharedAncestor = __bind(this.findSharedAncestor, this);
       this.getAncestorsOf = __bind(this.getAncestorsOf, this);
       this.getSubclassesOf = __bind(this.getSubclassesOf, this);
       this.getPathInfo = __bind(this.getPathInfo, this);
+      liftToTable = omap((function(_this) {
+        return function(k, v) {
+          return [k, new Table(v, _this)];
+        };
+      })(this));
       this.classes = liftToTable(classes);
     }
 
@@ -4065,7 +4066,8 @@
 
 },{}],13:[function(_dereq_,module,exports){
 (function() {
-  var Table, merge, properties;
+  var Promise, merge, properties,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   merge = function(src, dest) {
     var k, v, _results;
@@ -4077,14 +4079,18 @@
     return _results;
   };
 
+  Promise = _dereq_('./promise');
+
   properties = ['attributes', 'references', 'collections'];
 
-  Table = (function() {
-    function Table(_arg) {
+  exports.Table = (function() {
+    function Table(opts, model) {
       var c, prop, _, _i, _len, _ref, _ref1;
-      this.name = _arg.name, this.tags = _arg.tags, this.displayName = _arg.displayName, this.attributes = _arg.attributes, this.references = _arg.references, this.collections = _arg.collections;
+      this.model = model;
+      this.getDisplayName = __bind(this.getDisplayName, this);
+      this.name = opts.name, this.tags = opts.tags, this.displayName = opts.displayName, this.attributes = opts.attributes, this.references = opts.references, this.collections = opts.collections;
       this.fields = {};
-      this.__parents__ = (_ref = arguments[0]['extends']) != null ? _ref : [];
+      this.__parents__ = (_ref = opts['extends']) != null ? _ref : [];
       for (_i = 0, _len = properties.length; _i < _len; _i++) {
         prop = properties[_i];
         if (this[prop] == null) {
@@ -4118,15 +4124,25 @@
       return ((_ref = this.__parents__) != null ? _ref : []).slice();
     };
 
+    Table.prototype.getDisplayName = function() {
+      return new Promise((function(_this) {
+        return function(resolve, reject) {
+          if (_this.model != null) {
+            return resolve(_this.model.makePath(_this.name).getDisplayName());
+          } else {
+            return reject(new Error('model not set - cannot make path'));
+          }
+        };
+      })(this));
+    };
+
     return Table;
 
   })();
 
-  exports.Table = Table;
-
 }).call(this);
 
-},{}],14:[function(_dereq_,module,exports){
+},{"./promise":8}],14:[function(_dereq_,module,exports){
 (function() {
   var any, do_pref_req, error, get, isFunction, withCB, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -4710,7 +4726,7 @@
 
 },{"./promise":8}],16:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.9.0';
+  exports.VERSION = '3.10.0';
 
 }).call(this);
 

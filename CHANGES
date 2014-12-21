@@ -60,4 +60,5 @@
         - now returns an array of PathInfo, rather than strings
         - support for predication (#16, #17)
         - PathInfo now has a 'isReverseReference()' method.
+3.10.0 Table objects now have a getDisplayName method.
 **/
