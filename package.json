@@ -36,7 +36,7 @@
     "tests": "test"
   },
   "scripts": {
-    "prepublish": "grunt test",
+    "prepublish": "bower install && grunt test",
     "test": "grunt test",
     "grunt": "grunt"
   },
