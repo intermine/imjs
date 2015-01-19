@@ -369,11 +369,17 @@ describe 'utils', ->
 
     describe 'escaping "foo said "bar\'s dumb", & walked off >.<"', ->
 
-      escaped = escape 'foo said "bar\'s dumb", & walked off >.<'
+      e = escape 'foo said "bar\'s dumb", & walked off >.<'
 
       it 'should have escaped all the XML entities', ->
-        escaped.should.eql 'foo said &quot;bar&#x27;s dumb&quot;, &amp; walked off &gt;.&lt;'
+        e.should.eql 'foo said &quot;bar&apos;s dumb&quot;, &amp; walked off &gt;.&lt;'
 
+    describe 'escaping "всем привет"', ->
+
+      e = escape 'всем привет'
+
+      it 'should have escaped all the unicode characters', ->
+        e.should.eql "&#1074;&#1089;&#1077;&#1084; &#1087;&#1088;&#1080;&#1074;&#1077;&#1090;"
 
   describe 'omap', ->
 

@@ -124,12 +124,21 @@ entities =
   '<': '&lt;'
   '>': '&gt;'
   '"': '&quot;'
-  "'": '&#x27;'
+  "'": '&apos;'
 
-# XML escaping
+# XML escaping. Escape XML entities and unicode characters above ascii
 root.escape = (str) ->
   return '' if not str?
-  String(str).replace /[&<>"']/g, (entity) -> entities[entity]
+  withEntities = String(str).replace /[&<>"']/g, (entity) -> entities[entity]
+  ret = []
+  for i in [0 .. withEntities.length]
+    code = withEntities.charCodeAt i
+    if code > 256
+      ret.push "&##{ code };"
+    else
+      ret.push withEntities.charAt i
+
+  ret.join ''
 
 # Until I can find a nicer name for this...
 # Basically a mapping over an object, taking a
