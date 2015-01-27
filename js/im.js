@@ -1,4 +1,4 @@
-/*! imjs - v3.10.1 - 2015-01-19 */
+/*! imjs - v3.11.0 - 2015-01-27 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -290,7 +290,7 @@
 
 }).call(this);
 
-},{"./constants":1,"./util":15,"./version":16,"JSONStream":18,"http":50,"url":47}],4:[function(_dereq_,module,exports){
+},{"./constants":1,"./util":15,"./version":16,"JSONStream":18,"http":51,"url":48}],4:[function(_dereq_,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -1155,9 +1155,9 @@
 
 }).call(this);
 
-},{"es6-promise":22}],9:[function(_dereq_,module,exports){
+},{"es6-promise":23}],9:[function(_dereq_,module,exports){
 (function() {
-  var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
+  var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, stringifySortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice,
@@ -1194,7 +1194,7 @@
     return utils.compose(service.fetchList, get('listName'));
   };
 
-  CODES = [null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+  CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
   decapitate = function(x) {
     if (x == null) {
@@ -1388,6 +1388,19 @@
       }
     }
     return constraint;
+  };
+
+  stringifySortOrder = function(sortOrder) {
+    var oe;
+    return ((function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = sortOrder.length; _i < _len; _i++) {
+        oe = sortOrder[_i];
+        _results.push("" + oe.path + " " + oe.direction);
+      }
+      return _results;
+    })()).join(' ');
   };
 
   stringToSortOrder = function(str) {
@@ -2335,20 +2348,43 @@
       return this;
     };
 
-    Query.prototype.addSortOrder = function(so) {
+    Query.prototype.addSortOrder = function(so, _arg) {
+      var silent;
+      silent = (_arg != null ? _arg : {}).silent;
       this.sortOrder.push(this._parse_sort_order(so));
-      this.trigger('add:sortorder', so);
-      return this.trigger('change:sortorder', this.sortOrder);
+      if (!silent) {
+        this.trigger('add:sortorder', so);
+        return this.trigger('change:sortorder', this.sortOrder);
+      }
     };
 
     Query.prototype.orderBy = function(oes) {
-      var oe, _i, _len;
+      var copy, direction, oe, oldSO, path, _i, _len;
+      oldSO = this.sortOrder.slice();
       this.sortOrder = [];
       for (_i = 0, _len = oes.length; _i < _len; _i++) {
         oe = oes[_i];
-        this.addSortOrder(this._parse_sort_order(oe));
+        this.addSortOrder(this._parse_sort_order(oe), {
+          silent: true
+        });
       }
-      return this.trigger('set:sortorder change:sortorder', this.sortOrder);
+      copy = (function() {
+        var _j, _len1, _ref, _ref1, _results;
+        _ref = this.sortOrder;
+        _results = [];
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          _ref1 = _ref[_j], path = _ref1.path, direction = _ref1.direction;
+          _results.push({
+            path: path,
+            direction: direction
+          });
+        }
+        return _results;
+      }).call(this);
+      this.trigger('set:sortorder', copy);
+      if ((stringifySortOrder(oldSO)) !== this.getSorting()) {
+        return this.trigger('change:sortorder', copy);
+      }
     };
 
     Query.prototype.addJoins = function(joins) {
@@ -2402,18 +2438,22 @@
       return this;
     };
 
-    Query.prototype.addConstraints = function(constraints) {
-      var c, con, path, _fn, _i, _len;
+    Query.prototype.addConstraints = function(constraints, conj) {
+      var c, con, oldLogic, path, _fn, _i, _len;
+      if (conj == null) {
+        conj = 'and';
+      }
       this.__silent__ = true;
+      oldLogic = this.constraintLogic;
       if (utils.isArray(constraints)) {
         for (_i = 0, _len = constraints.length; _i < _len; _i++) {
           c = constraints[_i];
-          this.addConstraint(c);
+          this.addConstraint(c, conj);
         }
       } else {
         _fn = (function(_this) {
           return function(path, con) {
-            return _this.addConstraint(interpretConstraint(path, con));
+            return _this.addConstraint(interpretConstraint(path, con), conj);
           };
         })(this);
         for (path in constraints) {
@@ -2423,11 +2463,20 @@
       }
       this.__silent__ = false;
       this.trigger('add:constraint');
-      return this.trigger('change:constraints');
+      this.trigger('change:constraints');
+      if (oldLogic !== this.constraintLogic) {
+        return this.trigger('change:logic', this.constraintLogic);
+      }
     };
 
-    Query.prototype.addConstraint = function(constraint) {
-      var error;
+    Query.prototype.addConstraint = function(constraint, conj) {
+      var i, logic, needsLogicClause, newConLen, newLogic, oldLogic, _ref;
+      if (conj == null) {
+        conj = 'and';
+      }
+      if (conj !== 'and' && conj !== 'or') {
+        throw new Error('Unknown logical conjunction: ' + conj);
+      }
       if (utils.isArray(constraint)) {
         constraint = interpretConArray(constraint);
       } else {
@@ -2438,36 +2487,35 @@
       }
       constraint.path = this.adjustPath(constraint.path);
       if (constraint.type == null) {
-        try {
-          constraint.op = get_canonical_op(constraint.op);
-        } catch (_error) {
-          error = _error;
-          throw new Error("Illegal operator: " + constraint.op);
-        }
+        constraint.op = get_canonical_op(constraint.op);
       }
       this.constraints.push(constraint);
-      if ((this.constraintLogic != null) && this.constraintLogic !== '') {
-        this.constraintLogic = "(" + this.constraintLogic + ") and " + CODES[this.constraints.length];
+      needsLogicClause = (conj === 'or') || (((_ref = this.constraintLogic) != null ? _ref.length : void 0) > 0);
+      newConLen = this.constraints.length;
+      oldLogic = this.constraintLogic;
+      if (needsLogicClause) {
+        newLogic = newConLen === 2 ? "" + CODES[0] + " " + conj + " " + CODES[1] : (logic = this.constraintLogic, logic || (logic = ((function() {
+          var _i, _ref1, _results;
+          _results = [];
+          for (i = _i = 0, _ref1 = newConLen - 2; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+            _results.push(CODES[i]);
+          }
+          return _results;
+        })()).join(' and ')), "(" + logic + ") " + conj + " " + CODES[newConLen - 1]);
+        this.constraintLogic = newLogic;
       }
       if (!this.__silent__) {
         this.trigger('add:constraint', constraint);
         this.trigger('change:constraints');
+        if (oldLogic !== this.constraintLogic) {
+          this.trigger('change:logic', this.constraintLogic);
+        }
       }
       return this;
     };
 
     Query.prototype.getSorting = function() {
-      var oe;
-      return ((function() {
-        var _i, _len, _ref, _results;
-        _ref = this.sortOrder;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          oe = _ref[_i];
-          _results.push("" + oe.path + " " + oe.direction);
-        }
-        return _results;
-      }).call(this)).join(' ');
+      return stringifySortOrder(this.sortOrder);
     };
 
     Query.prototype.getConstraintXML = function() {
@@ -2896,7 +2944,7 @@
 
 }).call(this);
 
-},{"./util":15,"./xml":17,"backbone-events-standalone":21}],10:[function(_dereq_,module,exports){
+},{"./util":15,"./xml":17,"backbone-events-standalone":22}],10:[function(_dereq_,module,exports){
 (function() {
   var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -4740,7 +4788,7 @@
 
 },{"./promise":8}],16:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.10.1';
+  exports.VERSION = '3.11.0';
 
 }).call(this);
 
@@ -4981,8 +5029,8 @@ if(!module.parent && process.title !== 'browser') {
     .pipe(process.stdout)
 }
 
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"buffer":23,"jsonparse":19,"through":56}],19:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
+},{"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56,"buffer":24,"jsonparse":19,"through":20}],19:[function(_dereq_,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -5387,7 +5435,119 @@ proto.onToken = function (token, value) {
 module.exports = Parser;
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":23}],20:[function(_dereq_,module,exports){
+},{"buffer":24}],20:[function(_dereq_,module,exports){
+(function (process){
+var Stream = _dereq_('stream')
+
+// through
+//
+// a stream that does nothing but re-emit the input.
+// useful for aggregating a series of changing but not ending streams into one stream)
+
+exports = module.exports = through
+through.through = through
+
+//create a readable writable stream.
+
+function through (write, end, opts) {
+  write = write || function (data) { this.queue(data) }
+  end = end || function () { this.queue(null) }
+
+  var ended = false, destroyed = false, buffer = [], _ended = false
+  var stream = new Stream()
+  stream.readable = stream.writable = true
+  stream.paused = false
+
+//  stream.autoPause   = !(opts && opts.autoPause   === false)
+  stream.autoDestroy = !(opts && opts.autoDestroy === false)
+
+  stream.write = function (data) {
+    write.call(this, data)
+    return !stream.paused
+  }
+
+  function drain() {
+    while(buffer.length && !stream.paused) {
+      var data = buffer.shift()
+      if(null === data)
+        return stream.emit('end')
+      else
+        stream.emit('data', data)
+    }
+  }
+
+  stream.queue = stream.push = function (data) {
+//    console.error(ended)
+    if(_ended) return stream
+    if(data == null) _ended = true
+    buffer.push(data)
+    drain()
+    return stream
+  }
+
+  //this will be registered as the first 'end' listener
+  //must call destroy next tick, to make sure we're after any
+  //stream piped from here.
+  //this is only a problem if end is not emitted synchronously.
+  //a nicer way to do this is to make sure this is the last listener for 'end'
+
+  stream.on('end', function () {
+    stream.readable = false
+    if(!stream.writable && stream.autoDestroy)
+      process.nextTick(function () {
+        stream.destroy()
+      })
+  })
+
+  function _end () {
+    stream.writable = false
+    end.call(stream)
+    if(!stream.readable && stream.autoDestroy)
+      stream.destroy()
+  }
+
+  stream.end = function (data) {
+    if(ended) return
+    ended = true
+    if(arguments.length) stream.write(data)
+    _end() // will emit or queue
+    return stream
+  }
+
+  stream.destroy = function () {
+    if(destroyed) return
+    destroyed = true
+    ended = true
+    buffer.length = 0
+    stream.writable = stream.readable = false
+    stream.emit('close')
+    return stream
+  }
+
+  stream.pause = function () {
+    if(stream.paused) return
+    stream.paused = true
+    return stream
+  }
+
+  stream.resume = function () {
+    if(stream.paused) {
+      stream.paused = false
+      stream.emit('resume')
+    }
+    drain()
+    //may have become paused again,
+    //as drain emits 'data'.
+    if(!stream.paused)
+      stream.emit('drain')
+    return stream
+  }
+  return stream
+}
+
+
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56,"stream":46}],21:[function(_dereq_,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -5666,10 +5826,10 @@ module.exports = Parser;
   }
 })(this);
 
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 module.exports = _dereq_('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":20}],22:[function(_dereq_,module,exports){
+},{"./backbone-events-standalone":21}],23:[function(_dereq_,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -6631,8 +6791,8 @@ module.exports = _dereq_('./backbone-events-standalone');
       this['ES6Promise'] = es6$promise$umd$$ES6Promise;
     }
 }).call(this);
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55}],23:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56}],24:[function(_dereq_,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -7686,7 +7846,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":24,"ieee754":25,"is-array":26}],24:[function(_dereq_,module,exports){
+},{"base64-js":25,"ieee754":26,"is-array":27}],25:[function(_dereq_,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -7808,7 +7968,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -7894,7 +8054,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 
 /**
  * isArray
@@ -7929,7 +8089,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8232,7 +8392,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -8257,12 +8417,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -8773,7 +8933,7 @@ module.exports = Array.isArray || function (arr) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8859,7 +9019,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8946,16 +9106,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],33:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 'use strict';
 
 exports.decode = exports.parse = _dereq_('./decode');
 exports.encode = exports.stringify = _dereq_('./encode');
 
-},{"./decode":31,"./encode":32}],34:[function(_dereq_,module,exports){
+},{"./decode":32,"./encode":33}],35:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":35}],35:[function(_dereq_,module,exports){
+},{"./lib/_stream_duplex.js":36}],36:[function(_dereq_,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9047,8 +9207,8 @@ function forEach (xs, f) {
   }
 }
 
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_readable":37,"./_stream_writable":39,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"core-util-is":40,"inherits":28}],36:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"./_stream_readable":38,"./_stream_writable":40,"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56,"core-util-is":41,"inherits":29}],37:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9096,7 +9256,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":38,"core-util-is":40,"inherits":28}],37:[function(_dereq_,module,exports){
+},{"./_stream_transform":39,"core-util-is":41,"inherits":29}],38:[function(_dereq_,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10081,8 +10241,8 @@ function indexOf (xs, x) {
   return -1;
 }
 
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"buffer":23,"core-util-is":40,"events":27,"inherits":28,"isarray":29,"stream":45,"string_decoder/":46}],38:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56,"buffer":24,"core-util-is":41,"events":28,"inherits":29,"isarray":30,"stream":46,"string_decoder/":47}],39:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10294,7 +10454,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":35,"core-util-is":40,"inherits":28}],39:[function(_dereq_,module,exports){
+},{"./_stream_duplex":36,"core-util-is":41,"inherits":29}],40:[function(_dereq_,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10683,8 +10843,8 @@ function endWritable(stream, state, cb) {
   state.ended = true;
 }
 
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_duplex":35,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"buffer":23,"core-util-is":40,"inherits":28,"stream":45}],40:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"./_stream_duplex":36,"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56,"buffer":24,"core-util-is":41,"inherits":29,"stream":46}],41:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10794,10 +10954,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":23}],41:[function(_dereq_,module,exports){
+},{"buffer":24}],42:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":36}],42:[function(_dereq_,module,exports){
+},{"./lib/_stream_passthrough.js":37}],43:[function(_dereq_,module,exports){
 var Stream = _dereq_('stream'); // hack to fix a circular dependency issue when used with browserify
 exports = module.exports = _dereq_('./lib/_stream_readable.js');
 exports.Stream = Stream;
@@ -10807,13 +10967,13 @@ exports.Duplex = _dereq_('./lib/_stream_duplex.js');
 exports.Transform = _dereq_('./lib/_stream_transform.js');
 exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":35,"./lib/_stream_passthrough.js":36,"./lib/_stream_readable.js":37,"./lib/_stream_transform.js":38,"./lib/_stream_writable.js":39,"stream":45}],43:[function(_dereq_,module,exports){
+},{"./lib/_stream_duplex.js":36,"./lib/_stream_passthrough.js":37,"./lib/_stream_readable.js":38,"./lib/_stream_transform.js":39,"./lib/_stream_writable.js":40,"stream":46}],44:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":38}],44:[function(_dereq_,module,exports){
+},{"./lib/_stream_transform.js":39}],45:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":39}],45:[function(_dereq_,module,exports){
+},{"./lib/_stream_writable.js":40}],46:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10942,7 +11102,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":27,"inherits":28,"readable-stream/duplex.js":34,"readable-stream/passthrough.js":41,"readable-stream/readable.js":42,"readable-stream/transform.js":43,"readable-stream/writable.js":44}],46:[function(_dereq_,module,exports){
+},{"events":28,"inherits":29,"readable-stream/duplex.js":35,"readable-stream/passthrough.js":42,"readable-stream/readable.js":43,"readable-stream/transform.js":44,"readable-stream/writable.js":45}],47:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11165,7 +11325,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":23}],47:[function(_dereq_,module,exports){
+},{"buffer":24}],48:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11874,14 +12034,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":30,"querystring":33}],48:[function(_dereq_,module,exports){
+},{"punycode":31,"querystring":34}],49:[function(_dereq_,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],49:[function(_dereq_,module,exports){
+},{}],50:[function(_dereq_,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12470,8 +12630,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":48,"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"inherits":28}],50:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":49,"/Users/alex/projects/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":56,"inherits":29}],51:[function(_dereq_,module,exports){
 var http = module.exports;
 var EventEmitter = _dereq_('events').EventEmitter;
 var Request = _dereq_('./lib/request');
@@ -12617,7 +12777,7 @@ http.STATUS_CODES = {
     510 : 'Not Extended',               // RFC 2774
     511 : 'Network Authentication Required' // RFC 6585
 };
-},{"./lib/request":51,"events":27,"url":47}],51:[function(_dereq_,module,exports){
+},{"./lib/request":52,"events":28,"url":48}],52:[function(_dereq_,module,exports){
 var Stream = _dereq_('stream');
 var Response = _dereq_('./response');
 var Base64 = _dereq_('Base64');
@@ -12828,7 +12988,7 @@ var isXHR2Compatible = function (obj) {
     if (typeof FormData !== 'undefined' && obj instanceof FormData) return true;
 };
 
-},{"./response":52,"Base64":53,"inherits":54,"stream":45}],52:[function(_dereq_,module,exports){
+},{"./response":53,"Base64":54,"inherits":55,"stream":46}],53:[function(_dereq_,module,exports){
 var Stream = _dereq_('stream');
 var util = _dereq_('util');
 
@@ -12950,7 +13110,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":45,"util":49}],53:[function(_dereq_,module,exports){
+},{"stream":46,"util":50}],54:[function(_dereq_,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -13012,9 +13172,9 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],54:[function(_dereq_,module,exports){
-module.exports=_dereq_(28)
-},{"/home/alex/projects/javascript/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":28}],55:[function(_dereq_,module,exports){
+},{}],55:[function(_dereq_,module,exports){
+module.exports=_dereq_(29)
+},{"/Users/alex/projects/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":29}],56:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -13076,118 +13236,6 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],56:[function(_dereq_,module,exports){
-(function (process){
-var Stream = _dereq_('stream')
-
-// through
-//
-// a stream that does nothing but re-emit the input.
-// useful for aggregating a series of changing but not ending streams into one stream)
-
-exports = module.exports = through
-through.through = through
-
-//create a readable writable stream.
-
-function through (write, end, opts) {
-  write = write || function (data) { this.queue(data) }
-  end = end || function () { this.queue(null) }
-
-  var ended = false, destroyed = false, buffer = [], _ended = false
-  var stream = new Stream()
-  stream.readable = stream.writable = true
-  stream.paused = false
-
-//  stream.autoPause   = !(opts && opts.autoPause   === false)
-  stream.autoDestroy = !(opts && opts.autoDestroy === false)
-
-  stream.write = function (data) {
-    write.call(this, data)
-    return !stream.paused
-  }
-
-  function drain() {
-    while(buffer.length && !stream.paused) {
-      var data = buffer.shift()
-      if(null === data)
-        return stream.emit('end')
-      else
-        stream.emit('data', data)
-    }
-  }
-
-  stream.queue = stream.push = function (data) {
-//    console.error(ended)
-    if(_ended) return stream
-    if(data == null) _ended = true
-    buffer.push(data)
-    drain()
-    return stream
-  }
-
-  //this will be registered as the first 'end' listener
-  //must call destroy next tick, to make sure we're after any
-  //stream piped from here.
-  //this is only a problem if end is not emitted synchronously.
-  //a nicer way to do this is to make sure this is the last listener for 'end'
-
-  stream.on('end', function () {
-    stream.readable = false
-    if(!stream.writable && stream.autoDestroy)
-      process.nextTick(function () {
-        stream.destroy()
-      })
-  })
-
-  function _end () {
-    stream.writable = false
-    end.call(stream)
-    if(!stream.readable && stream.autoDestroy)
-      stream.destroy()
-  }
-
-  stream.end = function (data) {
-    if(ended) return
-    ended = true
-    if(arguments.length) stream.write(data)
-    _end() // will emit or queue
-    return stream
-  }
-
-  stream.destroy = function () {
-    if(destroyed) return
-    destroyed = true
-    ended = true
-    buffer.length = 0
-    stream.writable = stream.readable = false
-    stream.emit('close')
-    return stream
-  }
-
-  stream.pause = function () {
-    if(stream.paused) return
-    stream.paused = true
-    return stream
-  }
-
-  stream.resume = function () {
-    if(stream.paused) {
-      stream.paused = false
-      stream.emit('resume')
-    }
-    drain()
-    //may have become paused again,
-    //as drain emits 'data'.
-    if(!stream.paused)
-      stream.emit('drain')
-    return stream
-  }
-  return stream
-}
-
-
-}).call(this,_dereq_("/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/alex/projects/javascript/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":55,"stream":45}]},{},[2])(2)
+},{}]},{},[2])(2)
 });
 })(window.intermine);
