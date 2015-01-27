@@ -33,10 +33,10 @@ RESULTS_METHODS = [
 
 LIST_PIPE = (service) -> utils.compose service.fetchList, get 'listName'
 
-# The valid codes for a query
+# The valid codes for a query - 0 indexed.
 CODES = [
-  null, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-  'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
 ]
 
 # Return a string with the head cut off.
@@ -208,6 +208,11 @@ interpretConArray = (conArgs) ->
       constraint.extraValue = conArgs[2]
   return constraint
 
+# Turn a list of sort-order elements into a string.
+stringifySortOrder = (sortOrder) ->
+  ("#{oe.path} #{oe.direction}" for oe in sortOrder).join ' '
+
+# Turn a string into a list of sort-order elements.
 stringToSortOrder = (str) ->
   return [] unless str?
   parts = str.split /\s+/
@@ -401,6 +406,8 @@ class Query
 
     if reduced.length isnt orig.length - 1
       throw new Error didntRemove orig, reduced
+
+    # TODO - fix broken logic caused by constraint removal!
 
     @constraints = reduced
     unless silent
@@ -796,16 +803,22 @@ class Query
       @trigger 'change:sortorder', @sortOrder
     return @
 
-  addSortOrder: (so) ->
+  addSortOrder: (so, {silent} = {}) ->
     @sortOrder.push @_parse_sort_order so
-    @trigger 'add:sortorder', so
-    @trigger 'change:sortorder', @sortOrder
+    unless silent
+      @trigger 'add:sortorder', so
+      @trigger 'change:sortorder', @sortOrder
 
   orderBy: (oes) ->
+    oldSO = @sortOrder.slice()
     @sortOrder = []
-    for oe in oes
-      @addSortOrder @_parse_sort_order oe
-    @trigger 'set:sortorder change:sortorder', @sortOrder
+    for oe in oes # Suppress events since these are not real additions.
+      @addSortOrder (@_parse_sort_order oe), silent: true
+    # Deep copy of the sort-order, so event handlers don't mess with it.
+    copy = ({path, direction} for {path,direction} in @sortOrder)
+    @trigger 'set:sortorder', copy
+    if (stringifySortOrder oldSO) isnt @getSorting()
+      @trigger 'change:sortorder', copy
 
   addJoins: (joins) ->
     if utils.isArray(joins)
@@ -828,45 +841,63 @@ class Query
       @trigger 'change:joins', path: path, style: style
     this
 
-  addConstraints: (constraints) ->
+  # Add multiple constraints to the query, triggering change events.
+  # @param [Array|Object] constraints The constraint definitions
+  # @param [String] conj The logical conjunction to use. (default = 'and')
+  addConstraints: (constraints, conj = 'and') ->
     @__silent__ = true
+    oldLogic = @constraintLogic
     if utils.isArray(constraints)
-      @addConstraint(c) for c in constraints
+      @addConstraint(c, conj) for c in constraints
     else
       for path, con of constraints then do (path, con) =>
-        @addConstraint interpretConstraint path, con
+        @addConstraint (interpretConstraint path, con), conj
 
     @__silent__ = false
     @trigger 'add:constraint'
     @trigger 'change:constraints'
+    @trigger 'change:logic', @constraintLogic unless oldLogic is @constraintLogic
 
-  addConstraint: (constraint) =>
+  # Add a single constraint to the query, triggering change events.
+  # @param [Array|Object] constraint A constraint definition.
+  # @param [String] conj The logical conjunction to use. (default = 'and')
+  addConstraint: (constraint, conj = 'and') =>
+    throw new Error('Unknown logical conjunction: ' + conj) unless conj in ['and', 'or']
     if utils.isArray(constraint)
       constraint = interpretConArray constraint
     else
       constraint = copyCon constraint
 
-    # Don't add switched-off constraints
+    # Don't add switched-off constraints.
     return this if constraint.switched is 'OFF'
 
     constraint.path = @adjustPath constraint.path
     unless constraint.type?
-      try
-        constraint.op = get_canonical_op constraint.op
-      catch error
-        throw new Error "Illegal operator: #{ constraint.op }"
+      constraint.op = get_canonical_op constraint.op
     @constraints.push constraint
 
-    if @constraintLogic? and @constraintLogic isnt ''
-      # Naively add this constraint as an 'AND' filter.
-      @constraintLogic = "(#{@constraintLogic}) and #{ CODES[@constraints.length] }"
+    # We need to define the logic if this constraint was added as an OR,
+    # or if there is already a constraint logic definition.
+    needsLogicClause = (conj is 'or') or (@constraintLogic?.length > 0)
+    newConLen = @constraints.length
+    oldLogic = @constraintLogic
+
+    if needsLogicClause
+      newLogic = if newConLen is 2 # Simple case, there was one, and we just added one.
+        "#{ CODES[0] } #{ conj } #{ CODES[1] }"
+      else # More general, but more complex, and extra brackets.
+        logic = @constraintLogic # Use logic if available, or generate.
+        logic or= (CODES[i] for i in [0 .. newConLen - 2]).join(' and ')
+        "(#{ logic }) #{ conj } #{ CODES[newConLen - 1] }"
+      @constraintLogic = newLogic
 
     unless @__silent__
       @trigger 'add:constraint', constraint
       @trigger 'change:constraints'
+      @trigger 'change:logic', @constraintLogic unless oldLogic is @constraintLogic
     this
 
-  getSorting: -> ("#{oe.path} #{oe.direction}" for oe in @sortOrder).join(' ')
+  getSorting: -> stringifySortOrder @sortOrder
 
   getConstraintXML: ->
     toSerialise = (c for c in @constraints when not c.type? or @isInQuery(c.path))
