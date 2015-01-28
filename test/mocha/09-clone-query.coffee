@@ -14,3 +14,17 @@ describe 'Query#clone', ->
   it 'should have more views in clone', eventually ([q, clone]) ->
     clone.views.length.should.be.above q.views.length
 
+describe 'Query#clone sortOrder', ->
+
+  {service, youngerEmployees} = new Fixture()
+
+  @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
+    q.orderBy ['age']
+    [q, q.clone().addOrSetSortOrder(path: 'age', direction: 'DESC')]
+
+  it 'should exist on both', eventually ([q, clone]) ->
+    q.sortOrder.length.should.eql clone.sortOrder.length
+
+  it 'should not have linked the sort-order elements', eventually ([q, clone]) ->
+    q.sortOrder[0].direction.should.not.eql clone.sortOrder[0].direction
+
