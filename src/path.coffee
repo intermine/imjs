@@ -128,8 +128,11 @@ class PathInfo
   #   path.append('name').isa('String') //=> true
   #
   # @param [String|Table] The purported parent class.
-  # @return [boolean] If the path represents the provided class or one of its subclasses
+  # @return false If `clazz` is null.
+  # @return true If this path represents `clazz` or one of its subclasses
+  # @return false otherwise
   isa: (clazz) =>
+    return false unless clazz?
     if @isAttribute()
       @getType() is clazz
     else
