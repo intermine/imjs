@@ -2317,7 +2317,9 @@
 
     Query.prototype._parse_sort_order = function(input) {
       var direction, k, path, so, v, _ref;
-      so = input;
+      if (input == null) {
+        throw new Error('No input');
+      }
       if (typeof input === 'string') {
         so = {
           path: input,
@@ -2338,8 +2340,17 @@
           path: path,
           direction: direction
         };
+      } else {
+        path = input.path, direction = input.direction;
+        so = {
+          path: path,
+          direction: direction
+        };
       }
       so.path = this.adjustPath(so.path);
+      if (so.direction == null) {
+        so.direction = 'ASC';
+      }
       so.direction = so.direction.toUpperCase();
       return so;
     };

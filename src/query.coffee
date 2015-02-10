@@ -778,7 +778,7 @@ class Query
     utils.find(joinPaths, (p) => @joins[p] is 'OUTER' and path.indexOf(p) is 0)
 
   _parse_sort_order: (input) ->
-    so = input
+    throw new Error('No input') unless input?
     if typeof input is 'string'
       so = {path: input, direction: 'ASC'}
     else if utils.isArray input
@@ -787,8 +787,12 @@ class Query
     else if (not input.path?)
       [path, direction] = [k, v] for k, v of input
       so = {path, direction}
+    else
+      {path, direction} = input
+      so = {path, direction} # unpack so we don't take a reference to the input object.
 
     so.path = @adjustPath(so.path)
+    so.direction ?= 'ASC'
     so.direction = so.direction.toUpperCase()
     return so
 
