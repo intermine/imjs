@@ -1,4 +1,4 @@
-/*! imjs - v3.11.0 - 2015-01-27 */
+/*! imjs - v3.11.1 - 2015-02-10 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -782,7 +782,7 @@
 
 },{"./util":15}],6:[function(_dereq_,module,exports){
 (function() {
-  var Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
+  var JAVA_LANG_OBJ, Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -793,6 +793,15 @@
   _ref = _dereq_('./util'), flatten = _ref.flatten, find = _ref.find, error = _ref.error, omap = _ref.omap;
 
   intermine = exports;
+
+  JAVA_LANG_OBJ = new Table({
+    name: 'Object',
+    tags: [],
+    displayName: 'Object',
+    attributes: {},
+    references: {},
+    collections: {}
+  });
 
   Model = (function() {
     function Model(_arg) {
@@ -809,6 +818,7 @@
         };
       })(this));
       this.classes = liftToTable(classes);
+      this.classes['java.lang.Object'] = JAVA_LANG_OBJ;
     }
 
     Model.prototype.getPathInfo = function(path, subcls) {
@@ -833,17 +843,21 @@
     };
 
     Model.prototype.getAncestorsOf = function(cls) {
-      var ancestors, clazz, superC, _i, _len;
+      var clazz, parents;
       clazz = cls && cls.name ? cls : this.classes[cls];
       if (clazz == null) {
         throw new Error("" + cls + " is not a table");
       }
-      ancestors = clazz.parents();
-      for (_i = 0, _len = ancestors.length; _i < _len; _i++) {
-        superC = ancestors[_i];
-        ancestors.push(this.getAncestorsOf(superC));
-      }
-      return flatten(ancestors);
+      parents = clazz.parents();
+      return parents.filter((function(_this) {
+        return function(p) {
+          return _this.classes[p];
+        };
+      })(this)).reduce(((function(_this) {
+        return function(as, p) {
+          return as.concat(_this.getAncestorsOf(p));
+        };
+      })(this)), parents);
     };
 
     Model.prototype.findSharedAncestor = function(classA, classB) {
@@ -4788,7 +4802,7 @@
 
 },{"./promise":8}],16:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.11.0';
+  exports.VERSION = '3.11.1';
 
 }).call(this);
 

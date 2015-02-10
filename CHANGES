@@ -62,4 +62,5 @@
         - PathInfo now has a 'isReverseReference()' method.
 3.10.0 Table objects now have a getDisplayName method.
 3.11.0 Allow constraints to be added with a logical conjunction.
+3.11.1 Better support for FastPathObjects
 **/
