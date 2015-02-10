@@ -35,6 +35,12 @@ describe 'Model', ->
       it 'should throw a helpful error', ->
         attempt.should.throw /not a table/
 
+    describe 'getting the ancestry of a non IMO', ->
+      ancestry = testmodel.getAncestorsOf 'SimpleObject'
+
+      it 'should find the correct ancestry', ->
+        ancestry.should.eql ['java.lang.Object']
+
   describe '#findSharedAncestor', ->
 
     testmodel = Model.load TESTMODEL.model
@@ -42,6 +48,13 @@ describe 'Model', ->
     describe 'The shared ancestor of a class and null', ->
 
       ancestor = testmodel.findSharedAncestor 'Employee', null
+
+      it 'should not exist', ->
+        should.not.exist ancestor
+
+    describe 'The shared ancestor of a class and a simple object', ->
+
+      ancestor = testmodel.findSharedAncestor 'Employee', 'SimpleObject'
 
       it 'should not exist', ->
         should.not.exist ancestor

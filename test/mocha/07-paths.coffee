@@ -451,6 +451,16 @@ describe 'The path of a poor person', ->
   it 'should say this person is poor', eventually (name) ->
     name.should.eql 'Poor Person'
 
+describe 'The path of a simple object', ->
+
+  path = testmodel.makePath 'SimpleObject'
+
+  it 'should say that this path is not an IMO', ->
+    path.isa('InterMineObject').should.be.false
+
+  it 'should say that this path is a JLO', ->
+    path.isa('java.lang.Object').should.be.true
+
 describe 'PathInfo::isReverseReference', ->
 
   root_path = testmodel.makePath 'Employee'

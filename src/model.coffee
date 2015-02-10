@@ -12,6 +12,14 @@
 {flatten, find, error, omap}   = require('./util')
 intermine = exports
 
+JAVA_LANG_OBJ = new Table
+  name: 'Object'
+  tags: []
+  displayName: 'Object'
+  attributes: {}
+  references: {}
+  collections: {}
+
 # A representation of the metadata for an InterMine. This class
 # allows the user to inspect what kinds of data a mine is configured
 # with, allowing us to verify existing queries, as well as constructing
@@ -28,6 +36,7 @@ class Model
     liftToTable = omap (k, v) => [k, new Table(v, @)]
 
     @classes = liftToTable classes
+    @classes['java.lang.Object'] = JAVA_LANG_OBJ
 
   # Construct a PathInfo object representing the given path, given the
   # specified subclass constraints.
@@ -84,10 +93,9 @@ class Model
     clazz = if (cls and cls.name) then cls else @classes[cls]
     unless clazz?
       throw new Error "#{ cls } is not a table"
-    ancestors = clazz.parents()
-    for superC in ancestors
-      ancestors.push @getAncestorsOf superC
-    flatten ancestors
+    parents = clazz.parents()
+    parents.filter (p) => @classes[p] # filter out non IMOs
+           .reduce ((as, p) => as.concat @getAncestorsOf p), parents
 
   # Get the closest shared ancestor of these two classes.
   # For an inheritance pattern such as:
