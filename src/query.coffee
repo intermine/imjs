@@ -391,6 +391,7 @@ class Query
     @views = (v for v in @views when not (v in unwanted))
     @trigger('remove:view', unwanted)
     @trigger('change:views', @views)
+    @trigger('change', @views)
 
   removeConstraint: (con, silent = false) ->
     orig = @constraints
@@ -412,10 +413,11 @@ class Query
     @constraints = reduced
     unless silent
       @trigger 'change:constraints'
+      @trigger 'change'
       @trigger 'removed:constraint', utils.find orig, iscon
 
   # Add an element to the select list.
-  addToSelect: (views = []) ->
+  addToSelect: (views = [], opts = {}) ->
     views = utils.stringList views
     mapFn = utils.compose @expandStar, @adjustPath
     toAdd = utils.flatten (mapFn v for v in views)
@@ -426,18 +428,24 @@ class Query
     if dups.length
       throw new Error "#{ dups } specified multiple times as arguments to addToSelect"
     @views.push toAdd...
-    @trigger('add:view change:views', toAdd)
+    if opts.silent
+      opts.events = (opts.events ? []).concat ['change', 'add:view', 'change:views']
+    else
+      @trigger('add:view change:views', toAdd)
+      @trigger('change')
+    return this
 
   # Replace the existing select list with the one passed as an argument.
-  select: (views) =>
+  # allowing events to be silenced.
+  select: (views, opts) =>
     oldViews = @views.slice()
     try
       @views = []
-      @addToSelect views
+      @addToSelect views, opts
     catch e
       @views = oldViews
       utils.error e
-    @
+    return this
 
   # Interpret an argument as resolve the canonical path it refers to.
   # For example, if the root of this query is known, then this method will
@@ -805,6 +813,7 @@ class Query
       oe = utils.find @sortOrder, ({path}) -> path is so.path
       oe.direction = so.direction
       @trigger 'change:sortorder', @sortOrder
+      @trigger 'change'
     return @
 
   addSortOrder: (so, {silent} = {}) ->
@@ -812,8 +821,9 @@ class Query
     unless silent
       @trigger 'add:sortorder', so
       @trigger 'change:sortorder', @sortOrder
+      @trigger 'change'
 
-  orderBy: (oes) ->
+  orderBy: (oes, opts = {}) ->
     oldSO = @sortOrder.slice()
     @sortOrder = []
     for oe in oes # Suppress events since these are not real additions.
@@ -822,7 +832,12 @@ class Query
     copy = ({path, direction} for {path,direction} in @sortOrder)
     @trigger 'set:sortorder', copy
     if (stringifySortOrder oldSO) isnt @getSorting()
-      @trigger 'change:sortorder', copy
+      if opts.silent
+        opts.events = (opts.events ? []).concat ['change', 'change:sortorder']
+      else
+        @trigger 'change:sortorder', copy
+        @trigger 'change'
+    return this
 
   addJoins: (joins) ->
     if utils.isArray(joins)
@@ -843,6 +858,7 @@ class Query
     if @joins[path] isnt style
       @joins[path] = style
       @trigger 'change:joins', path: path, style: style
+      @trigger 'change'
     this
 
   # Add multiple constraints to the query, triggering change events.
@@ -861,6 +877,7 @@ class Query
     @trigger 'add:constraint'
     @trigger 'change:constraints'
     @trigger 'change:logic', @constraintLogic unless oldLogic is @constraintLogic
+    @trigger 'change'
 
   # Add a single constraint to the query, triggering change events.
   # @param [Array|Object] constraint A constraint definition.
@@ -899,6 +916,7 @@ class Query
       @trigger 'add:constraint', constraint
       @trigger 'change:constraints'
       @trigger 'change:logic', @constraintLogic unless oldLogic is @constraintLogic
+      @trigger 'change'
     this
 
   getSorting: -> stringifySortOrder @sortOrder
