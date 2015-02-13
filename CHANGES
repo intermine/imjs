@@ -64,4 +64,5 @@
 3.11.0 Allow constraints to be added with a logical conjunction.
 3.11.1 Fixed clone bug - sort order elements were captured when passed litterally.
 3.11.2 Better support for FastPathObjects
+3.12.0 Query#orderBy and Query#select accept an options object to silence events.
 **/
