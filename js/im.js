@@ -1,4 +1,4 @@
-/*! imjs - v3.12.0 - 2015-02-13 */
+/*! imjs - v3.13.0 - 2015-03-06 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3425,11 +3425,20 @@
       return withCB(cb, promise);
     };
 
-    Service.prototype.findById = function(type, id, cb) {
-      var promise;
+    Service.prototype.findById = function(type, id, fields, cb) {
+      var promise, _ref2;
+      if (fields == null) {
+        fields = ['**'];
+      }
+      if (cb == null) {
+        cb = (function() {});
+      }
+      if (utils.isFunction(fields)) {
+        _ref2 = [['**'], fields], fields = _ref2[0], cb = _ref2[1];
+      }
       promise = this.query({
         from: type,
-        select: ['**'],
+        select: fields,
         where: {
           id: id
         }
@@ -4841,7 +4850,7 @@
 
 },{"./promise":8}],16:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.12.0';
+  exports.VERSION = '3.13.0';
 
 }).call(this);
 
