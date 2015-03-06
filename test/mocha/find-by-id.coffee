@@ -2,8 +2,16 @@ Fixture = require './lib/fixture'
 {report, eventually, prepare} = require './lib/utils'
 {defer, get} = Fixture.funcutils
 
+caar = (xs) -> xs[0][0]
+
 findEmployee = (service, q) ->
-  service.rows(q).then((rows) -> rows[0][0]).then (id) -> service.findById 'Employee', id
+  service.rows(q).then(caar).then (id) -> service.findById 'Employee', id
+
+findFieldsOfEmployee = (service, q, fields) ->
+  service.rows(q).then(caar).then (id) -> service.findById 'Employee', id, fields
+
+# We have to query each time as ids are volatile.
+DAVIDS_ID_Q = select: ['Employee.id'], where: {name: 'David Brent'}
 
 describe 'lookup', ->
 
@@ -86,7 +94,7 @@ describe 'Service#findById', ->
 
   describe 'Looking for David', ->
 
-    q = select: ['Employee.id'], where: {name: 'David Brent'}
+    q = DAVIDS_ID_Q
 
     describe 'using the promises API', ->
 
@@ -103,6 +111,29 @@ describe 'Service#findById', ->
 
       it 'should find a full-time worker', eventually (david) ->
         david.fullTime.should.be.false
+
+      it 'should find a manager', eventually (david) ->
+        david['class'].should.equal 'Manager'
+
+    describe 'specific fields', ->
+
+      q = DAVIDS_ID_Q
+      flds = ['name', 'end']
+
+      @beforeAll (done) ->
+        report done, @promise = findFieldsOfEmployee service, q, flds
+
+      it 'should find someone with the right name', eventually (david) ->
+        david.name.should.equal 'David Brent'
+
+      it 'should not return a department', eventually (david) ->
+        david.should.not.have.property 'department'
+
+      it 'should not have an age', eventually (david) ->
+        david.should.not.have.property 'age'
+
+      it 'should have a title', eventually (david) ->
+        david.should.have.property 'end'
 
       it 'should find a manager', eventually (david) ->
         david['class'].should.equal 'Manager'

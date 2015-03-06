@@ -363,10 +363,13 @@ class Service
   # Retrieve a representation of a specific object.
   # @param [String] type The type of the object to find (eg: Gene)
   # @param [Number] id The internal DB id of the object.
-  # @param [(obj) ->] A callback that receives an object. (optional).
+  # @param [Array<String>] fields The fields to select (options, default = all)
+  # @param [(err, obj) ->] A node-style continuation callback (optional).
   # @return [Promise<Object>] A promise to yield an object.
-  findById: (type, id, cb) =>
-    promise = @query from: type, select: ['**'], where: {id: id}
+  findById: (type, id, fields = ['**'], cb = (->)) =>
+    if utils.isFunction fields
+      [fields, cb] = [['**'], fields]
+    promise = @query from: type, select: fields, where: {id: id}
       .then dejoin
       .then invoke 'records'
       .then get 0
