@@ -1,4 +1,4 @@
-/*! imjs - v3.13.0 - 2015-03-06 */
+/*! imjs - v3.13.0 - 2015-05-08 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -236,7 +236,9 @@
     parsed = URL.parse(opts.url, true);
     parsed.withCredentials = false;
     parsed.method = opts.type || 'GET';
-    parsed.port = opts.port || parsed.port || 80;
+    if (opts.port != null) {
+      parsed.port = opts.port;
+    }
     parsed.headers = {
       'User-Agent': USER_AGENT,
       'Accept': ACCEPT_HEADER[opts.dataType]
@@ -3836,6 +3838,10 @@
           return withCB(cb, _this.doReq(req).then(get('uid')).then(IDResolutionJob.create(_this)));
         };
       })(this));
+    };
+
+    Service.prototype.resolutionJob = function(id) {
+      return IDResolutionJob.create(this)(id);
     };
 
     Service.prototype.createList = function(opts, ids, cb) {

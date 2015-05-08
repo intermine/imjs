@@ -81,6 +81,18 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     it 'should fail', shouldFail service.resolveIds
 
+  describe '#resolutionJob(id)', ->
+
+    identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
+    @afterAll cleanUp
+    @beforeAll prepare ->
+      service.resolveIds({identifiers, type})
+             .then (j) -> service.resolutionJob(j.uid)
+
+    it 'should produce a job', eventually should.exist
+
+    it 'should get resolved', eventually (job) -> job.wait()
+
   describe '#resolveIds(job)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
@@ -158,7 +170,6 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
     it 'should increase its backoff on each poll', eventually (job) ->
       job.poll().then (results) ->
         job.decay.should.be.above 50
-
 
 describe 'Service', ->
 

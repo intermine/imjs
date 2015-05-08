@@ -807,6 +807,11 @@ class Service
       dataType: 'json'
     withCB cb, @doReq(req).then(get 'uid').then(IDResolutionJob.create @)
 
+  # Retrieve an existing ID Resolution job
+  # @param [String] id the job ID.
+  # @return [IDResolutionJob] the job object.
+  resolutionJob: (id) -> IDResolutionJob.create(this)(id)
+
   # Create a new list through the identifier upload service.
   #
   # This service takes a source of identifiers and attempts to resolve them automatically
