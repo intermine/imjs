@@ -166,8 +166,7 @@ describe 'GFF3 Queries', ->
         query.getGFF3 (err, gff3) ->
           return done new Error("Expected failure, got: #{ gff3 }") if gff3
           try
-            err.should.match /No columns/
+            err.message.trim().should.startWith "Query does not pass XML validation."
             done()
           catch e
             done e
-
