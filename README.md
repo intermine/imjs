@@ -94,8 +94,8 @@ SUPPORT
 
 For help with this library, or the use of intermine in general, please contact <dev@intermine.org>.
 
-[status]: https://travis-ci.org/alexkalderimis/imjs.svg?branch=master
-[ci]: https://travis-ci.org/alexkalderimis/imjs
+[status]: https://travis-ci.org/intermine/imjs.svg?branch=master
+[ci]: https://travis-ci.org/intermine/imjs
 [1]: classes/Model.html
 [2]: classes/List.html
 [3]: classes/Query.html
