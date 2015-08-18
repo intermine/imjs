@@ -24,11 +24,11 @@ describe 'GFF3 Queries', ->
     @beforeAll prepare -> service.query(opts).then (q) ->
       parallel [q.summarise('symbol').then(({stats}) -> stats), q.getGFF3()]
 
-    it 'should find only two genes, due to the pathways', eventually ([stats, gff3]) ->
-      stats.uniqueValues.should.equal 2
+    it 'should find only three genes, due to the pathways', eventually ([stats, gff3]) ->
+      stats.uniqueValues.should.equal 3
 
-    it 'should find only two gff3 record, due to the pathways', eventually ([stats, gff3]) ->
-      countRecords(gff3).should.equal 2
+    it 'should find only three gff3 record, due to the pathways', eventually ([stats, gff3]) ->
+      countRecords(gff3).should.equal 3
 
     describe 'callback api', ->
 
@@ -38,7 +38,7 @@ describe 'GFF3 Queries', ->
           query.getGFF3 (err, gff3) ->
             return done err if err?
             try
-              countRecords(gff3).should.equal 2
+              countRecords(gff3).should.equal 3
               done()
             catch e
               done e
