@@ -19,3 +19,4 @@ test/browser/accept.html
 test/browser/bundle-index.html
 oboe.js
 test/compiled
+*.log

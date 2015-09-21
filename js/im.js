@@ -1,4 +1,4 @@
-/*! imjs - v3.14.1 - 2015-06-23 */
+/*! imjs - v3.14.1 - 2015-09-21 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -126,7 +126,9 @@
       resp.on('error', reject);
       return resp.on('end', function() {
         var ct, e, err, f, match, parsed, _ref1;
-        ct = resp.headers['content-type'];
+        if ((resp != null ? resp.headers : void 0) != null) {
+          ct = resp.headers['content-type'];
+        }
         if ('application/json' === ct || /json/.test(opts.dataType) || /json/.test(opts.data.format)) {
           if ('' === containerBuffer && resp.statusCode === 200) {
             return resolve();
@@ -5097,8 +5099,8 @@ if(!module.parent && process.title !== 'browser') {
     .pipe(process.stdout)
 }
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
-},{"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"buffer":25,"jsonparse":19,"through":20}],19:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
+},{"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58,"buffer":25,"jsonparse":19,"through":20}],19:[function(_dereq_,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -5614,8 +5616,8 @@ function through (write, end, opts) {
 }
 
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"stream":47}],21:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58,"stream":47}],21:[function(_dereq_,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -6871,8 +6873,8 @@ module.exports = _dereq_('./backbone-events-standalone');
 }).call(this);
 
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57}],24:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58}],24:[function(_dereq_,module,exports){
 
 },{}],25:[function(_dereq_,module,exports){
 /*!
@@ -9289,8 +9291,8 @@ function forEach (xs, f) {
   }
 }
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_readable":39,"./_stream_writable":41,"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"core-util-is":42,"inherits":30}],38:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"./_stream_readable":39,"./_stream_writable":41,"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58,"core-util-is":42,"inherits":30}],38:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10292,8 +10294,8 @@ function indexOf (xs, x) {
   return -1;
 }
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_duplex":37,"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"buffer":25,"core-util-is":42,"events":29,"inherits":30,"isarray":31,"stream":47,"string_decoder/":48,"util":24}],40:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"./_stream_duplex":37,"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58,"buffer":25,"core-util-is":42,"events":29,"inherits":30,"isarray":31,"stream":47,"string_decoder/":48,"util":24}],40:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10984,8 +10986,8 @@ function endWritable(stream, state, cb) {
   state.ended = true;
 }
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_duplex":37,"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"buffer":25,"core-util-is":42,"inherits":30,"stream":47}],42:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"./_stream_duplex":37,"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58,"buffer":25,"core-util-is":42,"inherits":30,"stream":47}],42:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11094,8 +11096,8 @@ exports.isBuffer = isBuffer;
 function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
-}).call(this,_dereq_("buffer").Buffer)
-},{"buffer":25}],43:[function(_dereq_,module,exports){
+}).call(this,{"isBuffer":_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
+},{"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/is-buffer/index.js":57}],43:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_passthrough.js")
 
 },{"./lib/_stream_passthrough.js":38}],44:[function(_dereq_,module,exports){
@@ -12770,8 +12772,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,_dereq_("/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":50,"/home/josh/tmp/imjsinter/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"inherits":30}],52:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":50,"/home/josh/tmp/imjsfix/node_modules/insert-module-globals/node_modules/process/browser.js":58,"inherits":30}],52:[function(_dereq_,module,exports){
 var http = module.exports;
 var EventEmitter = _dereq_('events').EventEmitter;
 var Request = _dereq_('./lib/request');
@@ -13314,7 +13316,26 @@ var isArray = Array.isArray || function (xs) {
 
 },{}],56:[function(_dereq_,module,exports){
 module.exports=_dereq_(30)
-},{"/home/josh/tmp/imjsinter/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":30}],57:[function(_dereq_,module,exports){
+},{"/home/josh/tmp/imjsfix/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":30}],57:[function(_dereq_,module,exports){
+/**
+ * Determine if an object is Buffer
+ *
+ * Author:   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * License:  MIT
+ *
+ * `npm install is-buffer`
+ */
+
+module.exports = function (obj) {
+  return !!(obj != null &&
+    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
+      (obj.constructor &&
+      typeof obj.constructor.isBuffer === 'function' &&
+      obj.constructor.isBuffer(obj))
+    ))
+}
+
+},{}],58:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -13347,7 +13368,9 @@ function drainQueue() {
         currentQueue = queue;
         queue = [];
         while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
         queueIndex = -1;
         len = queue.length;
@@ -13399,7 +13422,6 @@ process.binding = function (name) {
     throw new Error('process.binding is not supported');
 };
 
-// TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');

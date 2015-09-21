@@ -57,7 +57,7 @@ blocking = (opts, resolve, reject) -> (resp) ->
   resp.on 'data', (chunk) -> containerBuffer += chunk
   resp.on 'error', reject
   resp.on 'end', ->
-    ct = resp.headers['content-type']
+    if resp?.headers? then ct = resp.headers['content-type']
     if 'application/json' is ct or /json/.test(opts.dataType) or /json/.test opts.data.format
       if '' is containerBuffer and resp.statusCode is 200
         # No body, but success.
@@ -169,4 +169,3 @@ exports.doReq = (opts, iter) ->
     reject e
 
   return promise
-
