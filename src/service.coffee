@@ -168,7 +168,8 @@ class Service
   # @option options [boolean] noCache Set this flag to true to prevent the use of the global
   #   results caches for non-volatile data (models, versions, etc). Each service instance will
   #   still continue to use its own private cache.
-  constructor: ({@root, @token, @errorHandler, @DEBUG, @help, noCache}) ->
+  # @option options [Object] headers Attach or override headers on every request.
+  constructor: ({@root, @token, @errorHandler, @DEBUG, @help, noCache, @headers}) ->
     unless @root?
       throw new Error("No service root provided. This is required")
     if !HAS_PROTOCOL.test @root
@@ -176,10 +177,10 @@ class Service
     if !HAS_SUFFIX.test @root
       @root = @root + SUFFIX
     @root = @root.replace /ice$/, "ice/" # Ensure trailing slash.
+    @headers ?= null
     @errorHandler ?= DEFAULT_ERROR_HANDLER
     @help ?= 'no.help.available@dev.null'
     @useCache = not noCache # Peristent processes might not want to cache model, version, etc.
-
     @getFormat = (intended = 'json') =>
       return intended
 
@@ -248,7 +249,9 @@ class Service
       opts.timeout = timeout
       delete data.timeout
 
-    @authorise(opts).then (authed) => @doReq authed, indiv
+    @authorise(opts).then (authed) =>
+      req = @attachCustomHeaders authed
+      @doReq req, indiv
 
   # TODO - when 14 is prevalent the fetchVersion can be removed.
   authorise: (req) -> @fetchVersion().then (version) =>
@@ -274,6 +277,15 @@ class Service
     if pathAdditions.length
       opts.url += '?' + to_query_string pathAdditions
 
+    return opts
+
+  # Attach custom headers to the request that were supplied to the Service constructor
+  # via the options object.
+  # Caution: This will override headers if they already exist on the req object.
+  attachCustomHeaders: (req) ->
+    opts = utils.copy req
+    if @headers?
+      opts.headers = utils.merge opts.headers, @headers
     return opts
 
   # Get the results of using a list enrichment widget to calculate
@@ -924,7 +936,7 @@ Service::rowByRow = (q, args...) ->
     f.apply this, arguments
   else
     @query(q).then (query) => @rowByRow query, args...
-    
+
 # Alias for {Service#rowByRow}
 Service::eachRow = Service::rowByRow
 
@@ -950,8 +962,8 @@ Service::recordByRecord = (q, args...) ->
     f.apply this, arguments
   else
     @query(q).then (query) => @recordByRecord query, args...
-  
-  
+
+
 # Alias for {Service#recordByRecord}
 Service::eachRecord = Service::recordByRecord
 

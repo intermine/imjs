@@ -163,6 +163,10 @@ root.partition = (f) -> (xs) ->
       [trues, falses.concat([x])]
   divide [[], []], xs
 
+root.merge = (options, overrides) -> extend (extend {}, options), overrides
+
+root.extend = (obj, properties) -> obj[key] = val for key, val of properties
+
 # The identity function
 #
 # @param x Something
@@ -320,4 +324,3 @@ pairFold = fold (o, [k, v]) ->
   o
 
 root.pairsToObj = (pairs) -> pairFold {}, pairs
-
