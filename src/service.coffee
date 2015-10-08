@@ -149,7 +149,9 @@ TO_NAMES = (xs = []) -> (x.name ? x for x in (if utils.isArray(xs) then xs else 
 #
 class Service
 
-  doReq: http.doReq
+  doReq: ->
+    arguments[0] = @attachCustomHeaders arguments[0]
+    http.doReq.apply this, arguments
 
   # Construct a new connection to a service.
   #
@@ -249,9 +251,7 @@ class Service
       opts.timeout = timeout
       delete data.timeout
 
-    @authorise(opts).then (authed) =>
-      req = @attachCustomHeaders authed
-      @doReq req, indiv
+    @authorise(opts).then (authed) => @doReq authed, indiv
 
   # TODO - when 14 is prevalent the fetchVersion can be removed.
   authorise: (req) -> @fetchVersion().then (version) =>
@@ -283,10 +283,12 @@ class Service
   # via the options object.
   # Caution: This will override headers if they already exist on the req object.
   attachCustomHeaders: (req) ->
-    opts = utils.copy req
     if @headers?
+      opts = utils.copy req
       opts.headers = utils.merge opts.headers, @headers
-    return opts
+      return opts
+    else
+      return req
 
   # Get the results of using a list enrichment widget to calculate
   # statistics for a set of objects. An enrichment calculation

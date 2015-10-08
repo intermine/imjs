@@ -1,4 +1,4 @@
-/*! imjs - v3.15.0-beta1 - 2015-09-29 */
+/*! imjs - v3.15.0-beta2 - 2015-10-08 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3184,7 +3184,10 @@
   Service = (function() {
     var FIVE_MIN, checkNameParam, getNewUserToken, loadQ, pathValuesReq, toMapByName;
 
-    Service.prototype.doReq = http.doReq;
+    Service.prototype.doReq = function() {
+      arguments[0] = this.attachCustomHeaders(arguments[0]);
+      return http.doReq.apply(this, arguments);
+    };
 
     function Service(_arg) {
       var noCache;
@@ -3310,9 +3313,7 @@
       }
       return this.authorise(opts).then((function(_this) {
         return function(authed) {
-          var req;
-          req = _this.attachCustomHeaders(authed);
-          return _this.doReq(req, indiv);
+          return _this.doReq(authed, indiv);
         };
       })(this));
     };
@@ -3353,11 +3354,13 @@
 
     Service.prototype.attachCustomHeaders = function(req) {
       var opts;
-      opts = utils.copy(req);
       if (this.headers != null) {
+        opts = utils.copy(req);
         opts.headers = utils.merge(opts.headers, this.headers);
+        return opts;
+      } else {
+        return req;
       }
-      return opts;
     };
 
     Service.prototype.enrichment = function(opts, cb) {
@@ -4886,7 +4889,7 @@
 
 },{"./promise":8}],16:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.15.0-beta1';
+  exports.VERSION = '3.15.0-beta2';
 
 }).call(this);
 
