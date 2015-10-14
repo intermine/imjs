@@ -149,7 +149,9 @@ TO_NAMES = (xs = []) -> (x.name ? x for x in (if utils.isArray(xs) then xs else 
 #
 class Service
 
-  doReq: http.doReq
+  doReq: ->
+    arguments[0] = @attachCustomHeaders arguments[0]
+    http.doReq.apply this, arguments
 
   # Construct a new connection to a service.
   #
@@ -168,7 +170,8 @@ class Service
   # @option options [boolean] noCache Set this flag to true to prevent the use of the global
   #   results caches for non-volatile data (models, versions, etc). Each service instance will
   #   still continue to use its own private cache.
-  constructor: ({@root, @token, @errorHandler, @DEBUG, @help, noCache}) ->
+  # @option options [Object] headers Attach or override headers on every request.
+  constructor: ({@root, @token, @errorHandler, @DEBUG, @help, noCache, @headers}) ->
     unless @root?
       throw new Error("No service root provided. This is required")
     if !HAS_PROTOCOL.test @root
@@ -176,10 +179,10 @@ class Service
     if !HAS_SUFFIX.test @root
       @root = @root + SUFFIX
     @root = @root.replace /ice$/, "ice/" # Ensure trailing slash.
+    @headers ?= null
     @errorHandler ?= DEFAULT_ERROR_HANDLER
     @help ?= 'no.help.available@dev.null'
     @useCache = not noCache # Peristent processes might not want to cache model, version, etc.
-
     @getFormat = (intended = 'json') =>
       return intended
 
@@ -275,6 +278,17 @@ class Service
       opts.url += '?' + to_query_string pathAdditions
 
     return opts
+
+  # Attach custom headers to the request that were supplied to the Service constructor
+  # via the options object.
+  # Caution: This will override headers if they already exist on the req object.
+  attachCustomHeaders: (req) ->
+    if @headers?
+      opts = utils.copy req
+      opts.headers = utils.merge opts.headers, @headers
+      return opts
+    else
+      return req
 
   # Get the results of using a list enrichment widget to calculate
   # statistics for a set of objects. An enrichment calculation
@@ -924,7 +938,7 @@ Service::rowByRow = (q, args...) ->
     f.apply this, arguments
   else
     @query(q).then (query) => @rowByRow query, args...
-    
+
 # Alias for {Service#rowByRow}
 Service::eachRow = Service::rowByRow
 
@@ -950,8 +964,8 @@ Service::recordByRecord = (q, args...) ->
     f.apply this, arguments
   else
     @query(q).then (query) => @recordByRecord query, args...
-  
-  
+
+
 # Alias for {Service#recordByRecord}
 Service::eachRecord = Service::recordByRecord
 

@@ -28,6 +28,18 @@ describe 'Service', ->
       service = new Service root: 'localhost/intermine-test'
       service.root.should.equal 'http://localhost/intermine-test/service/'
 
+  describe 'customHeaders', ->
+
+    {headers} = new Fixture
+
+    # By supplying an Authorization header with a bogus value we can prove
+    # that headers are being overwritten because the authentication will fail.
+    it 'override an authorization header', ->
+      headers.fetchLists().then (res) ->
+        res.should.startWith 'Invalid request authentication'
+      , (err) ->
+        err.message.trim().should.startWith 'Invalid request authentication.'
+
   describe '.connect', ->
 
     it 'should serve as an alias for "new Service"', ->
@@ -69,4 +81,3 @@ describe 'Service', ->
       it 'should mean we get fresh objects', eventually (fa) ->
         Service.flushCaches()
         Service.connect(service).fetchSummaryFields().then (fb) -> fb.should.not.equal fa
-

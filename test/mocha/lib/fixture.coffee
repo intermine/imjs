@@ -13,12 +13,16 @@ legacy =
   root: process.env.LEGACY_URL ? 'localhost:8080/legacy-test'
   token: 'test-user-token'
 
+headers =
+  root: process.env.LEGACY_URL ? 'localhost:8080/intermine-demo'
+  headers: Authorization: 'impossible'
+
 console.log "Testing against #{ args.root }" if process.env.DEBUG
 
 class Fixture
 
   constructor: ->
-    [@service, @legacy] = [args, legacy].map Service.connect
+    [@service, @legacy, @headers] = [args, legacy, headers].map Service.connect
 
     @allEmployees =
       select: ['*']
