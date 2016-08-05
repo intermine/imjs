@@ -1,6 +1,6 @@
 {
   "name": "imjs",
-  "version": "3.15.0",
+  "version": "3.15.1",
   "description": "Client library for communication with InterMine web-services",
   "main": "build/service",
   "browser": {
@@ -61,11 +61,9 @@
     "grunt-contrib-symlink": "~0.2.0",
     "grunt-contrib-uglify": "~0.2.7",
     "grunt-jscoverage": "0.0.3",
-    "grunt-mocha-phantomjs": "~0.6.0",
     "grunt-mocha-test": "^0.12.4",
-    "grunt-simple-mocha": "~0.4.0",
     "insert-module-globals": "^6.1.0",
-    "mocha": "latest",
+    "mocha": "2.5.3",
     "oboe": "~1.11.0",
     "repl.history": "~0.1.1",
     "should": "~4.1.x",
