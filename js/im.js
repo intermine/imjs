@@ -1,4 +1,4 @@
-/*! imjs - v3.15.0 - 2015-10-14 */
+/*! imjs - v3.15.0 - 2016-08-05 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -5130,8 +5130,8 @@ if(!module.parent && process.title !== 'browser') {
     .pipe(process.stdout)
 }
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
-},{"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"buffer":25,"jsonparse":19,"through":20}],19:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../insert-module-globals/node_modules/process/browser.js"),_dereq_("buffer").Buffer)
+},{"../insert-module-globals/node_modules/process/browser.js":58,"buffer":25,"jsonparse":19,"through":20}],19:[function(_dereq_,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -5647,8 +5647,8 @@ function through (write, end, opts) {
 }
 
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"stream":47}],21:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../../insert-module-globals/node_modules/process/browser.js"))
+},{"../../../insert-module-globals/node_modules/process/browser.js":58,"stream":47}],21:[function(_dereq_,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -6904,8 +6904,8 @@ module.exports = _dereq_('./backbone-events-standalone');
 }).call(this);
 
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57}],24:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../../insert-module-globals/node_modules/process/browser.js":58}],24:[function(_dereq_,module,exports){
 
 },{}],25:[function(_dereq_,module,exports){
 /*!
@@ -9322,8 +9322,8 @@ function forEach (xs, f) {
   }
 }
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_readable":39,"./_stream_writable":41,"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"core-util-is":42,"inherits":30}],38:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../../../../../insert-module-globals/node_modules/process/browser.js"))
+},{"../../../../../../insert-module-globals/node_modules/process/browser.js":58,"./_stream_readable":39,"./_stream_writable":41,"core-util-is":42,"inherits":30}],38:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10325,8 +10325,8 @@ function indexOf (xs, x) {
   return -1;
 }
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_duplex":37,"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"buffer":25,"core-util-is":42,"events":29,"inherits":30,"isarray":31,"stream":47,"string_decoder/":48,"util":24}],40:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../../../../../insert-module-globals/node_modules/process/browser.js"))
+},{"../../../../../../insert-module-globals/node_modules/process/browser.js":58,"./_stream_duplex":37,"buffer":25,"core-util-is":42,"events":29,"inherits":30,"isarray":31,"stream":47,"string_decoder/":48,"util":24}],40:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11017,8 +11017,8 @@ function endWritable(stream, state, cb) {
   state.ended = true;
 }
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"./_stream_duplex":37,"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"buffer":25,"core-util-is":42,"inherits":30,"stream":47}],42:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../../../../../insert-module-globals/node_modules/process/browser.js"))
+},{"../../../../../../insert-module-globals/node_modules/process/browser.js":58,"./_stream_duplex":37,"buffer":25,"core-util-is":42,"inherits":30,"stream":47}],42:[function(_dereq_,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11043,8 +11043,12 @@ function endWritable(stream, state, cb) {
 
 // NOTE: These type checking functions intentionally don't use `instanceof`
 // because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return Array.isArray(ar);
+
+function isArray(arg) {
+  if (Array.isArray) {
+    return Array.isArray(arg);
+  }
+  return objectToString(arg) === '[object Array]';
 }
 exports.isArray = isArray;
 
@@ -11084,7 +11088,7 @@ function isUndefined(arg) {
 exports.isUndefined = isUndefined;
 
 function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
+  return objectToString(re) === '[object RegExp]';
 }
 exports.isRegExp = isRegExp;
 
@@ -11094,13 +11098,12 @@ function isObject(arg) {
 exports.isObject = isObject;
 
 function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
+  return objectToString(d) === '[object Date]';
 }
 exports.isDate = isDate;
 
 function isError(e) {
-  return isObject(e) &&
-      (objectToString(e) === '[object Error]' || e instanceof Error);
+  return (objectToString(e) === '[object Error]' || e instanceof Error);
 }
 exports.isError = isError;
 
@@ -11119,19 +11122,18 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-function isBuffer(arg) {
-  return Buffer.isBuffer(arg);
-}
-exports.isBuffer = isBuffer;
+exports.isBuffer = Buffer.isBuffer;
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
-}).call(this,_dereq_("buffer").Buffer)
-},{"buffer":25}],43:[function(_dereq_,module,exports){
+
+}).call(this,{"isBuffer":_dereq_("../../../../../../../../insert-module-globals/node_modules/is-buffer/index.js")})
+},{"../../../../../../../../insert-module-globals/node_modules/is-buffer/index.js":57}],43:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_passthrough.js")
 
 },{"./lib/_stream_passthrough.js":38}],44:[function(_dereq_,module,exports){
+(function (process){
 exports = module.exports = _dereq_('./lib/_stream_readable.js');
 exports.Stream = _dereq_('stream');
 exports.Readable = exports;
@@ -11139,8 +11141,12 @@ exports.Writable = _dereq_('./lib/_stream_writable.js');
 exports.Duplex = _dereq_('./lib/_stream_duplex.js');
 exports.Transform = _dereq_('./lib/_stream_transform.js');
 exports.PassThrough = _dereq_('./lib/_stream_passthrough.js');
+if (!process.browser && process.env.READABLE_STREAM === 'disable') {
+  module.exports = _dereq_('stream');
+}
 
-},{"./lib/_stream_duplex.js":37,"./lib/_stream_passthrough.js":38,"./lib/_stream_readable.js":39,"./lib/_stream_transform.js":40,"./lib/_stream_writable.js":41,"stream":47}],45:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../../../../insert-module-globals/node_modules/process/browser.js"))
+},{"../../../../../insert-module-globals/node_modules/process/browser.js":58,"./lib/_stream_duplex.js":37,"./lib/_stream_passthrough.js":38,"./lib/_stream_readable.js":39,"./lib/_stream_transform.js":40,"./lib/_stream_writable.js":41,"stream":47}],45:[function(_dereq_,module,exports){
 module.exports = _dereq_("./lib/_stream_transform.js")
 
 },{"./lib/_stream_transform.js":40}],46:[function(_dereq_,module,exports){
@@ -12803,8 +12809,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,_dereq_("/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":50,"/home/josh/src/imjs/node_modules/insert-module-globals/node_modules/process/browser.js":57,"inherits":30}],52:[function(_dereq_,module,exports){
+}).call(this,_dereq_("../../../../../insert-module-globals/node_modules/process/browser.js"),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../../../../../insert-module-globals/node_modules/process/browser.js":58,"./support/isBuffer":50,"inherits":30}],52:[function(_dereq_,module,exports){
 var http = module.exports;
 var EventEmitter = _dereq_('events').EventEmitter;
 var Request = _dereq_('./lib/request');
@@ -13347,16 +13353,80 @@ var isArray = Array.isArray || function (xs) {
 
 },{}],56:[function(_dereq_,module,exports){
 module.exports=_dereq_(30)
-},{"/home/josh/src/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":30}],57:[function(_dereq_,module,exports){
-// shim for using process in browser
+},{"/home/FILESERVER5/micklem/jkh46/src/imjs/node_modules/grunt-browserify/node_modules/browserify/node_modules/inherits/inherits_browser.js":30}],57:[function(_dereq_,module,exports){
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
 
+// The _isBuffer check is for Safari 5-7 support, because it's missing
+// Object.prototype.constructor. Remove this eventually
+module.exports = function (obj) {
+  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+}
+
+function isBuffer (obj) {
+  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+
+// For Node v0.10 support. Remove this eventually.
+function isSlowBuffer (obj) {
+  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+}
+
+},{}],58:[function(_dereq_,module,exports){
+// shim for using process in browser
 var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+(function () {
+    try {
+        cachedSetTimeout = setTimeout;
+    } catch (e) {
+        cachedSetTimeout = function () {
+            throw new Error('setTimeout is not defined');
+        }
+    }
+    try {
+        cachedClearTimeout = clearTimeout;
+    } catch (e) {
+        cachedClearTimeout = function () {
+            throw new Error('clearTimeout is not defined');
+        }
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        return setTimeout(fun, 0);
+    } else {
+        return cachedSetTimeout.call(null, fun, 0);
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        clearTimeout(marker);
+    } else {
+        cachedClearTimeout.call(null, marker);
+    }
+}
 var queue = [];
 var draining = false;
 var currentQueue;
 var queueIndex = -1;
 
 function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
     draining = false;
     if (currentQueue.length) {
         queue = currentQueue.concat(queue);
@@ -13372,7 +13442,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    var timeout = runTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -13380,14 +13450,16 @@ function drainQueue() {
         currentQueue = queue;
         queue = [];
         while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
         queueIndex = -1;
         len = queue.length;
     }
     currentQueue = null;
     draining = false;
-    clearTimeout(timeout);
+    runClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -13399,7 +13471,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+        runTimeout(drainQueue);
     }
 };
 
@@ -13432,7 +13504,6 @@ process.binding = function (name) {
     throw new Error('process.binding is not supported');
 };
 
-// TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
