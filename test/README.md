@@ -7,7 +7,9 @@ the browser (the qunit) directory. Both test
 suites can be run with the following grunt
 command: 
 
-  grunt test
+```
+grunt test
+```
 
 The browser tests require phantomjs to be installed.
 
