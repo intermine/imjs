@@ -30,19 +30,23 @@ describe 'Service#search', ->
       it 'should find one manager', eventually ({facets}) ->
         facets.Category.Manager.should.equal 1
 
-    describe 'to look for HR and limit result count', ->
+    describe 'to look for HR', ->
 
-      @before prepare -> service.search 'Human Resources'
+      @beforeAll prepare -> service.search 'Human Resources'
 
       it 'should find 19 HR results when unconstrained', eventually ({results}) ->
         results.length.should.equal 19
 
-      @before prepare -> service.search q: 'Human Resources', start: 10
+    describe 'to look for HR and limit result count', ->
+
+      @beforeAll prepare -> service.search q: 'Human Resources', start: 10
+
+    describe 'to look for HR and return correct subset', ->
 
       it 'should paginate results', eventually ({results}) ->
         results.length.should.equal 9
 
-      @before prepare -> service.search q: 'Human Resources', size: 6
+      @beforeAll prepare -> service.search q: 'Human Resources', size: 6
 
       it 'should return the requested number of results', eventually ({results}) ->
         results.length.should.equal 6
