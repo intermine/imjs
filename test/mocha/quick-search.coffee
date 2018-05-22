@@ -37,14 +37,14 @@ describe 'Service#search', ->
       it 'should find 19 HR results when unconstrained', eventually ({results}) ->
         results.length.should.equal 19
 
-    describe 'to look for HR and limit result count', ->
+    describe 'to limit result count', ->
 
       @beforeAll prepare -> service.search q: 'Human Resources', start: 10
 
-    describe 'to look for HR and return correct subset', ->
-
       it 'should paginate results', eventually ({results}) ->
         results.length.should.equal 9
+
+    describe 'to return correct subset', ->
 
       @beforeAll prepare -> service.search q: 'Human Resources', size: 6
 
