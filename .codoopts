@@ -1,0 +1,6 @@
+--name imjs
+--title 'InterMine Client Library Documentation'
+--private
+./src
+-
+LICENCE
