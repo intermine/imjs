@@ -349,16 +349,6 @@ module.exports = function (grunt) {
     })
   })
 
-  grunt.registerTask('docs', 'Generate API documentation', function () {
-    var done = this.async()
-    var cmd = './node_modules/codo/bin/codo'
-    var args = ['-n', 'imjs', 'src']
-    var child = require('child_process').spawn(cmd, args, {stdio: 'inherit'})
-    child.on('exit', function (code) {
-      done(code === 0);
-    })
-  })
-
   grunt.registerTask('phantomjs', [
     'build-phantom-acceptance-index',
     'build-unit-test-suite',
