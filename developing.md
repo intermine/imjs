@@ -1,0 +1,20 @@
+# Developers - running / updating / testing imjs
+
+## Building imjs
+
+### Setup
+
+1. You'll need to have [node.js](https://nodejs.org/en/download/) - butwe prefer to use it via [nvm](https://github.com/creationix/nvm#installation) to manage node versions, since node changes versions very fast.
+2. Once that's set up, make sure you have grunt, mocha, and mocha installed globally ```bash
+npm install -g mocha grunt bower
+```
+3. Clone the repo and chande into its directory if you haven't already.
+4. Install dependencies: `npm install` and then `bower install`.
+
+### Running / updating imjs
+
+See the [gruntfile](gruntfile.js) for possible tasks to be run. A default task that runs the build and tests is simply `grunt`.
+
+## Releasing imjs
+
+See [release procedures](release-procedure.md).
