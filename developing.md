@@ -4,13 +4,13 @@
 
 ### Setup
 
-1. You'll need to have [node.js](https://nodejs.org/en/download/) - butwe prefer to use it via [nvm](https://github.com/creationix/nvm#installation) to manage node versions, since node changes versions very fast.
-2. Once that's set up, make sure you have grunt, mocha, and mocha installed globally
+1. You'll need to have [node.js](https://nodejs.org/en/download/) - but we prefer to use it via [nvm](https://github.com/creationix/nvm#installation) to manage node versions, since node changes versions very fast. Make sure you have Node 8 or greater via `node --version`
+2. Once that's set up, make sure you have grunt, mocha, and bower installed globally
 ```bash
 npm install -g mocha grunt bower
 ```
-3. Clone the repo and chande into its directory if you haven't already.
-4. Install dependencies: `npm install` and then `bower install`.
+3. Clone the repo and change into its directory if you haven't already.
+4. Install dependencies: `npm install` and then `bower install`. (Note - this is not a duplicate of step 2. Step 2 installs some global dependencies that can be used outside of this package, whereas step 4 installs local dependencies that are used to _build_ this package).
 
 ### Running / updating imjs
 
