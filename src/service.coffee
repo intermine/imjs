@@ -321,6 +321,8 @@ class Service
   # @param [Object] options A collection of parameters.
   # @param [(Array.<Object>, Object, Object) ->] An optional call-back function.
   # @option options [String] q The term to search by.
+  # @option options [Integer] size The number of results to return.
+  # @option options [Integer] start The index of the starting result, used to paginate results.
   # @option options [Object<String, String>] facets A set of facet constraints.
   # @return [Promise<Object>] A promise to search the database.
   search: (options = {}, cb = (->)) -> REQUIRES_VERSION @, 9, =>
