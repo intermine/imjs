@@ -3395,12 +3395,14 @@
             };
           } else {
             req = {
-              q: options.q
+              q: options.q,
+              start: options.start,
+              size: options.size
             };
             for (k in options) {
               if (!__hasProp.call(options, k)) continue;
               v = options[k];
-              if (k !== 'q') {
+              if ((k !== 'q') && (k !== 'start') && (k !== 'size')) {
                 req["facet_" + k] = v;
               }
             }

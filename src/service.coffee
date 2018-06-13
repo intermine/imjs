@@ -330,8 +330,8 @@ class Service
     if typeof options is 'string'
       req = q: options
     else
-      req = q: options.q
-      for own k, v of options when k isnt 'q'
+      req = {q: options.q, start: options.start, size: options.size}
+      for own k, v of options when (k isnt 'q') and (k isnt 'start') and (k isnt 'size')
         req["facet_#{ k }"] = v
 
     withCB cb, @post(QUICKSEARCH_PATH, req)

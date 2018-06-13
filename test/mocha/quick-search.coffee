@@ -6,7 +6,7 @@ describe 'Service#search', ->
   {service} = new Fixture()
 
   describe 'using the promise API', ->
-  
+
     describe 'to look for everything', ->
 
       @beforeAll prepare -> service.search()
@@ -29,6 +29,27 @@ describe 'Service#search', ->
 
       it 'should find one manager', eventually ({facets}) ->
         facets.Category.Manager.should.equal 1
+
+    describe 'to look for HR', ->
+
+      @beforeAll prepare -> service.search 'Human Resources'
+
+      it 'should find 19 HR results when unconstrained', eventually ({results}) ->
+        results.length.should.equal 19
+
+    describe 'to limit result count', ->
+
+      @beforeAll prepare -> service.search q: 'Human Resources', start: 10
+
+      it 'should paginate results', eventually ({results}) ->
+        results.length.should.equal 9
+
+    describe 'to return correct subset', ->
+
+      @beforeAll prepare -> service.search q: 'Human Resources', size: 6
+
+      it 'should return the requested number of results', eventually ({results}) ->
+        results.length.should.equal 6
 
     describe 'to look for David, with a request object', ->
 
@@ -58,7 +79,7 @@ describe 'Service#search', ->
         should.not.exist facets.Category.Manager
 
   describe 'using the callback API', ->
-  
+
     describe 'to look for everything', ->
 
       it 'should find at least 100 things, and some banks', (done) ->

@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+<meta name="description" content="Imjs search example">
+    <script src="js/im.js"></script>
+  </head>
+  <body>
+
+    <script>
+      var service = new imjs.Service({
+         root: 'http://www.flymine.org/flymine/service'
+     });
+        var options = {
+          q: "gata",
+          size: 103,
+          start: 20
+        }
+        service.search(options).then((data) => {
+          console.log(data.results.length)
+        })
+    </script>
+
+  </body>
+</html>

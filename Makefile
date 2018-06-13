@@ -52,15 +52,6 @@ instrument: build
 	@echo Instrumenting source code.
 	grunt jscoverage
 
-docs: src
-	codo \
-		--name imjs \
-		--title 'InterMine Client Library Documentation' \
-		--private \
-		src \
-		- \
-		LICENCE
-
 browser-deps:
 	bower install
 

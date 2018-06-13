@@ -60,7 +60,7 @@ Functionality
  * List Management
 
    Users may authenticate to their accounts (through the use of web-service tokens) and then
-   have full freedom to create, edit and delete lists they have access to. See the [List][2] class 
+   have full freedom to create, edit and delete lists they have access to. See the [List][2] class
    for more information.
 
  * Analysis
@@ -76,9 +76,13 @@ Functionality
 DOCUMENTATION
 =============
 
-For API documentation see <https://intermine.github.io/imjs>. For general useage
+For API documentation see <http://alexkalderimis.github.io/imjs/>. For general useage
 documentation and information about InterMine, see
 <http://intermine.readthedocs.org/en/latest/>.
+
+### Developing IMJS
+
+To build the project see [developing.md](developing.md) and to release a new version, see [release-procedure.md](release-procedure.md)
 
 LICENCE
 =======

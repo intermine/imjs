@@ -15,6 +15,10 @@ npm install -g mocha grunt bower
 
 See the [gruntfile](gruntfile.js) for possible tasks to be run. A default task that runs the build and tests is simply `grunt`.
 
+## Building the docs
+
+If you need to regenerate [the API documentation](http://alexkalderimis.github.io/imjs/), make sure you have [codo](https://www.npmjs.com/package/codo) installed globally, and run `codo` in the root directory. Config is automatically pulled from the [.codoopts](.codoopts) file.
+
 ## Releasing imjs
 
 See [release procedures](release-procedure.md).
