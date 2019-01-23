@@ -80,9 +80,9 @@ For API documentation see <http://alexkalderimis.github.io/imjs/>. For general u
 documentation and information about InterMine, see
 <http://intermine.readthedocs.org/en/latest/>.
 
-## Building the docs
+### Developing IMJS
 
-If you need to regenerate the documentation, make sure you have [codo](https://www.npmjs.com/package/codo) installed globally, and run `codo` in the root directory. Config is automatically pulled from the [.codoopts](.codoopts) file.
+To build the project see [developing.md](developing.md) and to release a new version, see [release-procedure.md](release-procedure.md)
 
 LICENCE
 =======
