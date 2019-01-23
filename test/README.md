@@ -15,10 +15,20 @@ The browser tests require phantomjs to be installed.
 
 To set up the testing environment: 
 
-You will need access to a working testmodel webservice with the loadsadata dataset loaded and the quick-search
-enabled. See [our testmodel docs](http://intermine.readthedocs.io/en/latest/get-started/testmodel/) for details on how to set
-the testmodel up. Once the testmodel is set up, to load the extra dataset you need, go to intermine/intermine/testmodel and run setup.sh (e.g. `./setup.sh`).
+You will need access to a working InterMine testmine with the loadsadata dataset loaded and the quick-search
+enabled. 
 
-If this is not located at http://localhost:8080/intermine-demo as expected, you can pass the location in an environment
-variable (TESTMODEL_URL).
+1. Clone the InterMine repo [https://github.com/intermine/intermine](https://github.com/intermine/intermine). Make sure you have all the required [dependencies](https://intermine.readthedocs.io/en/latest/system-requirements/software/) installed. 
+2. Once everything's installed, you can run a script to set up the TestMine. In a terminal, run:
+
+```bash
+cd intermine          #change into the cloned directory.
+./testmodel/setup.sh  # initialise InterMine TestMine. 
+```
+
+
+See [our testmodel docs](https://intermine.readthedocs.io/en/latest/get-started/testmine/) for more details.
+
+If this is not located at http://localhost:8080/intermine-demo as expected, you can [pass the location in an environment
+variable](https://stackoverflow.com/questions/22312671/setting-environment-variables-for-node-to-retrieve) (TESTMODEL_URL).
 
