@@ -13,7 +13,7 @@ fi
 git clone --single-branch --branch 'master' --depth 1 https://github.com/intermine/intermine.git server
 
 # We need a running demo webapp
-source server/testmodel/setup.sh
+source server/testmine/setup.sh
 sleep 5 # wait for tomcat to come on line
 # Get messages from 500 errors.
 echo 'i.am.a.dev = true' >> server/testmine/dbmodel/resources/testmodel.properties
