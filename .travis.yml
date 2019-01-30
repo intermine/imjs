@@ -11,7 +11,7 @@ before_install:
 script: 
     # Tests are run by npm install - no test script is needed.
     - echo "All tests passed"
-    - cd $HOME
+    - echo "home " $HOME
     - export DEBUG=true
     - codo
 node_js:
