@@ -10,7 +10,7 @@ else
 fi
 
 # Pull in the server code.
-git clone --single-branch --branch 'master' --depth 1 https://github.com/intermine/intermine.git server
+git clone --single-branch --branch 'dev' --depth 1 https://github.com/yochannah/intermine.git server
 
 # We need a running demo webapp
 source server/testmine/setup.sh
