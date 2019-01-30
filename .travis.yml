@@ -5,12 +5,24 @@ env:
         - TESTMODEL_URL=http://localhost:8080/intermine-demo
         - TESTMODEL_PATH=intermine-demo
 before_install:
+    - export DEBUG=true
+    - export DIR=$HOME"/server"
+    - echo "dir" $DIR
     - ./config/travis/init.sh
     - npm install bower
     - ./node_modules/.bin/bower install
 script: 
     # Tests are run by npm install - no test script is needed.
     - echo "All tests passed"
+    - codo
 node_js:
     # - '0.11' currently failing on 0.11
     - '0.10'
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: true
+  on:
+    branch: master    
+
