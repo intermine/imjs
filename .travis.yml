@@ -7,6 +7,7 @@ env:
 before_install:
     - export DEBUG=true
     - export DIR=$HOME"/server"
+    - echo "dir" $DIR
     - ./config/travis/init.sh
     - npm install bower
     - ./node_modules/.bin/bower install
