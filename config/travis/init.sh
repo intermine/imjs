@@ -14,8 +14,9 @@ cd $HOME
 # Pull in the server code.
 git clone --single-branch --branch 'dev' --depth 1 https://github.com/yochannah/intermine.git server
 ls server
-ls server/dbmodel
-ls server/dbmodel/resources
+ls server/testmine/
+ls server/testmine/dbmodel
+ls server/testmine/dbmodel/resources
 
 # We need a running demo webapp
 source server/testmine/setup.sh
