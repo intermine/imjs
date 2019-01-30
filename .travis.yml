@@ -11,7 +11,8 @@ before_install:
 script: 
     # Tests are run by npm install - no test script is needed.
     - echo "All tests passed"
-    - cd ~
+    - cd $HOME
+    - pwd
     - codo
 node_js:
     # - '0.11' currently failing on 0.11
