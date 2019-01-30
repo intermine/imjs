@@ -5,6 +5,7 @@ env:
         - TESTMODEL_URL=http://localhost:8080/intermine-demo
         - TESTMODEL_PATH=intermine-demo
 before_install:
+    - export DEBUG=true
     - ./config/travis/init.sh
     - npm install bower
     - ./node_modules/.bin/bower install
@@ -12,7 +13,6 @@ script:
     # Tests are run by npm install - no test script is needed.
     - echo "All tests passed"
     - echo "home " $HOME
-    - export DEBUG=true
     - codo
 node_js:
     # - '0.11' currently failing on 0.11
