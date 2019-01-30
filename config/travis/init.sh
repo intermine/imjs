@@ -13,6 +13,7 @@ cd $HOME
 
 # Pull in the server code.
 git clone --single-branch --branch 'dev' --depth 1 https://github.com/yochannah/intermine.git server
+ls
 
 # We need a running demo webapp
 source server/testmine/setup.sh
