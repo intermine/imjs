@@ -2,5 +2,6 @@
 --title 'InterMine Client Library Documentation'
 --private
 ./src
+--output ./docs
 -
 LICENCE
