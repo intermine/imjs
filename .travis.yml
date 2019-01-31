@@ -4,6 +4,7 @@ env:
     global:
         - TESTMODEL_URL=http://localhost:8080/intermine-demo
         - TESTMODEL_PATH=intermine-demo
+        - TERM=dumb
 before_install:
     - ./config/travis/init.sh
     - npm install bower
