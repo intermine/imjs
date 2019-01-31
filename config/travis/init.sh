@@ -18,7 +18,7 @@ cd server/testmine
 
 # We need a running demo webapp
 source setup.sh
-sleep 5 # wait for tomcat to come on line
+sleep 20 # wait for tomcat to come on line
 # Get messages from 500 errors.
 echo 'i.am.a.dev = true' >> dbmodel/resources/testmodel.properties
 PSQL_USER=postgres sh setup.sh
