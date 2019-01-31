@@ -8,9 +8,10 @@ before_install:
     - ./config/travis/init.sh
     - npm install bower
     - ./node_modules/.bin/bower install
-script: 
+script:
     # Tests are run by npm install - no test script is needed.
     - echo "All tests passed"
+    - codo
 node_js:
     # - '0.11' currently failing on 0.11
     - '0.10'
