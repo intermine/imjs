@@ -18,7 +18,7 @@ export PSQL_USER=postgres
 
 # We need a running demo webapp
 # Set up properties
-source server/config/create-ci-properties-files.sh
+source config/create-ci-properties-files.sh
 
 # We will need a fully operational web-application
 echo '#---> Building and releasing web application to test against'
