@@ -16,9 +16,16 @@ git clone --single-branch --branch 'master' --depth 1 https://github.com/intermi
 
 export PSQL_USER=postgres
 
-# We need a running demo webapp
 # Set up properties
-source create-ci-properties-files.sh
+PROPDIR=$HOME/.intermine
+TESTMODEL_PROPS=$PROPDIR/testmodel.properties
+SED_SCRIPT='s/PSQL_USER/postgres/'
+
+mkdir -p $PROPDIR
+
+echo "#--- creating $TESTMODEL_PROPS"
+cp testmodel.properties $TESTMODEL_PROPS
+sed -i -e $SED_SCRIPT $TESTMODEL_PROPS
 
 # We will need a fully operational web-application
 echo '#---> Building and releasing web application to test against'
