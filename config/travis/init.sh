@@ -24,7 +24,7 @@ SED_SCRIPT='s/PSQL_USER/postgres/'
 mkdir -p $PROPDIR
 
 echo "#--- creating $TESTMODEL_PROPS"
-cp ./config/travis/testmodel.properties $TESTMODEL_PROPS
+cp server/config/testmodel.properties $TESTMODEL_PROPS
 sed -i -e $SED_SCRIPT $TESTMODEL_PROPS
 
 # We will need a fully operational web-application
