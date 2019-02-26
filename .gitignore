@@ -20,3 +20,5 @@ test/browser/bundle-index.html
 oboe.js
 test/compiled
 *.log
+.vscode/
+*.swp
