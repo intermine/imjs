@@ -14,25 +14,35 @@ cd $HOME
 # Pull in the server code.
 git clone --single-branch --branch 'master' --depth 1 https://github.com/intermine/intermine.git server
 
+cd server
+
 export PSQL_USER=postgres
 
+# We need a running demo webapp
 # Set up properties
-PROPDIR=$HOME/.intermine
-TESTMODEL_PROPS=$PROPDIR/testmodel.properties
-SED_SCRIPT='s/PSQL_USER/postgres/'
+source config/create-ci-properties-files.sh
 
-mkdir -p $PROPDIR
+# install everything first. we don't want to test what's in maven
+(cd plugin && ./gradlew install)
+(cd intermine && ./gradlew install)
+(cd bio && ./gradlew install)
+(cd bio/sources && ./gradlew install)
+(cd bio/postprocess && ./gradlew install)
 
-echo "#--- creating $TESTMODEL_PROPS"
-cp server/config/testmodel.properties $TESTMODEL_PROPS
-sed -i -e $SED_SCRIPT $TESTMODEL_PROPS
+# set up database for testing
+(cd intermine && ./gradlew createUnitTestDatabases)
 
 # We will need a fully operational web-application
 echo '#---> Building and releasing web application to test against'
-(cd server/testmine && ./setup.sh)
+(cd testmine && ./setup.sh)
+
 sleep 60 # let webapp startup
 
 # Warm up the keyword search by requesting results, but ignoring the results
 $GET "$TESTMODEL_URL/service/search" > /dev/null
 # Start any list upgrades
 $GET "$TESTMODEL_URL/service/lists?token=test-user-token" > /dev/null
+
+
+# Get messages from 500 errors.
+echo 'i.am.a.dev = true' >> dbmodel/resources/testmodel.properties

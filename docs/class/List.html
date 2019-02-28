@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset='UTF-8'>
+  <title>InterMine Client Library Documentation</title>
+  <script src='../javascript/application.js'></script>
+  <script src='../javascript/search.js'></script>
+  <link rel='stylesheet' href='../stylesheets/application.css' type='text/css'>
+</head>
+  <body>
+    <div id='base' data-path='../'></div>
+<div id='header'>
+  <div id='menu'>
+    <a href='../extra/README.md.html' title='imjs'>
+      imjs
+    </a>
+    &raquo;
+    <a href='../alphabetical_index.html' title='Index'>
+      Index
+    </a>
+    &raquo;
+    <span class='title'>List</span>
+  </div>
+</div>
+    <div id='content'>
+      <h1>
+        Class:
+        List
+      </h1>
+      <table class='box'>
+        <tr>
+          <td>Defined in:</td>
+          <td>src&#47;lists.coffee</td>
+        </tr>
+      </table>
+      <h2>Overview</h2>
+      <div class='docstring'>
+  <p>A representation of collections of objects stored in a data-warehouse.</p><p>Lists can be created through the list upload mechanism (Service#createList) and
+the query saving mechanism (Query#saveAsList).</p>
+</div>
+<div class='tags'>
+</div>
+      <h2>Instance Method Summary</h2>
+      <ul class='summary'>
+  <li>
+    <span class='signature'>
+      <a href='#hasTag-dynamic'>
+        #
+(boolean)
+<b>hasTag</b><span>(t)</span>
+      </a>
+    </span>
+    <span class='bound note title'>Bound</span>
+    <span class='desc'>
+      Whether or not this list has a certain tag. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#query-dynamic'>
+        #
+(Promise&lt;Query&gt;)
+<b>query</b><span>(view = [&#39;*&#39;])</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Construct a query for data contained in this list. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#del-dynamic'>
+        #
+(Promise&lt;?&gt;)
+<b>del</b><span>(cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Delete this list on the server. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#_updateTags-dynamic'>
+        #
+(void)
+<b>_updateTags</b><span>(err, tags)</span>
+      </a>
+    </span>
+    <span class='bound note title'>Bound</span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#fetchTags-dynamic'>
+        #
+(Promise&lt;Array&lt;String&gt;&gt;)
+<b>fetchTags</b><span>(cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Get the current set of tags for this list, and update this object so it reflects the current state of the server.
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#addTags-dynamic'>
+        #
+(Promise&lt;Array&lt;String&gt;&gt;)
+<b>addTags</b><span>(tags, cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Add the given tags to the current set of tags for this list, and update this object so it reflects the current state of the server.
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#removeTags-dynamic'>
+        #
+(Promise&lt;Array&lt;String&gt;&gt;)
+<b>removeTags</b><span>(tags, cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Remove the given tags from the current set of tags for this list, and update this object so it reflects the current state of the server.
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#contents-dynamic'>
+        #
+(Promise&lt;Array&lt;Object&gt;&gt;)
+<b>contents</b><span>(cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Get the contents of this list. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#rename-dynamic'>
+        #
+(Promise&lt;List&gt;)
+<b>rename</b><span>(newName, cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Rename this list. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#copy-dynamic'>
+        #
+(Promise&lt;List&gt;)
+<b>copy</b><span>(opts = {}, cb = (function() {}))</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Copy this list to an exact duplicate with a different name. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#enrichment-dynamic'>
+        #
+(Promise&lt;Array&lt;Object&gt;&gt;)
+<b>enrichment</b><span>(opts, cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Fetch the results for a particular enrichment calculation against this list.
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#shareWithUser-dynamic'>
+        #
+(Promise&lt;&gt;)
+<b>shareWithUser</b><span>(recipient, cb)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Share this list with a recipient. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#inviteUserToShare-dynamic'>
+        #
+(Promise&lt;&gt;)
+<b>inviteUserToShare</b><span>(recipient, notify = true, cb = (function() {}))</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Invite a user to share this list. 
+    </span>
+  </li>
+</ul>
+      <h2>Constructor Details</h2>
+      <div class='methods'>
+  <div class='method_details'>
+    <p class='signature' id='constructor-dynamic'>
+      #
+(void)
+<b>constructor</b><span>(properties, service)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Construct a new list.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>properties</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The properties of this list. </span>
+    </li>
+    <li>
+      <span class='name'>service</span>
+      <span class='type'>
+        (
+          <tt><a href='../class/Service.html'>Service</a></tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The service this list belongs to. </span>
+    </li>
+  </ul>
+  <h3>
+    Options Hash:
+    (properties):
+  </h3>
+  <ul class='options'>
+    <li>
+      <span class='name'>name</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The name of this list. </span>
+    </li>
+    <li>
+      <span class='name'>size</span>
+      <span class='type'>
+        (
+          <tt>Number</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The size of this list. </span>
+    </li>
+    <li>
+      <span class='name'>dateCreated</span>
+      <span class='type'>
+        (
+          <tt>Number</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The timestamp of the creation date for this list. </span>
+    </li>
+    <li>
+      <span class='name'>description</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The description of this list. </span>
+    </li>
+    <li>
+      <span class='name'>The</span>
+      <span class='type'>
+        (
+          <tt>tags</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>tags for this list. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+</div>
+      <h2>Instance Method Details</h2>
+      <div class='methods'>
+  <div class='method_details'>
+    <p class='signature' id='hasTag-dynamic'>
+      #
+(boolean)
+<b>hasTag</b><span>(t)</span>
+      <span class='bound note'>Bound</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Whether or not this list has a certain tag.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>t</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The tag this list is meant to have. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>boolean</tt>
+      )
+      &mdash;
+      <span class='desc'>true if this list has the certain tag. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='query-dynamic'>
+      #
+(Promise&lt;Query&gt;)
+<b>query</b><span>(view = [&#39;*&#39;])</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Construct a query for data contained in this list.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>view</span>
+      <span class='type'>
+        (
+          <tt>Array&lt;String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional list of output columns. Defaults to the summary fields for objects of this type. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Query&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield a query. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='del-dynamic'>
+      #
+(Promise&lt;?&gt;)
+<b>del</b><span>(cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Delete this list on the server. The list should not be subsequently used.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>-&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional callback, called upon successful deletion. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;?&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to delete the list. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='_updateTags-dynamic'>
+      #
+(void)
+<b>_updateTags</b><span>(err, tags)</span>
+      <span class='bound note'>Bound</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='fetchTags-dynamic'>
+      #
+(Promise&lt;Array&lt;String&gt;&gt;)
+<b>fetchTags</b><span>(cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Get the current set of tags for this list, and update this object so it reflects the
+current state of the server.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>(Array&lt;String&gt;) -&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional callback </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Array&lt;String&gt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield a list of tags. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='addTags-dynamic'>
+      #
+(Promise&lt;Array&lt;String&gt;&gt;)
+<b>addTags</b><span>(tags, cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Add the given tags to the current set of tags for this list, and update this object so it
+reflects the current state of the server.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>tags</span>
+      <span class='type'>
+        (
+          <tt>Array&lt;String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The tags to add. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>(Array&lt;String&gt;) -&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional callback </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Array&lt;String&gt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield a list of tags. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='removeTags-dynamic'>
+      #
+(Promise&lt;Array&lt;String&gt;&gt;)
+<b>removeTags</b><span>(tags, cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Remove the given tags from the current set of tags for this list, and update this object so it
+reflects the current state of the server.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>tags</span>
+      <span class='type'>
+        (
+          <tt>Array&lt;String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The tags to remove. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>(Array&lt;String&gt;) -&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional callback </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Array&lt;String&gt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield a list of tags. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='contents-dynamic'>
+      #
+(Promise&lt;Array&lt;Object&gt;&gt;)
+<b>contents</b><span>(cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Get the contents of this list.</p><p>The dejoin function is used to ensure that all objects in the list are returned, and
+we don&#39;t miss out on any due to the implicit constraints of inner joins.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>(Array&lt;Object&gt;) -&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A function that receives a list of objects. Optional. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Array&lt;Object&gt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield a list of objects. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='rename-dynamic'>
+      #
+(Promise&lt;List&gt;)
+<b>rename</b><span>(newName, cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Rename this list. Upon resolution of this actions promise, this object will have its
+name property set to the new value.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>newName</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The name this list should have. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>(List) -&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional callback. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;List&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield the new state of the list. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='copy-dynamic'>
+      #
+(Promise&lt;List&gt;)
+<b>copy</b><span>(opts = {}, cb = (function() {}))</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Copy this list to an exact duplicate with a different name.</p><p>This function will check that any name given does not collide with any other
+list you have access to, adding a suffix to avoid name clashes. This means you should
+probably check the yielded value to see what name it ended up with.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>opts</span>
+      <span class='type'>
+        (
+          <tt>Object|String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Either an options object specifying the parameters for this operation, or the name to copy this list as. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>(List) -&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An optional function that receives a List. </span>
+    </li>
+  </ul>
+  <h3>
+    Options Hash:
+    (opts):
+  </h3>
+  <ul class='options'>
+    <li>
+      <span class='name'>name</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The name for the copy. If a list already exists with this name then a number will be added to the name to make it unique. (optional, defaults to @name + _copy.) </span>
+    </li>
+    <li>
+      <span class='name'>tags</span>
+      <span class='type'>
+        (
+          <tt>Array&lt;String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Tags to apply to the new list. These tags will be in addition to any that the list currently has, which will be copied over. (optional) </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;List&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to yield a list. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='enrichment-dynamic'>
+      #
+(Promise&lt;Array&lt;Object&gt;&gt;)
+<b>enrichment</b><span>(opts, cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Fetch the results for a particular enrichment calculation
+against this list. See Service#enrichment.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>opts</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The parameters of this request. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>-&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A function to call with the results when they have been received (optional). </span>
+    </li>
+  </ul>
+  <h3>
+    Options Hash:
+    (opts):
+  </h3>
+  <ul class='options'>
+    <li>
+      <span class='name'>widget</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The calculation to run. </span>
+    </li>
+    <li>
+      <span class='name'>maxp</span>
+      <span class='type'>
+        (
+          <tt>Number</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The maximum permissible p-value (optional, default = 0.05). </span>
+    </li>
+    <li>
+      <span class='name'>correction</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The correction algorithm to use (default = Holm-Bonferroni). </span>
+    </li>
+    <li>
+      <span class='name'>population</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The name of a list to use as a background population (optional). </span>
+    </li>
+    <li>
+      <span class='name'>filter</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>An extra value that some widget calculations accept. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Array&lt;Object&gt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to get results. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='shareWithUser-dynamic'>
+      #
+(Promise&lt;&gt;)
+<b>shareWithUser</b><span>(recipient, cb)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Share this list with a recipient.</p><p>The recipient should exist as a user in the target InterMine instance.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>recipient</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The identifier of a user. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>-&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A function to call on successful completion (optional). </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to share a List. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='inviteUserToShare-dynamic'>
+      #
+(Promise&lt;&gt;)
+<b>inviteUserToShare</b><span>(recipient, notify = true, cb = (function() {}))</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Invite a user to share this list.</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>recipient</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The email address of someone to invite to share this list. </span>
+    </li>
+    <li>
+      <span class='name'>notify</span>
+      <span class='type'>
+        (
+          <tt>boolean</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Whether or not to notify the recipient by email. </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>-&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A function to call upon successful completion. </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise to invite a user to share a list. </span>
+    </li>
+  </ul>
+</div>
+  </div>
+</div>
+    </div>
+    <div id='footer'>
+  By
+  <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
+    Codo
+  </a>
+  2.1.2
+  &#10034;
+  Press H to see the keyboard shortcuts
+  &#10034;
+  <a href='http://twitter.com/netzpirat' target='_parent'>@netzpirat</a>
+  &#10034;
+  <a href='http://twitter.com/_inossidabile' target='_parent'>@_inossidabile</a>
+</div>
+<iframe id='search_frame'></iframe>
+<div id='fuzzySearch'>
+  <input type='text'>
+  <ol></ol>
+</div>
+<div id='help'>
+  <p>
+    Quickly fuzzy find classes, mixins, methods, file:
+  </p>
+  <ul>
+    <li>
+      <span>T</span>
+      Open fuzzy finder dialog
+    </li>
+  </ul>
+  <p>
+    Control the navigation frame:
+  </p>
+  <ul>
+    <li>
+      <span>L</span>
+      Toggle list view
+    </li>
+    <li>
+      <span>C</span>
+      Show class list
+    </li>
+    <li>
+      <span>I</span>
+      Show mixin list
+    </li>
+    <li>
+      <span>F</span>
+      Show file list
+    </li>
+    <li>
+      <span>M</span>
+      Show method list
+    </li>
+    <li>
+      <span>E</span>
+      Show extras list
+    </li>
+  </ul>
+  <p>
+    You can focus and blur the search input:
+  </p>
+  <ul>
+    <li>
+      <span>S</span>
+      Focus search input
+    </li>
+    <li>
+      <span>Esc</span>
+      Blur search input
+    </li>
+  </ul>
+</div>
+  </body>
+</html>
