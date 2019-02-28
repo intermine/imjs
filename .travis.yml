@@ -15,7 +15,9 @@ script:
     # Build API Docs
     - echo "Generating docs"
     - codo
-
+node_js:
+    # - '0.11' currently failing on 0.11
+    - '10.15.2'
 
 
 # Deploys built API docs:
