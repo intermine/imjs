@@ -76,9 +76,9 @@ Functionality
 DOCUMENTATION
 =============
 
-For API documentation see <http://alexkalderimis.github.io/imjs/>. For general useage
+For API documentation see [http://intermine.org/imjs/](http://intermine.org/imjs/). For general usage
 documentation and information about InterMine, see
-<http://intermine.readthedocs.org/en/latest/>.
+<http://intermine.org/developers>.
 
 ### Developing IMJS
 

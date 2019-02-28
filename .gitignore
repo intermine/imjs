@@ -10,6 +10,7 @@ lib/*.js-old
 build
 build/*.js
 js
+doc
 test/browser/mocha-test.js
 bower_components
 dist
