@@ -37,6 +37,8 @@ function printResults(results){
   document.getElementById("demoScript").innerHTML = results;
 }
 
+//we use the url to tell us what file to fetch
 var fileToGet = window.location.search.split("=")[1];
 
+//execute! This line fetches the file and kicks everything off
 makeRequest("examples-src/" + fileToGet + ".js");
