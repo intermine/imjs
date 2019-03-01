@@ -10,13 +10,11 @@ before_install:
     - npm install -g codo
     - ./node_modules/.bin/bower install
 script:
-    # Tests are run by npm install - no test script is needed.
-    - echo "All tests passed"
+    - npm test
     # Build API Docs
     - echo "Generating docs"
     - codo
 node_js:
-    # - '0.11' currently failing on 0.11
     - '10.15.2'
 
 
