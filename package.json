@@ -22,13 +22,16 @@
     "url": "git://github.com/intermine/imjs.git"
   },
   "homepage": "http://www.intermine.org",
-  "bugs":"https://github.com/intermine/imjs/issues",
-  "contributors": [{
-    "name": "Joshua Heimbach"
-  }, {
-    "name": "Yo Yehudi",
-    "url": "http://yo-yehudi.com"
-  }],
+  "bugs": "https://github.com/intermine/imjs/issues",
+  "contributors": [
+    {
+      "name": "Joshua Heimbach"
+    },
+    {
+      "name": "Yo Yehudi",
+      "url": "http://yo-yehudi.com"
+    }
+  ],
   "dependencies": {
     "JSONStream": "~0.10.0",
     "acorn": "^6.0.2",
@@ -44,7 +47,6 @@
     "tests": "test"
   },
   "scripts": {
-    "prepublish": "grunt test",
     "test": "grunt test",
     "grunt": "grunt"
   },
