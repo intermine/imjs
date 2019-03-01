@@ -418,6 +418,6 @@ module.exports = function (grunt) {
   grunt.registerTask('test', ['lint', 'build', 'mocha-node'])
   grunt.registerTask('test:node', ['compile', 'mocha-node'])
   // grunt.registerTask('test:browser', ['-set-test-files', 'build', 'browser-indices', 'phantomjs'])
-  grunt.registerTask('default', ['test'])
+  grunt.registerTask('default', ['lint','build'])
 
 }
