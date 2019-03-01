@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>imjs examples</title>
+  <link rel="stylesheet" href="styles/styles.css">
+
+</head>
+
+<body>
+  <h1>imjs demos</h1>
+  <nav id="demos">
+  </nav>
+  <script>
+    var demoFiles = [{
+      fileName: "basicQuery",
+      humanName: "Basic Query",
+      description: "How to perform a basic query in IMJS"
+    }];
+    var demoDiv = document.getElementById("demos");
+    for (var i = 0; i < demoFiles.length; i++) {
+      var demoFile = demoFiles[i];
+      demoDiv.appendChild(createFileLink(demoFile));
+    }
+
+    function createFileLink(file) {
+      var link = document.createElement("a");
+      link.setAttribute("href","displayFile.html?file=" + file.fileName);
+      link.appendChild(document.createTextNode(file.humanName));
+      return link;
+    }
+  </script>
+
+</body>
+
+</html>
