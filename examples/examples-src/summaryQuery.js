@@ -16,12 +16,12 @@ var query = {
 };
 var pathways = new imjs.Query(query, service),
   // when you're running a summary query you need to
-  // choose a pathway to summarise. Here we choose length,
+  // choose a pathway to summarise. Here we choose Gene.length,
   // and the response from the server will be effectively
   // a histogram of *all* the lengths in this query.
   // What's a histogram? https://en.wikipedia.org/wiki/Histogram
   pathwaysPath = [query.from, query.select[2]].join('.'); //Gene.length
-s
+
 console.log("%cpathwaysPath", "color:turquoise;font-weight:bold;", pathwaysPath);
 pathways.summarize(pathwaysPath).then(function(pathwaySummary) {
   console.log(pathwaySummary);

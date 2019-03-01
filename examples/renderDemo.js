@@ -25,11 +25,16 @@ function handleResults(event) {
   }
 }
 
+/*
+Add the script to the screen, all pretty and highlighted, AND make it run.
+*/
 function printResults(results){
-  console.log("your results are",results)
+  //add to the screen
   var demoDiv = document.getElementById("demos");
   var formattedResults = Prism.highlight(results, Prism.languages.javascript, 'javascript');
   demoDiv.innerHTML = formattedResults;
+  //make the script run.
+  document.getElementById("demoScript").innerHTML = results;
 }
 
 var fileToGet = window.location.search.split("=")[1];
