@@ -20,6 +20,10 @@ See the [gruntfile](gruntfile.js) for possible tasks to be run. A default task t
 
 If you need to regenerate [the API documentation](http://alexkalderimis.github.io/imjs/), make sure you have [codo](https://www.npmjs.com/package/codo) installed globally, and run `codo` in the root directory. Config is automatically pulled from the [.codoopts](.codoopts) file.
 
+## Running tests
+
+Setting up tests to run on your local machine can be a bit tedious - it's usually easier to set up [TravisCI](https://travis-ci.org/) for your repo, and allow travis to test code you push to a branch on your repo. Read more about testing setup in [test/README.md](test/README.md)
+
 ## Releasing imjs
 
 See [release procedures](release-procedure.md).
