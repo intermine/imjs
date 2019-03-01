@@ -10,13 +10,17 @@
 
 <body>
   <h1>imjs demos</h1>
-  <nav id="demos">
-  </nav>
+  <ul id="demos" class="demoList">
+  </ul>
   <script>
     var demoFiles = [{
       fileName: "basicQuery",
       humanName: "Basic Query",
       description: "How to perform a basic query in IMJS"
+    },{
+      fileName: "summaryQuery",
+      humanName: "Summary Query",
+      description: "How to perform a column-summary style query in IMJS"
     }];
     var demoDiv = document.getElementById("demos");
     for (var i = 0; i < demoFiles.length; i++) {
@@ -25,10 +29,17 @@
     }
 
     function createFileLink(file) {
-      var link = document.createElement("a");
-      link.setAttribute("href","displayFile.html?file=" + file.fileName);
+      var li = document.createElement("li"),
+          link = document.createElement("a"),
+          description = document.createTextNode(" - " + file.description);
+
+      li.appendChild(link);
+      li.appendChild(description);
+
+      link.setAttribute("href", "displayFile.html?file=" + file.fileName);
       link.appendChild(document.createTextNode(file.humanName));
-      return link;
+
+      return li;
     }
   </script>
 

@@ -32,4 +32,6 @@ function printResults(results){
   demoDiv.innerHTML = formattedResults;
 }
 
-makeRequest("examples-src/basic-query.js");
+var fileToGet = window.location.search.split("=")[1];
+
+makeRequest("examples-src/" + fileToGet + ".js");
