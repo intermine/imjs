@@ -13,7 +13,7 @@ script:
     - npm test
     # Build API Docs
     - echo "Generating docs"
-    - codo
+    - codo --name "imjs"
 node_js:
     - '10.15.2'
 
