@@ -11,19 +11,5 @@ before_install:
     - ./node_modules/.bin/bower install
 script:
     - npm test
-    # Build API Docs
-    - echo "Generating docs"
-    - codo --name "imjs"
 node_js:
     - '10.15.2'
-
-
-# Deploys built API docs:
-deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-  keep-history: true
-  local-dir: doc
-  on:
-    branch: master
