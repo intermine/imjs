@@ -38,7 +38,7 @@ class Registry
     f = console.error ? console.log
     f e
 
- # Concatenates relative path with root and returns final path to call
+  # Concatenates relative path with root and returns final path to call
   # @param [Array<String>] path declare the nested scopes from
   #   where to fetch the data
   # @return [String] Final scope relative to the root of the
@@ -80,7 +80,7 @@ class Registry
     withCB cb, http.doReq.call this, opts
 
   # Fetches instances of all known registry information
-  # @param[->] cb A function to be attatched to the returned promise
+  # @param [->] cb A function to be attatched to the returned promise
   # @return [Promise<Array<Object>>] A promise which gets the results
   fetchAllMines: (cb = ->) =>
     @makeRequest 'GET', INSTANCES_PATH, {}, cb
