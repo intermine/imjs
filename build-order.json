@@ -15,4 +15,5 @@
     , "build/id-resolution-job.js"
     , "build/query.js"
     , "build/service.js"
+    , "build/registry.js"
 ]
