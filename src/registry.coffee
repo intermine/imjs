@@ -27,9 +27,14 @@ class Registry
   # @param [String] intended datatype to return if present
   #
   # @return [String] datatype if provided or fallbacks to json data
-  
   getFormat: (intended = 'json') =>
     return intended
+
+  # Helper function to check if an object is empty or not
+  # @param [Object] obj to test if empty or has some properties
+  # @return [Boolean] true if object doesnot have own properties
+  isEmpty: (obj) ->
+    return (Object.entries obj).length is 0 and obj.constructor is Object
 
   # Default error handler function to provide error stream if present
   # or fallback to stdout
@@ -44,11 +49,8 @@ class Registry
   # @return [String] Final scope relative to the root of the
   #  service from where to make the request
   makePath: (path = '', params = {}) =>
-    # paramObj = new URLSearchParams()
-    # for own key, val of params
-      # paramObj.append key, val
-    # paramString = paramObj.toString()
-    return ROOT + path + '?' + querystring.stringify params
+    paramString = if @isEmpty params then '' else '?' + querystring.stringify params
+    return ROOT + path + paramString
 
   # Helper function to make request, to be augmented further as need arises
   # @param [String] method The HTTP method to use (one of GET, POST, PUT, DELETE).
