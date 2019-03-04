@@ -8,6 +8,7 @@
 # This library is designed to be compatible with both node.js
 # and browsers.
 
+querystring = require 'querystring'
 utils = require './util'
 http = require './http'
 
@@ -39,23 +40,28 @@ class Registry
     f e
 
   # Concatenates relative path with root and returns final path to call
-  # @param [Array<String>] path declare the nested scopes from
-  #   where to fetch the data
+  # @param [String] path declare the scope from where to fetch the data
   # @return [String] Final scope relative to the root of the
   #  service from where to make the request
-  makePath: (path = []) =>
-    ROOT + path.join '/'
+  makePath: (path = '', params = {}) =>
+    # paramObj = new URLSearchParams()
+    # for own key, val of params
+      # paramObj.append key, val
+    # paramString = paramObj.toString()
+    return ROOT + path + '?' + querystring.stringify params
 
   # Helper function to make request, to be augmented further as need arises
   # @param [String] method The HTTP method to use (one of GET, POST, PUT, DELETE).
   # @param [String] path The path fragment of the endpoint to use. The service's root
   #   will be prepended to obtain the full URI.
+  # @param [Object<String, String>] urlParams The query paramters to be passed in the url
+  #   (in form of key: value pairs)
   # @param [Object,Array] data The parameters to send to the service.
   # @param [(data) ->] cb A function that will be called on the results when received.
   #
   # @return [Promise<Object>] A promise to yield a response object along
   # with callback attatched if provided
-  makeRequest: (method = 'GET', path = '', data = {}, cb = ->) ->
+  makeRequest: (method = 'GET', path = '', urlParams = {}, data = {}, cb = ->) ->
 
     if utils.isArray cb
       [cb, errBack] = cb
@@ -75,15 +81,28 @@ class Registry
       success: cb
       error: errBack
       type: method
-      url: @makePath [INSTANCES_PATH]
+      url: @makePath path, urlParams
 
     withCB cb, http.doReq.call this, opts
 
   # Fetches instances of all known registry information
+  # @param [Array<String>] q A list of words to look for in the instance name, organisms or brief
+  #   description. If not given, all the instances are returned
+  # @param [Array<String>] mines Three possible values: 'dev’, 'prod’ or 'all'. Retrieves the
+  #   InterMine instances that are ‘development’ mines, all the mines or ‘production’ mines
+  #   respectively.
   # @param [->] cb A function to be attatched to the returned promise
   # @return [Promise<Array<Object>>] A promise which gets the results
-  fetchAllMines: (cb = ->) =>
-    @makeRequest 'GET', INSTANCES_PATH, {}, cb
+  fetchAllMines: (q = [], mines = [], cb = ->) =>
+    # Check if mines contain permissible value
+    if not mines.every((mine) -> mine in ["dev", "prod", "all"])
+      return new Promise((res, rej) ->
+        rej("Mines field should only contain 'dev', 'prod' or 'all'"))
+
+    params = {}
+    if q isnt [] then params['q'] = q.join ' '
+    if mines isnt [] then params['mines'] = mines.join ' '
+    @makeRequest 'GET', INSTANCES_PATH, params, {}, cb
 
 
 exports.Registry = Registry

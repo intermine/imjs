@@ -71,7 +71,7 @@
       <a href='#makePath-dynamic'>
         #
 (String)
-<b>makePath</b><span>(path = [])</span>
+<b>makePath</b><span>(path = &#39;&#39;, params = {})</span>
       </a>
     </span>
     <span class='bound note title'>Bound</span>
@@ -85,7 +85,7 @@
       <a href='#makeRequest-dynamic'>
         #
 (Promise&lt;Object&gt;)
-<b>makeRequest</b><span>(method = &#39;GET&#39;, path = &#39;&#39;, data = {}, cb = function() {})</span>
+<b>makeRequest</b><span>(method = &#39;GET&#39;, path = &#39;&#39;, urlParams = {}, data = {}, cb = function() {})</span>
       </a>
     </span>
     <span class='desc'>
@@ -98,7 +98,7 @@
       <a href='#fetchAllMines-dynamic'>
         #
 (Promise&lt;Array&lt;Object&gt;&gt;)
-<b>fetchAllMines</b><span>(cb = function() {})</span>
+<b>fetchAllMines</b><span>(q = [], mines = [], cb = function() {})</span>
       </a>
     </span>
     <span class='bound note title'>Bound</span>
@@ -150,7 +150,7 @@ or fallback to stdout</p>
     <p class='signature' id='makePath-dynamic'>
       #
 (String)
-<b>makePath</b><span>(path = [])</span>
+<b>makePath</b><span>(path = &#39;&#39;, params = {})</span>
       <span class='bound note'>Bound</span>
       <br>
     </p>
@@ -165,11 +165,11 @@ or fallback to stdout</p>
       <span class='name'>path</span>
       <span class='type'>
         (
-          <tt>Array&lt;String&gt;</tt>
+          <tt>String</tt>
         )
       </span>
       &mdash;
-      <span class='desc'>declare the nested scopes from where to fetch the data </span>
+      <span class='desc'>declare the scope from where to fetch the data </span>
     </li>
   </ul>
   <h3>Returns:</h3>
@@ -189,7 +189,7 @@ or fallback to stdout</p>
     <p class='signature' id='makeRequest-dynamic'>
       #
 (Promise&lt;Object&gt;)
-<b>makeRequest</b><span>(method = &#39;GET&#39;, path = &#39;&#39;, data = {}, cb = function() {})</span>
+<b>makeRequest</b><span>(method = &#39;GET&#39;, path = &#39;&#39;, urlParams = {}, data = {}, cb = function() {})</span>
       <br>
     </p>
     <div class='docstring'>
@@ -217,6 +217,16 @@ or fallback to stdout</p>
       </span>
       &mdash;
       <span class='desc'>The path fragment of the endpoint to use. The service&#39;s root will be prepended to obtain the full URI. </span>
+    </li>
+    <li>
+      <span class='name'>urlParams</span>
+      <span class='type'>
+        (
+          <tt>Object&lt;String, String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The query paramters to be passed in the url (in form of key: value pairs) </span>
     </li>
     <li>
       <span class='name'>data</span>
@@ -256,7 +266,7 @@ or fallback to stdout</p>
     <p class='signature' id='fetchAllMines-dynamic'>
       #
 (Promise&lt;Array&lt;Object&gt;&gt;)
-<b>fetchAllMines</b><span>(cb = function() {})</span>
+<b>fetchAllMines</b><span>(q = [], mines = [], cb = function() {})</span>
       <span class='bound note'>Bound</span>
       <br>
     </p>
@@ -266,6 +276,26 @@ or fallback to stdout</p>
 <div class='tags'>
   <h3>Parameters:</h3>
   <ul class='param'>
+    <li>
+      <span class='name'>q</span>
+      <span class='type'>
+        (
+          <tt>Array&lt;String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A list of words to look for in the instance name, organisms or brief description. If not given, all the instances are returned </span>
+    </li>
+    <li>
+      <span class='name'>mines</span>
+      <span class='type'>
+        (
+          <tt>Array&lt;String&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Three possible values: &#39;dev’, &#39;prod’ or &#39;all&#39;. Retrieves the InterMine instances that are ‘development’ mines, all the mines or ‘production’ mines respectively. </span>
+    </li>
     <li>
       <span class='name'>cb</span>
       <span class='type'>
