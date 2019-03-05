@@ -3022,7 +3022,7 @@
 
   Registry = (function() {
     function Registry() {
-      this.fetchAllMines = __bind(this.fetchAllMines, this);
+      this.fetchMines = __bind(this.fetchMines, this);
       this.makePath = __bind(this.makePath, this);
       this.getFormat = __bind(this.getFormat, this);
     }
@@ -3095,10 +3095,10 @@
         type: method,
         url: this.makePath(path, urlParams)
       };
-      return withCB(cb, http.doReq.call(this, opts));
+      return http.doReq.call(this, opts);
     };
 
-    Registry.prototype.fetchAllMines = function(q, mines, cb) {
+    Registry.prototype.fetchMines = function(q, mines, cb) {
       var params;
       if (q == null) {
         q = [];
@@ -3112,8 +3112,8 @@
       if (!mines.every(function(mine) {
         return mine === "dev" || mine === "prod" || mine === "all";
       })) {
-        return new Promise(function(res, rej) {
-          return rej("Mines field should only contain 'dev', 'prod' or 'all'");
+        return new Promise(function(resolve, reject) {
+          return reject("Mines field should only contain 'dev', 'prod' or 'all'");
         });
       }
       params = {};

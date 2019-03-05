@@ -85,7 +85,7 @@ class Registry
       type: method
       url: @makePath path, urlParams
 
-    withCB cb, http.doReq.call this, opts
+    http.doReq.call this, opts
 
   # Fetches instances of all known registry information
   # @param [Array<String>] q A list of words to look for in the instance name, organisms or brief
@@ -95,11 +95,13 @@ class Registry
   #   respectively.
   # @param [->] cb A function to be attatched to the returned promise
   # @return [Promise<Array<Object>>] A promise which gets the results
-  fetchAllMines: (q = [], mines = [], cb = ->) =>
+  fetchMines: (q = [], mines = [], cb = ->) =>
     # Check if mines contain permissible value
     if not mines.every((mine) -> mine in ["dev", "prod", "all"])
-      return new Promise((res, rej) ->
-        rej("Mines field should only contain 'dev', 'prod' or 'all'"))
+      return new Promise((resolve, reject) ->
+        reject("Mines field should only contain 'dev', 'prod' or 'all'"))
+        .then(cb.bind null)
+        .catch(cb)
 
     params = {}
     if q isnt [] then params['q'] = q.join ' '

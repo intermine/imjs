@@ -1,4 +1,5 @@
 should = require 'should'
+{eventually} = require './lib/utils'
 
 Fixture = require './lib/fixture'
 
@@ -26,11 +27,26 @@ describe 'Registry', ->
         {makePath} = new Registry
         # Get the root of the registry passing in nothing
         root = makePath '', {}
+        root.should.equal 'http://registry.intermine.org/service/'
         (makePath 'outer/inner', {}).should.equal "#{root}outer/inner"
+        (makePath 'outer/inner', {a: 2, b: 3}).should.equal "#{root}outer/inner?a=2&b=3"
 
     describe 'isEmpty', ->
 
       it 'should return true if an object is empty and has Object as prototype, false if not', ->
         {isEmpty} = new Registry
-        (isEmpty {}).should.equal true
-        (isEmpty {a: 1}).should.equal false
+        (isEmpty {}).should.be.true
+        (isEmpty {a: 1}).should.be.false
+
+    # describe 'fetchMines', ->
+
+      # @timeout 15000
+
+      # it 'should fetch all mines given nothing in the query parameter', (done) ->
+        # {fetchMines} = new Registry
+        # fetchMines [], [], (err, mines) ->
+          # should.not.exist err
+          # mines.should.be.an 'array'
+          # done()
+          # return
+        
