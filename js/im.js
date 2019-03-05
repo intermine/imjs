@@ -1,4 +1,4 @@
-/*! imjs - v3.16.0 - 2019-03-05 */
+/*! imjs - v3.16.0 - 2019-03-06 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3114,7 +3114,7 @@
       })) {
         return new Promise(function(resolve, reject) {
           return reject("Mines field should only contain 'dev', 'prod' or 'all'");
-        });
+        }).then(cb.bind(null))["catch"](cb);
       }
       params = {};
       if (q !== []) {

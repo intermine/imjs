@@ -85,7 +85,7 @@ class Registry
       type: method
       url: @makePath path, urlParams
 
-    http.doReq.call this, opts
+    http.doReq.call this, opts, true
 
   # Fetches instances of all known registry information
   # @param [Array<String>] q A list of words to look for in the instance name, organisms or brief
@@ -106,7 +106,7 @@ class Registry
     params = {}
     if q isnt [] then params['q'] = q.join ' '
     if mines isnt [] then params['mines'] = mines.join ' '
-    @makeRequest 'GET', INSTANCES_PATH, params, {}, cb
+    @makeRequest('GET', INSTANCES_PATH, params, {}).then(cb)
 
 
 exports.Registry = Registry

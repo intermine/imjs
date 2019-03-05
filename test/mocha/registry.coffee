@@ -1,5 +1,5 @@
 should = require 'should'
-{eventually} = require './lib/utils'
+{prepare, eventually} = require './lib/utils'
 
 Fixture = require './lib/fixture'
 
@@ -38,15 +38,16 @@ describe 'Registry', ->
         (isEmpty {}).should.be.true
         (isEmpty {a: 1}).should.be.false
 
-    # describe 'fetchMines', ->
+    describe 'fetchMines', ->
 
-      # @timeout 15000
+      @beforeAll prepare -> new Registry().fetchMines()
+      @timeout 15000
 
-      # it 'should fetch all mines given nothing in the query parameter', (done) ->
+      it 'should fetch all mines given nothing in the query parameter', eventually (mines) ->
         # {fetchMines} = new Registry
         # fetchMines [], [], (err, mines) ->
-          # should.not.exist err
-          # mines.should.be.an 'array'
-          # done()
-          # return
+        # should.not.exist err
+        mines.should.be.an 'array'
+        # done()
+        # return
         
