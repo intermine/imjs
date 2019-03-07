@@ -1,5 +1,8 @@
-Tests
-=====
+# Tests
+
+## Installing and running tests locally
+
+**Note: If you are unable to get tests running locally, try enabling [TravisCI] for your repository**
 
 The tests for this project are written for
 both node.js (in the mocha directory) and for
@@ -32,3 +35,6 @@ See [our testmodel docs](https://intermine.readthedocs.io/en/latest/get-started/
 If this is not located at http://localhost:8080/intermine-demo as expected, you can [pass the location in an environment
 variable](https://stackoverflow.com/questions/22312671/setting-environment-variables-for-node-to-retrieve) (TESTMODEL_URL).
 
+## TravisCI
+
+If you enable [TravisCI](https://travis-ci.org/) for your repo, tests will run automatically when you push code to GitHub. This might be easier! 
