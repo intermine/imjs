@@ -1,4 +1,4 @@
-/*! imjs - v3.16.0 - 2019-03-06 */
+/*! imjs - v3.16.0 - 2019-03-08 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3090,12 +3090,10 @@
       opts = {
         data: data,
         dataType: dataType,
-        success: cb,
-        error: errBack,
         type: method,
         url: this.makePath(path, urlParams)
       };
-      return http.doReq.call(this, opts);
+      return withCB(cb, http.doReq.call(this, opts));
     };
 
     Registry.prototype.fetchMines = function(q, mines, cb) {
@@ -3112,9 +3110,9 @@
       if (!mines.every(function(mine) {
         return mine === "dev" || mine === "prod" || mine === "all";
       })) {
-        return new Promise(function(resolve, reject) {
+        return withCB(cb, new Promise(function(resolve, reject) {
           return reject("Mines field should only contain 'dev', 'prod' or 'all'");
-        }).then(cb.bind(null))["catch"](cb);
+        }));
       }
       params = {};
       if (q !== []) {

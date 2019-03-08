@@ -11,7 +11,6 @@
 querystring = require 'querystring'
 utils = require './util'
 http = require './http'
-axios = require 'axios'
 
 {withCB, get} = utils
 {doReq, merge} = http
@@ -81,7 +80,6 @@ class Registry
     opts =
       data: data
       dataType: dataType
-      error: errBack
       type: method
       url: @makePath path, urlParams
 
@@ -98,15 +96,12 @@ class Registry
   fetchMines: (q = [], mines = [], cb = ->) =>
     # Check if mines contain permissible value
     if not mines.every((mine) -> mine in ["dev", "prod", "all"])
-      return new Promise((resolve, reject) ->
+      return withCB cb, new Promise((resolve, reject) ->
         reject("Mines field should only contain 'dev', 'prod' or 'all'"))
-        .then(cb.bind null)
-        .catch(cb)
 
     params = {}
     if q isnt [] then params['q'] = q.join ' '
     if mines isnt [] then params['mines'] = mines.join ' '
-    # return axios.get @makePath(INSTANCES_PATH, params)
     @makeRequest('GET', INSTANCES_PATH, params, {}, cb)
 
 
