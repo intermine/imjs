@@ -11,6 +11,7 @@
 querystring = require 'querystring'
 utils = require './util'
 http = require './http'
+axios = require 'axios'
 
 {withCB, get} = utils
 {doReq, merge} = http
@@ -80,12 +81,11 @@ class Registry
     opts =
       data: data
       dataType: dataType
-      success: cb
       error: errBack
       type: method
       url: @makePath path, urlParams
 
-    http.doReq.call this, opts, true
+    withCB cb, http.doReq.call this, opts
 
   # Fetches instances of all known registry information
   # @param [Array<String>] q A list of words to look for in the instance name, organisms or brief
@@ -106,7 +106,8 @@ class Registry
     params = {}
     if q isnt [] then params['q'] = q.join ' '
     if mines isnt [] then params['mines'] = mines.join ' '
-    @makeRequest('GET', INSTANCES_PATH, params, {}).then(cb)
+    # return axios.get @makePath(INSTANCES_PATH, params)
+    @makeRequest('GET', INSTANCES_PATH, params, {}, cb)
 
 
 exports.Registry = Registry

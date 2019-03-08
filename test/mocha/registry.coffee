@@ -40,14 +40,16 @@ describe 'Registry', ->
 
     describe 'fetchMines', ->
 
-      @beforeAll prepare -> new Registry().fetchMines()
+      # @beforeAll prepare -> new Registry().fetchMines()
       @timeout 15000
 
-      it 'should fetch all mines given nothing in the query parameter', eventually (mines) ->
-        # {fetchMines} = new Registry
-        # fetchMines [], [], (err, mines) ->
-        # should.not.exist err
-        mines.should.be.an 'array'
-        # done()
-        # return
+      it 'should fetch all mines given nothing in the query parameter', ->
+        {fetchMines} = new Registry
+        (fetchMines [], []).then (mines) ->
+          # console.log 'hello world'
+          # console.log err
+          # console.log mines
+          should.not.exist err
+          # should.exist err
+          mines.should.be.an 'object'
         
