@@ -20,7 +20,7 @@ npm install -g mocha grunt bower
 
 ### Running / updating imjs
 
-See the [gruntfile](gruntfile.js) for possible tasks to be run. A default task that runs the build and tests is simply `grunt`.
+See the [gruntfile](Gruntfile.js) for possible tasks to be run. A default task that runs the build and tests is simply `grunt`.
 
 ## Building the docs
 
