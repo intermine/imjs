@@ -78,7 +78,7 @@
     "oboe": "~1.11.0",
     "q": "^1.5.1",
     "repl.history": "~0.1.1",
-    "should": "~4.1.x",
+    "should": "^13.2.3",
     "stream-reduce": "^1.0.3",
     "underscore": "^1.9.1"
   }

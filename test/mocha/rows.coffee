@@ -201,7 +201,7 @@ describe 'Service', ->
           return done new Error("Should have failed")
         failed.then null, ([status, stream]) ->
           try
-            status.should.match /400/
+            status.should.match 400
             done()
           catch e
             done e
