@@ -65,7 +65,7 @@
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./service":11,"./shiv":13}],3:[function(_dereq_,module,exports){
 (function() {
-  var ACCEPT_HEADER, JSONStream, PESKY_COMMA, URL, URLENC, USER_AGENT, VERSION, blocking, defer, error, getMsg, http, invoke, merge, parseOptions, rejectAfter, streaming, utils, _ref;
+  var ACCEPT_HEADER, JSONStream, PESKY_COMMA, URL, URLENC, USER_AGENT, VERSION, blocking, defer, error, getMsg, http, invoke, merge, parseOptions, ref, rejectAfter, streaming, utils;
 
   URL = _dereq_('url');
 
@@ -77,7 +77,7 @@
 
   VERSION = _dereq_('./version').VERSION;
 
-  _ref = utils = _dereq_('./util'), error = _ref.error, defer = _ref.defer, merge = _ref.merge, invoke = _ref.invoke;
+  ref = utils = _dereq_('./util'), error = ref.error, defer = ref.defer, merge = ref.merge, invoke = ref.invoke;
 
   USER_AGENT = "node-http/imjs-" + VERSION;
 
@@ -110,9 +110,9 @@
     };
   };
 
-  getMsg = function(_arg, text, e, code) {
+  getMsg = function(arg, text, e, code) {
     var type, url;
-    type = _arg.type, url = _arg.url;
+    type = arg.type, url = arg.url;
     return "Could not parse response to " + type + " " + url + ": \"" + text + "\" (" + code + ": " + e + ")";
   };
 
@@ -125,7 +125,7 @@
       });
       resp.on('error', reject);
       return resp.on('end', function() {
-        var ct, e, err, f, match, parsed, _ref1;
+        var ct, e, err, f, match, parsed, ref1;
         if ((resp != null ? resp.headers : void 0) != null) {
           ct = resp.headers['content-type'];
         }
@@ -140,8 +140,8 @@
               } else {
                 return resolve(parsed);
               }
-            } catch (_error) {
-              e = _error;
+            } catch (error1) {
+              e = error1;
               if (resp.statusCode >= 400) {
                 return reject(new Error(resp.statusCode));
               } else {
@@ -153,7 +153,7 @@
           if (match = containerBuffer.match(/\[ERROR\] (\d+)([\s\S]*)/)) {
             return reject(new Error(match[2]));
           } else {
-            f = (200 <= (_ref1 = resp.statusCode) && _ref1 < 400) ? resolve : reject;
+            f = ((200 <= (ref1 = resp.statusCode) && ref1 < 400)) ? resolve : reject;
             return f(containerBuffer);
           }
         }
@@ -163,7 +163,7 @@
 
   exports.iterReq = function(method, path, format) {
     return function(q, page, cb, eb, onEnd) {
-      var attach, promise, readErrors, req, _ref1;
+      var attach, promise, readErrors, ref1, req;
       if (page == null) {
         page = {};
       }
@@ -177,7 +177,7 @@
         onEnd = (function() {});
       }
       if (utils.isFunction(page)) {
-        _ref1 = [{}, page, cb, eb], page = _ref1[0], cb = _ref1[1], eb = _ref1[2], onEnd = _ref1[3];
+        ref1 = [{}, page, cb, eb], page = ref1[0], cb = ref1[1], eb = ref1[2], onEnd = ref1[3];
       }
       req = merge({
         format: format
@@ -195,9 +195,9 @@
         }), 3);
         return stream;
       };
-      readErrors = function(_arg) {
+      readErrors = function(arg) {
         var errors, sc;
-        sc = _arg[0], errors = _arg[1];
+        sc = arg[0], errors = arg[1];
         errors.on('data', eb);
         errors.on('error', eb);
         errors.on('end', onEnd);
@@ -223,13 +223,13 @@
   };
 
   parseOptions = function(opts) {
-    var k, parsed, postdata, sep, v, _ref1, _ref2, _ref3;
+    var k, parsed, postdata, ref1, ref2, ref3, sep, v;
     if (!opts.url) {
       throw new Error("No url provided in " + (JSON.stringify(opts)));
     }
     if (typeof opts.data === 'string') {
       postdata = opts.data;
-      if ((_ref1 = opts.type) === 'GET' || _ref1 === 'DELETE') {
+      if ((ref1 = opts.type) === 'GET' || ref1 === 'DELETE') {
         throw new Error("Invalid request. " + opts.type + " requests must not have bodies");
       }
     } else {
@@ -245,7 +245,7 @@
       'User-Agent': USER_AGENT,
       'Accept': ACCEPT_HEADER[opts.dataType]
     };
-    if (((_ref2 = parsed.method) === 'GET' || _ref2 === 'DELETE') && (postdata != null ? postdata.length : void 0)) {
+    if (((ref2 = parsed.method) === 'GET' || ref2 === 'DELETE') && (postdata != null ? postdata.length : void 0)) {
       sep = /\?/.test(parsed.path) ? '&' : '?';
       parsed.path += sep + postdata;
       postdata = null;
@@ -254,9 +254,9 @@
       parsed.headers['Content-Length'] = postdata.length;
     }
     if (opts.headers != null) {
-      _ref3 = opts.headers;
-      for (k in _ref3) {
-        v = _ref3[k];
+      ref3 = opts.headers;
+      for (k in ref3) {
+        v = ref3[k];
         parsed.headers[k] = v;
       }
     }
@@ -267,11 +267,11 @@
   };
 
   exports.doReq = function(opts, iter) {
-    var e, handler, postdata, promise, reject, req, resolve, timeout, url, _ref1, _ref2;
-    _ref1 = defer(), promise = _ref1.promise, resolve = _ref1.resolve, reject = _ref1.reject;
+    var e, handler, postdata, promise, ref1, ref2, reject, req, resolve, timeout, url;
+    ref1 = defer(), promise = ref1.promise, resolve = ref1.resolve, reject = ref1.reject;
     promise.then(null, opts.error);
     try {
-      _ref2 = parseOptions(opts), url = _ref2[0], postdata = _ref2[1];
+      ref2 = parseOptions(opts), url = ref2[0], postdata = ref2[1];
       handler = (iter ? streaming : blocking)(opts, resolve, reject);
       req = http.request(url, handler);
       req.on('error', function(err) {
@@ -285,8 +285,8 @@
       if (timeout > 0) {
         rejectAfter(timeout, reject, promise);
       }
-    } catch (_error) {
-      e = _error;
+    } catch (error1) {
+      e = error1;
       reject(e);
     }
     return promise;
@@ -297,9 +297,9 @@
 },{"./constants":1,"./util":16,"./version":17,"JSONStream":20,"http":29,"url":56}],4:[function(_dereq_,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
-    __hasProp = {}.hasOwnProperty,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    hasProp = {}.hasOwnProperty,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   funcutils = _dereq_('./util');
 
@@ -315,7 +315,7 @@
     function CategoryResults(results) {
       var k, v;
       for (k in results) {
-        if (!__hasProp.call(results, k)) continue;
+        if (!hasProp.call(results, k)) continue;
         v = results[k];
         this[k] = v;
       }
@@ -332,11 +332,11 @@
     getIssueMatches = concatMap(get('matches'));
 
     CategoryResults.prototype.getMatches = function(k) {
-      var _ref;
+      var ref;
       if (k === 'MATCH') {
         return this.matches[k];
       } else {
-        return (_ref = getIssueMatches(this.matches[k])) != null ? _ref : [];
+        return (ref = getIssueMatches(this.matches[k])) != null ? ref : [];
       }
     };
 
@@ -376,25 +376,25 @@
     getReasons = function(match) {
       var k, vals;
       return flatten((function() {
-        var _ref, _results;
-        _ref = match.identifiers;
-        _results = [];
-        for (k in _ref) {
-          vals = _ref[k];
-          _results.push(vals);
+        var ref, results1;
+        ref = match.identifiers;
+        results1 = [];
+        for (k in ref) {
+          vals = ref[k];
+          results1.push(vals);
         }
-        return _results;
+        return results1;
       })());
     };
 
     isGood = function(match, k) {
-      return (k == null) || __indexOf.call(getReasons(match), k) >= 0;
+      return (k == null) || indexOf.call(getReasons(match), k) >= 0;
     };
 
     function IdResults(results) {
       var k, v;
       for (k in results) {
-        if (!__hasProp.call(results, k)) continue;
+        if (!hasProp.call(results, k)) continue;
         v = results[k];
         this[k] = v;
       }
@@ -419,20 +419,20 @@
       toIdents = function(ms) {
         var ident, match;
         return unique(flatten((function() {
-          var _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = ms.length; _i < _len; _i++) {
-            match = ms[_i];
-            _results.push((function() {
-              var _results1;
-              _results1 = [];
+          var i, len, results1;
+          results1 = [];
+          for (i = 0, len = ms.length; i < len; i++) {
+            match = ms[i];
+            results1.push((function() {
+              var results2;
+              results2 = [];
               for (ident in match != null ? match.identifiers : void 0) {
-                _results1.push(ident);
+                results2.push(ident);
               }
-              return _results1;
+              return results2;
             })());
           }
-          return _results;
+          return results1;
         })()));
       };
       matchIdents = toIdents(this.getMatches('MATCH'));
@@ -452,16 +452,17 @@
       matches = this.goodMatchIds().length;
       all = this.allMatchIds().length;
       issues = ((function() {
-        var _results;
-        _results = [];
-        for (id in this) {
-          if (!__hasProp.call(this, id)) continue;
-          match = this[id];
-          if (__indexOf.call(getReasons(match), 'MATCH') < 0) {
-            _results.push(id);
+        var ref, results1;
+        ref = this;
+        results1 = [];
+        for (id in ref) {
+          if (!hasProp.call(ref, id)) continue;
+          match = ref[id];
+          if (indexOf.call(getReasons(match), 'MATCH') < 0) {
+            results1.push(id);
           }
         }
-        return _results;
+        return results1;
       }).call(this)).length;
       return {
         matches: matches,
@@ -471,29 +472,31 @@
     };
 
     IdResults.prototype.getMatches = function(k) {
-      var match, _results;
-      _results = [];
-      for (id in this) {
-        if (!__hasProp.call(this, id)) continue;
-        match = this[id];
+      var match, ref, results1;
+      ref = this;
+      results1 = [];
+      for (id in ref) {
+        if (!hasProp.call(ref, id)) continue;
+        match = ref[id];
         if (isGood(match, k)) {
-          _results.push(match);
+          results1.push(match);
         }
       }
-      return _results;
+      return results1;
     };
 
     IdResults.prototype.getMatchIds = function(k) {
-      var match, _results;
-      _results = [];
-      for (id in this) {
-        if (!__hasProp.call(this, id)) continue;
-        match = this[id];
+      var match, ref, results1;
+      ref = this;
+      results1 = [];
+      for (id in ref) {
+        if (!hasProp.call(ref, id)) continue;
+        match = ref[id];
         if (isGood(match, k)) {
-          _results.push(id);
+          results1.push(id);
         }
       }
-      return _results;
+      return results1;
     };
 
     IdResults.prototype.goodMatchIds = function() {
@@ -509,13 +512,13 @@
   })();
 
   IDResolutionJob = (function() {
-    function IDResolutionJob(uid, service) {
-      this.uid = uid;
-      this.service = service;
-      this.del = __bind(this.del, this);
-      this.fetchResults = __bind(this.fetchResults, this);
-      this.fetchErrorMessage = __bind(this.fetchErrorMessage, this);
-      this.fetchStatus = __bind(this.fetchStatus, this);
+    function IDResolutionJob(uid1, service1) {
+      this.uid = uid1;
+      this.service = service1;
+      this.del = bind(this.del, this);
+      this.fetchResults = bind(this.fetchResults, this);
+      this.fetchErrorMessage = bind(this.fetchErrorMessage, this);
+      this.fetchStatus = bind(this.fetchStatus, this);
     }
 
     IDResolutionJob.prototype.fetchStatus = function(cb) {
@@ -548,8 +551,8 @@
     IDResolutionJob.prototype.decay = 50;
 
     IDResolutionJob.prototype.poll = function(onSuccess, onError, onProgress) {
-      var backOff, notify, promise, reject, resolve, resp, _ref;
-      _ref = defer(), promise = _ref.promise, resolve = _ref.resolve, reject = _ref.reject;
+      var backOff, notify, promise, ref, reject, resolve, resp;
+      ref = defer(), promise = ref.promise, resolve = ref.resolve, reject = ref.reject;
       promise.then(onSuccess, onError);
       notify = onProgress != null ? onProgress : (function() {});
       resp = this.fetchStatus();
@@ -597,9 +600,9 @@
 },{"./util":16}],5:[function(_dereq_,module,exports){
 (function() {
   var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    hasProp = {}.hasOwnProperty,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   utils = _dereq_('./util');
 
@@ -627,10 +630,10 @@
     function List(properties, service) {
       var k, v;
       this.service = service;
-      this._updateTags = __bind(this._updateTags, this);
-      this.hasTag = __bind(this.hasTag, this);
+      this._updateTags = bind(this._updateTags, this);
+      this.hasTag = bind(this.hasTag, this);
       for (k in properties) {
-        if (!__hasProp.call(properties, k)) continue;
+        if (!hasProp.call(properties, k)) continue;
         v = properties[k];
         this[k] = v;
       }
@@ -639,7 +642,7 @@
     }
 
     List.prototype.hasTag = function(t) {
-      return __indexOf.call(this.tags, t) >= 0;
+      return indexOf.call(this.tags, t) >= 0;
     };
 
     List.prototype.query = function(view) {
@@ -659,9 +662,9 @@
       }, cb);
     };
 
-    getTags = function(_arg) {
+    getTags = function(arg) {
       var tags;
-      tags = _arg.tags;
+      tags = arg.tags;
       return tags;
     };
 
@@ -715,7 +718,7 @@
     };
 
     List.prototype.copy = function(opts, cb) {
-      var baseName, name, query, tags, _ref, _ref1, _ref2;
+      var baseName, name, query, ref, ref1, ref2, tags;
       if (opts == null) {
         opts = {};
       }
@@ -723,22 +726,22 @@
         cb = (function() {});
       }
       if (arguments.length === 1 && utils.isFunction(opts)) {
-        _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
+        ref = [{}, opts], opts = ref[0], cb = ref[1];
       }
       if (typeof opts === 'string') {
         opts = {
           name: opts
         };
       }
-      name = baseName = (_ref1 = opts.name) != null ? _ref1 : "" + this.name + "_copy";
-      tags = this.tags.concat((_ref2 = opts.tags) != null ? _ref2 : []);
+      name = baseName = (ref1 = opts.name) != null ? ref1 : this.name + "_copy";
+      tags = this.tags.concat((ref2 = opts.tags) != null ? ref2 : []);
       query = this.query(['id']);
       return withCB(cb, this.service.fetchLists().then(invoke('map', get('name'))).then((function(_this) {
         return function(names) {
           var c;
           c = 1;
-          while (__indexOf.call(names, name) >= 0) {
-            name = "" + baseName + "-" + (c++);
+          while (indexOf.call(names, name) >= 0) {
+            name = baseName + "-" + (c++);
           }
           return query.then(invoke('saveAsList', {
             name: name,
@@ -786,15 +789,15 @@
 
 },{"./util":16}],6:[function(_dereq_,module,exports){
 (function() {
-  var JAVA_LANG_OBJ, Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var JAVA_LANG_OBJ, Model, PathInfo, Table, error, find, flatten, intermine, omap, ref,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Table = _dereq_('./table').Table;
 
   PathInfo = _dereq_('./path').PathInfo;
 
-  _ref = _dereq_('./util'), flatten = _ref.flatten, find = _ref.find, error = _ref.error, omap = _ref.omap;
+  ref = _dereq_('./util'), flatten = ref.flatten, find = ref.find, error = ref.error, omap = ref.omap;
 
   intermine = exports;
 
@@ -808,14 +811,14 @@
   });
 
   Model = (function() {
-    function Model(_arg) {
+    function Model(arg) {
       var classes, liftToTable;
-      this.name = _arg.name, classes = _arg.classes;
-      this.findCommonType = __bind(this.findCommonType, this);
-      this.findSharedAncestor = __bind(this.findSharedAncestor, this);
-      this.getAncestorsOf = __bind(this.getAncestorsOf, this);
-      this.getSubclassesOf = __bind(this.getSubclassesOf, this);
-      this.getPathInfo = __bind(this.getPathInfo, this);
+      this.name = arg.name, classes = arg.classes;
+      this.findCommonType = bind(this.findCommonType, this);
+      this.findSharedAncestor = bind(this.findSharedAncestor, this);
+      this.getAncestorsOf = bind(this.getAncestorsOf, this);
+      this.getSubclassesOf = bind(this.getSubclassesOf, this);
+      this.getPathInfo = bind(this.getPathInfo, this);
       liftToTable = omap((function(_this) {
         return function(k, v) {
           return [k, new Table(v, _this)];
@@ -830,16 +833,16 @@
     };
 
     Model.prototype.getSubclassesOf = function(cls) {
-      var cd, clazz, ret, _, _ref1, _ref2;
-      clazz = cls && cls.name ? cls : this.classes[cls];
+      var _, cd, clazz, ref1, ref2, ret;
+      clazz = (cls && cls.name) ? cls : this.classes[cls];
       if (clazz == null) {
-        throw new Error("" + cls + " is not a table");
+        throw new Error(cls + " is not a table");
       }
       ret = [clazz.name];
-      _ref1 = this.classes;
-      for (_ in _ref1) {
-        cd = _ref1[_];
-        if (_ref2 = clazz.name, __indexOf.call(cd.parents(), _ref2) >= 0) {
+      ref1 = this.classes;
+      for (_ in ref1) {
+        cd = ref1[_];
+        if (ref2 = clazz.name, indexOf.call(cd.parents(), ref2) >= 0) {
           ret = ret.concat(this.getSubclassesOf(cd));
         }
       }
@@ -848,9 +851,9 @@
 
     Model.prototype.getAncestorsOf = function(cls) {
       var clazz, parents;
-      clazz = cls && cls.name ? cls : this.classes[cls];
+      clazz = (cls && cls.name) ? cls : this.classes[cls];
       if (clazz == null) {
-        throw new Error("" + cls + " is not a table");
+        throw new Error(cls + " is not a table");
       }
       parents = clazz.parents();
       return parents.filter((function(_this) {
@@ -873,15 +876,15 @@
         return classA;
       }
       a_ancestry = this.getAncestorsOf(classA);
-      if (__indexOf.call(a_ancestry, classB) >= 0) {
+      if (indexOf.call(a_ancestry, classB) >= 0) {
         return classB;
       }
       b_ancestry = this.getAncestorsOf(classB);
-      if (__indexOf.call(b_ancestry, classA) >= 0) {
+      if (indexOf.call(b_ancestry, classA) >= 0) {
         return classA;
       }
       firstCommon = find(a_ancestry, function(a) {
-        return __indexOf.call(b_ancestry, a) >= 0;
+        return indexOf.call(b_ancestry, a) >= 0;
       });
       return firstCommon;
     };
@@ -905,8 +908,8 @@
     var e;
     try {
       return new Model(data);
-    } catch (_error) {
-      e = _error;
+    } catch (error1) {
+      e = error1;
       throw new Error("Error loading model: " + e);
     }
   };
@@ -926,9 +929,9 @@
 },{"./path":7,"./table":14,"./util":16}],7:[function(_dereq_,module,exports){
 (function() {
   var NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, withCB,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __slice = [].slice,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   intermine = exports;
 
@@ -941,37 +944,37 @@
   PARSED = {};
 
   makeKey = function(model, path, subclasses) {
-    var k, v, _ref;
-    return "" + (model != null ? model.name : void 0) + "|" + (model != null ? (_ref = model.service) != null ? _ref.root : void 0 : void 0) + "|" + path + ":" + ((function() {
-      var _results;
-      _results = [];
+    var k, ref, v;
+    return (model != null ? model.name : void 0) + "|" + (model != null ? (ref = model.service) != null ? ref.root : void 0 : void 0) + "|" + path + ":" + ((function() {
+      var results;
+      results = [];
       for (k in subclasses) {
         v = subclasses[k];
-        _results.push("" + k + "=" + v);
+        results.push(k + "=" + v);
       }
-      return _results;
+      return results;
     })());
   };
 
   PathInfo = (function() {
-    function PathInfo(_arg) {
-      var _i, _ref;
-      this.root = _arg.root, this.model = _arg.model, this.descriptors = _arg.descriptors, this.subclasses = _arg.subclasses, this.displayName = _arg.displayName, this.ident = _arg.ident;
-      this.allDescriptors = __bind(this.allDescriptors, this);
-      this.getChildNodes = __bind(this.getChildNodes, this);
-      this.getDisplayName = __bind(this.getDisplayName, this);
-      this.isa = __bind(this.isa, this);
-      this.append = __bind(this.append, this);
-      this.getParent = __bind(this.getParent, this);
-      this.getEndClass = __bind(this.getEndClass, this);
-      this.containsCollection = __bind(this.containsCollection, this);
-      this.isCollection = __bind(this.isCollection, this);
-      this.isReverseReference = __bind(this.isReverseReference, this);
-      this.isReference = __bind(this.isReference, this);
-      this.isClass = __bind(this.isClass, this);
-      this.isAttribute = __bind(this.isAttribute, this);
-      this.isRoot = __bind(this.isRoot, this);
-      _ref = this.descriptors, this.mid = 2 <= _ref.length ? __slice.call(_ref, 0, _i = _ref.length - 1) : (_i = 0, []), this.end = _ref[_i++];
+    function PathInfo(arg) {
+      var i, ref;
+      this.root = arg.root, this.model = arg.model, this.descriptors = arg.descriptors, this.subclasses = arg.subclasses, this.displayName = arg.displayName, this.ident = arg.ident;
+      this.allDescriptors = bind(this.allDescriptors, this);
+      this.getChildNodes = bind(this.getChildNodes, this);
+      this.getDisplayName = bind(this.getDisplayName, this);
+      this.isa = bind(this.isa, this);
+      this.append = bind(this.append, this);
+      this.getParent = bind(this.getParent, this);
+      this.getEndClass = bind(this.getEndClass, this);
+      this.containsCollection = bind(this.containsCollection, this);
+      this.isCollection = bind(this.isCollection, this);
+      this.isReverseReference = bind(this.isReverseReference, this);
+      this.isReference = bind(this.isReference, this);
+      this.isClass = bind(this.isClass, this);
+      this.isAttribute = bind(this.isAttribute, this);
+      this.isRoot = bind(this.isRoot, this);
+      ref = this.descriptors, this.mid = 2 <= ref.length ? slice.call(ref, 0, i = ref.length - 1) : (i = 0, []), this.end = ref[i++];
       if (this.ident == null) {
         this.ident = makeKey(this.model, this, this.subclasses);
       }
@@ -990,14 +993,14 @@
     };
 
     PathInfo.prototype.isReference = function() {
-      var _ref;
-      return ((_ref = this.end) != null ? _ref.referencedType : void 0) != null;
+      var ref;
+      return ((ref = this.end) != null ? ref.referencedType : void 0) != null;
     };
 
     PathInfo.prototype.isReverseReference = function() {
-      var gp, p, referencedType, reverseReference, _ref;
+      var gp, p, ref, referencedType, reverseReference;
       if (this.isReference() && (this.mid.length > 0)) {
-        _ref = this.end, reverseReference = _ref.reverseReference, referencedType = _ref.referencedType;
+        ref = this.end, reverseReference = ref.reverseReference, referencedType = ref.referencedType;
         p = this.getParent();
         gp = p.getParent();
         return (referencedType != null) && (gp.isa(referencedType)) && (p.end.name === reverseReference);
@@ -1006,8 +1009,8 @@
     };
 
     PathInfo.prototype.isCollection = function() {
-      var _ref, _ref1;
-      return (_ref = (_ref1 = this.end) != null ? _ref1.isCollection : void 0) != null ? _ref : false;
+      var ref, ref1;
+      return (ref = (ref1 = this.end) != null ? ref1.isCollection : void 0) != null ? ref : false;
     };
 
     PathInfo.prototype.containsCollection = function() {
@@ -1017,8 +1020,8 @@
     };
 
     PathInfo.prototype.getEndClass = function() {
-      var _ref;
-      return this.model.classes[this.subclasses[this.toString()] || ((_ref = this.end) != null ? _ref.referencedType : void 0)] || this.root;
+      var ref;
+      return this.model.classes[this.subclasses[this.toString()] || ((ref = this.end) != null ? ref.referencedType : void 0)] || this.root;
     };
 
     PathInfo.prototype.getParent = function() {
@@ -1038,11 +1041,11 @@
     PathInfo.prototype.append = function(attr) {
       var data, fld;
       if (this.isAttribute()) {
-        throw new Error("" + this + " is an attribute.");
+        throw new Error(this + " is an attribute.");
       }
-      fld = typeof attr === 'string' ? this.getType().fields[attr] : attr;
+      fld = (typeof attr === 'string') ? this.getType().fields[attr] : attr;
       if (fld == null) {
-        throw new Error("" + attr + " is not a field of " + (this.getType()));
+        throw new Error(attr + " is not a field of " + (this.getType()));
       }
       data = {
         root: this.root,
@@ -1063,7 +1066,7 @@
       } else {
         name = clazz.name ? clazz.name : '' + clazz;
         type = this.getType();
-        return (name === type.name) || (__indexOf.call(this.model.getAncestorsOf(type), name) >= 0);
+        return (name === type.name) || (indexOf.call(this.model.getAncestorsOf(type), name) >= 0);
       }
     };
 
@@ -1079,8 +1082,8 @@
           format: 'json'
         }))(copy(this.subclasses)), this.model.service.get(path, params).then(get('display')).then((function(_this) {
           return function(n) {
-            var _name;
-            return NAMES[_name = _this.ident] != null ? NAMES[_name] : NAMES[_name] = n;
+            var name1;
+            return NAMES[name1 = _this.ident] != null ? NAMES[name1] : NAMES[name1] = n;
           };
         })(this)));
       }
@@ -1088,14 +1091,14 @@
     };
 
     PathInfo.prototype.getChildNodes = function() {
-      var fld, name, _ref, _ref1, _results;
-      _ref1 = ((_ref = this.getEndClass()) != null ? _ref.fields : void 0) || {};
-      _results = [];
-      for (name in _ref1) {
-        fld = _ref1[name];
-        _results.push(this.append(fld));
+      var fld, name, ref, ref1, results;
+      ref1 = ((ref = this.getEndClass()) != null ? ref.fields : void 0) || {};
+      results = [];
+      for (name in ref1) {
+        fld = ref1[name];
+        results.push(this.append(fld));
       }
-      return _results;
+      return results;
     };
 
     PathInfo.prototype.allDescriptors = function() {
@@ -1111,8 +1114,8 @@
     };
 
     PathInfo.prototype.getType = function() {
-      var _ref, _ref1;
-      return ((_ref = this.end) != null ? (_ref1 = _ref.type) != null ? _ref1.replace(/java\.lang\./, '') : void 0 : void 0) || this.getEndClass();
+      var ref, ref1;
+      return ((ref = this.end) != null ? (ref1 = ref.type) != null ? ref1.replace(/java\.lang\./, '') : void 0 : void 0) || this.getEndClass();
     };
 
     return PathInfo;
@@ -1134,19 +1137,19 @@
     root = cd = model.classes[parts.shift()];
     keyPath = root.name;
     descriptors = (function() {
-      var _i, _len, _ref, _results;
-      _results = [];
-      for (_i = 0, _len = parts.length; _i < _len; _i++) {
-        part = parts[_i];
-        fld = (cd != null ? cd.fields[part] : void 0) || ((_ref = (cd = model.classes[subclasses[keyPath]])) != null ? _ref.fields[part] : void 0);
+      var i, len, ref, results;
+      results = [];
+      for (i = 0, len = parts.length; i < len; i++) {
+        part = parts[i];
+        fld = (cd != null ? cd.fields[part] : void 0) || ((ref = (cd = model.classes[subclasses[keyPath]])) != null ? ref.fields[part] : void 0);
         if (!fld) {
           throw new Error("Could not find " + part + " in " + cd + " when parsing " + path);
         }
         keyPath += "." + part;
         cd = model.classes[fld.type || fld.referencedType];
-        _results.push(fld);
+        results.push(fld);
       }
-      return _results;
+      return results;
     })();
     return PARSED[ident] = new PathInfo({
       root: root,
@@ -1178,11 +1181,11 @@
 
 },{"es6-promise":27}],9:[function(_dereq_,module,exports){
 (function() {
-  var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, stringifySortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __slice = [].slice,
-    __hasProp = {}.hasOwnProperty;
+  var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, _get_data_fetcher, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fn1, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, l, len, len1, m, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, ref1, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, stringifySortOrder, toQueryString, typeConStr, union, utils, withCB,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice,
+    hasProp = {}.hasOwnProperty;
 
   Events = _dereq_('backbone-events-standalone');
 
@@ -1235,15 +1238,15 @@
   conAttrs = function(c, names) {
     var k, v;
     return ((function() {
-      var _results;
-      _results = [];
+      var results;
+      results = [];
       for (k in c) {
         v = c[k];
-        if ((__indexOf.call(names, k) >= 0)) {
-          _results.push("" + k + "=\"" + (utils.escape(v)) + "\" ");
+        if ((indexOf.call(names, k) >= 0)) {
+          results.push(k + "=\"" + (utils.escape(v)) + "\" ");
         }
       }
-      return _results;
+      return results;
     })()).join('');
   };
 
@@ -1268,14 +1271,14 @@
   };
 
   conStr = function(c) {
-    var _ref;
+    var ref1;
     if (c.values != null) {
       return multiConStr(c);
     } else if (c.ids != null) {
       return idConStr(c);
     } else if (c.op == null) {
       return typeConStr(c);
-    } else if (_ref = c.op, __indexOf.call(Query.NULL_OPS, _ref) >= 0) {
+    } else if (ref1 = c.op, indexOf.call(Query.NULL_OPS, ref1) >= 0) {
       return noValueConStr(c);
     } else {
       return simpleConStr(c);
@@ -1329,7 +1332,7 @@
   };
 
   interpretConstraint = function(path, con) {
-    var constraint, k, keys, v, x, _ref, _ref1;
+    var constraint, k, keys, ref1, ref2, v, x;
     constraint = {
       path: path
     };
@@ -1338,8 +1341,8 @@
     } else if (utils.isArray(con)) {
       constraint.op = 'ONE OF';
       constraint.values = con;
-    } else if ((_ref = typeof con) === 'string' || _ref === 'number' || _ref === 'boolean') {
-      if (_ref1 = typeof con.toUpperCase === "function" ? con.toUpperCase() : void 0, __indexOf.call(Query.NULL_OPS, _ref1) >= 0) {
+    } else if ((ref1 = typeof con) === 'string' || ref1 === 'number' || ref1 === 'boolean') {
+      if (ref2 = typeof con.toUpperCase === "function" ? con.toUpperCase() : void 0, indexOf.call(Query.NULL_OPS, ref2) >= 0) {
         constraint.op = con;
       } else {
         constraint.op = '=';
@@ -1347,15 +1350,15 @@
       }
     } else {
       keys = (function() {
-        var _results;
-        _results = [];
+        var results;
+        results = [];
         for (k in con) {
           x = con[k];
-          _results.push(k);
+          results.push(k);
         }
-        return _results;
+        return results;
       })();
-      if (__indexOf.call(keys, 'isa') >= 0) {
+      if (indexOf.call(keys, 'isa') >= 0) {
         if (utils.isArray(con.isa)) {
           constraint.op = k;
           constraint.values = con.isa;
@@ -1363,7 +1366,7 @@
           constraint.type = con.isa;
         }
       } else {
-        if (__indexOf.call(keys, 'extraValue') >= 0) {
+        if (indexOf.call(keys, 'extraValue') >= 0) {
           constraint.extraValue = con.extraValue;
         }
         for (k in con) {
@@ -1384,14 +1387,14 @@
   };
 
   interpretConArray = function(conArgs) {
-    var a0, constraint, v, _ref;
+    var a0, constraint, ref1, v;
     conArgs = conArgs.slice();
     constraint = {
       path: conArgs.shift()
     };
     if (conArgs.length === 1) {
       a0 = conArgs[0];
-      if (_ref = typeof a0.toUpperCase === "function" ? a0.toUpperCase() : void 0, __indexOf.call(Query.NULL_OPS, _ref) >= 0) {
+      if (ref1 = typeof a0.toUpperCase === "function" ? a0.toUpperCase() : void 0, indexOf.call(Query.NULL_OPS, ref1) >= 0) {
         constraint.op = a0;
       } else {
         constraint.type = a0;
@@ -1414,51 +1417,51 @@
   stringifySortOrder = function(sortOrder) {
     var oe;
     return ((function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = sortOrder.length; _i < _len; _i++) {
-        oe = sortOrder[_i];
-        _results.push("" + oe.path + " " + oe.direction);
+      var l, len, results;
+      results = [];
+      for (l = 0, len = sortOrder.length; l < len; l++) {
+        oe = sortOrder[l];
+        results.push(oe.path + " " + oe.direction);
       }
-      return _results;
+      return results;
     })()).join(' ');
   };
 
   stringToSortOrder = function(str) {
-    var i, parts, pathIndices, x, _i, _len, _results;
+    var i, l, len, parts, pathIndices, results, x;
     if (str == null) {
       return [];
     }
     parts = str.split(/\s+/);
     pathIndices = (function() {
-      var _i, _ref, _results;
-      _results = [];
-      for (x = _i = 0, _ref = parts.length / 2; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
-        _results.push(x * 2);
+      var l, ref1, results;
+      results = [];
+      for (x = l = 0, ref1 = parts.length / 2; 0 <= ref1 ? l < ref1 : l > ref1; x = 0 <= ref1 ? ++l : --l) {
+        results.push(x * 2);
       }
-      return _results;
+      return results;
     })();
-    _results = [];
-    for (_i = 0, _len = pathIndices.length; _i < _len; _i++) {
-      i = pathIndices[_i];
-      _results.push([parts[i], parts[i + 1]]);
+    results = [];
+    for (l = 0, len = pathIndices.length; l < len; l++) {
+      i = pathIndices[l];
+      results.push([parts[i], parts[i + 1]]);
     }
-    return _results;
+    return results;
   };
 
   removeIrrelevantSortOrders = function() {
     var oe, oldOrder;
     oldOrder = this.sortOrder;
     this.sortOrder = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = oldOrder.length; _i < _len; _i++) {
-        oe = oldOrder[_i];
+      var l, len, results;
+      results = [];
+      for (l = 0, len = oldOrder.length; l < len; l++) {
+        oe = oldOrder[l];
         if (this.isRelevant(oe.path)) {
-          _results.push(oe);
+          results.push(oe);
         }
       }
-      return _results;
+      return results;
     }).call(this);
     if (oldOrder.length !== this.sortOrder.length) {
       return this.trigger('change:sortorder change:orderby', this.sortOrder.slice());
@@ -1539,26 +1542,26 @@
     cAttrs = ['path', 'type', 'op', 'code', 'value', 'ids'];
 
     toAttrPairs = function(el, attrs) {
-      var x, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = attrs.length; _i < _len; _i++) {
-        x = attrs[_i];
+      var l, len, results, x;
+      results = [];
+      for (l = 0, len = attrs.length; l < len; l++) {
+        x = attrs[l];
         if (el.hasAttribute(x)) {
-          _results.push([x, el.getAttribute(x)]);
+          results.push([x, el.getAttribute(x)]);
         }
       }
-      return _results;
+      return results;
     };
 
     kids = function(el, name) {
-      var kid, _i, _len, _ref, _results;
-      _ref = el.getElementsByTagName(name);
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        kid = _ref[_i];
-        _results.push(kid);
+      var kid, l, len, ref1, results;
+      ref1 = el.getElementsByTagName(name);
+      results = [];
+      for (l = 0, len = ref1.length; l < len; l++) {
+        kid = ref1[l];
+        results.push(kid);
       }
-      return _results;
+      return results;
     };
 
     xmlAttr = function(name) {
@@ -1580,63 +1583,63 @@
       q.view = q.view.split(/\s+/);
       q.sortOrder = stringToSortOrder(q.sortOrder);
       q.joins = (function() {
-        var _i, _len, _ref, _results;
-        _ref = kids(query, 'join');
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          j = _ref[_i];
+        var l, len, ref1, results;
+        ref1 = kids(query, 'join');
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          j = ref1[l];
           if (styleOf(j) === 'OUTER') {
-            _results.push(pathOf(j));
+            results.push(pathOf(j));
           }
         }
-        return _results;
+        return results;
       })();
       q.constraints = (function() {
-        var _i, _len, _ref, _results;
-        _ref = kids(query, 'constraint');
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          con = _ref[_i];
-          _results.push((function(con) {
+        var l, len, ref1, results;
+        ref1 = kids(query, 'constraint');
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          con = ref1[l];
+          results.push((function(con) {
             var c, tn, v, values, x;
             c = utils.pairsToObj(toAttrPairs(con, cAttrs));
             if (c.ids != null) {
               c.ids = (function() {
-                var _j, _len1, _ref1, _results1;
-                _ref1 = c.ids.split(',');
-                _results1 = [];
-                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-                  x = _ref1[_j];
-                  _results1.push(parseInt(x, 10));
+                var len1, m, ref2, results1;
+                ref2 = c.ids.split(',');
+                results1 = [];
+                for (m = 0, len1 = ref2.length; m < len1; m++) {
+                  x = ref2[m];
+                  results1.push(parseInt(x, 10));
                 }
-                return _results1;
+                return results1;
               })();
             }
             values = kids(con, 'value');
             if (values.length) {
               c.values = (function() {
-                var _j, _len1, _results1;
-                _results1 = [];
-                for (_j = 0, _len1 = values.length; _j < _len1; _j++) {
-                  v = values[_j];
-                  _results1.push(((function() {
-                    var _k, _len2, _ref1, _results2;
-                    _ref1 = v.childNodes;
-                    _results2 = [];
-                    for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-                      tn = _ref1[_k];
-                      _results2.push(tn.data);
+                var len1, m, results1;
+                results1 = [];
+                for (m = 0, len1 = values.length; m < len1; m++) {
+                  v = values[m];
+                  results1.push(((function() {
+                    var len2, o, ref2, results2;
+                    ref2 = v.childNodes;
+                    results2 = [];
+                    for (o = 0, len2 = ref2.length; o < len2; o++) {
+                      tn = ref2[o];
+                      results2.push(tn.data);
                     }
-                    return _results2;
+                    return results2;
                   })()).join(''));
                 }
-                return _results1;
+                return results1;
               })();
             }
             return c;
           })(con));
         }
-        return _results;
+        return results;
       })();
       return q;
     };
@@ -1659,33 +1662,33 @@
 
     Query.prototype.description = null;
 
-    function Query(properties, service, _arg) {
-      var model, prop, summaryFields, _i, _len, _ref, _ref1, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-      _ref = _arg != null ? _arg : {}, model = _ref.model, summaryFields = _ref.summaryFields;
-      this.addConstraint = __bind(this.addConstraint, this);
-      this.expandStar = __bind(this.expandStar, this);
-      this.adjustPath = __bind(this.adjustPath, this);
-      this.select = __bind(this.select, this);
+    function Query(properties, service, arg) {
+      var l, len, model, prop, ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, summaryFields;
+      ref1 = arg != null ? arg : {}, model = ref1.model, summaryFields = ref1.summaryFields;
+      this.addConstraint = bind(this.addConstraint, this);
+      this.expandStar = bind(this.expandStar, this);
+      this.adjustPath = bind(this.adjustPath, this);
+      this.select = bind(this.select, this);
       if (properties == null) {
         properties = {};
       }
       this.constraints = [];
       this.views = [];
       this.joins = {};
-      this.displayNames = utils.copy((_ref1 = (_ref2 = properties.displayNames) != null ? _ref2 : properties.aliases) != null ? _ref1 : {});
-      _ref3 = ['name', 'title', 'comment', 'description', 'type'];
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        prop = _ref3[_i];
+      this.displayNames = utils.copy((ref2 = (ref3 = properties.displayNames) != null ? ref3 : properties.aliases) != null ? ref2 : {});
+      ref4 = ['name', 'title', 'comment', 'description', 'type'];
+      for (l = 0, len = ref4.length; l < len; l++) {
+        prop = ref4[l];
         if (properties[prop] != null) {
           this[prop] = properties[prop];
         }
       }
       this.service = service != null ? service : {};
-      this.model = (_ref4 = model != null ? model : properties.model) != null ? _ref4 : {};
-      this.summaryFields = (_ref5 = summaryFields != null ? summaryFields : properties.summaryFields) != null ? _ref5 : {};
-      this.root = (_ref6 = properties.root) != null ? _ref6 : properties.from;
-      this.maxRows = (_ref7 = (_ref8 = properties.size) != null ? _ref8 : properties.limit) != null ? _ref7 : properties.maxRows;
-      this.start = (_ref9 = (_ref10 = properties.start) != null ? _ref10 : properties.offset) != null ? _ref9 : 0;
+      this.model = (ref5 = model != null ? model : properties.model) != null ? ref5 : {};
+      this.summaryFields = (ref6 = summaryFields != null ? summaryFields : properties.summaryFields) != null ? ref6 : {};
+      this.root = (ref7 = properties.root) != null ? ref7 : properties.from;
+      this.maxRows = (ref8 = (ref9 = properties.size) != null ? ref9 : properties.limit) != null ? ref8 : properties.maxRows;
+      this.start = (ref10 = (ref11 = properties.start) != null ? ref11 : properties.offset) != null ? ref10 : 0;
       this.select(properties.views || properties.view || properties.select || []);
       this.addConstraints(properties.constraints || properties.where || []);
       this.addJoins(properties.joins || properties.join || []);
@@ -1704,37 +1707,37 @@
       unwanted = utils.stringList(unwanted);
       mapFn = utils.compose(this.expandStar, this.adjustPath);
       unwanted = utils.flatten((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = unwanted.length; _i < _len; _i++) {
-          uw = unwanted[_i];
-          _results.push(mapFn(uw));
+        var l, len, results;
+        results = [];
+        for (l = 0, len = unwanted.length; l < len; l++) {
+          uw = unwanted[l];
+          results.push(mapFn(uw));
         }
-        return _results;
+        return results;
       })());
       this.sortOrder = (function() {
-        var _i, _len, _ref, _ref1, _results;
-        _ref = this.sortOrder;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          so = _ref[_i];
-          if (!(_ref1 = so.path, __indexOf.call(unwanted, _ref1) >= 0)) {
-            _results.push(so);
+        var l, len, ref1, ref2, results;
+        ref1 = this.sortOrder;
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          so = ref1[l];
+          if (!(ref2 = so.path, indexOf.call(unwanted, ref2) >= 0)) {
+            results.push(so);
           }
         }
-        return _results;
+        return results;
       }).call(this);
       this.views = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.views;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          v = _ref[_i];
-          if (!(__indexOf.call(unwanted, v) >= 0)) {
-            _results.push(v);
+        var l, len, ref1, results;
+        ref1 = this.views;
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          v = ref1[l];
+          if (!(indexOf.call(unwanted, v) >= 0)) {
+            results.push(v);
           }
         }
-        return _results;
+        return results;
       }).call(this);
       this.trigger('remove:view', unwanted);
       this.trigger('change:views', this.views);
@@ -1747,22 +1750,22 @@
         silent = false;
       }
       orig = this.constraints;
-      iscon = typeof con === 'string' ? (function(c) {
+      iscon = (typeof con === 'string') ? (function(c) {
         return c.code === con;
       }) : (function(c) {
-        var _ref, _ref1;
-        return (c.path === con.path) && (c.op === con.op) && (c.value === con.value) && (c.extraValue === con.extraValue) && (con.type === c.type) && (((_ref = c.values) != null ? _ref.join('%%') : void 0) === ((_ref1 = con.values) != null ? _ref1.join('%%') : void 0));
+        var ref1, ref2;
+        return (c.path === con.path) && (c.op === con.op) && (c.value === con.value) && (c.extraValue === con.extraValue) && (con.type === c.type) && (((ref1 = c.values) != null ? ref1.join('%%') : void 0) === ((ref2 = con.values) != null ? ref2.join('%%') : void 0));
       });
       reduced = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = orig.length; _i < _len; _i++) {
-          c = orig[_i];
+        var l, len, results;
+        results = [];
+        for (l = 0, len = orig.length; l < len; l++) {
+          c = orig[l];
           if (!iscon(c)) {
-            _results.push(c);
+            results.push(c);
           }
         }
-        return _results;
+        return results;
       })();
       if (reduced.length !== orig.length - 1) {
         throw new Error(didntRemove(orig, reduced));
@@ -1776,7 +1779,7 @@
     };
 
     Query.prototype.addToSelect = function(views, opts) {
-      var dups, mapFn, p, toAdd, v, x, _ref, _ref1;
+      var dups, mapFn, p, ref1, ref2, toAdd, v, x;
       if (views == null) {
         views = [];
       }
@@ -1786,55 +1789,55 @@
       views = utils.stringList(views);
       mapFn = utils.compose(this.expandStar, this.adjustPath);
       toAdd = utils.flatten((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = views.length; _i < _len; _i++) {
-          v = views[_i];
-          _results.push(mapFn(v));
+        var l, len, results;
+        results = [];
+        for (l = 0, len = views.length; l < len; l++) {
+          v = views[l];
+          results.push(mapFn(v));
         }
-        return _results;
+        return results;
       })());
       dups = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
-          p = toAdd[_i];
-          if (__indexOf.call(this.views, p) >= 0) {
-            _results.push(p);
+        var l, len, results;
+        results = [];
+        for (l = 0, len = toAdd.length; l < len; l++) {
+          p = toAdd[l];
+          if (indexOf.call(this.views, p) >= 0) {
+            results.push(p);
           }
         }
-        return _results;
+        return results;
       }).call(this);
       if (dups.length) {
-        throw new Error("" + dups + " already in the select list");
+        throw new Error(dups + " already in the select list");
       }
       dups = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = toAdd.length; _i < _len; _i++) {
-          p = toAdd[_i];
+        var l, len, results;
+        results = [];
+        for (l = 0, len = toAdd.length; l < len; l++) {
+          p = toAdd[l];
           if (((function() {
-            var _j, _len1, _results1;
-            _results1 = [];
-            for (_j = 0, _len1 = toAdd.length; _j < _len1; _j++) {
-              x = toAdd[_j];
+            var len1, m, results1;
+            results1 = [];
+            for (m = 0, len1 = toAdd.length; m < len1; m++) {
+              x = toAdd[m];
               if (x === p) {
-                _results1.push(x);
+                results1.push(x);
               }
             }
-            return _results1;
+            return results1;
           })()).length > 1) {
-            _results.push(p);
+            results.push(p);
           }
         }
-        return _results;
+        return results;
       })();
       if (dups.length) {
-        throw new Error("" + dups + " specified multiple times as arguments to addToSelect");
+        throw new Error(dups + " specified multiple times as arguments to addToSelect");
       }
-      (_ref = this.views).push.apply(_ref, toAdd);
+      (ref1 = this.views).push.apply(ref1, toAdd);
       if (opts.silent) {
-        opts.events = ((_ref1 = opts.events) != null ? _ref1 : []).concat(['change', 'add:view', 'change:views']);
+        opts.events = ((ref2 = opts.events) != null ? ref2 : []).concat(['change', 'add:view', 'change:views']);
       } else {
         this.trigger('add:view change:views', toAdd);
         this.trigger('change');
@@ -1848,8 +1851,8 @@
       try {
         this.views = [];
         this.addToSelect(views, opts);
-      } catch (_error) {
-        e = _error;
+      } catch (error) {
+        e = error;
         this.views = oldViews;
         utils.error(e);
       }
@@ -1857,7 +1860,7 @@
     };
 
     Query.prototype.adjustPath = function(path) {
-      path = path && path.name ? path.name : "" + path;
+      path = (path && path.name) ? path.name : "" + path;
       if (this.root != null) {
         if (!path.match("^" + this.root)) {
           path = this.root + "." + path;
@@ -1869,7 +1872,7 @@
     };
 
     Query.prototype.getPossiblePaths = function(depth, allowReverseReferences, predicate) {
-      var getPaths, key, ret, test, _base;
+      var base, getPaths, key, ret, test;
       if (depth == null) {
         depth = 3;
       }
@@ -1893,27 +1896,27 @@
           } else {
             cd = path.getType();
             subPaths = concatMap(function(ref) {
-              return getPaths("" + root + "." + ref.name, d - 1);
+              return getPaths(root + "." + ref.name, d - 1);
             });
             others = cd && (d > 0) ? subPaths((function() {
-              var _ref, _results;
-              _ref = cd.fields;
-              _results = [];
-              for (name in _ref) {
-                field = _ref[name];
-                _results.push(field);
+              var ref1, results;
+              ref1 = cd.fields;
+              results = [];
+              for (name in ref1) {
+                field = ref1[name];
+                results.push(field);
               }
-              return _results;
+              return results;
             })()) : [];
             return [path].concat(others);
           }
         };
       })(this);
-      key = "" + depth + "-" + allowReverseReferences;
+      key = depth + "-" + allowReverseReferences;
       if (this._possiblePaths == null) {
         this._possiblePaths = {};
       }
-      ret = ((_base = this._possiblePaths)[key] != null ? _base[key] : _base[key] = getPaths(this.root, depth)).slice();
+      ret = ((base = this._possiblePaths)[key] != null ? base[key] : base[key] = getPaths(this.root, depth)).slice();
       if (test != null) {
         return ret.filter(test);
       } else {
@@ -1922,9 +1925,9 @@
     };
 
     Query.prototype.getPathInfo = function(path) {
-      var adjusted, pi, _ref;
+      var adjusted, pi, ref1;
       adjusted = this.adjustPath(path);
-      pi = (_ref = this.model) != null ? typeof _ref.getPathInfo === "function" ? _ref.getPathInfo(adjusted, this.getSubclasses()) : void 0 : void 0;
+      pi = (ref1 = this.model) != null ? typeof ref1.getPathInfo === "function" ? ref1.getPathInfo(adjusted, this.getSubclasses()) : void 0 : void 0;
       if (pi && adjusted in this.displayNames) {
         pi.displayName = this.displayNames[adjusted];
       }
@@ -1955,25 +1958,25 @@
         };
       })(this);
       return utils.uniqBy(String, (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.views;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          p = _ref[_i];
-          _results.push(toParentNode(p));
+        var l, len, ref1, results;
+        ref1 = this.views;
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          p = ref1[l];
+          results.push(toParentNode(p));
         }
-        return _results;
+        return results;
       }).call(this));
     };
 
     Query.prototype.isInView = function(path) {
-      var pi, pstr, _ref;
+      var pi, pstr, ref1;
       pi = this.getPathInfo(path);
       if (!pi) {
         throw new Error("Invalid path: " + path);
       }
       if (pi.isAttribute()) {
-        return _ref = pi.toString(), __indexOf.call(this.views, _ref) >= 0;
+        return ref1 = pi.toString(), indexOf.call(this.views, ref1) >= 0;
       } else {
         pstr = pi.toString();
         return utils.any(this.getViewNodes(), function(n) {
@@ -2012,45 +2015,45 @@
       var c, constrainedNodes, pi, viewNodes;
       viewNodes = this.getViewNodes();
       constrainedNodes = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.constraints;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          c = _ref[_i];
+        var l, len, ref1, results;
+        ref1 = this.constraints;
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          c = ref1[l];
           if (!(c.type == null)) {
             continue;
           }
           pi = this.getPathInfo(c.path);
           if (pi.isAttribute()) {
-            _results.push(pi.getParent());
+            results.push(pi.getParent());
           } else {
-            _results.push(pi);
+            results.push(pi);
           }
         }
-        return _results;
+        return results;
       }).call(this);
       return utils.uniqBy(String, viewNodes.concat(constrainedNodes));
     };
 
     Query.prototype.isInQuery = function(p) {
-      var c, pi, pstr, _i, _len, _ref;
+      var c, l, len, pi, pstr, ref1;
       pi = this.getPathInfo(p);
       if (pi) {
         pstr = pi.toPathString();
-        _ref = this.views.concat((function() {
-          var _j, _len, _ref, _results;
-          _ref = this.constraints;
-          _results = [];
-          for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-            c = _ref[_j];
+        ref1 = this.views.concat((function() {
+          var len, m, ref1, results;
+          ref1 = this.constraints;
+          results = [];
+          for (m = 0, len = ref1.length; m < len; m++) {
+            c = ref1[m];
             if (c.type == null) {
-              _results.push(c.path);
+              results.push(c.path);
             }
           }
-          return _results;
+          return results;
         }).call(this));
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          p = _ref[_i];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          p = ref1[l];
           if (0 === p.indexOf(pstr)) {
             return true;
           }
@@ -2085,27 +2088,27 @@
           if (cd && this.summaryFields[cd.name]) {
             fn = utils.compose(expand, decapitate);
             return (function() {
-              var _i, _len, _ref, _results;
-              _ref = this.summaryFields[cd.name];
-              _results = [];
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                n = _ref[_i];
+              var l, len, ref1, results;
+              ref1 = this.summaryFields[cd.name];
+              results = [];
+              for (l = 0, len = ref1.length; l < len; l++) {
+                n = ref1[l];
                 if (!this.hasView(n)) {
-                  _results.push(fn(n));
+                  results.push(fn(n));
                 }
               }
-              return _results;
+              return results;
             }).call(this);
           }
         } else if (/\.\*\*$/.test(path)) {
           starViews = this.expandStar(pathStem + '.*');
           attrViews = (function() {
-            var _results;
-            _results = [];
+            var results;
+            results = [];
             for (name in cd.attributes) {
-              _results.push(expand("." + name));
+              results.push(expand("." + name));
             }
-            return _results;
+            return results;
           })();
           return utils.uniqBy(id, starViews.concat(attrViews));
         }
@@ -2118,8 +2121,8 @@
     };
 
     Query.prototype.hasView = function(v) {
-      var _ref;
-      return this.views && (_ref = this.adjustPath(v), __indexOf.call(this.views, _ref) >= 0);
+      var ref1;
+      return this.views && (ref1 = this.adjustPath(v), indexOf.call(this.views, ref1) >= 0);
     };
 
     Query.prototype.count = function(cont) {
@@ -2153,15 +2156,15 @@
     };
 
     Query.prototype.selectPreservingImpliedConstraints = function(paths) {
-      var n, toRun, _i, _len, _ref;
+      var l, len, n, ref1, toRun;
       if (paths == null) {
         paths = [];
       }
       toRun = this.clone();
       toRun.select(paths);
-      _ref = this.getViewNodes();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        n = _ref[_i];
+      ref1 = this.getViewNodes();
+      for (l = 0, len = ref1.length; l < len; l++) {
+        n = ref1[l];
         if (!this.isOuterJoined(n)) {
           if (!(toRun.isInView(n || toRun.isConstrained(n))) && (n.getEndClass().fields.id != null)) {
             toRun.addConstraint([n.append('id'), 'IS NOT NULL']);
@@ -2172,9 +2175,9 @@
     };
 
     Query.prototype.makeListQuery = function() {
-      var paths, _ref;
+      var paths, ref1;
       paths = this.views.slice();
-      if (paths.length !== 1 || !((_ref = paths[0]) != null ? _ref.match(/\.id$/) : void 0)) {
+      if (paths.length !== 1 || !((ref1 = paths[0]) != null ? ref1.match(/\.id$/) : void 0)) {
         paths = ['id'];
       }
       return this.selectPreservingImpliedConstraints(paths);
@@ -2198,16 +2201,16 @@
 
     Query.prototype.summarize = function() {
       var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       return this.summarise.apply(this, args);
     };
 
     parseSummary = function(data) {
-      var isNumeric, r, stats, _i, _len, _ref, _ref1;
-      isNumeric = ((_ref = data.results[0]) != null ? _ref.max : void 0) != null;
-      _ref1 = data.results;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        r = _ref1[_i];
+      var isNumeric, l, len, r, ref1, ref2, stats;
+      isNumeric = ((ref1 = data.results[0]) != null ? ref1.max : void 0) != null;
+      ref2 = data.results;
+      for (l = 0, len = ref2.length; l < len; l++) {
+        r = ref2[l];
         r.count = parseInt(r.count, 10);
       }
       stats = {
@@ -2222,16 +2225,16 @@
     };
 
     Query.prototype.filterSummary = function(path, term, limit, cont) {
-      var req, toRun, _ref;
+      var ref1, req, toRun;
       if (cont == null) {
         cont = (function() {});
       }
       if (utils.isFunction(limit)) {
-        _ref = [limit, null], cont = _ref[0], limit = _ref[1];
+        ref1 = [limit, null], cont = ref1[0], limit = ref1[1];
       }
       path = this.adjustPath(path);
       toRun = this.clone();
-      if (__indexOf.call(toRun.views, path) < 0) {
+      if (indexOf.call(toRun.views, path) < 0) {
         toRun.views.push(path);
       }
       req = {
@@ -2249,16 +2252,16 @@
     };
 
     Query.prototype.clone = function(cloneEvents) {
-      var cloned, k, v, _ref;
+      var cloned, k, ref1, v;
       cloned = new Query(this, this.service);
       if (cloned._callbacks == null) {
         cloned._callbacks = {};
       }
       if (cloneEvents) {
-        _ref = this._callbacks;
-        for (k in _ref) {
-          if (!__hasProp.call(_ref, k)) continue;
-          v = _ref[k];
+        ref1 = this._callbacks;
+        for (k in ref1) {
+          if (!hasProp.call(ref1, k)) continue;
+          v = ref1[k];
           cloned._callbacks[k] = v;
         }
         cloned.off('change:views', removeIrrelevantSortOrders, this);
@@ -2290,22 +2293,22 @@
       var a, so;
       a = this.adjustPath(sorted);
       if (!(this.isInQuery(a) || this.isRelevant(a))) {
-        throw new Error("" + sorted + " is not in the query");
+        throw new Error(sorted + " is not in the query");
       }
-      so = utils.find(this.sortOrder, function(_arg) {
+      so = utils.find(this.sortOrder, function(arg) {
         var path;
-        path = _arg.path;
+        path = arg.path;
         return a === path;
       });
       return so != null ? so.direction : void 0;
     };
 
     Query.prototype.isOuterJoined = function(path) {
-      var dir, jp, _ref;
+      var dir, jp, ref1;
       path = this.adjustPath(path);
-      _ref = this.joins;
-      for (jp in _ref) {
-        dir = _ref[jp];
+      ref1 = this.joins;
+      for (jp in ref1) {
+        dir = ref1[jp];
         if (dir === 'OUTER' && path.indexOf(jp) === 0) {
           return true;
         }
@@ -2317,12 +2320,12 @@
       var joinPaths, k;
       path = this.adjustPath(path);
       joinPaths = ((function() {
-        var _results;
-        _results = [];
+        var results;
+        results = [];
         for (k in this.joins) {
-          _results.push(k);
+          results.push(k);
         }
-        return _results;
+        return results;
       }).call(this)).sort(function(a, b) {
         return b.length - a.length;
       });
@@ -2334,7 +2337,7 @@
     };
 
     Query.prototype._parse_sort_order = function(input) {
-      var direction, k, path, so, v, _ref;
+      var direction, k, path, ref1, so, v;
       if (input == null) {
         throw new Error('No input');
       }
@@ -2352,7 +2355,7 @@
       } else if (input.path == null) {
         for (k in input) {
           v = input[k];
-          _ref = [k, v], path = _ref[0], direction = _ref[1];
+          ref1 = [k, v], path = ref1[0], direction = ref1[1];
         }
         so = {
           path: path,
@@ -2380,9 +2383,9 @@
       if (currentDirection == null) {
         this.addSortOrder(so);
       } else if (currentDirection !== so.direction) {
-        oe = utils.find(this.sortOrder, function(_arg) {
+        oe = utils.find(this.sortOrder, function(arg) {
           var path;
-          path = _arg.path;
+          path = arg.path;
           return path === so.path;
         });
         oe.direction = so.direction;
@@ -2392,9 +2395,9 @@
       return this;
     };
 
-    Query.prototype.addSortOrder = function(so, _arg) {
+    Query.prototype.addSortOrder = function(so, arg) {
       var silent;
-      silent = (_arg != null ? _arg : {}).silent;
+      silent = (arg != null ? arg : {}).silent;
       this.sortOrder.push(this._parse_sort_order(so));
       if (!silent) {
         this.trigger('add:sortorder', so);
@@ -2404,35 +2407,35 @@
     };
 
     Query.prototype.orderBy = function(oes, opts) {
-      var copy, direction, oe, oldSO, path, _i, _len, _ref;
+      var copy, direction, l, len, oe, oldSO, path, ref1;
       if (opts == null) {
         opts = {};
       }
       oldSO = this.sortOrder.slice();
       this.sortOrder = [];
-      for (_i = 0, _len = oes.length; _i < _len; _i++) {
-        oe = oes[_i];
+      for (l = 0, len = oes.length; l < len; l++) {
+        oe = oes[l];
         this.addSortOrder(this._parse_sort_order(oe), {
           silent: true
         });
       }
       copy = (function() {
-        var _j, _len1, _ref, _ref1, _results;
-        _ref = this.sortOrder;
-        _results = [];
-        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-          _ref1 = _ref[_j], path = _ref1.path, direction = _ref1.direction;
-          _results.push({
+        var len1, m, ref1, ref2, results;
+        ref1 = this.sortOrder;
+        results = [];
+        for (m = 0, len1 = ref1.length; m < len1; m++) {
+          ref2 = ref1[m], path = ref2.path, direction = ref2.direction;
+          results.push({
             path: path,
             direction: direction
           });
         }
-        return _results;
+        return results;
       }).call(this);
       this.trigger('set:sortorder', copy);
       if ((stringifySortOrder(oldSO)) !== this.getSorting()) {
         if (opts.silent) {
-          opts.events = ((_ref = opts.events) != null ? _ref : []).concat(['change', 'change:sortorder']);
+          opts.events = ((ref1 = opts.events) != null ? ref1 : []).concat(['change', 'change:sortorder']);
         } else {
           this.trigger('change:sortorder', copy);
           this.trigger('change');
@@ -2442,24 +2445,24 @@
     };
 
     Query.prototype.addJoins = function(joins) {
-      var j, k, v, _i, _len, _results, _results1;
+      var j, k, l, len, results, results1, v;
       if (utils.isArray(joins)) {
-        _results = [];
-        for (_i = 0, _len = joins.length; _i < _len; _i++) {
-          j = joins[_i];
-          _results.push(this.addJoin(j));
+        results = [];
+        for (l = 0, len = joins.length; l < len; l++) {
+          j = joins[l];
+          results.push(this.addJoin(j));
         }
-        return _results;
+        return results;
       } else {
-        _results1 = [];
+        results1 = [];
         for (k in joins) {
           v = joins[k];
-          _results1.push(this.addJoin({
+          results1.push(this.addJoin({
             path: k,
             style: v
           }));
         }
-        return _results1;
+        return results1;
       }
     };
 
@@ -2479,7 +2482,7 @@
       }
       path = this.adjustPath(path);
       style = style.toUpperCase();
-      if (__indexOf.call(Query.JOIN_STYLES, style) < 0) {
+      if (indexOf.call(Query.JOIN_STYLES, style) < 0) {
         throw new Error("Invalid join style: " + style);
       }
       if (this.joins[path] !== style) {
@@ -2494,26 +2497,26 @@
     };
 
     Query.prototype.addConstraints = function(constraints, conj) {
-      var c, con, oldLogic, path, _fn, _i, _len;
+      var c, con, fn1, l, len, oldLogic, path;
       if (conj == null) {
         conj = 'and';
       }
       this.__silent__ = true;
       oldLogic = this.constraintLogic;
       if (utils.isArray(constraints)) {
-        for (_i = 0, _len = constraints.length; _i < _len; _i++) {
-          c = constraints[_i];
+        for (l = 0, len = constraints.length; l < len; l++) {
+          c = constraints[l];
           this.addConstraint(c, conj);
         }
       } else {
-        _fn = (function(_this) {
+        fn1 = (function(_this) {
           return function(path, con) {
             return _this.addConstraint(interpretConstraint(path, con), conj);
           };
         })(this);
         for (path in constraints) {
           con = constraints[path];
-          _fn(path, con);
+          fn1(path, con);
         }
       }
       this.__silent__ = false;
@@ -2526,7 +2529,7 @@
     };
 
     Query.prototype.addConstraint = function(constraint, conj) {
-      var i, logic, needsLogicClause, newConLen, newLogic, oldLogic, _ref;
+      var i, logic, needsLogicClause, newConLen, newLogic, oldLogic, ref1;
       if (conj == null) {
         conj = 'and';
       }
@@ -2546,17 +2549,17 @@
         constraint.op = get_canonical_op(constraint.op);
       }
       this.constraints.push(constraint);
-      needsLogicClause = (conj === 'or') || (((_ref = this.constraintLogic) != null ? _ref.length : void 0) > 0);
+      needsLogicClause = (conj === 'or') || (((ref1 = this.constraintLogic) != null ? ref1.length : void 0) > 0);
       newConLen = this.constraints.length;
       oldLogic = this.constraintLogic;
       if (needsLogicClause) {
-        newLogic = newConLen === 2 ? "" + CODES[0] + " " + conj + " " + CODES[1] : (logic = this.constraintLogic, logic || (logic = ((function() {
-          var _i, _ref1, _results;
-          _results = [];
-          for (i = _i = 0, _ref1 = newConLen - 2; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-            _results.push(CODES[i]);
+        newLogic = newConLen === 2 ? CODES[0] + " " + conj + " " + CODES[1] : (logic = this.constraintLogic, logic || (logic = ((function() {
+          var l, ref2, results;
+          results = [];
+          for (i = l = 0, ref2 = newConLen - 2; 0 <= ref2 ? l <= ref2 : l >= ref2; i = 0 <= ref2 ? ++l : --l) {
+            results.push(CODES[i]);
           }
-          return _results;
+          return results;
         })()).join(' and ')), "(" + logic + ") " + conj + " " + CODES[newConLen - 1]);
         this.constraintLogic = newLogic;
       }
@@ -2578,16 +2581,16 @@
     Query.prototype.getConstraintXML = function() {
       var c, toSerialise;
       toSerialise = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.constraints;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          c = _ref[_i];
+        var l, len, ref1, results;
+        ref1 = this.constraints;
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          c = ref1[l];
           if ((c.type == null) || this.isInQuery(c.path)) {
-            _results.push(c);
+            results.push(c);
           }
         }
-        return _results;
+        return results;
       }).call(this);
       if (toSerialise.length) {
         return concatMap(conStr)(concatMap(id)(partition(function(c) {
@@ -2601,16 +2604,16 @@
     Query.prototype.getJoinXML = function() {
       var p, s, strs;
       strs = (function() {
-        var _ref, _results;
-        _ref = this.joins;
-        _results = [];
-        for (p in _ref) {
-          s = _ref[p];
+        var ref1, results;
+        ref1 = this.joins;
+        results = [];
+        for (p in ref1) {
+          s = ref1[p];
           if (this.isInQuery(p) && s === 'OUTER') {
-            _results.push("<join path=\"" + p + "\" style=\"OUTER\"/>");
+            results.push("<join path=\"" + p + "\" style=\"OUTER\"/>");
           }
         }
-        return _results;
+        return results;
       }).call(this);
       return strs.join('');
     };
@@ -2627,15 +2630,15 @@
         attrs.name = this.name;
       }
       headAttrs = ((function() {
-        var _results;
-        _results = [];
+        var results;
+        results = [];
         for (k in attrs) {
           v = attrs[k];
           if (v) {
-            _results.push(k + '="' + v + '"');
+            results.push(k + '="' + v + '"');
           }
         }
-        return _results;
+        return results;
       })()).join(' ');
       return "<query " + headAttrs + " >" + (this.getJoinXML()) + (this.getConstraintXML()) + "</query>";
     };
@@ -2650,49 +2653,49 @@
         constraintLogic: this.constraintLogic,
         from: this.root,
         select: (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.views;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            v = _ref[_i];
-            _results.push(headLess(v));
+          var l, len, ref1, results;
+          ref1 = this.views;
+          results = [];
+          for (l = 0, len = ref1.length; l < len; l++) {
+            v = ref1[l];
+            results.push(headLess(v));
           }
-          return _results;
+          return results;
         }).call(this),
         orderBy: (function() {
-          var _i, _len, _ref, _ref1, _results;
-          _ref = this.sortOrder;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            _ref1 = _ref[_i], path = _ref1.path, direction = _ref1.direction;
-            _results.push({
+          var l, len, ref1, ref2, results;
+          ref1 = this.sortOrder;
+          results = [];
+          for (l = 0, len = ref1.length; l < len; l++) {
+            ref2 = ref1[l], path = ref2.path, direction = ref2.direction;
+            results.push({
               path: headLess(path),
               direction: direction
             });
           }
-          return _results;
+          return results;
         }).call(this),
         joins: (function() {
-          var _ref, _results;
-          _ref = this.joins;
-          _results = [];
-          for (path in _ref) {
-            style = _ref[path];
+          var ref1, results;
+          ref1 = this.joins;
+          results = [];
+          for (path in ref1) {
+            style = ref1[path];
             if (style === 'OUTER') {
-              _results.push(headLess(path));
+              results.push(headLess(path));
             }
           }
-          return _results;
+          return results;
         }).call(this),
         where: (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.constraints;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            c = _ref[_i];
-            _results.push(conToJSON(c));
+          var l, len, ref1, results;
+          ref1 = this.constraints;
+          results = [];
+          for (l = 0, len = ref1.length; l < len; l++) {
+            c = ref1[l];
+            results.push(conToJSON(c));
           }
-          return _results;
+          return results;
         }).call(this)
       });
     };
@@ -2706,16 +2709,16 @@
       return withCB(cb, this.service.post('query/code', req).then(this.service.VERIFIER).then(get('code')));
     };
 
-    Query.prototype.setName = function(name) {
-      this.name = name;
+    Query.prototype.setName = function(name1) {
+      this.name = name1;
     };
 
     Query.prototype.save = function(name, cb) {
       return REQUIRES_VERSION(this.service, 16, (function(_this) {
         return function() {
-          var req, _ref;
+          var ref1, req;
           if (utils.isFunction(name)) {
-            _ref = [null, name], name = _ref[0], cb = _ref[1];
+            ref1 = [null, name], name = ref1[0], cb = ref1[1];
           }
           if (name != null) {
             _this.setName(name);
@@ -2739,9 +2742,9 @@
     Query.prototype.store = function(name, cb) {
       return REQUIRES_VERSION(this.service, 16, (function(_this) {
         return function() {
-          var getName, req, updateName, _ref;
+          var getName, ref1, req, updateName;
           if (utils.isFunction(name)) {
-            _ref = [null, name], name = _ref[0], cb = _ref[1];
+            ref1 = [null, name], name = ref1[0], cb = ref1[1];
           }
           if (name != null) {
             _this.setName(name);
@@ -2769,9 +2772,9 @@
     Query.prototype.saveAsTemplate = function(name, cb) {
       return REQUIRES_VERSION(this.service, 16, (function(_this) {
         return function() {
-          var req, _ref;
+          var ref1, req;
           if (utils.isFunction(name)) {
-            _ref = [null, name], name = _ref[0], cb = _ref[1];
+            ref1 = [null, name], name = ref1[0], cb = ref1[1];
           }
           if (name != null) {
             _this.setName(name);
@@ -2794,43 +2797,43 @@
     };
 
     Query.prototype.getCodeURI = function(lang) {
-      var req, _ref;
+      var ref1, req;
       req = {
         query: this.toXML(),
         lang: lang,
         format: 'text'
       };
-      if (((_ref = this.service) != null ? _ref.token : void 0) != null) {
+      if (((ref1 = this.service) != null ? ref1.token : void 0) != null) {
         req.token = this.service.token;
       }
-      return "" + this.service.root + "query/code?" + (toQueryString(req));
+      return this.service.root + "query/code?" + (toQueryString(req));
     };
 
     Query.prototype.getExportURI = function(format, options) {
-      var req, _ref;
+      var ref1, req;
       if (format == null) {
         format = 'tab';
       }
       if (options == null) {
         options = {};
       }
-      if (__indexOf.call(Query.BIO_FORMATS, format) >= 0) {
+      if (indexOf.call(Query.BIO_FORMATS, format) >= 0) {
         return this["get" + (format.toUpperCase()) + "URI"](options);
       }
       req = merge(options, {
         query: this.toXML(),
         format: format
       });
-      if (((_ref = this.service) != null ? _ref.token : void 0) != null) {
+      if (((ref1 = this.service) != null ? ref1.token : void 0) != null) {
         req.token = this.service.token;
       }
-      return "" + this.service.root + "query/results?" + (toQueryString(req));
+      return this.service.root + "query/results?" + (toQueryString(req));
     };
 
     Query.prototype.needsAuthentication = function() {
       return utils.any(this.constraints, function(c) {
-        var _ref;
-        return (_ref = c.op) === 'NOT IN' || _ref === 'IN';
+        var ref1;
+        return (ref1 = c.op) === 'NOT IN' || ref1 === 'IN';
       });
     };
 
@@ -2853,16 +2856,16 @@
         });
       };
       toRun.views = utils.take(n)((function() {
-        var _i, _len, _ref, _results;
-        _ref = this.getViewNodes();
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          n = _ref[_i];
+        var l, len, ref1, results;
+        ref1 = this.getViewNodes();
+        results = [];
+        for (l = 0, len = ref1.length; l < len; l++) {
+          n = ref1[l];
           if (isSuitable(n)) {
-            _results.push(addPI(n));
+            results.push(addPI(n));
           }
         }
-        return _results;
+        return results;
       }).call(this));
       return {
         query: toRun.toXML(),
@@ -2896,7 +2899,7 @@
 
   bioUriArgs = function(reqMeth, f) {
     return function(opts, cb) {
-      var ensureAttr, obj, req, v, _ref;
+      var ensureAttr, obj, ref1, req, v;
       if (opts == null) {
         opts = {};
       }
@@ -2904,7 +2907,7 @@
         cb = function() {};
       }
       if (utils.isFunction(opts)) {
-        _ref = [{}, opts], opts = _ref[0], cb = _ref[1];
+        ref1 = [{}, opts], opts = ref1[0], cb = ref1[1];
       }
       ensureAttr = (function(_this) {
         return function(p) {
@@ -2919,14 +2922,14 @@
       })(this);
       if ((opts != null ? opts.view : void 0) != null) {
         opts.view = (function() {
-          var _i, _len, _ref1, _results;
-          _ref1 = opts.view;
-          _results = [];
-          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-            v = _ref1[_i];
-            _results.push(this.getPathInfo(v).toString());
+          var l, len, ref2, results;
+          ref2 = opts.view;
+          results = [];
+          for (l = 0, len = ref2.length; l < len; l++) {
+            v = ref2[l];
+            results.push(this.getPathInfo(v).toString());
           }
-          return _results;
+          return results;
         }).call(this);
       }
       obj = opts["export"] != null ? this.selectPreservingImpliedConstraints(opts["export"].map(ensureAttr)) : this;
@@ -2935,8 +2938,8 @@
     };
   };
 
-  _ref = Query.BIO_FORMATS;
-  _fn = function(f) {
+  ref1 = Query.BIO_FORMATS;
+  fn1 = function(f) {
     var getMeth, reqMeth, uriMeth;
     reqMeth = "_" + f + "_req";
     getMeth = "get" + (f.toUpperCase());
@@ -2948,46 +2951,46 @@
       if (this.service.token != null) {
         req.token = this.service.token;
       }
-      return "" + this.service.root + "query/results/" + f + "?" + (toQueryString(req));
+      return this.service.root + "query/results/" + f + "?" + (toQueryString(req));
     });
   };
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    f = _ref[_i];
-    _fn(f);
+  for (l = 0, len = ref1.length; l < len; l++) {
+    f = ref1[l];
+    fn1(f);
   }
 
   _get_data_fetcher = function(server_fn) {
     return function() {
-      var cbs, page, x, _ref1;
-      page = arguments[0], cbs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      var cbs, page, ref2, x;
+      page = arguments[0], cbs = 2 <= arguments.length ? slice.call(arguments, 1) : [];
       if (this.service[server_fn]) {
         if (page == null) {
           page = {};
         } else if (utils.isFunction(page)) {
           page = {};
           cbs = (function() {
-            var _j, _len1, _results;
-            _results = [];
-            for (_j = 0, _len1 = arguments.length; _j < _len1; _j++) {
-              x = arguments[_j];
-              _results.push(x);
+            var len1, m, results;
+            results = [];
+            for (m = 0, len1 = arguments.length; m < len1; m++) {
+              x = arguments[m];
+              results.push(x);
             }
-            return _results;
+            return results;
           }).apply(this, arguments);
         }
         page = noUndefVals(merge({
           start: this.start,
           size: this.maxRows
         }, page));
-        return (_ref1 = this.service)[server_fn].apply(_ref1, [this, page].concat(__slice.call(cbs)));
+        return (ref2 = this.service)[server_fn].apply(ref2, [this, page].concat(slice.call(cbs)));
       } else {
         throw new Error("Service does not provide '" + server_fn + "'.");
       }
     };
   };
 
-  for (_j = 0, _len1 = RESULTS_METHODS.length; _j < _len1; _j++) {
-    mth = RESULTS_METHODS[_j];
+  for (m = 0, len1 = RESULTS_METHODS.length; m < len1; m++) {
+    mth = RESULTS_METHODS[m];
     Query.prototype[mth] = _get_data_fetcher(mth);
   }
 
@@ -3004,7 +3007,7 @@
 },{"./util":16,"./xml":18,"backbone-events-standalone":22}],10:[function(_dereq_,module,exports){
 (function() {
   var INSTANCES_PATH, ROOT, Registry, doReq, get, http, merge, querystring, utils, withCB,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   querystring = _dereq_('querystring');
 
@@ -3022,9 +3025,9 @@
 
   Registry = (function() {
     function Registry() {
-      this.fetchMines = __bind(this.fetchMines, this);
-      this.makePath = __bind(this.makePath, this);
-      this.getFormat = __bind(this.getFormat, this);
+      this.fetchMines = bind(this.fetchMines, this);
+      this.makePath = bind(this.makePath, this);
+      this.getFormat = bind(this.getFormat, this);
     }
 
     Registry.prototype.getFormat = function(intended) {
@@ -3039,8 +3042,8 @@
     };
 
     Registry.prototype.errorHandler = function(e) {
-      var f, _ref;
-      f = (_ref = console.error) != null ? _ref : console.log;
+      var f, ref;
+      f = (ref = console.error) != null ? ref : console.log;
       return f(e);
     };
 
@@ -3057,7 +3060,7 @@
     };
 
     Registry.prototype.makeRequest = function(method, path, urlParams, data, cb) {
-      var dataType, errBack, opts, _ref, _ref1;
+      var dataType, errBack, opts, ref, ref1;
       if (method == null) {
         method = 'GET';
       }
@@ -3074,7 +3077,7 @@
         cb = function() {};
       }
       if (utils.isArray(cb)) {
-        _ref = cb, cb = _ref[0], errBack = _ref[1];
+        ref = cb, cb = ref[0], errBack = ref[1];
       }
       if (utils.isArray(data)) {
         data = utils.pairsToObj(data);
@@ -3085,7 +3088,7 @@
       data = utils.copy(data);
       dataType = this.getFormat(data.format);
       if (!http.supports(method)) {
-        _ref1 = [method, http.getMethod(method)], data.method = _ref1[0], method = _ref1[1];
+        ref1 = [method, http.getMethod(method)], data.method = ref1[0], method = ref1[1];
       }
       opts = {
         data: data,
@@ -3134,10 +3137,10 @@
 
 },{"./http":3,"./util":16,"querystring":41}],11:[function(_dereq_,module,exports){
 (function() {
-  var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, Registry, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __slice = [].slice;
+  var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, Registry, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, _get_or_fetch, dejoin, error, get, getListFinder, http, i, invoke, j, len, len1, map, merge, p, ref, ref1, set, success, to_query_string, utils, version, withCB,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    hasProp = {}.hasOwnProperty,
+    slice = [].slice;
 
   Promise = _dereq_('./promise');
 
@@ -3223,17 +3226,17 @@
 
   NO_AUTH = {};
 
-  _ref = [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH, WIDGETS_PATH, MODEL_PATH, SUMMARYFIELDS_PATH, QUICKSEARCH_PATH, PATH_VALUES_PATH];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    p = _ref[_i];
+  ref = [VERSION_PATH, RELEASE_PATH, CLASSKEY_PATH, WIDGETS_PATH, MODEL_PATH, SUMMARYFIELDS_PATH, QUICKSEARCH_PATH, PATH_VALUES_PATH];
+  for (i = 0, len = ref.length; i < len; i++) {
+    p = ref[i];
     NO_AUTH[p] = true;
   }
 
   ALWAYS_AUTH = {};
 
-  _ref1 = [WHOAMI_PATH, PREF_PATH, LIST_OPERATION_PATHS, SUBTRACT_PATH, WITH_OBJ_PATH, ENRICHMENT_PATH, TEMPLATES_PATH, USER_TOKENS];
-  for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-    p = _ref1[_j];
+  ref1 = [WHOAMI_PATH, PREF_PATH, LIST_OPERATION_PATHS, SUBTRACT_PATH, WITH_OBJ_PATH, ENRICHMENT_PATH, TEMPLATES_PATH, USER_TOKENS];
+  for (j = 0, len1 = ref1.length; j < len1; j++) {
+    p = ref1[j];
     ALWAYS_AUTH[p] = true;
   }
 
@@ -3256,15 +3259,15 @@
   SUFFIX = "/service/";
 
   DEFAULT_ERROR_HANDLER = function(e) {
-    var f, _ref2;
-    f = (_ref2 = console.error) != null ? _ref2 : console.log;
+    var f, ref2;
+    f = (ref2 = console.error) != null ? ref2 : console.log;
     return f(e);
   };
 
   _get_or_fetch = function(propName, store, path, key, cb) {
-    var opts, promise, root, useCache, value;
-    root = this.root, useCache = this.useCache;
-    promise = this[propName] != null ? this[propName] : this[propName] = useCache && (value = store[root]) ? success(value) : (opts = {
+    var opts, promise, ref2, root, useCache, value;
+    ref2 = this, root = ref2.root, useCache = ref2.useCache;
+    promise = this[propName] != null ? this[propName] : this[propName] = (useCache && (value = store[root])) ? success(value) : (opts = {
       type: 'GET',
       dataType: 'json',
       data: {
@@ -3301,17 +3304,17 @@
   };
 
   TO_NAMES = function(xs) {
-    var x, _k, _len2, _ref2, _ref3, _results;
+    var len2, n, ref2, ref3, results, x;
     if (xs == null) {
       xs = [];
     }
-    _ref2 = (utils.isArray(xs) ? xs : [xs]);
-    _results = [];
-    for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-      x = _ref2[_k];
-      _results.push((_ref3 = x.name) != null ? _ref3 : x);
+    ref2 = (utils.isArray(xs) ? xs : [xs]);
+    results = [];
+    for (n = 0, len2 = ref2.length; n < len2; n++) {
+      x = ref2[n];
+      results.push((ref3 = x.name) != null ? ref3 : x);
     }
-    return _results;
+    return results;
   };
 
   Service = (function() {
@@ -3322,39 +3325,39 @@
       return http.doReq.apply(this, arguments);
     };
 
-    function Service(_arg) {
+    function Service(arg) {
       var noCache;
-      this.root = _arg.root, this.token = _arg.token, this.errorHandler = _arg.errorHandler, this.DEBUG = _arg.DEBUG, this.help = _arg.help, noCache = _arg.noCache, this.headers = _arg.headers;
-      this.connectAs = __bind(this.connectAs, this);
-      this.createList = __bind(this.createList, this);
-      this.resolveIds = __bind(this.resolveIds, this);
-      this.templateQuery = __bind(this.templateQuery, this);
-      this.savedQuery = __bind(this.savedQuery, this);
-      this.query = __bind(this.query, this);
-      this.fetchRelease = __bind(this.fetchRelease, this);
-      this.fetchClassKeys = __bind(this.fetchClassKeys, this);
-      this.fetchVersion = __bind(this.fetchVersion, this);
-      this.fetchSummaryFields = __bind(this.fetchSummaryFields, this);
-      this.fetchModel = __bind(this.fetchModel, this);
-      this.fetchWidgetMap = __bind(this.fetchWidgetMap, this);
-      this.fetchWidgets = __bind(this.fetchWidgets, this);
-      this.complement = __bind(this.complement, this);
-      this.fetchListsContaining = __bind(this.fetchListsContaining, this);
-      this.fetchList = __bind(this.fetchList, this);
-      this.findLists = __bind(this.findLists, this);
-      this.fetchLists = __bind(this.fetchLists, this);
-      this.fetchTemplates = __bind(this.fetchTemplates, this);
-      this.tableRows = __bind(this.tableRows, this);
-      this.values = __bind(this.values, this);
-      this.rows = __bind(this.rows, this);
-      this.records = __bind(this.records, this);
-      this.table = __bind(this.table, this);
-      this.pathValues = __bind(this.pathValues, this);
-      this.fetchUser = __bind(this.fetchUser, this);
-      this.whoami = __bind(this.whoami, this);
-      this.findById = __bind(this.findById, this);
-      this.count = __bind(this.count, this);
-      this.enrichment = __bind(this.enrichment, this);
+      this.root = arg.root, this.token = arg.token, this.errorHandler = arg.errorHandler, this.DEBUG = arg.DEBUG, this.help = arg.help, noCache = arg.noCache, this.headers = arg.headers;
+      this.connectAs = bind(this.connectAs, this);
+      this.createList = bind(this.createList, this);
+      this.resolveIds = bind(this.resolveIds, this);
+      this.templateQuery = bind(this.templateQuery, this);
+      this.savedQuery = bind(this.savedQuery, this);
+      this.query = bind(this.query, this);
+      this.fetchRelease = bind(this.fetchRelease, this);
+      this.fetchClassKeys = bind(this.fetchClassKeys, this);
+      this.fetchVersion = bind(this.fetchVersion, this);
+      this.fetchSummaryFields = bind(this.fetchSummaryFields, this);
+      this.fetchModel = bind(this.fetchModel, this);
+      this.fetchWidgetMap = bind(this.fetchWidgetMap, this);
+      this.fetchWidgets = bind(this.fetchWidgets, this);
+      this.complement = bind(this.complement, this);
+      this.fetchListsContaining = bind(this.fetchListsContaining, this);
+      this.fetchList = bind(this.fetchList, this);
+      this.findLists = bind(this.findLists, this);
+      this.fetchLists = bind(this.fetchLists, this);
+      this.fetchTemplates = bind(this.fetchTemplates, this);
+      this.tableRows = bind(this.tableRows, this);
+      this.values = bind(this.values, this);
+      this.rows = bind(this.rows, this);
+      this.records = bind(this.records, this);
+      this.table = bind(this.table, this);
+      this.pathValues = bind(this.pathValues, this);
+      this.fetchUser = bind(this.fetchUser, this);
+      this.whoami = bind(this.whoami, this);
+      this.findById = bind(this.findById, this);
+      this.count = bind(this.count, this);
+      this.enrichment = bind(this.enrichment, this);
       if (this.root == null) {
         throw new Error("No service root provided. This is required");
       }
@@ -3394,7 +3397,7 @@
     };
 
     Service.prototype.makeRequest = function(method, path, data, cb, indiv) {
-      var dataType, errBack, opts, timeout, _ref2, _ref3, _ref4;
+      var dataType, errBack, opts, ref2, ref3, ref4, timeout;
       if (method == null) {
         method = 'GET';
       }
@@ -3411,7 +3414,7 @@
         indiv = false;
       }
       if (utils.isArray(cb)) {
-        _ref2 = cb, cb = _ref2[0], errBack = _ref2[1];
+        ref2 = cb, cb = ref2[0], errBack = ref2[1];
       }
       if (utils.isArray(data)) {
         data = utils.pairsToObj(data);
@@ -3422,7 +3425,7 @@
       data = utils.copy(data);
       dataType = this.getFormat(data.format);
       if (!http.supports(method)) {
-        _ref3 = [method, http.getMethod(method)], data.method = _ref3[0], method = _ref3[1];
+        ref3 = [method, http.getMethod(method)], data.method = ref3[0], method = ref3[1];
       }
       opts = {
         data: data,
@@ -3440,7 +3443,7 @@
         opts.headers = utils.copy(data.headers);
         delete opts.data.headers;
       }
-      if (timeout = (_ref4 = data.timeout) != null ? _ref4 : this.timeout) {
+      if (timeout = (ref4 = data.timeout) != null ? ref4 : this.timeout) {
         opts.timeout = timeout;
         delete data.timeout;
       }
@@ -3454,7 +3457,7 @@
     Service.prototype.authorise = function(req) {
       return this.fetchVersion().then((function(_this) {
         return function(version) {
-          var opts, pathAdditions, _ref2;
+          var opts, pathAdditions, ref2;
           opts = utils.copy(req);
           if (opts.headers == null) {
             opts.headers = {};
@@ -3468,7 +3471,7 @@
               opts.data.format = opts.dataType;
             }
           }
-          if ((_this.token != null) && NEEDS_AUTH(req.path, (_ref2 = opts.data) != null ? _ref2.query : void 0)) {
+          if ((_this.token != null) && NEEDS_AUTH(req.path, (ref2 = opts.data) != null ? ref2.query : void 0)) {
             if (version >= 14) {
               opts.headers.Authorization = "Token " + _this.token;
             } else if ('string' === typeof opts.data) {
@@ -3518,9 +3521,9 @@
       }
       return REQUIRES_VERSION(this, 9, (function(_this) {
         return function() {
-          var k, req, v, _ref2;
+          var k, ref2, req, v;
           if (utils.isFunction(options)) {
-            _ref2 = [options, {}], cb = _ref2[0], options = _ref2[1];
+            ref2 = [options, {}], cb = ref2[0], options = ref2[1];
           }
           if (typeof options === 'string') {
             req = {
@@ -3533,7 +3536,7 @@
               size: options.size
             };
             for (k in options) {
-              if (!__hasProp.call(options, k)) continue;
+              if (!hasProp.call(options, k)) continue;
               v = options[k];
               if ((k !== 'q') && (k !== 'start') && (k !== 'size')) {
                 req["facet_" + k] = v;
@@ -3570,8 +3573,8 @@
           var e;
           try {
             return _this.count(m.makePath(q));
-          } catch (_error) {
-            e = _error;
+          } catch (error1) {
+            e = error1;
             return _this.query({
               select: [q]
             }).then(_this.count);
@@ -3582,7 +3585,7 @@
     };
 
     Service.prototype.findById = function(type, id, fields, cb) {
-      var promise, _ref2;
+      var promise, ref2;
       if (fields == null) {
         fields = ['**'];
       }
@@ -3590,7 +3593,7 @@
         cb = (function() {});
       }
       if (utils.isFunction(fields)) {
-        _ref2 = [['**'], fields], fields = _ref2[0], cb = _ref2[1];
+        ref2 = [['**'], fields], fields = ref2[0], cb = ref2[1];
       }
       promise = this.query({
         from: type,
@@ -3603,9 +3606,9 @@
     };
 
     Service.prototype.lookup = function(type, term, context, cb) {
-      var promise, _ref2;
+      var promise, ref2;
       if (utils.isFunction(context)) {
-        _ref2 = [null, context], context = _ref2[0], cb = _ref2[1];
+        ref2 = [null, context], context = ref2[0], cb = ref2[1];
       }
       promise = this.query({
         from: type,
@@ -3616,9 +3619,9 @@
     };
 
     Service.prototype.find = function(type, term, context, cb) {
-      var _ref2;
+      var ref2;
       if (utils.isFunction(context)) {
-        _ref2 = [null, context], context = _ref2[0], cb = _ref2[1];
+        ref2 = [null, context], context = ref2[0], cb = ref2[1];
       }
       return withCB(cb, this.lookup(type, term, context).then(function(found) {
         if ((found == null) || found.length === 0) {
@@ -3643,7 +3646,7 @@
 
     Service.prototype.fetchUser = function() {
       var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       return this.whoami.apply(this, args);
     };
 
@@ -3661,30 +3664,30 @@
       }
       return REQUIRES_VERSION(this, 6, (function(_this) {
         return function() {
-          var e, format, promise, wanted, _ref2;
+          var e, format, promise, ref2, wanted;
           if (typeof typeConstraints === 'string') {
             wanted = typeConstraints;
             typeConstraints = {};
           }
           if (utils.isFunction(typeConstraints)) {
-            _ref2 = [cb, typeConstraints], typeConstraints = _ref2[0], cb = _ref2[1];
+            ref2 = [cb, typeConstraints], typeConstraints = ref2[0], cb = ref2[1];
           }
           if (wanted !== 'count') {
             wanted = 'results';
           }
           format = wanted === 'count' ? 'jsoncount' : 'json';
           promise = (function() {
-            var _ref3;
+            var ref3;
             try {
-              return this.fetchModel().then(invoke('makePath', path, (_ref3 = path.subclasses) != null ? _ref3 : typeConstraints)).then(function(path) {
+              return this.fetchModel().then(invoke('makePath', path, (ref3 = path.subclasses) != null ? ref3 : typeConstraints)).then(function(path) {
                 return pathValuesReq(format, path);
               }).then((function(_this) {
                 return function(req) {
                   return _this.post(PATH_VALUES_PATH, req);
                 };
               })(this)).then(get(wanted));
-            } catch (_error) {
-              e = _error;
+            } catch (error1) {
+              e = error1;
               return error(e);
             }
           }).call(_this);
@@ -3694,7 +3697,7 @@
     };
 
     Service.prototype.doPagedRequest = function(q, path, page, format, cb) {
-      var req, _ref2;
+      var ref2, req;
       if (page == null) {
         page = {};
       }
@@ -3703,7 +3706,7 @@
       }
       if (q.toXML != null) {
         if (utils.isFunction(page)) {
-          _ref2 = [page, {}], cb = _ref2[0], page = _ref2[1];
+          ref2 = [page, {}], cb = ref2[0], page = ref2[1];
         }
         req = merge(page, {
           query: q,
@@ -3732,9 +3735,9 @@
     };
 
     Service.prototype.values = function(q, opts, cb) {
-      var resp, _ref2;
+      var ref2, resp;
       if (utils.isFunction(opts)) {
-        _ref2 = [opts, cb], cb = _ref2[0], opts = _ref2[1];
+        ref2 = [opts, cb], cb = ref2[0], opts = ref2[1];
       }
       resp = q == null ? error("No query term supplied") : (q.descriptors != null) || typeof q === 'string' ? this.pathValues(q, opts).then(map(get('value'))) : q.toXML != null ? q.views.length !== 1 ? error("Expected one column, got " + q.views.length) : this.rows(q, opts).then(map(get(0))) : this.query(q).then((function(_this) {
         return function(query) {
@@ -3767,13 +3770,13 @@
         return function(v) {
           var fn;
           return withCB(cb, name && v < 13 ? error("Finding lists by name on the server requires version 13. This is only " + v) : (fn = function(ls) {
-            var data, _k, _len2, _results;
-            _results = [];
-            for (_k = 0, _len2 = ls.length; _k < _len2; _k++) {
-              data = ls[_k];
-              _results.push(new List(data, _this));
+            var data, len2, n, results;
+            results = [];
+            for (n = 0, len2 = ls.length; n < len2; n++) {
+              data = ls[n];
+              results.push(new List(data, _this));
             }
-            return _results;
+            return results;
           }, _this.get(LISTS_PATH, {
             name: name
           }).then(get('lists')).then(fn)));
@@ -3793,30 +3796,30 @@
       var fn;
       fn = (function(_this) {
         return function(xs) {
-          var x, _k, _len2, _results;
-          _results = [];
-          for (_k = 0, _len2 = xs.length; _k < _len2; _k++) {
-            x = xs[_k];
-            _results.push(new List(x, _this));
+          var len2, n, results, x;
+          results = [];
+          for (n = 0, len2 = xs.length; n < len2; n++) {
+            x = xs[n];
+            results.push(new List(x, _this));
           }
-          return _results;
+          return results;
         };
       })(this);
       return withCB(cb, this.get(WITH_OBJ_PATH, opts).then(get('lists')).then(fn));
     };
 
     Service.prototype.combineLists = function(operation, options, cb) {
-      var description, lists, name, req, tags, _ref2;
-      _ref2 = merge({
+      var description, lists, name, ref2, req, tags;
+      ref2 = merge({
         lists: [],
         tags: []
-      }, options), name = _ref2.name, lists = _ref2.lists, tags = _ref2.tags, description = _ref2.description;
+      }, options), name = ref2.name, lists = ref2.lists, tags = ref2.tags, description = ref2.description;
       req = {
         name: name,
         description: description
       };
       if (req.description == null) {
-        req.description = "" + operation + " of " + (lists.join(', '));
+        req.description = operation + " of " + (lists.join(', '));
       }
       req.tags = tags.join(';');
       req.lists = lists.join(';');
@@ -3824,15 +3827,15 @@
     };
 
     Service.prototype.merge = function() {
-      return this.combineLists.apply(this, ['union'].concat(__slice.call(arguments)));
+      return this.combineLists.apply(this, ['union'].concat(slice.call(arguments)));
     };
 
     Service.prototype.intersect = function() {
-      return this.combineLists.apply(this, ['intersection'].concat(__slice.call(arguments)));
+      return this.combineLists.apply(this, ['intersection'].concat(slice.call(arguments)));
     };
 
     Service.prototype.diff = function() {
-      return this.combineLists.apply(this, ['difference'].concat(__slice.call(arguments)));
+      return this.combineLists.apply(this, ['difference'].concat(slice.call(arguments)));
     };
 
     Service.prototype.complement = function(options, cb) {
@@ -3915,9 +3918,9 @@
     Service.prototype.query = function(options, cb) {
       var buildQuery;
       buildQuery = (function(_this) {
-        return function(_arg) {
+        return function(arg) {
           var model, summaryFields;
-          model = _arg[0], summaryFields = _arg[1];
+          model = arg[0], summaryFields = arg[1];
           return new Query(options, _this, {
             model: model,
             summaryFields: summaryFields
@@ -4022,7 +4025,7 @@
           return "\"" + x + "\"";
         }).join("\n") : ids,
         dataType: 'json',
-        url: "" + this.root + "lists?" + (to_query_string(adjust(opts))),
+        url: this.root + "lists?" + (to_query_string(adjust(opts))),
         type: 'POST',
         contentType: 'text/plain'
       };
@@ -4083,7 +4086,7 @@
       return REQUIRES_VERSION(this, 9, (function(_this) {
         return function() {
           var auth;
-          auth = "" + name + ":" + password;
+          auth = name + ":" + password;
           return withCB(cb, _this.logout().then(function(service) {
             return service.get('user/token', {
               auth: auth
@@ -4103,14 +4106,14 @@
 
   Service.prototype.rowByRow = function() {
     var args, f, q;
-    q = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    q = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
     f = http.iterReq('POST', QUERY_RESULTS_PATH, 'json');
     if (q.toXML != null) {
       return f.apply(this, arguments);
     } else {
       return this.query(q).then((function(_this) {
         return function(query) {
-          return _this.rowByRow.apply(_this, [query].concat(__slice.call(args)));
+          return _this.rowByRow.apply(_this, [query].concat(slice.call(args)));
         };
       })(this));
     }
@@ -4120,14 +4123,14 @@
 
   Service.prototype.recordByRecord = function() {
     var args, f, q;
-    q = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    q = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
     f = http.iterReq('POST', QUERY_RESULTS_PATH, 'jsonobjects');
     if (q.toXML != null) {
       return f.apply(this, arguments);
     } else {
       return this.query(q).then((function(_this) {
         return function(query) {
-          return _this.recordByRecord.apply(_this, [query].concat(__slice.call(args)));
+          return _this.recordByRecord.apply(_this, [query].concat(slice.call(args)));
         };
       })(this));
     }
@@ -4196,7 +4199,7 @@
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],13:[function(_dereq_,module,exports){
 (function() {
-  var HAS_CONSOLE, HAS_JSON, NOT_ENUM, hasDontEnumBug, hasOwnProperty, head, m, script, _fn, _i, _len, _ref;
+  var HAS_CONSOLE, HAS_JSON, NOT_ENUM, fn, hasDontEnumBug, hasOwnProperty, head, j, len, m, ref, script;
 
   HAS_CONSOLE = typeof console !== 'undefined';
 
@@ -4218,23 +4221,23 @@
       toString: null
     }.propertyIsEnumerable("toString");
     Object.keys = function(o) {
-      var keys, name, nonEnum, _i, _len;
+      var j, keys, len, name, nonEnum;
       if (typeof o !== "object" && typeof o !== "" || o === null) {
         throw new TypeError("Object.keys called on a non-object");
       }
       keys = (function() {
-        var _results;
-        _results = [];
+        var results;
+        results = [];
         for (name in o) {
           if (hasOwnProperty.call(o, name)) {
-            _results.push(name);
+            results.push(name);
           }
         }
-        return _results;
+        return results;
       })();
       if (hasDontEnumBug) {
-        for (_i = 0, _len = NOT_ENUM.length; _i < _len; _i++) {
-          nonEnum = NOT_ENUM[_i];
+        for (j = 0, len = NOT_ENUM.length; j < len; j++) {
+          nonEnum = NOT_ENUM[j];
           if (hasOwnProperty.call(o, nonEnum)) {
             keys.push(nonEnum);
           }
@@ -4246,37 +4249,39 @@
 
   if (Array.prototype.map == null) {
     Array.prototype.map = function(f) {
-      var x, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = this.length; _i < _len; _i++) {
-        x = this[_i];
-        _results.push(f(x));
+      var j, len, ref, results, x;
+      ref = this;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        x = ref[j];
+        results.push(f(x));
       }
-      return _results;
+      return results;
     };
   }
 
   if (Array.prototype.filter == null) {
     Array.prototype.filter = function(f) {
-      var x, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = this.length; _i < _len; _i++) {
-        x = this[_i];
+      var j, len, ref, results, x;
+      ref = this;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        x = ref[j];
         if (f(x)) {
-          _results.push(x);
+          results.push(x);
         }
       }
-      return _results;
+      return results;
     };
   }
 
   if (Array.prototype.reduce == null) {
     Array.prototype.reduce = function(f, initValue) {
-      var ret, x, xs, _i, _len;
+      var j, len, ret, x, xs;
       xs = this.slice();
       ret = arguments.length < 2 ? xs.pop() : initValue;
-      for (_i = 0, _len = xs.length; _i < _len; _i++) {
-        x = xs[_i];
+      for (j = 0, len = xs.length; j < len; j++) {
+        x = xs[j];
         ret = f(ret, x);
       }
       return ret;
@@ -4285,16 +4290,17 @@
 
   if (Array.prototype.forEach == null) {
     Array.prototype.forEach = function(f, ctx) {
-      var i, x, _i, _len, _results;
+      var i, j, len, ref, results, x;
       if (!f) {
         throw new Error("No function provided");
       }
-      _results = [];
-      for (i = _i = 0, _len = this.length; _i < _len; i = ++_i) {
-        x = this[i];
-        _results.push(f.call(ctx != null ? ctx : this, x, i, this));
+      ref = this;
+      results = [];
+      for (i = j = 0, len = ref.length; j < len; i = ++j) {
+        x = ref[i];
+        results.push(f.call(ctx != null ? ctx : this, x, i, this));
       }
-      return _results;
+      return results;
     };
   }
 
@@ -4323,17 +4329,17 @@
 
   if (console.log.apply == null) {
     console.log("Your console needs patching.");
-    _ref = ['log', 'error', 'debug'];
-    _fn = function(m) {
+    ref = ['log', 'error', 'debug'];
+    fn = function(m) {
       var oldM;
       oldM = console[m];
       return console[m] = function(args) {
         return oldM(args);
       };
     };
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      m = _ref[_i];
-      _fn(m);
+    for (j = 0, len = ref.length; j < len; j++) {
+      m = ref[j];
+      fn(m);
     }
   }
 
@@ -4342,16 +4348,16 @@
 },{}],14:[function(_dereq_,module,exports){
 (function() {
   var Promise, merge, properties,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   merge = function(src, dest) {
-    var k, v, _results;
-    _results = [];
+    var k, results, v;
+    results = [];
     for (k in src) {
       v = src[k];
-      _results.push(dest[k] = v);
+      results.push(dest[k] = v);
     }
-    return _results;
+    return results;
   };
 
   Promise = _dereq_('./promise');
@@ -4360,43 +4366,43 @@
 
   exports.Table = (function() {
     function Table(opts, model) {
-      var c, prop, _, _i, _len, _ref, _ref1;
+      var _, c, i, len, prop, ref, ref1;
       this.model = model;
-      this.getDisplayName = __bind(this.getDisplayName, this);
+      this.getDisplayName = bind(this.getDisplayName, this);
       this.name = opts.name, this.tags = opts.tags, this.displayName = opts.displayName, this.attributes = opts.attributes, this.references = opts.references, this.collections = opts.collections;
       this.fields = {};
-      this.__parents__ = (_ref = opts['extends']) != null ? _ref : [];
-      for (_i = 0, _len = properties.length; _i < _len; _i++) {
-        prop = properties[_i];
+      this.__parents__ = (ref = opts['extends']) != null ? ref : [];
+      for (i = 0, len = properties.length; i < len; i++) {
+        prop = properties[i];
         if (this[prop] == null) {
           throw new Error("Bad model data: missing " + prop);
         }
         merge(this[prop], this.fields);
       }
-      _ref1 = this.collections;
-      for (_ in _ref1) {
-        c = _ref1[_];
+      ref1 = this.collections;
+      for (_ in ref1) {
+        c = ref1[_];
         c.isCollection = true;
       }
     }
 
     Table.prototype.toString = function() {
-      var n, _;
+      var _, n;
       return "[Table name=" + this.name + ", fields=[" + ((function() {
-        var _ref, _results;
-        _ref = this.fields;
-        _results = [];
-        for (n in _ref) {
-          _ = _ref[n];
-          _results.push(n);
+        var ref, results;
+        ref = this.fields;
+        results = [];
+        for (n in ref) {
+          _ = ref[n];
+          results.push(n);
         }
-        return _results;
+        return results;
       }).call(this)) + "]]";
     };
 
     Table.prototype.parents = function() {
-      var _ref;
-      return ((_ref = this.__parents__) != null ? _ref : []).slice();
+      var ref;
+      return ((ref = this.__parents__) != null ? ref : []).slice();
     };
 
     Table.prototype.getDisplayName = function() {
@@ -4419,10 +4425,10 @@
 
 },{"./promise":8}],15:[function(_dereq_,module,exports){
 (function() {
-  var any, do_pref_req, error, get, isFunction, withCB, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var any, do_pref_req, error, get, isFunction, ref, withCB,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  _ref = _dereq_('./util'), withCB = _ref.withCB, get = _ref.get, isFunction = _ref.isFunction, any = _ref.any, error = _ref.error;
+  ref = _dereq_('./util'), withCB = ref.withCB, get = ref.get, isFunction = ref.isFunction, any = ref.any, error = ref.error;
 
   do_pref_req = function(user, data, method, cb) {
     return user.service.manageUserPreferences(method, data, cb).then(function(prefs) {
@@ -4431,14 +4437,14 @@
   };
 
   exports.User = (function() {
-    function User(service, _arg) {
+    function User(service, arg) {
       this.service = service;
-      this.username = _arg.username, this.preferences = _arg.preferences;
-      this.refresh = __bind(this.refresh, this);
-      this.clearPreferences = __bind(this.clearPreferences, this);
-      this.clearPreference = __bind(this.clearPreference, this);
-      this.setPreferences = __bind(this.setPreferences, this);
-      this.setPreference = __bind(this.setPreference, this);
+      this.username = arg.username, this.preferences = arg.preferences;
+      this.refresh = bind(this.refresh, this);
+      this.clearPreferences = bind(this.clearPreferences, this);
+      this.clearPreference = bind(this.clearPreference, this);
+      this.setPreferences = bind(this.setPreferences, this);
+      this.setPreference = bind(this.setPreference, this);
       this.hasPreferences = this.preferences != null;
       if (this.preferences == null) {
         this.preferences = {};
@@ -4446,9 +4452,9 @@
     }
 
     User.prototype.setPreference = function(key, value, cb) {
-      var data, _ref1;
+      var data, ref1;
       if (isFunction(value)) {
-        _ref1 = [null, value], value = _ref1[0], cb = _ref1[1];
+        ref1 = [null, value], value = ref1[0], cb = ref1[1];
       }
       if (typeof key === 'string') {
         data = {};
@@ -4480,15 +4486,15 @@
     };
 
     User.prototype.createToken = function(type, message, cb) {
-      var _ref1, _ref2;
+      var ref1, ref2;
       if (type == null) {
         type = 'day';
       }
       if ((cb == null) && any([type, message], isFunction)) {
         if (isFunction(type)) {
-          _ref1 = [null, null, type], type = _ref1[0], message = _ref1[1], cb = _ref1[2];
+          ref1 = [null, null, type], type = ref1[0], message = ref1[1], cb = ref1[2];
         } else if (isFunction(message)) {
-          _ref2 = [null, message], message = _ref2[0], cb = _ref2[1];
+          ref2 = [null, message], message = ref2[0], cb = ref2[1];
         }
       }
       return withCB(cb, this.service.post('user/tokens', {
@@ -4517,10 +4523,10 @@
 
 },{"./util":16}],16:[function(_dereq_,module,exports){
 (function() {
-  var Promise, REQUIRES, comp, curry, encode, entities, error, flatten, fold, id, invoke, invokeWith, isArray, merge, pairFold, qsFromList, root, success, thenFold, _ref,
-    __slice = [].slice,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __hasProp = {}.hasOwnProperty;
+  var Promise, REQUIRES, comp, curry, encode, entities, error, flatten, fold, id, invoke, invokeWith, isArray, merge, pairFold, qsFromList, ref, root, success, thenFold,
+    slice = [].slice,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    hasProp = {}.hasOwnProperty;
 
   Promise = _dereq_('./promise');
 
@@ -4543,13 +4549,13 @@
   qsFromList = function(pairs) {
     var pair;
     return ((function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
-        pair = pairs[_i];
-        _results.push(pair.map(encode).join('='));
+      var j, len, results;
+      results = [];
+      for (j = 0, len = pairs.length; j < len; j++) {
+        pair = pairs[j];
+        results.push(pair.map(encode).join('='));
       }
-      return _results;
+      return results;
     })()).join('&');
   };
 
@@ -4566,13 +4572,13 @@
         v = obj[k];
         if (isArray(v)) {
           subList = (function() {
-            var _i, _len, _results;
-            _results = [];
-            for (_i = 0, _len = v.length; _i < _len; _i++) {
-              sv = v[_i];
-              _results.push([k, sv]);
+            var j, len, results;
+            results = [];
+            for (j = 0, len = v.length; j < len; j++) {
+              sv = v[j];
+              results.push([k, sv]);
             }
-            return _results;
+            return results;
           })();
           pairs = pairs.concat(subList);
         } else {
@@ -4581,24 +4587,24 @@
       }
     }
     return qsFromList((function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = pairs.length; _i < _len; _i++) {
-        p = pairs[_i];
+      var j, len, results;
+      results = [];
+      for (j = 0, len = pairs.length; j < len; j++) {
+        p = pairs[j];
         if (p[1] != null) {
-          _results.push(p);
+          results.push(p);
         }
       }
-      return _results;
+      return results;
     })());
   };
 
   root.curry = curry = function() {
     var args, f;
-    f = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    f = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
     return function() {
       var rest;
-      rest = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      rest = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       return f.apply(null, args.concat(rest));
     };
   };
@@ -4617,7 +4623,7 @@
 
   root.parallel = function() {
     var promises;
-    promises = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    promises = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     if (promises.length === 1 && (!promises[0].then) && promises[0].length) {
       return Promise.all(promises[0]);
     } else {
@@ -4626,10 +4632,10 @@
   };
 
   root.withCB = function() {
-    var f, fs, onErr, onSucc, p, _i, _j, _len;
-    fs = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), p = arguments[_i++];
-    for (_j = 0, _len = fs.length; _j < _len; _j++) {
-      f = fs[_j];
+    var f, fs, j, l, len, onErr, onSucc, p;
+    fs = 2 <= arguments.length ? slice.call(arguments, 0, j = arguments.length - 1) : (j = 0, []), p = arguments[j++];
+    for (l = 0, len = fs.length; l < len; l++) {
+      f = fs[l];
       if (!(f != null)) {
         continue;
       }
@@ -4677,20 +4683,20 @@
 
   root.filter = function(f) {
     return function(xs) {
-      var x, _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = xs.length; _i < _len; _i++) {
-        x = xs[_i];
+      var j, len, results, x;
+      results = [];
+      for (j = 0, len = xs.length; j < len; j++) {
+        x = xs[j];
         if (f(x)) {
-          _results.push(x);
+          results.push(x);
         }
       }
-      return _results;
+      return results;
     };
   };
 
   root.uniqBy = function(f, xs) {
-    var k, keys, values, x, _i, _len;
+    var j, k, keys, len, values, x;
     if (arguments.length === 1) {
       return curry(root.uniqBy, f);
     }
@@ -4699,10 +4705,10 @@
     if (xs == null) {
       return values;
     }
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
+    for (j = 0, len = xs.length; j < len; j++) {
+      x = xs[j];
       k = f(x);
-      if (__indexOf.call(keys, k) < 0) {
+      if (indexOf.call(keys, k) < 0) {
         keys.push(k);
         values.push(x);
       }
@@ -4711,15 +4717,15 @@
   };
 
   root.find = function(xs, f) {
-    var x, _i, _len;
+    var j, len, x;
     if (arguments.length === 1) {
       f = xs;
       return function(xs) {
         return root.find(xs, f);
       };
     }
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
+    for (j = 0, len = xs.length; j < len; j++) {
+      x = xs[j];
       if (f(x)) {
         return x;
       }
@@ -4727,13 +4733,13 @@
     return null;
   };
 
-  isArray = (_ref = Array.isArray) != null ? _ref : function(xs) {
+  isArray = (ref = Array.isArray) != null ? ref : function(xs) {
     return ((xs != null ? xs.splice : void 0) != null) && ((xs != null ? xs.push : void 0) != null) && ((xs != null ? xs.pop : void 0) != null) && ((xs != null ? xs.slice : void 0) != null);
   };
 
   root.isArray = isArray;
 
-  root.isFunction = typeof /./ !== 'function' ? function(f) {
+  root.isFunction = (typeof /./ !== 'function') ? function(f) {
     return typeof f === 'function';
   } : function(f) {
     return (f != null) && (f.call != null) && (f.apply != null) && f.toString() === '[object Function]';
@@ -4748,7 +4754,7 @@
   };
 
   root.escape = function(str) {
-    var code, i, ret, withEntities, _i, _ref1;
+    var code, i, j, ref1, ret, withEntities;
     if (str == null) {
       return '';
     }
@@ -4756,7 +4762,7 @@
       return entities[entity];
     });
     ret = [];
-    for (i = _i = 0, _ref1 = withEntities.length; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+    for (i = j = 0, ref1 = withEntities.length; 0 <= ref1 ? j <= ref1 : j >= ref1; i = 0 <= ref1 ? ++j : --j) {
       code = withEntities.charCodeAt(i);
       if (code > 256) {
         ret.push("&#" + code + ";");
@@ -4770,8 +4776,8 @@
   root.omap = function(f) {
     var merger;
     merger = fold(function(a, oldk, oldv) {
-      var newk, newv, _ref1;
-      _ref1 = f(oldk, oldv), newk = _ref1[0], newv = _ref1[1];
+      var newk, newv, ref1;
+      ref1 = f(oldk, oldv), newk = ref1[0], newv = ref1[1];
       if (isArray(newv)) {
         newv = newv.slice();
       }
@@ -4790,9 +4796,9 @@
   root.partition = function(f) {
     return function(xs) {
       var divide;
-      divide = fold(function(_arg, x) {
+      divide = fold(function(arg, x) {
         var falses, trues;
-        trues = _arg[0], falses = _arg[1];
+        trues = arg[0], falses = arg[1];
         if (f(x)) {
           return [trues.concat([x]), falses];
         } else {
@@ -4808,13 +4814,13 @@
   };
 
   root.extend = function(obj, properties) {
-    var key, val, _results;
-    _results = [];
+    var key, results, val;
+    results = [];
     for (key in properties) {
       val = properties[key];
-      _results.push(obj[key] = val);
+      results.push(obj[key] = val);
     }
-    return _results;
+    return results;
   };
 
   root.id = id = function(x) {
@@ -4823,10 +4829,10 @@
 
   root.concatMap = function(f) {
     return function(xs) {
-      var fx, ret, x, _i, _len;
+      var fx, j, len, ret, x;
       ret = void 0;
-      for (_i = 0, _len = xs.length; _i < _len; _i++) {
-        x = xs[_i];
+      for (j = 0, len = xs.length; j < len; j++) {
+        x = xs[j];
         fx = f(x);
         ret = ret === void 0 ? fx : typeof ret === 'number' ? ret + fx : ret.concat != null ? ret.concat(fx) : merge(ret, fx);
       }
@@ -4841,29 +4847,29 @@
   comp = fold(function(f, g) {
     return function() {
       var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       return f(g.apply(null, args));
     };
   });
 
   root.compose = function() {
     var fs;
-    fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    fs = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     return comp(fs);
   };
 
   root.flatMap = root.concatMap;
 
   root.difference = function(xs, remove) {
-    var x, _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
-      if (__indexOf.call(remove, x) < 0) {
-        _results.push(x);
+    var j, len, results, x;
+    results = [];
+    for (j = 0, len = xs.length; j < len; j++) {
+      x = xs[j];
+      if (indexOf.call(remove, x) < 0) {
+        results.push(x);
       }
     }
-    return _results;
+    return results;
   };
 
   root.stringList = function(x) {
@@ -4875,15 +4881,15 @@
   };
 
   root.flatten = flatten = function() {
-    var ret, x, xs, xx, _i, _j, _len, _len1, _ref1;
-    xs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    var j, l, len, len1, ref1, ret, x, xs, xx;
+    xs = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     ret = [];
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
+    for (j = 0, len = xs.length; j < len; j++) {
+      x = xs[j];
       if (isArray(x)) {
-        _ref1 = flatten.apply(null, x);
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          xx = _ref1[_j];
+        ref1 = flatten.apply(null, x);
+        for (l = 0, len1 = ref1.length; l < len1; l++) {
+          xx = ref1[l];
           ret.push(xx);
         }
       } else {
@@ -4896,13 +4902,13 @@
   root.sum = root.concatMap(id);
 
   root.merge = merge = function() {
-    var k, newObj, o, objs, v, _i, _len;
-    objs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    var j, k, len, newObj, o, objs, v;
+    objs = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     newObj = {};
-    for (_i = 0, _len = objs.length; _i < _len; _i++) {
-      o = objs[_i];
+    for (j = 0, len = objs.length; j < len; j++) {
+      o = objs[j];
       for (k in o) {
-        if (!__hasProp.call(o, k)) continue;
+        if (!hasProp.call(o, k)) continue;
         v = o[k];
         newObj[k] = v;
       }
@@ -4911,12 +4917,12 @@
   };
 
   root.any = function(xs, f) {
-    var x, _i, _len;
+    var j, len, x;
     if (f == null) {
       f = id;
     }
-    for (_i = 0, _len = xs.length; _i < _len; _i++) {
-      x = xs[_i];
+    for (j = 0, len = xs.length; j < len; j++) {
+      x = xs[j];
       if (f(x)) {
         return true;
       }
@@ -4926,7 +4932,7 @@
 
   root.invoke = invoke = function() {
     var args, name;
-    name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    name = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
     return invokeWith(name, args);
   };
 
@@ -4962,7 +4968,7 @@
         obj[name] = value;
       } else {
         for (k in name) {
-          if (!__hasProp.call(name, k)) continue;
+          if (!hasProp.call(name, k)) continue;
           v = name[k];
           obj[k] = v;
         }
@@ -4986,10 +4992,10 @@
   };
 
   root.dejoin = function(q) {
-    var parts, view, _i, _len, _ref1;
-    _ref1 = q.views;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      view = _ref1[_i];
+    var j, len, parts, ref1, view;
+    ref1 = q.views;
+    for (j = 0, len = ref1.length; j < len; j++) {
+      view = ref1[j];
       parts = view.split('.');
       if (parts.length > 2) {
         q.addJoin(parts.slice(1, -1).join('.'));
@@ -5004,13 +5010,13 @@
 
   root.sequence = function() {
     var fns;
-    fns = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    fns = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     return thenFold(success(), fns);
   };
 
-  pairFold = fold(function(o, _arg) {
+  pairFold = fold(function(o, arg) {
     var k, v;
-    k = _arg[0], v = _arg[1];
+    k = arg[0], v = arg[1];
     if (o[k] != null) {
       throw new Error("Duplicate key: " + k);
     }
@@ -5061,7 +5067,7 @@
       try {
         parser = new DOMParser();
         return parser.parseFromString(xml, 'text/xml');
-      } catch (_error) {}
+      } catch (error) {}
     })();
     if ((!dom) || (!dom.documentElement) || dom.getElementsByTagName('parsererror').length) {
       throw new Error("Invalid XML: " + xml);
