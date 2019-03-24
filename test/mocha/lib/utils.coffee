@@ -24,7 +24,9 @@ parallel = (promises...) ->
 after = (promises...) ->
   if promises?.length then Promise.all(promises) else Promise.resolve(true)
 
-report = (done, promise) -> promise.then (-> done()), done
+report = (done, promise) -> 
+  promise.then (-> done()), done
+  return
 
 prepare = (promiser) -> (done) -> report done, @promise = promiser()
 
