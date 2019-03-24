@@ -51,7 +51,7 @@ describe 'Static service properties:', ->
 
     it 'should equal "test"', (done) ->
       promise.then( (r) -> r.should.equal 'test' )
-             .then (-> done()), done
+      .then (-> done()), done
 
     it 'should support callbacks', (done) ->
       service.fetchRelease (err, r) ->
@@ -72,11 +72,11 @@ describe 'Static service properties:', ->
 
     it 'should have the classes property', (done) ->
       promise.then( (ck) -> ck.should.have.property 'Employee' )
-             .then (-> done()), done
+      .then (-> done()), done
 
     it 'should have a keys for employee', (done) ->
       promise.then( (ck) -> ck.Employee.should.have.lengthOf 1 )
-             .then (-> done()), done
+      .then (-> done()), done
 
     it 'should support callbacks', (done) ->
       service.fetchRelease (err, ck) ->

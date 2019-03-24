@@ -23,9 +23,9 @@ describe 'User#getToken', ->
 
     it 'should still function as one though', eventually ([user, token]) ->
       service.connectAs(token)
-             .fetchUser()
-             .then (user2) ->
-               user2.username.should.equal user.username
+      .fetchUser()
+      .then (user2) ->
+        user2.username.should.equal user.username
 
   describe 'Permanent tokens', ->
 

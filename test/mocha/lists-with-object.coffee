@@ -40,8 +40,8 @@ describe 'Service#fetchListsContaining', ->
     @beforeAll prepare ->
       q = select: ['Employee.id'], where: {name: 'David Brent'}
       service.values(q)
-             .then(get 0)
-             .then (id) -> service.fetchListsContaining {id}
+      .then(get 0)
+      .then (id) -> service.fetchListsContaining {id}
 
     it 'should find the right number of lists', eventually (ls) ->
       ls.length.should.equal 3

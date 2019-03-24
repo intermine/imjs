@@ -87,7 +87,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
     @afterAll cleanUp
     @beforeAll prepare ->
       service.resolveIds({identifiers, type})
-             .then (j) -> service.resolutionJob(j.uid)
+      .then (j) -> service.resolutionJob(j.uid)
 
     it 'should produce a job', eventually should.exist
 

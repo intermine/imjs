@@ -95,7 +95,7 @@ class Model
       throw new Error "#{ cls } is not a table"
     parents = clazz.parents()
     parents.filter (p) => @classes[p] # filter out non IMOs
-           .reduce ((as, p) => as.concat @getAncestorsOf p), parents
+    .reduce ((as, p) => as.concat @getAncestorsOf p), parents
 
   # Get the closest shared ancestor of these two classes.
   # For an inheritance pattern such as:

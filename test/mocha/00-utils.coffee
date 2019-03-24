@@ -187,7 +187,7 @@ describe 'utils', ->
 
       it 'should have been resolved', (done) ->
         promise.then( (res) -> res.should.equal 'FOO' )
-               .then( (-> done()), done )
+        .then( (-> done()), done )
       
     describe 'rejection', ->
 

@@ -25,5 +25,5 @@ describe 'Using templates', ->
 
   it 'should be fine to adjust their values', eventually (templates) ->
     service.query(templates.ManagerLookup)
-           .then((q) -> q.constraints[0].value = 'David Brent'; q.count())
-           .then (c) -> c.should.equal 1
+    .then((q) -> q.constraints[0].value = 'David Brent'; q.count())
+    .then (c) -> c.should.equal 1

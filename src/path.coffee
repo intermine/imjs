@@ -21,6 +21,7 @@ PARSED = {}
 
 # Produce a key suitable for indexing paths with.
 makeKey = (model, path, subclasses) ->
+  # coffeelint: disable=no_nested_string_interpolation
   """#{model?.name}|#{model?.service?.root}|#{path}:#{ "#{ k }=#{ v }" for k, v of subclasses }"""
 
 #

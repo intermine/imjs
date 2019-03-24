@@ -20,7 +20,7 @@ describe 'List', ->
     @afterAll always cleanUp
     @beforeAll prepare -> cleanUp().then ->
       service.fetchList(FAVS).then(invoke 'copy', {tags, name})
-           .then( (copy) -> copy.rename newName )
+      .then( (copy) -> copy.rename newName )
 
     it 'should exist', eventually (list) ->
       should.exist list

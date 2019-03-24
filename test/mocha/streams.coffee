@@ -50,8 +50,8 @@ describe 'Service#eachRecord', ->
 
       p = service.eachRecord(query).then (streamOfEmployees) ->
         streamOfEmployees.pipe reduce ((total, emp) -> total + emp.age), 0
-                         .on 'data', check
-                         .on 'error', done
+        .on 'data', check
+        .on 'error', done
       p.then null, done
 
   describe 'Query', ->

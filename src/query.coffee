@@ -793,7 +793,7 @@ class Query
       [path, direction] = input
       so = {path, direction}
     else if (not input.path?)
-      [path, direction] = [k, v] for k, v of input
+      [path, direction] = ([k, v] for k, v of input)
       so = {path, direction}
     else
       {path, direction} = input
@@ -972,8 +972,8 @@ class Query
       contentType: 'application/xml'
       dataType: 'json'
     withCB cb, @service.authorise(req)
-                       .then((authed) => @service.doReq authed)
-                       .then((resp) -> resp.queries)
+    .then((authed) => @service.doReq authed)
+    .then((resp) -> resp.queries)
 
   # Store this query for the first time, avoiding name collisions.
   store: (name, cb) -> REQUIRES_VERSION @service, 16, =>
@@ -989,8 +989,8 @@ class Query
       contentType: 'application/xml'
       dataType: 'json'
     withCB cb, updateName, @service.authorise(req)
-                                   .then((authed) => @service.doReq authed)
-                                   .then(getName)
+    .then((authed) => @service.doReq authed)
+    .then(getName)
 
   saveAsTemplate: (name, cb) -> REQUIRES_VERSION @service, 16, =>
     if utils.isFunction name
