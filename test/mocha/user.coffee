@@ -16,7 +16,9 @@ describe 'User#getToken', ->
 
   describe 'A day token', ->
 
-    @beforeAll prepare -> parallel userPromise, userPromise.then invoke 'createToken'
+    @beforeAll prepare ->
+      parallel userPromise, userPromise.then invoke 'createToken'
+      return
 
     it 'should not be the same as the permanent token', eventually ([_, token]) ->
       token.should.not.equal service.token
@@ -33,7 +35,7 @@ describe 'User#getToken', ->
 
     describe 'create a token', ->
 
-      @afterAll always revokeAll
+      @afterAll ->always revokeAll
       @beforeAll always revokeAll
       @beforeAll prepare -> userPromise.then (user) ->
         user.createToken('perm', MSG).then -> user.fetchCurrentTokens()

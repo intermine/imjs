@@ -34,7 +34,9 @@ eventually = (test) -> (done) -> report done, @promise.then test
 
 promising = (p, test) -> (done) -> report done, p.then test
 
-always = (fn) -> (done) -> fn().then (-> done()), (-> done())
+always = (fn) -> (done) -> 
+  fn().then (-> done()), (-> done())
+  return
 
 shouldFail = (fn) -> shouldBeRejected fn()
 
