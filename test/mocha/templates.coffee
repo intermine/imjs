@@ -5,11 +5,14 @@ should               = require 'should'
 describe 'Fetching templates', ->
 
   {service} = new Fixture
-  
+
   @beforeAll prepare service.fetchTemplates
 
   it 'should find some templates', eventually (templates) ->
     should.exist templates
+
+  it 'should return tags for private templates', eventually (templates) ->
+    templates["private-template-1"]["tags"].length.should.equal 2
 
   it 'should include ManagerLookup', eventually (templates) ->
     templates.should.have.property('ManagerLookup').with.property('select')
@@ -17,7 +20,7 @@ describe 'Fetching templates', ->
 describe 'Using templates', ->
 
   {service} = new Fixture
-  
+
   @beforeAll prepare service.fetchTemplates
 
   it 'should be just like using queries', eventually (templates) ->
