@@ -12,7 +12,7 @@ fi
 cd $HOME
 
 # Pull in the server code.
-git clone --single-branch --branch 'master' --depth 1 https://github.com/intermine/intermine.git server
+git clone --single-branch --branch 'dev' --depth 1 https://github.com/intermine/intermine.git server
 
 export PSQL_USER=postgres
 
