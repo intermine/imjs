@@ -12,9 +12,15 @@ npm install -g mocha grunt bower
 3. Clone the repo and change into its directory if you haven't already.
 4. Install dependencies: `npm install` and then `bower install`. (Note - this is not a duplicate of step 2. Step 2 installs some global dependencies that can be used outside of this package, whereas step 4 installs local dependencies that are used to _build_ this package).
 
+### Adding new classes to the API
+
+1. Ideally, any new class added to the API should be in its own separate file.
+2. [`service.coffee`](src/service.coffee) acts as the entry point to the API. In order to add to the public part of the API, import the functionality in the file (at the top) and re-export it (at the bottom). Same pattern has to be followed to ensure that your file is correctly being added to the final build file.
+3. Update [`build-order.json`](build-order.json) and [`BUILD_ORDER`](BUILD_ORDER) (if required) so that your files are concatenated in the final build in correct order.
+
 ### Running / updating imjs
 
-See the [gruntfile](gruntfile.js) for possible tasks to be run. A default task that runs the build and tests is simply `grunt`.
+See the [gruntfile](Gruntfile.js) for possible tasks to be run. A default task that runs the build and tests is simply `grunt`.
 
 ## Building the docs
 
