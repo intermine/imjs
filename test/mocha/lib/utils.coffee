@@ -25,7 +25,10 @@ after = (promises...) ->
   if promises?.length then Promise.all(promises) else Promise.resolve(true)
 
 report = (done, promise) -> 
-  promise.then (-> done()), done
+  if promise.then?
+    promise.then (-> done()), done 
+  else 
+    done()
   return true
 
 prepare = (promiser) -> (done) -> 

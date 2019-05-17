@@ -130,6 +130,7 @@ describe 'PathInfo', ->
               catch e
                 done e
             return
+          return undefined
 
     describe '#containsCollection()', -> it 'should not contain a collection', ->
       path.containsCollection().should.be.false
@@ -368,13 +369,13 @@ describe 'PathInfo', ->
 
     describe '#getDisplayName', ->
 
-      @beforeAll prepare ->
-        path.getDisplayName
-        return
       @afterEach PathInfo.flushCache
 
-      it 'should promise to return the name we gave it', eventually (name) ->
-        name.should.equal "FOO"
+      it 'should promise to return the name we gave it', (done) ->
+        path.getDisplayName (err, name) ->
+          name.should.equal "FOO"
+        done()
+        return undefined
 
   describe 'Long reference with collection chain', ->
 
@@ -393,7 +394,6 @@ describe 'PathInfo', ->
 
       @beforeAll prepare ->
         path.getDisplayName
-        return
 
       it 'should promise to return a name', eventually (name) ->
         name.should.equal "Company > Departments > Manager > Address"
