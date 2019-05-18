@@ -83,6 +83,7 @@ describe 'User#getToken', ->
                   done()
                 catch e
                   done e
+        return undefined
 
     describe 'create a couple of tokens', ->
 

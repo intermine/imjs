@@ -1,5 +1,5 @@
 Fixture = require './lib/fixture'
-{eventually, prepare, always} = require './lib/utils'
+{eventually, prepare, always, report} = require './lib/utils'
 {invoke} = Fixture.funcutils
 should = require 'should'
 
@@ -29,7 +29,6 @@ describe 'Service', ->
 
         it 'should find the prefs set correctly', eventually (prefs) ->
           prefs.testpref.should.equal 'foo'
-          return undefined
 
     describe 'callback api', ->
 
@@ -46,6 +45,7 @@ describe 'Service', ->
               done()
             catch e
               done e
+          return undefined
 
       describe 'setting pref', ->
 
@@ -57,6 +57,7 @@ describe 'Service', ->
               done()
             catch e
               done e
+          return undefined
 
 describe 'User: single preference management', ->
 
