@@ -67,6 +67,7 @@ describe 'Service', ->
           done()
         catch e
           done e
+      return undefined
 
 describe 'Query', ->
 

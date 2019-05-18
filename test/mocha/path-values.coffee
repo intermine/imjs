@@ -43,6 +43,7 @@ describe 'Service', ->
           done()
         catch e
           done e
+      return undefined
 
   describe '#pathValues(Path("Company.name"))', ->
 
@@ -101,6 +102,7 @@ describe 'Service', ->
           done()
         catch err
           done err
+      return undefined
 
   describe '#pathValues(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 

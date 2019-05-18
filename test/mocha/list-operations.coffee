@@ -58,7 +58,7 @@ listOpTest = ({method, expectedMember, lists, size}) ->
             done()
           catch e
             done e
-
+        return undefined
 describe 'List Operations', ->
 
   listOpTest

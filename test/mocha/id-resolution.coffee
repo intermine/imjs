@@ -72,6 +72,7 @@ describe 'CategoryResults', ->
 cleanUp = (done) ->
   pass = -> done()
   @promise.then(invoke 'del').then pass, pass
+  return undefined
 
 testIDResolutionAgainst = (service, extraTests = {}) ->
 
@@ -170,6 +171,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
     it 'should increase its backoff on each poll', eventually (job) ->
       job.poll().then (results) ->
         job.decay.should.be.above 50
+      return undefined
 
 describe 'Service', ->
 

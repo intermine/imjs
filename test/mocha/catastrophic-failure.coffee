@@ -38,6 +38,7 @@ describe 'not available failure', ->
 
     it 'should fail', (done) ->
       promise.then (shouldHaveFailed done), (-> done())
+      return undefined
 
     it 'should provide a reasonable message', (done) ->
       promise.then (shouldHaveFailed done), (err) ->

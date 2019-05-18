@@ -54,4 +54,5 @@ describe 'List', ->
           catch e
             done e
       service.fetchList(FAVS).then(invoke 'copy', {tags, name}).then test, done
+      return undefined
 

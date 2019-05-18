@@ -49,6 +49,7 @@ describe 'Service', ->
             done()
           catch e
             done e
+        return undefined
 
     describe 'bad requests', ->
 
@@ -61,6 +62,7 @@ describe 'Service', ->
           service.errorHandler = eh
           done "Expected error - got #{ emps }" unless err?
           done()
+        return undefined
 
 describe 'Query', ->
 
@@ -86,4 +88,4 @@ describe 'Query', ->
           done e
 
       service.query(olderEmployees).then testEmps, done
-
+      return undefined

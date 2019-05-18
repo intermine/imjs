@@ -114,6 +114,7 @@ describe 'List', ->
           done e
 
       service.fetchList('My-Favourite-Employees').then testCopy, done
+      return undefined
 
   describe '#copy({name, tags}, cb)', ->
 
@@ -138,6 +139,7 @@ describe 'List', ->
           done e
 
       service.fetchList('My-Favourite-Employees').then testCopy, done
+      return undefined
 
   describe '#copy(cb)', ->
 
@@ -161,4 +163,5 @@ describe 'List', ->
           done e
 
       service.fetchList('My-Favourite-Employees').then testCopy, done
+      return undefined
 

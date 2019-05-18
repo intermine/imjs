@@ -34,6 +34,7 @@ describe 'Service#fetchListsContaining', ->
           done()
         catch e
           done e
+      return undefined
 
   describe 'searching for internal ids', ->
 
@@ -46,7 +47,10 @@ describe 'Service#fetchListsContaining', ->
     it 'should find the right number of lists', eventually (ls) ->
       ls.length.should.equal 3
 
-    it 'should find "My-Favourite-Employees"', eventually (ls) ->
-      (l.name for l in ls).should.containEql 'My-Favourite-Employees'
+    it 'should find "My-Favourite-Employees"', (done)->
+      test =  (ls) ->
+        (l.name for l in ls).should.containEql 'My-Favourite-Employees'
+      eventually(test)(done)
+      return undefined
 
 
