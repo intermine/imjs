@@ -29,6 +29,7 @@ describe 'Service', ->
 
         it 'should find the prefs set correctly', eventually (prefs) ->
           prefs.testpref.should.equal 'foo'
+          return undefined
 
     describe 'callback api', ->
 
