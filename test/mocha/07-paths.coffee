@@ -119,7 +119,6 @@ describe 'PathInfo', ->
         
         it 'should yield the name', (done) ->
           path.getDisplayName (err, name) ->
-            # return done err if err?
             if err?
               done err
               return
