@@ -41,6 +41,7 @@ describe 'Service#eachRecord', ->
         stream.on 'end', check
         stream.on 'error', reject
       service.eachRecord(query).then test, done
+      return undefined
 
     it 'can make use of pipes', (done) ->
       check = (total) ->
@@ -55,6 +56,7 @@ describe 'Service#eachRecord', ->
         .on 'data', check
         .on 'error', done
       p.then null, done
+      return undefined
 
   describe 'Query', ->
 

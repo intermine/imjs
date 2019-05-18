@@ -24,13 +24,16 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
-    it 'should resolve successfully', resolves promise
+    it 'should resolve successfully', (done) ->
+      resolves(promise)(done)
+      return undefined
 
     it 'should yield a positive value', (done) ->
       promise.then (v) ->
         v.should.be.above 0
         done()
       promise.then null, done
+      return undefined
 
     it 'should support callbacks', (done) ->
       service.fetchVersion (err, v) ->
@@ -40,6 +43,7 @@ describe 'Static service properties:', ->
           done()
         catch e
           done e
+      return undefined
 
   describe 'the release', ->
     
@@ -47,11 +51,14 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
-    it 'should resolve successfully', resolves promise
+    it 'should resolve successfully', (done)->
+      resolves(promise)(done)
+      return undefined
 
     it 'should equal "test"', (done) ->
       promise.then( (r) -> r.should.equal 'test' )
       .then (-> done()), done
+      return undefined
 
     it 'should support callbacks', (done) ->
       service.fetchRelease (err, r) ->
@@ -61,6 +68,7 @@ describe 'Static service properties:', ->
           done()
         catch e
           done e
+      return undefined
 
   describe 'the classkeys', ->
 
@@ -68,15 +76,19 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
-    it 'should resolve successfully', resolves promise
+    it 'should resolve successfully', (done) ->
+      resolves(promise)(done)
+      return undefined
 
     it 'should have the classes property', (done) ->
       promise.then( (ck) -> ck.should.have.property 'Employee' )
       .then (-> done()), done
+      return undefined
 
     it 'should have a keys for employee', (done) ->
       promise.then( (ck) -> ck.Employee.should.have.lengthOf 1 )
       .then (-> done()), done
+      return undefined
 
     it 'should support callbacks', (done) ->
       service.fetchRelease (err, ck) ->
@@ -86,6 +98,7 @@ describe 'Static service properties:', ->
           done()
         catch e
           done e
+      return undefined
 
   describe 'the model', ->
 
@@ -93,24 +106,29 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
-    it 'should resolve successfully', resolves promise
+    it 'should resolve successfully', (done) ->
+      resolves(promise)(done)
+      return undefined
 
     it 'should have the classes property', (done) ->
       promise.then (m) ->
         m.should.have.property 'classes'
         done()
       promise.then null, done
+      return undefined
 
     it 'should have a positive number of classes', (done) ->
       promise.then null, done
       promise.then (m) ->
         (v for _, v of m.classes).length.should.be.ok
         done()
+      return undefined
 
     it 'should support callbacks', (done) ->
       service.fetchModel (err, m) ->
         m.should.have.property 'classes' if m?
         done(err)
+      return undefined
 
   describe 'the summary fields', ->
 
@@ -127,23 +145,28 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
-    it 'should resolve successfully', resolves promise
+    it 'should resolve successfully', (done) ->
+      resolves(promise)(done)
+      return undefined
 
     it 'should have fields for Employee', (done) ->
       promise.then null, done
       promise.then (sfs) ->
         sfs.should.have.property 'Employee'
         done()
+      return undefined
 
     it 'should have the expected fields for Employee', (done) ->
       promise.then null, done
       promise.then (sfs) ->
         sfs.Employee.should.eql expected
         done()
+      return undefined
 
     it 'should support callbacks', (done) ->
       promise.then null, done
       service.fetchSummaryFields (err, sfs) ->
         sfs.should.have.property 'Employee' if sfs?
         done(err)
+      return undefined
 
