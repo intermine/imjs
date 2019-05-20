@@ -18,7 +18,6 @@ describe 'User#getToken', ->
 
     @beforeAll prepare ->
       parallel userPromise, userPromise.then invoke 'createToken'
-      return
 
     it 'should not be the same as the permanent token', eventually ([_, token]) ->
       token.should.not.equal service.token

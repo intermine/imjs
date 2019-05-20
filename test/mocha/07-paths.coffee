@@ -108,8 +108,7 @@ describe 'PathInfo', ->
 
       describe 'promise API', ->
         @beforeAll prepare ->
-          path.getDisplayName
-          return true
+          path.getDisplayName()
 
         it 'should be a nice human readable string', eventually (name) ->
           name.should.equal "Employee > Years Alive"
@@ -392,7 +391,7 @@ describe 'PathInfo', ->
     describe '#getPathInfo', ->
 
       @beforeAll prepare ->
-        path.getDisplayName
+        path.getDisplayName()
 
       it 'should promise to return a name', eventually (name) ->
         name.should.equal "Company > Departments > Manager > Address"
@@ -460,7 +459,6 @@ describe 'The path of a poor person', ->
 
   @beforeAll prepare ->
     path.getDisplayName()
-    return
 
   it 'should say this person is poor', eventually (name) ->
     name.should.eql 'Poor Person'
