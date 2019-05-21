@@ -12,7 +12,7 @@ fi
 cd $HOME
 
 # Pull in the server code.
-git clone --single-branch --branch 'master' --depth 1 https://github.com/intermine/intermine.git server
+git clone --single-branch --branch 'dev' --depth 1 https://github.com/intermine/intermine.git server
 
 export PSQL_USER=postgres
 
@@ -26,6 +26,10 @@ mkdir -p $PROPDIR
 echo "#--- creating $TESTMODEL_PROPS"
 cp server/config/testmodel.properties $TESTMODEL_PROPS
 sed -i -e $SED_SCRIPT $TESTMODEL_PROPS
+
+# Initialise solr
+echo '#---> Setting up solr search'
+./server/config/travis/init-solr.sh
 
 # We will need a fully operational web-application
 echo '#---> Building and releasing web application to test against'
