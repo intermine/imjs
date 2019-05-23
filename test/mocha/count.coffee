@@ -12,7 +12,7 @@ describe 'Service', ->
 
   describe '#count(path)', ->
 
-    pathCountTest = (path, n, xs) =>
+    pathCountTest = (path, n, xs) ->
       describe path, ->
         @beforeAll prepare -> service.count path
 
@@ -55,6 +55,7 @@ describe 'Service', ->
             done()
           catch e
             done e
+        return undefined
 
 describe 'Query#count', ->
 

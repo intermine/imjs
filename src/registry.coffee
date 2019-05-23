@@ -27,7 +27,7 @@ class Registry
   # @param [String] intended datatype to return if present
   #
   # @return [String] datatype if provided or fallbacks to json data
-  getFormat: (intended = 'json') =>
+  getFormat: (intended = 'json') ->
     return intended
 
   # Helper function to check if an object is empty or not

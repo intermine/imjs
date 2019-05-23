@@ -15,7 +15,8 @@ describe 'parse failure', ->
     promise = service.fetchModel()
 
     it 'should fail', (done) ->
-      promise.then (shouldHaveFailed done), (-> done())
+      promise.then((shouldHaveFailed done), (-> done()))
+      return undefined
 
     it 'should provide a reasonable message', (done) ->
       promise.then (shouldHaveFailed done), (err) ->
@@ -24,6 +25,7 @@ describe 'parse failure', ->
           done()
         catch e
           done e
+      return undefined
 
 describe 'not available failure', ->
 
@@ -36,6 +38,7 @@ describe 'not available failure', ->
 
     it 'should fail', (done) ->
       promise.then (shouldHaveFailed done), (-> done())
+      return undefined
 
     it 'should provide a reasonable message', (done) ->
       promise.then (shouldHaveFailed done), (err) ->
@@ -44,3 +47,4 @@ describe 'not available failure', ->
           done()
         catch e
           done e
+      return undefined

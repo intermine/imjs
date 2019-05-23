@@ -22,8 +22,8 @@ describe 'TSV results', ->
 
   @beforeAll prepare ->
     service.query(query)
-           .then (q) -> service.post 'query/results', format: 'tsv', query: q.toXML()
-           .then toRows
+    .then (q) -> service.post 'query/results', format: 'tsv', query: q.toXML()
+    .then toRows
   
   describe '#post(path, format: "tsv")', ->
 

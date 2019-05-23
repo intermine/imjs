@@ -107,21 +107,28 @@ describe 'PathInfo', ->
     describe '#getDisplayName', ->
 
       describe 'promise API', ->
-        @beforeAll prepare path.getDisplayName
+        @beforeAll prepare ->
+          path.getDisplayName()
 
         it 'should be a nice human readable string', eventually (name) ->
           name.should.equal "Employee > Years Alive"
+          return undefined
 
       describe 'callback api', ->
         
         it 'should yield the name', (done) ->
           path.getDisplayName (err, name) ->
-            return done err if err?
-            try
-              name.should.equal "Employee > Years Alive"
-              done()
-            catch e
-              done e
+            if err?
+              done err
+              return
+            else
+              try
+                name.should.equal "Employee > Years Alive"
+                done()
+              catch e
+                done e
+            return
+          return undefined
 
     describe '#containsCollection()', -> it 'should not contain a collection', ->
       path.containsCollection().should.be.false
@@ -360,11 +367,13 @@ describe 'PathInfo', ->
 
     describe '#getDisplayName', ->
 
-      @beforeAll prepare path.getDisplayName
       @afterEach PathInfo.flushCache
 
-      it 'should promise to return the name we gave it', eventually (name) ->
-        name.should.equal "FOO"
+      it 'should promise to return the name we gave it', (done) ->
+        path.getDisplayName (err, name) ->
+          name.should.equal "FOO"
+        done()
+        return undefined
 
   describe 'Long reference with collection chain', ->
 
@@ -381,7 +390,8 @@ describe 'PathInfo', ->
 
     describe '#getPathInfo', ->
 
-      @beforeAll prepare path.getDisplayName
+      @beforeAll prepare ->
+        path.getDisplayName()
 
       it 'should promise to return a name', eventually (name) ->
         name.should.equal "Company > Departments > Manager > Address"
@@ -437,7 +447,8 @@ describe 'Two similar paths', ->
 
   describe 'their names', ->
 
-    @beforeAll prepare -> Fixture.utils.parallel(p.getDisplayName() for p in [pathA, pathB])
+    @beforeAll prepare ->
+      Fixture.utils.parallel(p.getDisplayName() for p in [pathA, pathB])
 
     it 'should be the same', eventually ([a, b]) ->
       a.should.eql b
@@ -446,7 +457,8 @@ describe 'The path of a poor person', ->
 
   path = testmodel.makePath 'Broke'
 
-  @beforeAll prepare -> path.getDisplayName()
+  @beforeAll prepare ->
+    path.getDisplayName()
 
   it 'should say this person is poor', eventually (name) ->
     name.should.eql 'Poor Person'

@@ -138,4 +138,5 @@ describe 'Service', ->
           done()
         catch e
           done e
+      return undefined
 

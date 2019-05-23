@@ -91,6 +91,7 @@ describe 'Service#search', ->
             done()
           catch e
             done e
+        return undefined
 
     describe 'to look for David', ->
 
@@ -104,6 +105,7 @@ describe 'Service#search', ->
             done()
           catch e
             done e
+        return undefined
 
     describe 'searching by a specific type', ->
 
@@ -118,3 +120,4 @@ describe 'Service#search', ->
             done()
           catch e
             done e
+        return undefined

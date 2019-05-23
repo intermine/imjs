@@ -184,7 +184,7 @@ class Service
     @errorHandler ?= DEFAULT_ERROR_HANDLER
     @help ?= 'no.help.available@dev.null'
     @useCache = not noCache # Peristent processes might not want to cache model, version, etc.
-    @getFormat = (intended = 'json') =>
+    @getFormat = (intended = 'json') ->
       return intended
 
   # Convenience method for making basic POST requests.

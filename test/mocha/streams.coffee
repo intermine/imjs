@@ -27,10 +27,12 @@ describe 'Service#eachRecord', ->
     it 'can yield each employee, using params', (done) ->
       {reject, check, count} = Counter.forOldEmployees done
       service.eachRecord query, {}, count, reject, check
+      return undefined
 
     it 'can yield each employee, without needing a page, using params', (done) ->
       {reject, check, count} = Counter.forOldEmployees done
       service.eachRecord query, count, reject, check
+      return undefined
 
     it 'can yield a stream of employees, using params', (done) ->
       {reject, check, count} = Counter.forOldEmployees done
@@ -39,6 +41,7 @@ describe 'Service#eachRecord', ->
         stream.on 'end', check
         stream.on 'error', reject
       service.eachRecord(query).then test, done
+      return undefined
 
     it 'can make use of pipes', (done) ->
       check = (total) ->
@@ -50,9 +53,10 @@ describe 'Service#eachRecord', ->
 
       p = service.eachRecord(query).then (streamOfEmployees) ->
         streamOfEmployees.pipe reduce ((total, emp) -> total + emp.age), 0
-                         .on 'data', check
-                         .on 'error', done
+        .on 'data', check
+        .on 'error', done
       p.then null, done
+      return undefined
 
   describe 'Query', ->
 
@@ -60,11 +64,13 @@ describe 'Service#eachRecord', ->
       {reject, check, count} = Counter.forOldEmployees done
       test = (q) -> service.eachRecord q, {}, count, reject, check
       service.query(query).then test, done
+      return undefined
 
     it 'can yield each employee, without needing a page', (done) ->
       {reject, check, count} = Counter.forOldEmployees done
       testQuery = (q) -> service.eachRecord q, count, reject, check
       service.query(query).then testQuery, done
+      return undefined
 
     it 'can yield a stream of employees, no callbacks', (done) ->
       {reject, check, count} = Counter.forOldEmployees done
@@ -74,6 +80,7 @@ describe 'Service#eachRecord', ->
         stream.on 'error', reject
       testQuery = (q) -> service.eachRecord(q).then testStream, reject
       service.query(query).then testQuery, reject
+      return undefined
 
 describe 'Query#eachRecord', ->
 

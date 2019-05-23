@@ -50,6 +50,7 @@ describe 'lookup', ->
             done()
           catch e
             done new Error e
+        return undefined
 
 describe 'find', ->
 
@@ -87,6 +88,7 @@ describe 'find', ->
             done()
           catch e
             done new Error e
+        return undefined
 
 describe 'Service#findById', ->
 

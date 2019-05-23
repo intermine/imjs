@@ -163,6 +163,7 @@ describe 'utils', ->
     it 'should be a failed promise', (done) ->
       shouldHaveFailed = (args...) -> done "Expected failure, got #{ args }"
       e.then shouldHaveFailed, (-> done())
+      return
 
   describe 'success', ->
      
@@ -172,6 +173,7 @@ describe 'utils', ->
 
     it 'should be a resolved promise', (done) ->
       s.then (-> done()), (-> done "Failed")
+      return
 
   describe 'defer', ->
 
@@ -187,7 +189,8 @@ describe 'utils', ->
 
       it 'should have been resolved', (done) ->
         promise.then( (res) -> res.should.equal 'FOO' )
-               .then( (-> done()), done )
+        .then( (-> done()), done )
+        return
       
     describe 'rejection', ->
 
@@ -203,6 +206,7 @@ describe 'utils', ->
           ((err) ->
             err.should.equal 'BAR'
             done()))
+        return
 
   describe 'the result of thenning a rejected promise', ->
 
@@ -220,6 +224,7 @@ describe 'utils', ->
                  ((err) ->
                    err.should.equal 'FOO'
                    done())
+      return
 
   describe 'fold', ->
 

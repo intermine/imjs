@@ -27,6 +27,7 @@ describe 'Service', ->
           done()
         catch e
           done e
+      return undefined
 
   describe '#findLists name', ->
 
@@ -35,8 +36,15 @@ describe 'Service', ->
     it 'should find one list', eventually (lists) ->
       lists.length.should.equal 1
 
-    it 'should find the right list', eventually ([list]) ->
-      list.name.should.equal 'My-Favourite-Employees'
+    it 'should find the right list', (done) ->
+      test = ([list]) ->
+        list.name.should.equal 'My-Favourite-Employees'
+      promise = service.findLists 'My-Favourite-Employees'
+      promise.then ((lists) ->
+        test lists
+        done()
+      )
+      return undefined
 
     it 'should have 4 members', eventually ([list]) ->
       list.size.should.equal 4
@@ -46,23 +54,41 @@ describe 'Service', ->
     it 'should find the right list', (done) ->
 
       service.findLists 'My-Favourite-Employees', (err, lists) ->
-        return done err if err?
-        try
-          lists.length.should.equal 1
-          lists[0].size.should.equal 4
-          done()
-        catch e
-          done e
+        #return done err if err?
+        if err?
+          done err
+        else
+          try
+            lists.length.should.equal 1
+            lists[0].size.should.equal 4
+            done()
+          catch e
+            done e
+      return undefined
 
   describe '#fetchList()', ->
 
     @beforeAll prepare -> service.fetchList 'My-Favourite-Employees'
 
-    it 'should find that list', eventually (list) ->
-      should.exist list
+    it 'should find that list', (done) ->
+      test = (list) ->
+        should.exist list
+      promise = service.fetchList 'My-Favourite-Employees'
+      promise.then ((list) ->
+        test list
+        done()
+      )
+      return undefined
 
-    it 'should find the right list', eventually (list) ->
-      list.name.should.equal 'My-Favourite-Employees'
+    it 'should find the right list', (done) ->
+      test =  (list) ->
+        list.name.should.equal 'My-Favourite-Employees'
+      promise = service.fetchList 'My-Favourite-Employees'
+      promise.then ((list) ->
+        test list
+        done()
+      )
+      return undefined
 
     it 'should have 4 members', eventually (list) ->
       list.size.should.equal 4
@@ -83,3 +109,4 @@ describe 'Service', ->
           done()
         catch e
           done e
+      return undefined

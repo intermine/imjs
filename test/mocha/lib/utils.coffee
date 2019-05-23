@@ -24,15 +24,28 @@ parallel = (promises...) ->
 after = (promises...) ->
   if promises?.length then Promise.all(promises) else Promise.resolve(true)
 
-report = (done, promise) -> promise.then (-> done()), done
+report = (done, promise) -> 
+  if promise.then?
+    promise.then (-> done()), done 
+  else 
+    done()
+  return true
 
-prepare = (promiser) -> (done) -> report done, @promise = promiser()
+prepare = (promiser) -> (done) -> 
+  report done, @promise = promiser()
+  return true
 
-eventually = (test) -> (done) -> report done, @promise.then test
+eventually = (test) -> (done) -> 
+  report done, @promise.then test
+  return true
 
-promising = (p, test) -> (done) -> report done, p.then test
+promising = (p, test) -> (done) -> 
+  report done, p.then test
+  return true
 
-always = (fn) -> (done) -> fn().then (-> done()), (-> done())
+always = (fn) -> (done) -> 
+  fn().then (-> done()), (-> done())
+  return true
 
 shouldFail = (fn) -> shouldBeRejected fn()
 
@@ -40,6 +53,7 @@ shouldBeRejected = (promise) -> (done) ->
   onErr = -> done()
   onSucc = (args...) -> done new Error "Expected failure, got: [#{ args.join(', ') }]"
   promise.then onSucc, onErr
+  return true
 
 needs = (exp) -> (service) -> (fn) -> prepare -> service.fetchVersion().then (actual) ->
   if actual >= exp then fn service else error "Service at #{ actual }, must be >= #{ exp }"

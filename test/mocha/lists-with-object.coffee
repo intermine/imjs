@@ -34,19 +34,18 @@ describe 'Service#fetchListsContaining', ->
           done()
         catch e
           done e
+      return undefined
 
   describe 'searching for internal ids', ->
 
     @beforeAll prepare ->
       q = select: ['Employee.id'], where: {name: 'David Brent'}
       service.values(q)
-             .then(get 0)
-             .then (id) -> service.fetchListsContaining {id}
+      .then(get 0)
+      .then (id) -> service.fetchListsContaining {id}
 
     it 'should find the right number of lists', eventually (ls) ->
       ls.length.should.equal 3
 
     it 'should find "My-Favourite-Employees"', eventually (ls) ->
       (l.name for l in ls).should.containEql 'My-Favourite-Employees'
-
-
