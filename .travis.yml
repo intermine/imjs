@@ -13,3 +13,5 @@ script:
     - npm test
 node_js:
     - '10.15.2'
+jdk:
+    - openjdk8
