@@ -1,11 +1,11 @@
 should = require 'should'
+{unitTests} = require './lib/segregation'
   
 even = (n) -> n % 2 is 0
 add = (a, b) -> a + b
 lengthOf = (x) -> x.length
 
-#UNIT
-describe 'utils', ->
+unitTests() && describe 'utils', ->
 
   {utils} = require './lib/fixture'
 
