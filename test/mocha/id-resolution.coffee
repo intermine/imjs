@@ -82,6 +82,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     it 'should fail', shouldFail service.resolveIds
 
+  # BOTH
   describe '#resolutionJob(id)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
@@ -94,6 +95,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     it 'should get resolved', eventually (job) -> job.wait()
 
+  # BOTH
   describe '#resolveIds(job)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
@@ -131,6 +133,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     extraTests['#resolveIds(job)']?()
 
+  # BOTH
   describe '#resolveIds(convertedTypes)', ->
 
     identifiers = ['Sales']
@@ -153,6 +156,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
         results.goodMatchIds().should.have.lengthOf 0
         results.getMatchIds('MATCH').should.have.lengthOf 0
 
+  # BOTH
   describe '#resolveIds(caseSensitiveJob)', ->
 
     identifiers = ['anne', 'Brenda', 'Carol', 'Foo Bar', 'Fatou']
@@ -173,6 +177,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
         job.decay.should.be.above 50
       return undefined
 
+# BOTH (uses above function, mock accordingly)
 describe 'Service', ->
 
   describe 'current', ->

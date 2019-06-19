@@ -18,6 +18,7 @@ describe 'Service', ->
 
     it 'should fail', shouldFail service.complement
 
+  # BOTH
   describe '#complement(opts)', ->
 
     opts =
@@ -49,6 +50,7 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.containEql expectedMember
 
+  # BOTH
   describe '#complement(opts) {Array of list names}', ->
 
     opts =
@@ -80,6 +82,7 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.containEql expectedMember
 
+  # BOTH
   describe '#complement(opts) {Array of Lists}', ->
 
     from = ['some favs-some unknowns', 'Umlaut holders']
@@ -115,6 +118,7 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.containEql expectedMember
 
+  # BOTH
   describe '#complement(opts, cb)', ->
 
     opts =

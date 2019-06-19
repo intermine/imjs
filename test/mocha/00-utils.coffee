@@ -4,6 +4,7 @@ even = (n) -> n % 2 is 0
 add = (a, b) -> a + b
 lengthOf = (x) -> x.length
 
+#UNIT
 describe 'utils', ->
 
   {utils} = require './lib/fixture'

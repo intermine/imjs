@@ -10,6 +10,7 @@ SLOW = 100
 
 toRows = (text) -> text.split /\n/
 
+# BOTH
 describe 'CSV results', ->
 
   @slow SLOW

@@ -11,6 +11,7 @@ checkEmployees = (employees) ->
   employees.length.should.equal 46
   (e.age for e in employees).reduce((x, y) -> x + y).should.equal 2688
 
+# BOTH
 describe 'Service', ->
   @slow SLOW
 
@@ -64,6 +65,7 @@ describe 'Service', ->
           done()
         return undefined
 
+# BOTH
 describe 'Query', ->
 
   {service, olderEmployees} = new Fixture()

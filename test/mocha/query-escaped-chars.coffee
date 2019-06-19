@@ -2,6 +2,7 @@ Fixture = require './lib/fixture'
 {promising, prepare, eventually, shouldFail} = require './lib/utils'
 {invoke} = Fixture.utils
 
+# BOTH
 describe 'Control query for escaped chars', ->
 
   {service} = new Fixture()
@@ -14,6 +15,7 @@ describe 'Control query for escaped chars', ->
   it 'should find some employees', eventually (count) ->
     count.should.eql 1
 
+# BOTH
 describe 'Querying for escaped values', ->
 
   {service} = new Fixture()

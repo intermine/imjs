@@ -12,6 +12,7 @@ there_are_seven = (results) ->
   results.length.should.equal 7
   results[0].identifier.should.equal 'Vikram'
 
+# BOTH
 describe 'Service', ->
 
   @slow SLOW
@@ -69,6 +70,7 @@ describe 'Service', ->
           done e
       return undefined
 
+# BOTH
 describe 'Query', ->
 
   @slow SLOW

@@ -1,6 +1,7 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
 
+# BOTH
 describe 'Query#isRelevant', ->
 
   {service, youngerEmployees} = new Fixture()

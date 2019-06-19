@@ -10,6 +10,7 @@ toQ = (ids) -> query =
 
 toIds = invoke 'map', get 'objectId'
 
+# BOTH
 describe 'Query', ->
   
   {service, olderEmployees} = new Fixture()

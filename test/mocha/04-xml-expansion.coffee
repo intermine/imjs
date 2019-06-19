@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 
+# BOTH
 describe 'Query', ->
 
   describe 'expandStar', ->

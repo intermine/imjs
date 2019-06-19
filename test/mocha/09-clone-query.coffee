@@ -1,6 +1,7 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
 
+# BOTH
 describe 'Query#clone', ->
 
   {service, youngerEmployees} = new Fixture()
@@ -14,6 +15,7 @@ describe 'Query#clone', ->
   it 'should have more views in clone', eventually ([q, clone]) ->
     clone.views.length.should.be.above q.views.length
 
+# BOTH
 describe 'Query#clone sortOrder', ->
 
   {service, youngerEmployees} = new Fixture()

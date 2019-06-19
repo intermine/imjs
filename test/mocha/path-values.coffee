@@ -22,6 +22,7 @@ describe 'Service', ->
 
     it 'should fail', shouldFail -> service.pathValues 'Foo.bar'
 
+  # BOTH
   describe '#pathValues("Company.name")', ->
 
     @beforeAll prepare -> service.pathValues 'Company.name'
@@ -32,6 +33,7 @@ describe 'Service', ->
     it 'should include Wernham-Hogg', eventually (values) ->
       (v.value for v in values).should.containEql 'Wernham-Hogg'
 
+  # BOTH
   describe '#pathValues("Company.name", cb)', ->
      
     it 'should find WH in amongst the 7 companies', (done) ->
@@ -45,6 +47,7 @@ describe 'Service', ->
           done e
       return undefined
 
+  # BOTH
   describe '#pathValues(Path("Company.name"))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
@@ -56,6 +59,7 @@ describe 'Service', ->
     it 'should include Wernham-Hogg', eventually (values) ->
       (v.value for v in values).should.containEql 'Wernham-Hogg'
 
+  # BOTH
   describe '#pathValues("Department.employees.name")', ->
 
     @beforeAll prepare -> service.pathValues workerNames
@@ -66,6 +70,7 @@ describe 'Service', ->
     it 'should include David-Brent', eventually (values) ->
       (v.value for v in values).should.containEql 'David Brent'
 
+  # BOTH
   describe '#pathValues("Department.employees.name")', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
@@ -76,6 +81,7 @@ describe 'Service', ->
     it 'should include David-Brent', eventually (values) ->
       (v.value for v in values).should.containEql 'David Brent'
 
+  # BOTH
   describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"})', ->
 
     @beforeAll prepare -> service.pathValues workerNames, workingBosses
@@ -89,6 +95,7 @@ describe 'Service', ->
     it "should include B'wah Hah Hah", eventually (values) ->
       (v.value for v in values).should.containEql "Charles Miner"
 
+  # BOTH
   describe '#pathValues("Department.employees.name", {"Department.employees": "CEO"}, cb)', ->
 
     it 'should find 6 CEOs, including Charles Miner', (done) ->
@@ -104,6 +111,7 @@ describe 'Service', ->
           done err
       return undefined
 
+  # BOTH
   describe '#pathValues(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->
@@ -118,6 +126,7 @@ describe 'Service', ->
     it "should include B'wah Hah Hah", eventually (values) ->
       (v.value for v in values).should.containEql "Charles Miner"
 
+  # BOTH
   describe '#values("Department.employees.name", {"Department.employees": "CEO"})', ->
 
     @beforeAll prepare -> service.values workerNames, workingBosses
@@ -131,6 +140,7 @@ describe 'Service', ->
     it "should include B'wah Hah Hah", eventually (values) ->
       values.should.containEql "Charles Miner"
 
+  # BOTH
   describe '#values(Path("Department.employees.name", {"Department.employees": "CEO"}))', ->
 
     @beforeAll prepare -> service.fetchModel().then (m) ->

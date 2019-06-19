@@ -10,6 +10,7 @@ constraints = [
   {path: 'Employee.department.name', op: 'ONE OF', values: ['Sales', 'Accounting']}
 ]
 
+# BOTH
 describe 'Query', ->
 
   {service} = new Fixture

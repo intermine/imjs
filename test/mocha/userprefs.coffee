@@ -3,6 +3,7 @@ Fixture = require './lib/fixture'
 {invoke} = Fixture.funcutils
 should = require 'should'
 
+# BOTH
 describe 'Service', ->
 
   {service} = new Fixture()
@@ -59,6 +60,7 @@ describe 'Service', ->
               done e
           return undefined
 
+# BOTH
 describe 'User: single preference management', ->
 
   {service} = new Fixture()
@@ -90,6 +92,7 @@ describe 'User: single preference management', ->
     it 'should have the right prefs set', eventually (prefs) ->
       prefs.should.not.have.property 'testpref'
 
+# BOTH
 describe 'User: preference management with callbacks', ->
 
   {service} = new Fixture()
@@ -137,6 +140,7 @@ describe 'User: preference management with callbacks', ->
           catch e
             done e
 
+# BOTH
 describe 'User: multiple preference management', ->
 
   {service} = new Fixture()

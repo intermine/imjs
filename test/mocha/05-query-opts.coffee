@@ -16,6 +16,7 @@ sqlish =
     'department.name': 'Sales*'
     'age': {gt: 50}
 
+# BOTH
 describe 'The equivalence of syntaxes', ->
 
   {service} = new Fixture()

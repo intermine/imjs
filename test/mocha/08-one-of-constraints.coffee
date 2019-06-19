@@ -2,6 +2,7 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 
+#BOTH
 describe 'Query', ->
 
   # This query was failing in the webapp.

@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 {prepare, report, eventually} = require './lib/utils'
 
+# BOTH
 describe 'Service#search', ->
 
   {service} = new Fixture()

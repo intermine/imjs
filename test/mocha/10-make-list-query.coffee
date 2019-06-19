@@ -1,6 +1,7 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
 
+# BOTH
 describe 'Query#selectPreservingImpliedConstraints', ->
 
   {service, youngerEmployees} = new Fixture()
@@ -19,6 +20,7 @@ describe 'Query#selectPreservingImpliedConstraints', ->
   it 'should still think Employee.address is in the query', eventually (lq) ->
     lq.isInQuery('address').should.be.true
 
+# BOTH
 describe 'Query#makeListQuery', ->
 
   {service, youngerEmployees} = new Fixture()

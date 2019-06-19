@@ -5,6 +5,7 @@ should     = require 'should'
 
 things = ["Thing","Employable","Contractor","Employee","Manager","CEO","Address"]
 
+# UNIT
 describe 'Model', ->
 
   describe 'new', ->

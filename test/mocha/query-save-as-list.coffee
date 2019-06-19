@@ -7,6 +7,7 @@ tags = ['js', 'node', 'testing', 'mocha', 'save-as-list']
 makeTheList = (s, name, opts) -> prepare -> clear(s, name)().then ->
   parallel s.query(opts).then((q) -> q.saveAsList {name, tags}), s.count(opts)
 
+# BOTH
 describe 'Query#saveAsList', ->
 
   {service, olderEmployees, youngerEmployees} = new Fixture()

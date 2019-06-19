@@ -3,6 +3,7 @@ should = require 'should'
 Fixture = require './lib/fixture'
 {invoke, success} = Fixture.funcutils
 
+# BOTH
 describe 'List', ->
 
   {service} = new Fixture()

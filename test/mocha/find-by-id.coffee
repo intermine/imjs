@@ -13,6 +13,7 @@ findFieldsOfEmployee = (service, q, fields) ->
 # We have to query each time as ids are volatile.
 DAVIDS_ID_Q = select: ['Employee.id'], where: {name: 'David Brent'}
 
+# BOTH
 describe 'lookup', ->
 
   {service} = new Fixture()
@@ -52,6 +53,7 @@ describe 'lookup', ->
             done new Error e
         return undefined
 
+# BOTH
 describe 'find', ->
 
   {service} = new Fixture()
@@ -90,6 +92,7 @@ describe 'find', ->
             done new Error e
         return undefined
 
+# BOTH
 describe 'Service#findById', ->
 
   {service} = new Fixture()

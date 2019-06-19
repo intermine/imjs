@@ -3,6 +3,7 @@ Fixture = require './lib/fixture'
 
 normalise = (s) -> s.replace(/\s+/gm, ' ').replace(/>\s*</gm, '><')
 
+# BOTH
 describe 'Relevance of joins', ->
 
   {service} = new Fixture()

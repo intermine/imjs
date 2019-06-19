@@ -24,10 +24,12 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
+    # BOTH
     it 'should resolve successfully', (done) ->
       resolves(promise)(done)
       return undefined
 
+    # BOTH
     it 'should yield a positive value', (done) ->
       promise.then (v) ->
         v.should.be.above 0
@@ -35,6 +37,7 @@ describe 'Static service properties:', ->
       promise.then null, done
       return undefined
 
+    # BOTH
     it 'should support callbacks', (done) ->
       service.fetchVersion (err, v) ->
         return done err if err?
@@ -51,15 +54,18 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
+    # BOTH
     it 'should resolve successfully', (done)->
       resolves(promise)(done)
       return undefined
 
+    # BOTH
     it 'should equal "test"', (done) ->
       promise.then( (r) -> r.should.equal 'test' )
       .then (-> done()), done
       return undefined
 
+    # BOTH
     it 'should support callbacks', (done) ->
       service.fetchRelease (err, r) ->
         return done err if err?
@@ -76,20 +82,24 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
+    # BOTH
     it 'should resolve successfully', (done) ->
       resolves(promise)(done)
       return undefined
 
+    # BOTH
     it 'should have the classes property', (done) ->
       promise.then( (ck) -> ck.should.have.property 'Employee' )
       .then (-> done()), done
       return undefined
 
+    # BOTH
     it 'should have a keys for employee', (done) ->
       promise.then( (ck) -> ck.Employee.should.have.lengthOf 1 )
       .then (-> done()), done
       return undefined
 
+    # BOTH
     it 'should support callbacks', (done) ->
       service.fetchRelease (err, ck) ->
         return done err if err?
@@ -106,10 +116,12 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
+    # BOTH
     it 'should resolve successfully', (done) ->
       resolves(promise)(done)
       return undefined
 
+    # BOTH
     it 'should have the classes property', (done) ->
       promise.then (m) ->
         m.should.have.property 'classes'
@@ -117,6 +129,7 @@ describe 'Static service properties:', ->
       promise.then null, done
       return undefined
 
+    # BOTH
     it 'should have a positive number of classes', (done) ->
       promise.then null, done
       promise.then (m) ->
@@ -124,6 +137,7 @@ describe 'Static service properties:', ->
         done()
       return undefined
 
+    # BOTH
     it 'should support callbacks', (done) ->
       service.fetchModel (err, m) ->
         m.should.have.property 'classes' if m?
@@ -145,10 +159,12 @@ describe 'Static service properties:', ->
 
     it 'should return a usable value', is_usable promise
 
+    # BOTH
     it 'should resolve successfully', (done) ->
       resolves(promise)(done)
       return undefined
 
+    # BOTH
     it 'should have fields for Employee', (done) ->
       promise.then null, done
       promise.then (sfs) ->
@@ -156,6 +172,7 @@ describe 'Static service properties:', ->
         done()
       return undefined
 
+    # BOTH
     it 'should have the expected fields for Employee', (done) ->
       promise.then null, done
       promise.then (sfs) ->
@@ -163,6 +180,7 @@ describe 'Static service properties:', ->
         done()
       return undefined
 
+    # BOTH
     it 'should support callbacks', (done) ->
       promise.then null, done
       service.fetchSummaryFields (err, sfs) ->

@@ -7,6 +7,7 @@ once = parallel
 
 atV = needs 12
 
+# BOTH
 describe 'Query', ->
 
   describe 'qids', ->

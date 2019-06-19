@@ -28,6 +28,7 @@ describe 'Service', ->
       service = new Service root: 'localhost/intermine-test'
       service.root.should.equal 'http://localhost/intermine-test/service/'
 
+  # BOTH
   describe 'customHeaders', ->
 
     {headers} = new Fixture
@@ -55,6 +56,8 @@ describe 'Service', ->
   # from data, each service instance gets its own copy, so we test with
   # the summary fields instead, which can provide us with a strict identity
   # check (unlike the version and the release, which are primitives).
+
+  # BOTH
   describe 'caching', ->
 
     describe 'useCache', ->

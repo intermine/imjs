@@ -8,6 +8,7 @@ MSG = 'some message'
 # Subtract a second because the remote time is floored to the nearest second.
 start = new Date().getTime() - 1000
 
+# BOTH
 describe 'User#getToken', ->
 
   {service} = new Fixture

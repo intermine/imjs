@@ -88,6 +88,8 @@ constraintsTest = (input) -> () ->
     q.addConstraints input
     q.constraints.should.eql expected
 
+
+# UNIT
 describe 'Defining Query constraints', ->
 
   describe 'using the internal verbose format', constraintsTest expected
@@ -104,6 +106,7 @@ describe 'Defining Query constraints', ->
 
   describe 'including switched off constraints', constraintsTest someSwitchedOff
 
+# ??
 describe 'range constraints', ->
 
   {service} = new Fixture()
@@ -123,6 +126,7 @@ describe 'range constraints', ->
     it 'should have made a query with 6 constraints', eventually (q) ->
       q.constraints.length.should.eql 6
 
+# BOTH
 describe 'Query', ->
 
   describe '#isConstrained', ->

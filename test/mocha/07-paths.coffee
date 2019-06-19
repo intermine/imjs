@@ -104,6 +104,7 @@ describe 'PathInfo', ->
     describe '#getType()', -> it 'should report an appropriate type', ->
       path.getType().should.equal('int')
 
+    # BOTH
     describe '#getDisplayName', ->
 
       describe 'promise API', ->
@@ -388,6 +389,7 @@ describe 'PathInfo', ->
     it 'should stringify with string concatenation', ->
       ('' + path).should.equal('Company.departments.manager.address')
 
+    # BOTH
     describe '#getPathInfo', ->
 
       @beforeAll prepare ->
@@ -445,6 +447,7 @@ describe 'Two similar paths', ->
   it 'should equal each other', ->
     pathA.equals(pathB).should.be.true
 
+  #BOTH
   describe 'their names', ->
 
     @beforeAll prepare ->

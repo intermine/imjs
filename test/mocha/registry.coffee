@@ -2,9 +2,11 @@ should = require 'should'
 {shouldBeRejected} = require './lib/utils'
 
 Fixture = require './lib/fixture'
+nock = require 'nock'
 
 {Registry} = Fixture
 
+# BOTH
 describe 'Registry', ->
 
   describe 'new Registry', ->
@@ -48,6 +50,9 @@ describe 'Registry', ->
 
       it 'should fetch all mines given nothing in the query parameter', ->
         (fetchMines [], []).then (mines) ->
+          nock 'http://registry.intermine.org'
+            .get '/service/'
+            .reply 200, statusCode: 201, instances: {}
           should.exist mines
           mines.should.have.properties statusCode: 200
           mines.should.have.property 'instances'

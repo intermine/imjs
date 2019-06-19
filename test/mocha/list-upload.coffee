@@ -21,6 +21,7 @@ describe 'Service', ->
 
     it 'should fail', shouldFail service.createList
 
+  # BOTH
   describe '#createList(opts, ids)', ->
 
     opts =
@@ -47,6 +48,7 @@ describe 'Service', ->
     it 'should have the right tags', eventually (list) ->
       list.hasTag(t).should.be.true for t in opts.tags
 
+  # BOTH
   describe '#createList(opts-id-array, ids)', ->
 
     ids = [

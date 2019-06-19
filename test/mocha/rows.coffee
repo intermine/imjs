@@ -39,6 +39,7 @@ test = (done) -> (rows) ->
   catch e
     done e
 
+# BOTH
 describe 'Query', ->
 
   @slow SLOW
@@ -93,6 +94,7 @@ describe 'Service', ->
 
   describe '#rows()', ->
 
+    # BOTH
     describe 'good requests', ->
 
       {service, olderEmployees} = new Fixture()
@@ -120,6 +122,7 @@ describe 'Service', ->
 
       it 'should fail', shouldFail -> service.rows olderEmployees, timeout: 1
 
+    # BOTH
     describe 'reasonable timeouts', ->
 
       {service, olderEmployees} = new Fixture()
@@ -141,12 +144,14 @@ describe 'Service', ->
 
       it 'should return a failed promise', shouldFail -> service.rows badQuery
 
+      # BOTH
       it 'should yield an error as the first parameter to the callback', (done) ->
         service.rows badQuery, (err, rows) ->
           return done new Error("Expected error, but got #{ rows } instead") unless err?
           done()
         return undefined
 
+  # BOTH
   describe '#eachRow()', ->
 
     describe 'good requests', ->
@@ -210,6 +215,7 @@ describe 'Service', ->
 
       it 'should return a failed promise', shouldFail request
 
+      # BOTH
       it 'should report the status code of a bad query', (done) ->
         failed = service.eachRow badQuery
         failed.then (res) ->
@@ -222,6 +228,7 @@ describe 'Service', ->
             done e
         return undefined
 
+      # BOTH
       it 'should trigger the error handler provided', (done) ->
         state = {}
         reportNoError =

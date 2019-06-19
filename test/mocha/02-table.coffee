@@ -4,6 +4,7 @@ should     = require 'should'
 
 {TESTMODEL} = require '../data/model'
 
+# UNIT
 describe 'Table', ->
 
   testmodel = new Model TESTMODEL.model

@@ -2,6 +2,7 @@
 should = require 'should'
 Fixture = require './lib/fixture'
 
+# BOTH
 describe 'List', ->
 
   {service} = new Fixture()

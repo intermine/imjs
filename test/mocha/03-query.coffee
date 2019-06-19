@@ -17,6 +17,7 @@ options =
       'department.name': 'Sales*'
       'age': {gt: 50}
 
+# UNIT
 describe 'Query', ->
 
   testmodel = new Model TESTMODEL.model

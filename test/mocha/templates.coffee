@@ -2,6 +2,7 @@ Fixture              = require './lib/fixture'
 should               = require 'should'
 {prepare, eventually, always, shouldBeRejected} = require './lib/utils'
 
+# BOTH
 describe 'Fetching templates', ->
 
   {service} = new Fixture
@@ -14,6 +15,7 @@ describe 'Fetching templates', ->
   it 'should include ManagerLookup', eventually (templates) ->
     templates.should.have.property('ManagerLookup').with.property('select')
 
+# BOTH
 describe 'Using templates', ->
 
   {service} = new Fixture

@@ -10,6 +10,7 @@ describe 'Service', ->
 
     it 'should fail', shouldFail service.count
 
+  # BOTH
   describe '#count(path)', ->
 
     pathCountTest = (path, n, xs) ->
@@ -27,6 +28,7 @@ describe 'Service', ->
     pathCountTest 'Company.name',           7, 'names'
     pathCountTest 'Company',                7, 'companies'
 
+  # BOTH
   describe '#count(query)', ->
 
     describe 'promise API', ->
@@ -57,6 +59,7 @@ describe 'Service', ->
             done e
         return undefined
 
+# BOTH
 describe 'Query#count', ->
 
   {service, olderEmployees, allEmployees} = new Fixture()

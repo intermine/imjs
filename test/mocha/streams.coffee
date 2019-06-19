@@ -11,6 +11,7 @@ should               = require 'should'
 
 SLOW = 200
 
+# BOTH
 describe 'Service#eachRecord', ->
 
   @slow SLOW
@@ -82,6 +83,7 @@ describe 'Service#eachRecord', ->
       service.query(query).then testQuery, reject
       return undefined
 
+# BOTH
 describe 'Query#eachRecord', ->
 
   {olderEmployees, service} = new Fixture()

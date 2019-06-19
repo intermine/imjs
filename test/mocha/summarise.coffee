@@ -3,6 +3,7 @@ Fixture = require './lib/fixture'
 {invoke, get, flatMap} = Fixture.funcutils
 sumCounts = flatMap get 'count'
 
+# BOTH
 describe 'Query', ->
 
   describe 'summary of numeric path', ->

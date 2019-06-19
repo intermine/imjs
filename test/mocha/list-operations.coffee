@@ -16,6 +16,7 @@ listOpTest = ({method, expectedMember, lists, size}) ->
 
   clearList = clear service, args.name
 
+  # BOTH
   describe "a list created by #{ method }", ->
 
     describe 'using the promise api', ->
@@ -59,6 +60,8 @@ listOpTest = ({method, expectedMember, lists, size}) ->
           catch e
             done e
         return undefined
+
+# BOTH (Utilizes above function)
 describe 'List Operations', ->
 
   listOpTest

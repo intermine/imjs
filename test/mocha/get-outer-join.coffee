@@ -2,6 +2,7 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 should = require 'should'
 
+# BOTH
 describe 'Query', ->
 
   describe '#getOuterJoin(path)', ->

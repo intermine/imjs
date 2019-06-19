@@ -1,6 +1,7 @@
 Fixture                      = require './lib/fixture'
 {eventually, prepare, parallel} = require './lib/utils'
 
+# BOTH
 describe 'Query', ->
 
   describe 'with-subclasses', ->

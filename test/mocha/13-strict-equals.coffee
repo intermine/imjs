@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 
+# BOTH
 describe 'Equality', ->
 
   {service} = new Fixture()

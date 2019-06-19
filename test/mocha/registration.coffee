@@ -2,6 +2,7 @@ Fixture = require './lib/fixture'
 {always, prepare, eventually} = require './lib/utils'
 should = require 'should'
 
+# BOTH
 describe 'Service#register', ->
 
   username = 'mr foo'

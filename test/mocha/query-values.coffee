@@ -32,6 +32,7 @@ describe 'Query', ->
 
   test '#values', -> service.query(ageQuery).then invoke 'values'
 
+# BOTH
 describe 'Service', ->
 
   describe '#values', ->
