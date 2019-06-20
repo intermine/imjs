@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
+{integrationTests} = require './lib/segregation'
 
 # This query was failing in the webapp.
 toQ = (ids) -> query =
@@ -10,13 +11,13 @@ toQ = (ids) -> query =
 
 toIds = invoke 'map', get 'objectId'
 
-# BOTH
-describe 'Query', ->
+integrationTests() && describe 'Query', ->
   
   {service, olderEmployees} = new Fixture()
 
   describe 'ID constraints', ->
 
+    # MOCK HERE
     @beforeAll prepare ->
       service.records(olderEmployees).then(toIds).then(toQ).then service.rows
 

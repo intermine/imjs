@@ -1,9 +1,9 @@
 Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 should = require 'should'
+{unitTests} = require './lib/segregation'
 
-# BOTH
-describe 'Query', ->
+unitTests() && describe 'Query', ->
 
   describe '#getOuterJoin(path)', ->
 

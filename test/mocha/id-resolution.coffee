@@ -9,8 +9,9 @@ OLD_ID_RES_FORMAT = require '../data/old-id-resolution-format.json'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {fold, get, invoke} = Fixture.funcutils
 should = require 'should'
+{unitTests} = require './lib/segregation'
 
-describe 'IdResults', ->
+unitTests() && describe 'IdResults', ->
 
   data = OLD_ID_RES_FORMAT
   result = new idresolution.IdResults data
