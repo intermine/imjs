@@ -1,5 +1,6 @@
 {Query} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
+{unitTests, bothTests}  = require './lib/segregation'
 
 expected = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -89,8 +90,7 @@ constraintsTest = (input) -> () ->
     q.constraints.should.eql expected
 
 
-# UNIT
-describe 'Defining Query constraints', ->
+unitTests() && describe 'Defining Query constraints', ->
 
   describe 'using the internal verbose format', constraintsTest expected
 
@@ -126,8 +126,8 @@ describe 'range constraints', ->
     it 'should have made a query with 6 constraints', eventually (q) ->
       q.constraints.length.should.eql 6
 
-# BOTH
-describe 'Query', ->
+# Manages to check isConstrained method and also tests the Service for it's response
+bothTests() && describe 'Query', ->
 
   describe '#isConstrained', ->
 
