@@ -7,7 +7,7 @@ else
   {PathInfo} = require "../../build/path"
 
 should = require 'should'
-{unitTests, integrationTests, bothTests} = require './lib/seperation'
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
 
 {shouldFail, prepare, eventually} = require './lib/utils'
 Fixture = require './lib/fixture'

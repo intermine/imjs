@@ -1,11 +1,13 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
 
-# BOTH
-describe 'Query#clone', ->
+# Tests the clone() function of the Query class
+unitTests() && describe 'Query#clone', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  # MOCK HERE
   @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
     [q, q.clone().addToSelect('end')]
 
@@ -15,11 +17,12 @@ describe 'Query#clone', ->
   it 'should have more views in clone', eventually ([q, clone]) ->
     clone.views.length.should.be.above q.views.length
 
-# BOTH
-describe 'Query#clone sortOrder', ->
+# Tests the clone() and sortOrder function of the Query class
+unitTests() && describe 'Query#clone sortOrder', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  # MOCK HERE
   @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
     q.orderBy ['age']
     [q, q.clone().addOrSetSortOrder(path: 'age', direction: 'DESC')]

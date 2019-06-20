@@ -1,7 +1,7 @@
 Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
-{unitTests, integrationTests, bothTests} = require './lib/seperation'
+{bothTests} = require './lib/segregation'
 
 bothTests() && describe 'Query', ->
 
