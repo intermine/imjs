@@ -106,7 +106,7 @@ bothTests() && describe 'PathInfo', ->
       path.getType().should.equal('int')
 
     describe '#getDisplayName', ->
-      # Even though mocks are required, the primary purpose of these tests is to 
+      # Even though mocks are required, the primary purpose of these tests is to
       # test if the promise and callback API is working as expected
       describe 'promise API', ->
         # MOCK HERE

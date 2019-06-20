@@ -1,6 +1,6 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
-{unitTests, integrationTests, bothTests} = require './lib/segregation'
+{unitTests} = require './lib/segregation'
 
 # Tests the clone() function of the Query class
 unitTests() && describe 'Query#clone', ->

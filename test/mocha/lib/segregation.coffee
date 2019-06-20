@@ -13,7 +13,7 @@ unitTests = ->
 # run the integration tests (current case)
 # (Change this behaviour in case the build changes)
 integrationTests = ->
-    not unit_tests()
+    not unitTests()
 
 # Defined just to keep consistency, both tests implies those which
 # can be used as both unit and integration tests
