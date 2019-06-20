@@ -1,7 +1,7 @@
 Fixture = require './lib/fixture'
 {promising, prepare, eventually, shouldFail} = require './lib/utils'
 {invoke} = Fixture.utils
-{unitTests, integrationTests, unitTests} = require './lib/segregation'
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
 
 bothTests() && describe 'Service', ->
 

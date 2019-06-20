@@ -1,6 +1,7 @@
 Fixture              = require './lib/fixture'
 {prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
+{integrationTests, bothTests} = require './lib/segregation'
 
 SLOW = 200
 
@@ -12,13 +13,13 @@ there_are_seven = (results) ->
   results.length.should.equal 7
   results[0].identifier.should.equal 'Vikram'
 
-# BOTH
-describe 'Service', ->
+# Tests fetchWidgets and that widgets can be fetched
+bothTests() && describe 'Service', ->
 
   @slow SLOW
   {service, olderEmployees} = new Fixture()
 
-  describe '#fetchWidgets', ->
+  bothTests() && describe '#fetchWidgets', ->
 
     @beforeAll prepare service.fetchWidgets
 
@@ -27,7 +28,7 @@ describe 'Service', ->
       widgets.length.should.be.above 1
       (w for w in widgets when w.name is 'contractor_enrichment').length.should.equal 1
 
-  describe '#fetchWidgetMap', ->
+  integrationTests() && describe '#fetchWidgetMap', ->
 
     @beforeAll prepare service.fetchWidgetMap
 
@@ -35,7 +36,7 @@ describe 'Service', ->
       should.exist widgets.contractor_enrichment
       widgets.contractor_enrichment.widgetType.should.equal 'enrichment'
 
-  describe '#enrichment', ->
+  integrationTests() && describe '#enrichment', ->
 
     @beforeAll prepare -> service.enrichment
       list: 'My-Favourite-Employees'
@@ -44,7 +45,7 @@ describe 'Service', ->
 
     it 'performs an enrichment calculation', eventually there_is_one_and_it_is_vikram
 
-  describe '#enrichment, specifying correction', ->
+  integrationTests() && describe '#enrichment, specifying correction', ->
 
     @beforeAll prepare -> service.enrichment
       list: 'My-Favourite-Employees'
@@ -54,7 +55,7 @@ describe 'Service', ->
 
     it 'performs an enrichment calculation', eventually there_are_seven
 
-  describe '#enrichment with callback', ->
+  integrationTests() && describe '#enrichment with callback', ->
 
     it 'performs an enrichment calculation with a callback', (done) ->
       opts =
@@ -70,8 +71,9 @@ describe 'Service', ->
           done e
       return undefined
 
-# BOTH
-describe 'Query', ->
+# Tests for the enrichment function of the query object
+# and the widget in the service too
+bothTests() && describe 'Query', ->
 
   @slow SLOW
   {service, olderEmployees} = new Fixture()
@@ -83,5 +85,4 @@ describe 'Query', ->
       maxp: 1
 
     it 'performs an enrichment calculation', eventually there_is_one_and_it_is_vikram
-
 

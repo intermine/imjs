@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 {report, eventually, prepare} = require './lib/utils'
 {defer, get} = Fixture.funcutils
+{unitTests} = require './lib/segregation'
 
 caar = (xs) -> xs[0][0]
 
@@ -13,8 +14,7 @@ findFieldsOfEmployee = (service, q, fields) ->
 # We have to query each time as ids are volatile.
 DAVIDS_ID_Q = select: ['Employee.id'], where: {name: 'David Brent'}
 
-# BOTH
-describe 'lookup', ->
+unitTests() && describe 'lookup', ->
 
   {service} = new Fixture()
 
@@ -22,6 +22,7 @@ describe 'lookup', ->
 
     describe 'using the promises API', ->
 
+      # MOCK HERE
       @beforeAll prepare -> service.lookup 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually ([david]) ->
@@ -53,8 +54,7 @@ describe 'lookup', ->
             done new Error e
         return undefined
 
-# BOTH
-describe 'find', ->
+unitTests() && describe 'find', ->
 
   {service} = new Fixture()
 
@@ -62,6 +62,7 @@ describe 'find', ->
 
     describe 'using the promises API', ->
 
+      # MOCK HERE
       @beforeAll prepare -> service.find 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually (david) ->
@@ -92,8 +93,7 @@ describe 'find', ->
             done new Error e
         return undefined
 
-# BOTH
-describe 'Service#findById', ->
+unitTests() && describe 'Service#findById', ->
 
   {service} = new Fixture()
 
