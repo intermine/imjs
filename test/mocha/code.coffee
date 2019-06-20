@@ -1,8 +1,9 @@
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
+{bothTests} = require './lib/segregation'
 
-# BOTH
-describe 'Query', ->
+# Tests both the query/code endpoint of the service, and the fetchCode function
+bothTests() && describe 'Query', ->
 
   {service, allEmployees} = new Fixture()
 
