@@ -1,8 +1,8 @@
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
+{unitTests} = require './lib/segregation'
 
-# BOTH
-describe 'Equality', ->
+unitTests() && describe 'Equality', ->
 
   {service} = new Fixture()
 

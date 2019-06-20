@@ -3,8 +3,9 @@ Fixture = require './lib/fixture'
 
 {parallel, invoke} = Fixture.funcutils
 
-# BOTH
-describe 'Query#appendToList', ->
+{integrationTests} = require './lib/segregation'
+
+integrationTests() && describe 'Query#appendToList', ->
 
   {service, olderEmployees, youngerEmployees} = new Fixture()
   name = 'temp-olders-append-to-list-target'
@@ -35,7 +36,7 @@ describe 'Query#appendToList', ->
     it 'should keep the input and output lists in sync', eventually ([_..., orig, appended]) ->
       orig.size.should.equal appended.size
 
-  describe 'target: String', ->
+  integrationTests() && describe 'target: String', ->
 
     @beforeAll prepare -> clearList().then -> parallel([
       service.count(youngerEmployees),

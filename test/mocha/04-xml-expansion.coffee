@@ -11,6 +11,7 @@ unitTests() && describe 'Query', ->
 
     describe "#select(['*'])", ->
 
+      # MOCK HERE
       @beforeEach prepare -> service.query root: 'Employee'
 
       it 'should expand stars to the summary fields', eventually (q) ->
