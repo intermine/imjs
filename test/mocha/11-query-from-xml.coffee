@@ -3,6 +3,7 @@
 Fixture = require './lib/fixture'
 {Query, Model} = Fixture
 {get} = Fixture.funcutils
+{unitTests} = require './lib/segregation'
 
 xml = """
   <query view="Employee.name Employee.age" sortOrder="Employee.name ASC Employee.fullTime DESC">
@@ -16,7 +17,7 @@ xml = """
   </query>
 """
 
-describe 'Query.fromXML', ->
+unitTests() && describe 'Query.fromXML', ->
 
   describe 'attempting to parse nonsense', ->
     attempt = -> Query.fromXML 'foo bar baz'

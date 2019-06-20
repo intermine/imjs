@@ -8,12 +8,14 @@ describe 'Equality', ->
 
   describe 'Case insensitivity', ->
 
+    # MOCK HERE
     @beforeAll prepare -> service.count select: ['Employee.*'], where: {name: {'=': 'brenda'}}
 
     it 'should find something', eventually (c) -> c.should.equal 1
 
   describe 'Case sensitivity', ->
 
+    # MOCK HERE
     @beforeAll prepare -> service.count select: ['Employee.*'], where: {name: {'==': 'brenda'}}
 
     it 'should find something', eventually (c) -> c.should.equal 0

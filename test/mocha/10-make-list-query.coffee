@@ -1,11 +1,12 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
+{unitTests} = require './lib/segregation'
 
-# BOTH
-describe 'Query#selectPreservingImpliedConstraints', ->
+unitTests() && describe 'Query#selectPreservingImpliedConstraints', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  # MOCK HERE
   @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
     q.selectPreservingImpliedConstraints ['name', 'department.name']
 
@@ -20,11 +21,11 @@ describe 'Query#selectPreservingImpliedConstraints', ->
   it 'should still think Employee.address is in the query', eventually (lq) ->
     lq.isInQuery('address').should.be.true
 
-# BOTH
-describe 'Query#makeListQuery', ->
+unitTests() && describe 'Query#makeListQuery', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  # MOCK HERE
   @beforeAll prepare -> service.query(youngerEmployees).then (q) -> q.makeListQuery()
 
   it 'should leave us with more constraints', eventually (lq) ->
