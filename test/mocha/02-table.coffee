@@ -25,7 +25,7 @@ unitTests() && describe 'Table', ->
   it 'should support the getDisplayName method', ->
     Employee.getDisplayName.should.not.throw()
 
-describe 'Table with live model', ->
+unitTests() && describe 'Table with live model', ->
 
   testmodel = new Model TESTMODEL.model
   {service} = new Fixture

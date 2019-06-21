@@ -2,7 +2,7 @@ Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests} = require './lib/segregation'
 
-# To expand the '*' is handled by `imjs` library (expandStar)
+# To expand the '*' is handled by `imjs` library, therefore unit test (expandStar)
 unitTests() && describe 'Query', ->
 
   describe 'expandStar', ->
