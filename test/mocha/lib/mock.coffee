@@ -1,0 +1,3 @@
+TESTMODEL_URL_VAR = 'TESTMODEL_URL'
+root = process.env[TESTMODEL_URL_VAR]
+
