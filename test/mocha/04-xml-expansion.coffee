@@ -1,18 +1,30 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests} = require './lib/segregation'
+{nockTest} = require './lib/mock'
+nock = require 'nock'
+fs = require 'fs'
 
 # To expand the '*' is handled by `imjs` library, therefore unit test (expandStar)
+
 unitTests() && describe 'Query', ->
+
+  before ->
+    nock.recorder.rec
+      logging: (content) -> fs.appendFile 'record.txt', content, (err) ->
+        console.log 'fk'
+  
+  after ->
+    nock.restore()
 
   describe 'expandStar', ->
 
     {service} = new Fixture()
 
     describe "#select(['*'])", ->
-
-      # MOCK HERE
-      @beforeEach prepare -> service.query root: 'Employee'
+      @beforeEach prepare ->
+        # nockTest()
+        service.query root: 'Employee'
 
       it 'should expand stars to the summary fields', eventually (q) ->
         expected_views = [
