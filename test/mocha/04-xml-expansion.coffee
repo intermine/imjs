@@ -1,21 +1,23 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests} = require './lib/segregation'
-{nockTest} = require './lib/mock'
+{recordResponses} = require './lib/mock'
 nock = require 'nock'
 fs = require 'fs'
 
 # To expand the '*' is handled by `imjs` library, therefore unit test (expandStar)
 
 unitTests() && describe 'Query', ->
+  # recordResponses 'dummy.txt', before, after
+  # before ->
+    # nock.recorder.rec
+      # logging: (content) -> fs.appendFile 'record.txt', content, console.error
+      # output_objects: true
 
-  before ->
-    nock.recorder.rec
-      logging: (content) -> fs.appendFile 'record.txt', content, (err) ->
-        console.log 'fk'
-  
-  after ->
-    nock.restore()
+  # after ->
+    # nock.restore()
+    # nockCallObjects = nock.recorder.play()
+    # fs.writeFile 'dummy.txt', JSON.stringify(nockCallObjects), console.error
 
   describe 'expandStar', ->
 
