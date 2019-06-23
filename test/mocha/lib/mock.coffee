@@ -26,13 +26,19 @@ recordResponses = (fileName, before, after) ->
 
 parseUrl = (relativeUrl) ->
     urlObj = url.parse relativeUrl
-    pathname = urlObj.pathname?.slice 1      # Remove the leading '/'
-    querystring = urlObj.search?.slice 1     # Remove the leading '?'
-    fragment = urlObj.hash?.slice 1          # Remove the leading '#'
+    # pathname = urlObj.pathname?.slice 1      # Remove the leading '/'
+    # querystring = urlObj.search?.slice 1     # Remove the leading '?'
+    # fragment = urlObj.hash?.slice 1          # Remove the leading '#'
+    pathname = urlObj.pathname
+    querystring = urlObj.search
+    fragment = urlObj.hash
+
     return 
         pathname: pathname
         querystring: querystring
         fragment: fragment
+
+
 
 # Helper function to find the file storing the responses,
 # along with the query parameter specified.
@@ -41,13 +47,14 @@ parseUrl = (relativeUrl) ->
 #   concatenation of 'root' and the 'url' must provide the path of the query to be resolved
 findResponse = (url) ->
     parsedUrl = parseUrl url
-    {pathname} = parsedUrl
+    {pathname, querystring} = parsedUrl
     # Convert the pathname to the folder name by replacing '/' with OS specific delimiter
     folderName = path.join RESPONSE_FOLDER, pathname.split('/').join path.sep
     metaFileName = path.join folderName, META_FILE
     responsesData = JSON.parse fs.readFileSync metaFileName
-
-
+    for k,v of responsesData
+        if k is querystring
+            console.log JSON.parse fs.readFileSync path.join folderName, v.file 
 
 # nockTest = ->
     # nock 'http://localhost:8080/intermine-demo'
@@ -56,5 +63,6 @@ findResponse = (url) ->
 
 
 module.exports =
-    nockTest: nockTest
+    # nockTest: nockTest
     recordResponses: recordResponses
+    findResponse: findResponse
