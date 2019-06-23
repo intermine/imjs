@@ -29,9 +29,6 @@ recordResponses = (fileName, before, after) ->
 
 parseUrl = (relativeUrl) ->
     urlObj = url.parse relativeUrl
-    # pathname = urlObj.pathname?.slice 1      # Remove the leading '/'
-    # querystring = urlObj.search?.slice 1     # Remove the leading '?'
-    # fragment = urlObj.hash?.slice 1          # Remove the leading '#'
     pathname = urlObj.pathname
     querystring = urlObj.search
     fragment = urlObj.hash
@@ -67,19 +64,12 @@ shouldSetupMock = ->
     unitTests()
 
 setupMock = (url) ->
-    if not shouldSetupMock
+    if not shouldSetupMock()
         return
     responseFile = findResponse url
     nock.load responseFile
 
-# nockTest = ->
-    # nock 'http://localhost:8080/intermine-demo'
-        # .get '/service/model'
-        # .replyWithFile 200, path.join __dirname, 'responses/service-model.xml'
-
-
 module.exports =
-    # nockTest: nockTest
     recordResponses: recordResponses
     findResponse: findResponse
     setupMock: setupMock
