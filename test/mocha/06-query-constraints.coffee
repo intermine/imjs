@@ -1,6 +1,7 @@
 {Query} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests, bothTests}  = require './lib/segregation'
+{recordResponses, setupMock} = require './lib/mock'
 
 expected = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -106,7 +107,7 @@ unitTests() && describe 'Defining Query constraints', ->
 
   describe 'including switched off constraints', constraintsTest someSwitchedOff
 
-# ??
+# NOT WORKING???
 describe 'range constraints', ->
 
   {service} = new Fixture()
@@ -133,14 +134,20 @@ bothTests() && describe 'Query', ->
 
     {service} = new Fixture()
 
-    @beforeAll prepare -> service.query
-      from: 'Employee'
-      select: 'name'
-      where:
-        age: 10
-        'department.manager': { isa: 'CEO' }
-        'address.address': 'IS NOT NULL'
-        'department.company': {lookup: '*Hogg'}
+    @beforeAll prepare ->
+      setupMock '/service/user/whoami', 'GET'
+      setupMock '/service/lists?name=My-Favourite-Employees', 'GET'
+      setupMock '/service/path/values', 'POST'
+      setupMock '/service/model?format=json', 'GET'
+      setupMock '/service/summaryfields?format=json', 'GET'
+      service.query
+        from: 'Employee'
+        select: 'name'
+        where:
+          age: 10
+          'department.manager': { isa: 'CEO' }
+          'address.address': 'IS NOT NULL'
+          'department.company': {lookup: '*Hogg'}
 
     it 'should say that "Employee.age" is constrained', eventually (q) ->
       q.isConstrained('Employee.age').should.be.true

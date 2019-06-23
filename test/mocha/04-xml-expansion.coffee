@@ -14,8 +14,8 @@ unitTests() && describe 'Query', ->
 
     describe "#select(['*'])", ->
       @beforeEach prepare ->
-        setupMock '/service/model?format=json'
-        setupMock '/service/summaryfields?format=json'
+        setupMock '/service/model?format=json', 'GET'
+        setupMock '/service/summaryfields?format=json', 'GET'
         service.query root: 'Employee'
 
       it 'should expand stars to the summary fields', eventually (q) ->
