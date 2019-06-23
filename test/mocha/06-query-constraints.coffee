@@ -1,7 +1,7 @@
 {Query} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests, bothTests}  = require './lib/segregation'
-{recordResponses, setupMock} = require './lib/mock'
+{setupMock} = require './lib/mock'
 
 expected = [
   {path: 'Employee.department.manager', type: 'CEO'},

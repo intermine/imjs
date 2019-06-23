@@ -392,8 +392,6 @@ bothTests() && describe 'PathInfo', ->
       ('' + path).should.equal('Company.departments.manager.address')
 
     integrationTests() && describe '#getPathInfo', ->
-      # MOCK HERE
-
       @beforeAll prepare ->
         path.getDisplayName()
 
