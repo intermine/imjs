@@ -3,10 +3,13 @@ path = require 'path'
 fs   = require 'fs'
 url  = require 'url'
 
+{unitTests} = require './segregation'
+
 TESTMODEL_URL_VAR = 'TESTMODEL_URL'
 root = process.env[TESTMODEL_URL_VAR]
 
-RESPONSE_FOLDER = 'responses'
+# IMPORTANT: RESPONSE_FOLDER must be present relative to the current directory
+RESPONSE_FOLDER = path.join __dirname, 'responses'
 META_FILE = '_meta.json'
 
 # Helper function to record the nock responses and store them
@@ -52,9 +55,22 @@ findResponse = (url) ->
     folderName = path.join RESPONSE_FOLDER, pathname.split('/').join path.sep
     metaFileName = path.join folderName, META_FILE
     responsesData = JSON.parse fs.readFileSync metaFileName
+    responseFile = null
     for k,v of responsesData
         if k is querystring
-            console.log JSON.parse fs.readFileSync path.join folderName, v.file 
+            responseFile = path.join folderName, v.file 
+    return responseFile
+    
+# Function which specifies if mocks should be setup or not, currenty it's functionality
+# is redundant, but might change later in case the logic when to setup unit test changes
+shouldSetupMock = ->
+    unitTests()
+
+setupMock = (url) ->
+    if not shouldSetupMock
+        return
+    responseFile = findResponse url
+    nock.load responseFile
 
 # nockTest = ->
     # nock 'http://localhost:8080/intermine-demo'
@@ -66,3 +82,4 @@ module.exports =
     # nockTest: nockTest
     recordResponses: recordResponses
     findResponse: findResponse
+    setupMock: setupMock

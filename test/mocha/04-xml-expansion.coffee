@@ -1,7 +1,7 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests} = require './lib/segregation'
-{recordResponses} = require './lib/mock'
+{recordResponses, setupTest} = require './lib/mock'
 nock = require 'nock'
 fs = require 'fs'
 
@@ -25,7 +25,8 @@ unitTests() && describe 'Query', ->
 
     describe "#select(['*'])", ->
       @beforeEach prepare ->
-        # nockTest()
+        setupMock '/service/model?format=json'
+        setupMock '/service/summaryfields?format=json'
         service.query root: 'Employee'
 
       it 'should expand stars to the summary fields', eventually (q) ->
