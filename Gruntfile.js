@@ -180,6 +180,14 @@ module.exports = function (grunt) {
           src: ['**'],
           dest: 'test/compiled/lib/responses/'
         }]
+      },
+      mockBundledResponses: {
+        files: [{
+          expand: true,
+          cwd: 'test/mocha/lib/bundledResponses/',
+          src: ['**'],
+          dest: 'test/compiled/lib/bundledResponses/'
+        }]
       }
     },
     browserify: {
@@ -419,6 +427,7 @@ module.exports = function (grunt) {
     'browserify',
     'uglify',
     'copy:mockResponses',
+    'copy:mockBundledResponses',
     'copy:dist',
     'copy:version'
   ])

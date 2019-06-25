@@ -1,0 +1,11 @@
+{
+    "-": {
+        "file": {
+            "08-one-of-constraints.1": "1.json",
+            "08-one-of-constraints.2": "2.json",
+            "08-one-of-constraints.3": "3.json",
+            "08-one-of-constraints.4": "4.json"
+        },
+        "method": "POST"
+    }
+}

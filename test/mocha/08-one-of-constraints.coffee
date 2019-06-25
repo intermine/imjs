@@ -2,6 +2,9 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 {bothTests} = require './lib/segregation'
+{setupMock} = require './lib/mock'
+nock = require 'nock'
+path = require 'path'
 
 bothTests() && describe 'Query', ->
 
@@ -26,8 +29,10 @@ bothTests() && describe 'Query', ->
     describe 'count', ->
       expected = 36
 
-      # MOCK HERE
-      @beforeAll prepare -> service.count query
+      @beforeAll prepare ->
+        setupMock '/service/version?format=json', 'GET'
+        nock.load path.join __dirname, 'lib/bundledResponses/08-one-of-constraints.2.json'
+        service.count query
 
       it "should find #{ expected } rows", eventually (c) ->
         c.should.equal expected
@@ -37,8 +42,10 @@ bothTests() && describe 'Query', ->
 
       allowed = query.where[0].values
 
-      # MOCK HERE
-      @beforeAll prepare -> service.records query
+      @beforeAll prepare ->
+        nock.load path.join __dirname, 'lib/bundledResponses/08-one-of-constraints.2.json'
+        service.records query
+      
 
       it 'should only find employees in sales and accounting', eventually (emps) ->
         allowed.should.containEql e.department.name for e in emps
