@@ -64,19 +64,22 @@ equalUrlParts = (url1, url2) ->
 # url (string) -> Must be relative to the 'root', eg. '/service/model?format=json' is a valid 
 #   part of the url, note the leading slash. Initial part of the path used will be 'root', i.e.
 #   concatenation of 'root' and the 'url' must provide the path of the query to be resolved
-findResponse = (url, method) ->
+findResponse = (url, method, discriminator) ->
     parsedUrl = parseUrl url
     {pathname, querystring} = parsedUrl
     # Convert the pathname to the folder name by replacing '/' with OS specific delimiter
     folderName = path.join RESPONSE_FOLDER, pathname.split('/').join path.sep
     metaFileName = path.join folderName, META_FILE
     responsesData = JSON.parse fs.readFileSync metaFileName
-    responseFile = 'xx'
+    responseFile = null
     for k,v of responsesData
-        console.log querystring, k, equalUrlParts querystring, k
-        console.log k, v.method
+        # console.log querystring, k, equalUrlParts querystring, k
+        # console.log k, v.method
         if equalUrlParts(querystring, k) and v.method is method
-            responseFile = path.join folderName, v.file 
+            if typeof v.file is 'string' then responseFile = path.join folderName, v.file 
+            if typeof v.file is 'object'
+                for dK, dV of v.file
+                    if dK is discriminator then responseFile = dV
             break
     return responseFile
     
@@ -89,7 +92,7 @@ setupMock = (url, method) ->
     if not shouldSetupMock()
         return
     responseFile = findResponse url, method
-    console.log responseFile
+    console.log "SETUP: #{responseFile}"
     nock.load responseFile
 
 module.exports =
