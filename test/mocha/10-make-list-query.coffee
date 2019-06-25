@@ -1,15 +1,23 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
 {unitTests} = require './lib/segregation'
+{setupMock} = require './lib/mock'
+nock = require 'nock'
+fs = require 'fs'
 
 unitTests() && describe 'Query#selectPreservingImpliedConstraints', ->
 
   {service, youngerEmployees} = new Fixture()
 
-  # MOCK HERE
-  @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
-    q.selectPreservingImpliedConstraints ['name', 'department.name']
-
+  @beforeAll prepare ->
+    setupMock '/service/summaryfields?format=json', 'GET'
+    setupMock '/service/model?format=json', 'GET'
+    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
+    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
+    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
+    service.query(youngerEmployees).then (q) ->
+      q.selectPreservingImpliedConstraints ['name', 'department.name']
+    
   it 'should have the view we asked for', eventually (lq) ->
     lq.views.length.should.eql 2
     lq.views.should.containEql 'Employee.name'
@@ -25,8 +33,13 @@ unitTests() && describe 'Query#makeListQuery', ->
 
   {service, youngerEmployees} = new Fixture()
 
-  # MOCK HERE
-  @beforeAll prepare -> service.query(youngerEmployees).then (q) -> q.makeListQuery()
+  @beforeAll prepare ->
+    setupMock '/service/summaryfields?format=json', 'GET'
+    setupMock '/service/model?format=json', 'GET'
+    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
+    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
+    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
+    service.query(youngerEmployees).then (q) -> q.makeListQuery()
 
   it 'should leave us with more constraints', eventually (lq) ->
     lq.constraints.length.should.be.above 1
