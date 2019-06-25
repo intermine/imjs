@@ -1,7 +1,8 @@
 {
     "-": {
         "file": {
-            "08-one-of-constraints.1": "1.json"
+            "08-one-of-constraints.1": "1.json",
+            "09-clone-query.1": "1.json"
         },
         "method": "POST"
     }
