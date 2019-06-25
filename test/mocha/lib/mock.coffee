@@ -73,13 +73,12 @@ findResponse = (url, method, discriminator) ->
     responsesData = JSON.parse fs.readFileSync metaFileName
     responseFile = null
     for k,v of responsesData
-        # console.log querystring, k, equalUrlParts querystring, k
-        # console.log k, v.method
         if equalUrlParts(querystring, k) and v.method is method
             if typeof v.file is 'string' then responseFile = path.join folderName, v.file 
             if typeof v.file is 'object'
                 for dK, dV of v.file
-                    if dK is discriminator then responseFile = dV
+                    console.log dK, discriminator
+                    if dK is discriminator then responseFile = path.join folderName, dV
             break
     return responseFile
     
@@ -88,10 +87,10 @@ findResponse = (url, method, discriminator) ->
 shouldSetupMock = ->
     unitTests()
 
-setupMock = (url, method) ->
+setupMock = (url, method, discriminator) ->
     if not shouldSetupMock()
         return
-    responseFile = findResponse url, method
+    responseFile = findResponse url, method, discriminator
     console.log "SETUP: #{responseFile}"
     nock.load responseFile
 
