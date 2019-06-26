@@ -10,6 +10,7 @@ root = process.env[TESTMODEL_URL_VAR]
 
 # IMPORTANT: RESPONSE_FOLDER must be present relative to the current directory
 RESPONSE_FOLDER = path.join __dirname, 'responses'
+BUNDLES_FOLDER = path.join __dirname, 'bundledResponses'
 META_FILE = '_meta.json'
 
 # Helper function to record the nock responses and store them
@@ -26,6 +27,17 @@ recordResponses = (fileName, before, after) ->
         nock.restore()
         nockCallObjects = nock.recorder.play()
         fs.writeFile fileName, JSON.stringify(nockCallObjects), console.error
+    
+setupRecorder = ->
+    nock.recorder.rec
+        output_objects: true
+
+stopRecorder = (fileName) ->
+    nock.restore()
+    nockCallObjects = nock.recorder.play()
+    fs.writeFile fileName, JSON.stringify(nockCallObjects), console.error
+
+
 
 parseUrl = (relativeUrl) ->
     urlObj = url.parse relativeUrl
@@ -94,7 +106,16 @@ setupMock = (url, method, discriminator) ->
     console.log "SETUP: #{responseFile}"
     nock.load responseFile
 
+setupBundle = (fileName) ->
+    if not shouldSetupMock()
+        return
+    responseFile = path.join BUNDLES_FOLDER, fileName
+    nock.load responseFile
+
 module.exports =
+    setupRecorder: setupRecorder
+    stopRecorder: stopRecorder
     recordResponses: recordResponses
     findResponse: findResponse
     setupMock: setupMock
+    setupBundle: setupBundle
