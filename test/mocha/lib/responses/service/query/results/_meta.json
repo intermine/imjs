@@ -4,7 +4,9 @@
             "08-one-of-constraints.1": "1.json",
             "08-one-of-constraints.2": "2.json",
             "08-one-of-constraints.3": "3.json",
-            "08-one-of-constraints.4": "4.json"
+            "08-one-of-constraints.4": "4.json",
+            "13-strict-equals.1": "5.json",
+            "13-strict-equals.2": "6.json"
         },
         "method": "POST"
     }

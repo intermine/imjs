@@ -1,7 +1,8 @@
 {
     "-": {
         "file": {
-            "10-make-list-query.1": "1.json"
+            "10-make-list-query.1": "1.json",
+            "13-strict-equals.1": "1.json"
         },
         "method": "POST"
     }

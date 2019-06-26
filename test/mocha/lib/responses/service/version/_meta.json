@@ -2,5 +2,9 @@
     "?format=json": {
         "file": "1.json",
         "method": "GET"
+    },
+    "-": {
+        "file": "1.json",
+        "method": "GET"
     }
 }

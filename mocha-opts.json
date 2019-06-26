@@ -1,4 +1,5 @@
 {
+    "grep": "Equality",
     "globals": ["should"],
     "timeout": 30000,
     "ignoreLeaks": false,
