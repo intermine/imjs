@@ -20,8 +20,6 @@ bothTests() && describe 'Query', ->
       setupMock '/service/user/preferences', 'POST', 'code.1'
       setupMock '/service/user/preferences', 'POST', 'code.1'
       setupMock '/service/user/whoami', 'GET'
-      # nock.load path.join __dirnsetupRecorder, stopRecorder, ame, '/lib/bundledResponses/code.1
-      #.json'
       setupBundle 'code.1.json'
       service.query(allEmployees).then (q) -> q.fetchCode 'py'
 

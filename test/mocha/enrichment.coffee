@@ -2,6 +2,7 @@ Fixture              = require './lib/fixture'
 {prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 {integrationTests, bothTests} = require './lib/segregation'
+{setupRecorder, stopRecorder, setupBundle} = require './lib/mock'
 
 SLOW = 200
 
@@ -14,12 +15,12 @@ there_are_seven = (results) ->
   results[0].identifier.should.equal 'Vikram'
 
 # Tests fetchWidgets and that widgets can be fetched
-bothTests() && describe 'Service', ->
+integrationTests() && describe 'Service', ->
 
   @slow SLOW
   {service, olderEmployees} = new Fixture()
 
-  bothTests() && describe '#fetchWidgets', ->
+  integrationTests() && describe '#fetchWidgets', ->
 
     @beforeAll prepare service.fetchWidgets
 
@@ -73,7 +74,7 @@ bothTests() && describe 'Service', ->
 
 # Tests for the enrichment function of the query object
 # and the widget in the service too
-bothTests() && describe 'Query', ->
+integrationTests() && describe 'Query', ->
 
   @slow SLOW
   {service, olderEmployees} = new Fixture()
