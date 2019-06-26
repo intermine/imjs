@@ -1,7 +1,8 @@
 Fixture = require './lib/fixture'
 {report, eventually, prepare} = require './lib/utils'
 {defer, get} = Fixture.funcutils
-{unitTests} = require './lib/segregation'
+{unitTests, integrationTests} = require './lib/segregation'
+{setupMock, setupBundle} = require './lib/mock'
 
 caar = (xs) -> xs[0][0]
 
@@ -22,8 +23,17 @@ unitTests() && describe 'lookup', ->
 
     describe 'using the promises API', ->
 
-      # MOCK HERE
-      @beforeAll prepare -> service.lookup 'Employee', 'David Brent'
+      @beforeAll prepare ->
+        setupMock '/service/summaryfields?format=json', 'GET'
+        setupMock '/service/summaryfields?format=json', 'GET'
+        setupMock '/service/model?format=json', 'GET'
+        setupMock '/service/version?format=json', 'GET'
+        setupMock '/service/user/whoami', 'GET'
+        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
+        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
+        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
+        setupBundle 'find-by-id.1.json'
+        service.lookup 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually ([david]) ->
         david.name.should.equal 'David Brent'
@@ -62,8 +72,17 @@ unitTests() && describe 'find', ->
 
     describe 'using the promises API', ->
 
-      # MOCK HERE
-      @beforeAll prepare -> service.find 'Employee', 'David Brent'
+      @beforeAll prepare ->
+        setupMock '/service/summaryfields?format=json', 'GET'
+        setupMock '/service/summaryfields?format=json', 'GET'
+        setupMock '/service/model?format=json', 'GET'
+        setupMock '/service/version?format=json', 'GET'
+        setupMock '/service/user/whoami', 'GET'
+        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
+        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
+        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
+        setupBundle 'find-by-id.1.json'
+        service.find 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually (david) ->
         david.name.should.equal 'David Brent'
@@ -93,7 +112,8 @@ unitTests() && describe 'find', ->
             done new Error e
         return undefined
 
-unitTests() && describe 'Service#findById', ->
+# Same function as above called, tests if the service finds by id correctly
+integrationTests() && describe 'Service#findById', ->
 
   {service} = new Fixture()
 

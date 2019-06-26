@@ -110,6 +110,7 @@ setupBundle = (fileName) ->
     if not shouldSetupMock()
         return
     responseFile = path.join BUNDLES_FOLDER, fileName
+    console.log "SETUPBUNDLE: #{responseFile}"
     nock.load responseFile
 
 module.exports =
