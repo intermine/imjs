@@ -1,0 +1,477 @@
+[
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/query/results",
+        "body": "query=%3Cquery%20model%3D%22testmodel%22%20view%3D%22Employee.name%20Employee.department.name%20Employee.department.manager.name%20Employee.department.company.name%20Employee.fullTime%20Employee.address.address%22%20%3E%3Cconstraint%20path%3D%22Employee.age%22%20op%3D%22%26gt%3B%22%20value%3D%2250%22%20%2F%3E%3C%2Fquery%3E&summaryPath=Employee.department.company.name&format=jsonrows",
+        "status": 200,
+        "response": {
+            "uniqueValues": 6,
+            "modelName": "testmodel",
+            "columnHeaders": [
+                "item",
+                "count"
+            ],
+            "rootClass": "Employee",
+            "start": 0,
+            "views": [
+                "Employee.name",
+                "Employee.department.name",
+                "Employee.department.manager.name",
+                "Employee.department.company.name",
+                "Employee.fullTime",
+                "Employee.address.address"
+            ],
+            "results": [
+                {
+                    "item": "Capitol Versicherung AG",
+                    "count": 10
+                },
+                {
+                    "item": "Difficulties Я Us",
+                    "count": 9
+                },
+                {
+                    "item": "Gogirep",
+                    "count": 9
+                },
+                {
+                    "item": "Wernham-Hogg",
+                    "count": 9
+                },
+                {
+                    "item": "Dunder-Mifflin",
+                    "count": 8
+                },
+                {
+                    "item": "CompanyB",
+                    "count": 1
+                }
+            ],
+            "executionTime": "2019.06.26 19:16::17",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Wed, 26 Jun 2019 13:46:17 GMT",
+            "Connection",
+            "close"
+        ]
+    },
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/query/results",
+        "body": "query=%3Cquery%20model%3D%22testmodel%22%20view%3D%22Employee.name%20Employee.department.name%20Employee.department.manager.name%20Employee.department.company.name%20Employee.fullTime%20Employee.address.address%20Employee.age%22%20%3E%3Cconstraint%20path%3D%22Employee.age%22%20op%3D%22%26gt%3B%22%20value%3D%2250%22%20%2F%3E%3C%2Fquery%3E&summaryPath=Employee.age&format=jsonrows",
+        "status": 200,
+        "response": {
+            "uniqueValues": 16,
+            "modelName": "testmodel",
+            "columnHeaders": [
+                "min",
+                "max",
+                "average",
+                "standard-dev"
+            ],
+            "rootClass": "Employee",
+            "start": 0,
+            "views": [
+                "Employee.name",
+                "Employee.department.name",
+                "Employee.department.manager.name",
+                "Employee.department.company.name",
+                "Employee.fullTime",
+                "Employee.address.address",
+                "Employee.age"
+            ],
+            "results": [
+                {
+                    "bucket": 1,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 6,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 2,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 2,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 3,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 2,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 4,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 4,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 5,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 5,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 6,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 5,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 7,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 2,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 8,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 4,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 9,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 3,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 10,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 3,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 11,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 8,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 17,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 1,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 20,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 1,
+                    "stdev": 5.058116355205951
+                }
+            ],
+            "executionTime": "2019.06.26 19:16::17",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Wed, 26 Jun 2019 13:46:17 GMT",
+            "Connection",
+            "close"
+        ]
+    },
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/query/results",
+        "body": "query=%3Cquery%20model%3D%22testmodel%22%20view%3D%22Employee.name%20Employee.department.name%20Employee.department.manager.name%20Employee.department.company.name%20Employee.fullTime%20Employee.address.address%20Employee.age%22%20%3E%3Cconstraint%20path%3D%22Employee.age%22%20op%3D%22%26gt%3B%22%20value%3D%2250%22%20%2F%3E%3C%2Fquery%3E&summaryPath=Employee.age&format=jsonrows",
+        "status": 200,
+        "response": {
+            "uniqueValues": 16,
+            "modelName": "testmodel",
+            "columnHeaders": [
+                "min",
+                "max",
+                "average",
+                "standard-dev"
+            ],
+            "rootClass": "Employee",
+            "start": 0,
+            "views": [
+                "Employee.name",
+                "Employee.department.name",
+                "Employee.department.manager.name",
+                "Employee.department.company.name",
+                "Employee.fullTime",
+                "Employee.address.address",
+                "Employee.age"
+            ],
+            "results": [
+                {
+                    "bucket": 1,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 6,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 2,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 2,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 3,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 2,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 4,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 4,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 5,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 5,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 6,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 5,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 7,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 2,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 8,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 4,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 9,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 3,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 10,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 3,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 11,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 8,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 17,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 1,
+                    "stdev": 5.058116355205951
+                },
+                {
+                    "bucket": 20,
+                    "average": 58.43478260869565,
+                    "min": 51,
+                    "max": 74,
+                    "buckets": 20,
+                    "count": 1,
+                    "stdev": 5.058116355205951
+                }
+            ],
+            "executionTime": "2019.06.26 19:16::17",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Wed, 26 Jun 2019 13:46:17 GMT",
+            "Connection",
+            "close"
+        ]
+    },
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/query/code",
+        "body": "query=%3Cquery%20model%3D%22testmodel%22%20view%3D%22Employee.name%20Employee.department.name%20Employee.department.manager.name%20Employee.department.company.name%20Employee.fullTime%20Employee.address.address%22%20%3E%3C%2Fquery%3E&lang=py",
+        "status": 200,
+        "response": {
+            "code": "#!/usr/bin/env python\n\n# This is an automatically generated script to run your query\n# to use it you will require the intermine python client.\n# To install the client, run the following command from a terminal:\n#\n#     sudo easy_install intermine\n#\n# For further documentation you can visit:\n#     http://intermine.readthedocs.org/en/latest/web-services/\n\n# The following two lines will be needed in every python script:\nfrom intermine.webservice import Service\nservice = Service(\"http://localhost:8080/intermine-demo/service\")\n\n# Get a new query on the class (table) you will be querying:\nquery = service.new_query(\"Employee\")\n\n# The view specifies the output columns\nquery.add_view(\n    \"name\", \"department.name\", \"department.manager.name\",\n    \"department.company.name\", \"fullTime\", \"address.address\"\n)\n\nfor row in query.rows():\n    print row[\"name\"], row[\"department.name\"], row[\"department.manager.name\"], \\\n        row[\"department.company.name\"], row[\"fullTime\"], row[\"address.address\"]\n",
+            "executionTime": "2019.06.26 19:16::17",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"querycode.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Wed, 26 Jun 2019 13:46:17 GMT",
+            "Connection",
+            "close"
+        ]
+    }
+]
