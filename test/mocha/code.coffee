@@ -13,6 +13,9 @@ bothTests() && describe 'Query', ->
   describe '#fetchCode', ->
 
     @beforeAll prepare ->
+      setupMock '/service/summaryfields?format=json', 'GET'
+      setupMock '/service/model?format=json', 'GET'
+      setupMock '/service/version?format=json', 'GET'
       setupMock '/service/user/preferences', 'POST', 'code.1'
       setupMock '/service/user/preferences', 'POST', 'code.1'
       setupMock '/service/user/preferences', 'POST', 'code.1'
@@ -34,9 +37,11 @@ bothTests() && describe 'Query', ->
     values = [0 .. 2000]
 
     @beforeAll prepare ->
+      setupMock '/service/summaryfields?format=json', 'GET'
+      setupMock '/service/model?format=json', 'GET'
+      setupMock '/service/version?format=json', 'GET'
       setupMock '/service/user/preferences', 'POST', 'code.1'
       setupMock '/service/user/whoami', 'GET'
-      # nock.load path.join __dirname, '/lib/bundledResponses/code.2.json'
       setupBundle 'code.2.json'
       service.query(allEmployees).then (q) ->
         q.addConstraint {path: 'age', op: 'ONE OF', values}

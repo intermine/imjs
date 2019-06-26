@@ -137,7 +137,7 @@ bothTests() && describe 'Query', ->
     @beforeAll prepare ->
       setupMock '/service/user/whoami', 'GET'
       setupMock '/service/lists?name=My-Favourite-Employees', 'GET'
-      setupMock '/service/path/values', 'POST'
+      setupMock '/service/path/values', 'POST', '06-query-constraints.1'
       setupMock '/service/model?format=json', 'GET'
       setupMock '/service/summaryfields?format=json', 'GET'
       service.query
