@@ -9,7 +9,7 @@ OLD_ID_RES_FORMAT = require '../data/old-id-resolution-format.json'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {fold, get, invoke} = Fixture.funcutils
 should = require 'should'
-{unitTests} = require './lib/segregation'
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
 
 unitTests() && describe 'IdResults', ->
 
@@ -79,12 +79,11 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
   type = 'Employee'
 
-  describe '#resolveIds()', ->
+  unitTests() && describe '#resolveIds()', ->
 
     it 'should fail', shouldFail service.resolveIds
 
-  # BOTH
-  describe '#resolutionJob(id)', ->
+  integrationTests() && describe '#resolutionJob(id)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
     @afterAll cleanUp
@@ -96,8 +95,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     it 'should get resolved', eventually (job) -> job.wait()
 
-  # BOTH
-  describe '#resolveIds(job)', ->
+  integrationTests() && describe '#resolveIds(job)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
     @beforeAll prepare -> service.resolveIds({identifiers, type})
@@ -134,8 +132,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     extraTests['#resolveIds(job)']?()
 
-  # BOTH
-  describe '#resolveIds(convertedTypes)', ->
+  integrationTests() && describe '#resolveIds(convertedTypes)', ->
 
     identifiers = ['Sales']
     @beforeAll prepare -> service.resolveIds({identifiers, type})
@@ -157,8 +154,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
         results.goodMatchIds().should.have.lengthOf 0
         results.getMatchIds('MATCH').should.have.lengthOf 0
 
-  # BOTH
-  describe '#resolveIds(caseSensitiveJob)', ->
+  integrationTests() && describe '#resolveIds(caseSensitiveJob)', ->
 
     identifiers = ['anne', 'Brenda', 'Carol', 'Foo Bar', 'Fatou']
     caseSensitive = true
@@ -179,7 +175,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
       return undefined
 
 # BOTH (uses above function, mock accordingly)
-describe 'Service', ->
+bothTests() && describe 'Service', ->
 
   describe 'current', ->
     {service} = new Fixture()

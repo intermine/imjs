@@ -2,7 +2,7 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 should = require 'should'
 {unitTests} = require './lib/segregation'
-{setupRecorder, stopRecorder} = require './lib/mock'
+{setupMock} = require './lib/mock'
 
 unitTests() && describe 'Query', ->
 
@@ -11,15 +11,15 @@ unitTests() && describe 'Query', ->
     {service} = new Fixture()
 
     @beforeAll prepare ->
-      setupRecorder()
+      setupMock '/service/summaryfields?format=json', 'GET'
+      setupMock '/service/model?format=json', 'GET'
+      setupMock '/service/version?format=json', 'GET'
+      setupMock '/service/user/preferences', 'POST', 'get-outer-join.1'
       service.query
         select: ['name'],
         from: 'Employee'
         joins: [ 'department', 'department.manager' ]
       
-    @afterAll ->
-      stopRecorder 'dummy.json'
-
     it 'should find the outer join of department', eventually (q) ->
       q.getOuterJoin('department').should.equal 'Employee.department'
 
