@@ -2,11 +2,17 @@ Fixture = require './lib/fixture'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
+{setupMock, setupBundle} = require './lib/mock'
 
 tags = ['js', 'testing', 'mocha', 'imjs']
 namePrefix = 'temp-testing-list-operations-'
 
 describe 'Service', ->
+  setupMock '/service/version', 'GET'
+  setupMock '/service/version', 'GET'
+  setupMock '/service/version', 'GET'
+  setupMock '/service/version', 'GET'
+  setupMock '/service/version', 'GET'
 
   {service} = new Fixture()
   service.errorHandler = ->
@@ -18,7 +24,6 @@ describe 'Service', ->
 
     it 'should fail', shouldFail service.complement
 
-  # BOTH
   describe '#complement(opts)', ->
 
     opts =
@@ -29,6 +34,8 @@ describe 'Service', ->
     expectedMember = 'Brenda'
     clearUp = clear service, opts.name
 
+    setupMock '/service/version', 'GET'
+    setupBundle 'list-complement.1.json'
     @beforeAll prepare -> clearUp().then -> service.complement opts
     @afterAll always clearUp
 
@@ -50,7 +57,6 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.containEql expectedMember
 
-  # BOTH
   describe '#complement(opts) {Array of list names}', ->
 
     opts =
@@ -61,6 +67,8 @@ describe 'Service', ->
     expectedMember = 'Frank Möllers'
     clearUp = clear service, opts.name
 
+    setupMock '/service/version', 'GET'
+    setupBundle 'list-complement.2.json'
     @beforeAll prepare -> clearUp().then -> service.complement opts
     @afterAll always clearUp
 
@@ -98,6 +106,8 @@ describe 'Service', ->
       opts.exclude = (l for l in lists when l.name in exclude)
       service.complement opts
 
+    setupMock '/service/version', 'GET'
+    setupBundle 'list-complement.3.json'
     @beforeAll prepare -> clearUp().then( -> service.fetchLists() ).then setup
 
     @afterAll always clearUp
@@ -118,9 +128,7 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.containEql expectedMember
 
-  # BOTH
   describe '#complement(opts, cb)', ->
-
     opts =
       from: ['some favs-some unknowns', 'Umlaut holders']
       exclude: ['My-Favourite-Employees', 'The great unknowns']
@@ -128,6 +136,8 @@ describe 'Service', ->
       name: 'List created from subtraction of arrays of names'
     clearUp = clear service, opts.name
 
+    setupMock '/service/version', 'GET'
+    setupBundle 'list-complement.4.json'
     @beforeAll prepare clearUp
     @afterAll always clearUp
 

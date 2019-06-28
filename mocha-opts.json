@@ -1,5 +1,4 @@
 {
-    "grep": "#getOuterJoin(path)",
     "globals": ["should"],
     "timeout": 30000,
     "ignoreLeaks": false,
