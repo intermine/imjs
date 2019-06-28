@@ -2,9 +2,15 @@
 should = require 'should'
 Fixture = require './lib/fixture'
 {success, sequence, curry, invoke} = Fixture.funcutils
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 # BOTH
-describe 'List', ->
+# Checks both the renmae function of the Service class
+# and the mine's response to it
+bothTests() && describe 'List', ->
+
+  setupBundle 'list-rename.1.json'
 
   {service} = new Fixture()
   remove = curry clear, service

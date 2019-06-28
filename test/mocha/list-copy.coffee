@@ -9,7 +9,6 @@ bothTests() && describe 'List', ->
 
   {service} = new Fixture()
 
-  setupRecorder()
   setupBundle 'list-copy.1.json'
   @beforeAll always -> service.fetchLists().then (lists) ->
     parallel (l.del() for l in lists when l.name.match(/_copy/) or l.hasTag('copy'))
