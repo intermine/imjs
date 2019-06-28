@@ -2,12 +2,15 @@
 should = require 'should'
 Fixture = require './lib/fixture'
 {invoke, success} = Fixture.funcutils
+{integrationTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-# BOTH
 describe 'List', ->
 
   {service} = new Fixture()
 
+  setupRecorder()
+  setupBundle 'list-copy.1.json'
   @beforeAll always -> service.fetchLists().then (lists) ->
     parallel (l.del() for l in lists when l.name.match(/_copy/) or l.hasTag('copy'))
 
