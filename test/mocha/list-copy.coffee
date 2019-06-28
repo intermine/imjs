@@ -2,10 +2,10 @@
 should = require 'should'
 Fixture = require './lib/fixture'
 {invoke, success} = Fixture.funcutils
-{integrationTests} = require './lib/segregation'
+{bothTests} = require './lib/segregation'
 {setupBundle} = require './lib/mock'
 
-describe 'List', ->
+bothTests() && describe 'List', ->
 
   {service} = new Fixture()
 

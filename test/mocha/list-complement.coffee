@@ -3,11 +3,12 @@ Fixture = require './lib/fixture'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
 {setupMock, setupBundle} = require './lib/mock'
+{bothTests} = require './lib/segregation'
 
 tags = ['js', 'testing', 'mocha', 'imjs']
 namePrefix = 'temp-testing-list-operations-'
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
   setupMock '/service/version', 'GET'
   setupMock '/service/version', 'GET'
   setupMock '/service/version', 'GET'
