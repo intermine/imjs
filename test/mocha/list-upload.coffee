@@ -1,6 +1,8 @@
 Fixture = require './lib/fixture'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 should = require 'should'
+{ setupBundle} = require './lib/mock'
+{bothTests, unitTests} = require './lib/segregation'
 
 IDENTIFIERS = """
 anne, "brenda"
@@ -10,19 +12,22 @@ rubbishy identifiers
 Fatou
 """
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
 
   {service} = new Fixture()
+
+  setupBundle 'list-upload.1.json'
 
   @beforeAll cleanSlate service
   @slow 500
 
-  describe '#createList()', ->
+
+  unitTests() && describe '#createList()', ->
 
     it 'should fail', shouldFail service.createList
 
   # BOTH
-  describe '#createList(opts, ids)', ->
+  bothTests() && describe '#createList(opts, ids)', ->
 
     opts =
       name: 'temp-list-uploaded'
@@ -49,7 +54,7 @@ describe 'Service', ->
       list.hasTag(t).should.be.true for t in opts.tags
 
   # BOTH
-  describe '#createList(opts-id-array, ids)', ->
+  bothTests() && describe '#createList(opts-id-array, ids)', ->
 
     ids = [
       "anne", "brenda", "carol",

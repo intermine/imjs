@@ -2,13 +2,16 @@ Fixture              = require './lib/fixture'
 {needs, prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 {invoke, parallel}   = Fixture.funcutils
+{unitTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 once = parallel
 
 atV = needs 12
 
-# BOTH
-describe 'Query', ->
+unitTests() && describe 'Query', ->
+
+  setupBundle 'qids.1.json'
 
   describe 'qids', ->
 
