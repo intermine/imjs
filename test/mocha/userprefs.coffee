@@ -2,9 +2,17 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always, report} = require './lib/utils'
 {invoke} = Fixture.funcutils
 should = require 'should'
+{bothTests} = require './lib/segregation'
+{setupRecorder, stopRecorder} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
-# BOTH
-describe 'Service', ->
+bothTests() && describe 'Service', ->
+# bothTests() && describe '__current', ->
+
+  setupBundle 'userprefs.1.json'
+  # setupRecorder()
+  @afterAll ->
+    # stopRecorder 'dummy.json'
 
   {service} = new Fixture()
 

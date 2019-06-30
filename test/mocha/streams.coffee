@@ -9,10 +9,11 @@ should               = require 'should'
 
 {invoke, defer} = Fixture.utils
 
+{integrationTests} = require './lib/segregation'
+
 SLOW = 200
 
-# BOTH
-describe 'Service#eachRecord', ->
+integrationTests() && describe 'Service#eachRecord', ->
 
   @slow SLOW
 
@@ -83,8 +84,7 @@ describe 'Service#eachRecord', ->
       service.query(query).then testQuery, reject
       return undefined
 
-# BOTH
-describe 'Query#eachRecord', ->
+integrationTests() && describe 'Query#eachRecord', ->
 
   {olderEmployees, service} = new Fixture()
 

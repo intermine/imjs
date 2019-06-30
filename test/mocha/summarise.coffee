@@ -2,9 +2,13 @@ Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 {invoke, get, flatMap} = Fixture.funcutils
 sumCounts = flatMap get 'count'
+{unitTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-# BOTH
-describe 'Query', ->
+unitTests() && describe 'Query', ->
+# unitTests() && describe '__current', ->
+
+  setupBundle 'summarise.1.json'
 
   describe 'summary of numeric path', ->
 
