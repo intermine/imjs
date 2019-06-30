@@ -2,7 +2,6 @@ Fixture              = require './lib/fixture'
 {prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 {integrationTests, bothTests} = require './lib/segregation'
-{setupRecorder, stopRecorder, setupBundle} = require './lib/mock'
 
 SLOW = 200
 

@@ -2,7 +2,6 @@
 should = require 'should'
 Fixture = require './lib/fixture'
 {bothTests} = require './lib/segregation'
-{setupRecorder, stopRecorder} = require './lib/mock'
 {setupBundle} = require './lib/mock'
 
 bothTests() && describe 'List', ->

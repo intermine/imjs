@@ -1,8 +1,9 @@
 Fixture                      = require './lib/fixture'
 {eventually, prepare, parallel} = require './lib/utils'
+{integrationTests} = require './lib/segregation'
 
-# BOTH
-describe 'Query', ->
+# Tests the capability of the service to correctly interpret a nested (subclass) query
+integrationTests() && describe 'Query', ->
 
   describe 'with-subclasses', ->
     {service} = new Fixture

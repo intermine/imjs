@@ -2,13 +2,16 @@
 should = require 'should'
 Fixture = require './lib/fixture'
 {set, parallel} = Fixture.funcutils
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 tags = ['js', 'node', 'testing', 'mocha', 'save-as-list']
 makeTheList = (s, name, opts) -> prepare -> clear(s, name)().then ->
   parallel s.query(opts).then((q) -> q.saveAsList {name, tags}), s.count(opts)
 
-# BOTH
-describe 'Query#saveAsList', ->
+bothTests() && describe 'Query#saveAsList', ->
+
+  setupBundle 'query-save-as-list.1.json'
 
   {service, olderEmployees, youngerEmployees} = new Fixture()
 

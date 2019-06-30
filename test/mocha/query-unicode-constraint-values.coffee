@@ -1,9 +1,12 @@
 Fixture = require './lib/fixture'
 {promising, prepare, eventually, shouldFail} = require './lib/utils'
 {invoke} = Fixture.utils
+{integrationTests} = require './lib/segregation'
 
-# BOTH
-describe 'Control query for unicode', ->
+# Both of the tests below see the Unicode functionality of the service
+# 'count' function of the library has been tested before
+
+integrationTests() && describe 'Control query for unicode', ->
 
   {service} = new Fixture()
 
@@ -16,8 +19,7 @@ describe 'Control query for unicode', ->
   it 'should find some employees', eventually (count) ->
     count.should.eql 21
 
-# BOTH
-describe  'Querying for unicode values', ->
+integrationTests() && describe  'Querying for unicode values', ->
 
   {service} = new Fixture()
 
