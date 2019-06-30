@@ -1,6 +1,9 @@
 Fixture              = require './lib/fixture'
 {prepare, eventually, always, shouldBeRejected} = require './lib/utils'
 should               = require 'should'
+{setupRecorder, stopRecorder} = require './lib/mock'
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 {invoke} = Fixture.funcutils
 
@@ -11,8 +14,11 @@ checkEmployees = (employees) ->
   employees.length.should.equal 46
   (e.age for e in employees).reduce((x, y) -> x + y).should.equal 2688
 
-# BOTH
-describe 'Service', ->
+bothTests() && describe 'Service', ->
+# bothTests() && describe '__current', ->
+
+  setupBundle 'records.1.json'
+
   @slow SLOW
 
   {olderEmployees} = new Fixture()
@@ -65,9 +71,10 @@ describe 'Service', ->
           done()
         return undefined
 
-# BOTH
-describe 'Query', ->
+bothTests() && describe 'Query', ->
+# bothTests() && describe '__current', ->
 
+  setupBundle 'records.2.json'
   {service, olderEmployees} = new Fixture()
 
   olderEmployees.select.push 'age'

@@ -1,8 +1,12 @@
 Fixture = require './lib/fixture'
 {prepare, report, eventually} = require './lib/utils'
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-# BOTH
-describe 'Service#search', ->
+bothTests() && describe 'Service#search', ->
+# bothTests() && describe '__current', ->
+
+  setupBundle 'quick-search.1.json'
 
   {service} = new Fixture()
 

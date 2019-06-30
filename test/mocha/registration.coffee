@@ -1,9 +1,9 @@
 Fixture = require './lib/fixture'
 {always, prepare, eventually} = require './lib/utils'
 should = require 'should'
+{integrationTests} = require './lib/segregation'
 
-# BOTH
-describe 'Service#register', ->
+integrationTests() && describe 'Service#register', ->
 
   username = 'mr foo'
   password = 'pæssw0rd'
