@@ -1,7 +1,7 @@
 {Query} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests, bothTests}  = require './lib/segregation'
-{setupMock} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 expected = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -134,12 +134,8 @@ bothTests() && describe 'Query', ->
 
     {service} = new Fixture()
 
+    setupBundle '06-query-constraints.1.json'
     @beforeAll prepare ->
-      setupMock '/service/user/whoami', 'GET'
-      setupMock '/service/lists?name=My-Favourite-Employees', 'GET'
-      setupMock '/service/path/values', 'POST', '06-query-constraints.1'
-      setupMock '/service/model?format=json', 'GET'
-      setupMock '/service/summaryfields?format=json', 'GET'
       service.query
         from: 'Employee'
         select: 'name'

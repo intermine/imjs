@@ -2,18 +2,15 @@ Fixture = require './lib/fixture'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
-{setupMock, setupBundle} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 {bothTests} = require './lib/segregation'
 
 tags = ['js', 'testing', 'mocha', 'imjs']
 namePrefix = 'temp-testing-list-operations-'
 
 bothTests() && describe 'Service', ->
-  setupMock '/service/version', 'GET'
-  setupMock '/service/version', 'GET'
-  setupMock '/service/version', 'GET'
-  setupMock '/service/version', 'GET'
-  setupMock '/service/version', 'GET'
+
+  setupBundle 'list-complement.1.json'
 
   {service} = new Fixture()
   service.errorHandler = ->
@@ -35,8 +32,6 @@ bothTests() && describe 'Service', ->
     expectedMember = 'Brenda'
     clearUp = clear service, opts.name
 
-    setupMock '/service/version', 'GET'
-    setupBundle 'list-complement.1.json'
     @beforeAll prepare -> clearUp().then -> service.complement opts
     @afterAll always clearUp
 
@@ -68,8 +63,6 @@ bothTests() && describe 'Service', ->
     expectedMember = 'Frank Möllers'
     clearUp = clear service, opts.name
 
-    setupMock '/service/version', 'GET'
-    setupBundle 'list-complement.2.json'
     @beforeAll prepare -> clearUp().then -> service.complement opts
     @afterAll always clearUp
 
@@ -107,8 +100,6 @@ bothTests() && describe 'Service', ->
       opts.exclude = (l for l in lists when l.name in exclude)
       service.complement opts
 
-    setupMock '/service/version', 'GET'
-    setupBundle 'list-complement.3.json'
     @beforeAll prepare -> clearUp().then( -> service.fetchLists() ).then setup
 
     @afterAll always clearUp
@@ -137,8 +128,6 @@ bothTests() && describe 'Service', ->
       name: 'List created from subtraction of arrays of names'
     clearUp = clear service, opts.name
 
-    setupMock '/service/version', 'GET'
-    setupBundle 'list-complement.4.json'
     @beforeAll prepare clearUp
     @afterAll always clearUp
 

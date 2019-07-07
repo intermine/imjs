@@ -2,7 +2,7 @@ Fixture = require './lib/fixture'
 {report, eventually, prepare} = require './lib/utils'
 {defer, get} = Fixture.funcutils
 {unitTests, integrationTests} = require './lib/segregation'
-{setupMock, setupBundle} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 caar = (xs) -> xs[0][0]
 
@@ -17,6 +17,7 @@ DAVIDS_ID_Q = select: ['Employee.id'], where: {name: 'David Brent'}
 
 unitTests() && describe 'lookup', ->
 
+  setupBundle 'find-by-id.1.json'
   {service} = new Fixture()
 
   describe 'Looking for David', ->
@@ -24,15 +25,6 @@ unitTests() && describe 'lookup', ->
     describe 'using the promises API', ->
 
       @beforeAll prepare ->
-        setupMock '/service/summaryfields?format=json', 'GET'
-        setupMock '/service/summaryfields?format=json', 'GET'
-        setupMock '/service/model?format=json', 'GET'
-        setupMock '/service/version?format=json', 'GET'
-        setupMock '/service/user/whoami', 'GET'
-        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
-        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
-        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
-        setupBundle 'find-by-id.1.json'
         service.lookup 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually ([david]) ->
@@ -66,6 +58,8 @@ unitTests() && describe 'lookup', ->
 
 unitTests() && describe 'find', ->
 
+  setupBundle 'find-by-id.2.json'
+
   {service} = new Fixture()
 
   describe 'Looking for David', ->
@@ -73,15 +67,6 @@ unitTests() && describe 'find', ->
     describe 'using the promises API', ->
 
       @beforeAll prepare ->
-        setupMock '/service/summaryfields?format=json', 'GET'
-        setupMock '/service/summaryfields?format=json', 'GET'
-        setupMock '/service/model?format=json', 'GET'
-        setupMock '/service/version?format=json', 'GET'
-        setupMock '/service/user/whoami', 'GET'
-        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
-        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
-        setupMock '/service/user/preferences', 'POST', 'find-by-id.1'
-        setupBundle 'find-by-id.1.json'
         service.find 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually (david) ->

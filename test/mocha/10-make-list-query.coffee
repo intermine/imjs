@@ -1,7 +1,7 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
 {unitTests} = require './lib/segregation'
-{setupMock} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 nock = require 'nock'
 fs = require 'fs'
 
@@ -9,12 +9,8 @@ unitTests() && describe 'Query#selectPreservingImpliedConstraints', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  setupBundle '10-make-list-query.1.json'
   @beforeAll prepare ->
-    setupMock '/service/summaryfields?format=json', 'GET'
-    setupMock '/service/model?format=json', 'GET'
-    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
-    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
-    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
     service.query(youngerEmployees).then (q) ->
       q.selectPreservingImpliedConstraints ['name', 'department.name']
     
@@ -33,12 +29,9 @@ unitTests() && describe 'Query#makeListQuery', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  setupBundle '10-make-list-query.2.json'
+
   @beforeAll prepare ->
-    setupMock '/service/summaryfields?format=json', 'GET'
-    setupMock '/service/model?format=json', 'GET'
-    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
-    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
-    setupMock '/service/user/preferences', 'POST', '10-make-list-query.1'
     service.query(youngerEmployees).then (q) -> q.makeListQuery()
 
   it 'should leave us with more constraints', eventually (lq) ->

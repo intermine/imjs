@@ -1,12 +1,15 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {unitTests} = require './lib/segregation'
-{recordResponses, setupMock} = require './lib/mock'
+{setupBundle} = require './lib/mock'
+
 nock = require 'nock'
 fs = require 'fs'
 
 # To expand the '*' is handled by `imjs` library, therefore unit test (expandStar)
 unitTests() && describe 'Query', ->
+
+  setupBundle '04-xml-expansion.1.json'
 
   describe 'expandStar', ->
 
@@ -14,8 +17,6 @@ unitTests() && describe 'Query', ->
 
     describe "#select(['*'])", ->
       @beforeEach prepare ->
-        setupMock '/service/model?format=json', 'GET'
-        setupMock '/service/summaryfields?format=json', 'GET'
         service.query root: 'Employee'
 
       it 'should expand stars to the summary fields', eventually (q) ->

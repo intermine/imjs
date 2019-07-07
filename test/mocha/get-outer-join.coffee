@@ -2,19 +2,17 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 should = require 'should'
 {unitTests} = require './lib/segregation'
-{setupMock} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 unitTests() && describe 'Query', ->
+
+  setupBundle 'get-outer-join.1.json'
 
   describe '#getOuterJoin(path)', ->
 
     {service} = new Fixture()
 
     @beforeAll prepare ->
-      setupMock '/service/summaryfields?format=json', 'GET'
-      setupMock '/service/model?format=json', 'GET'
-      setupMock '/service/version?format=json', 'GET'
-      setupMock '/service/user/preferences', 'POST', 'get-outer-join.1'
       service.query
         select: ['name'],
         from: 'Employee'

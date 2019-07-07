@@ -1,31 +1,22 @@
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 {bothTests} = require './lib/segregation'
-{setupMock, setupBundle} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 nock = require 'nock'
 path = require 'path'
 
 # Tests both the query/code endpoint of the service, and the fetchCode function
 bothTests() && describe 'Query', ->
 
+  setupBundle 'code.1.json'
+
   {service, allEmployees} = new Fixture()
 
   describe '#fetchCode', ->
 
     @beforeAll prepare ->
-      setupMock '/service/summaryfields?format=json', 'GET'
-      setupMock '/service/model?format=json', 'GET'
-      setupMock '/service/version?format=json', 'GET'
-      setupMock '/service/user/preferences', 'POST', 'code.1'
-      setupMock '/service/user/preferences', 'POST', 'code.1'
-      setupMock '/service/user/preferences', 'POST', 'code.1'
-      setupMock '/service/user/whoami', 'GET'
-      setupBundle 'code.1.json'
       service.query(allEmployees).then (q) -> q.fetchCode 'py'
 
-    
-    @afterAll ->
-      # stopRecorder 'dummy.json'
 
     it 'should return some code', eventually (code) ->
       code.length.should.be.above 0
@@ -35,18 +26,9 @@ bothTests() && describe 'Query', ->
     values = [0 .. 2000]
 
     @beforeAll prepare ->
-      setupMock '/service/summaryfields?format=json', 'GET'
-      setupMock '/service/model?format=json', 'GET'
-      setupMock '/service/version?format=json', 'GET'
-      setupMock '/service/user/preferences', 'POST', 'code.1'
-      setupMock '/service/user/whoami', 'GET'
-      setupBundle 'code.2.json'
       service.query(allEmployees).then (q) ->
         q.addConstraint {path: 'age', op: 'ONE OF', values}
         q.fetchCode 'py'
-
-    @afterAll ->
-      # stopRecorder 'dummy2.json'
 
     it 'should return some code', eventually (code) ->
       code.length.should.be.above 1000

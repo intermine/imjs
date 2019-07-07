@@ -1,18 +1,15 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
 {unitTests} = require './lib/segregation'
-{setupMock} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 # Tests the clone() function of the Query class
 unitTests() && describe 'Query#clone', ->
 
   {service, youngerEmployees} = new Fixture()
 
+  setupBundle '09-clone-query.1.json'
   @beforeAll prepare ->
-    setupMock '/service/summaryfields?format=json', 'GET'
-    setupMock '/service/ids', 'POST', '09-clone-query.1'
-    setupMock '/service/model?format=json', 'GET'
-    setupMock '/service/model?format=json', 'GET'
     service.query(youngerEmployees).then (q) ->
       [q, q.clone().addToSelect('end')]
 
@@ -27,7 +24,6 @@ unitTests() && describe 'Query#clone sortOrder', ->
 
   {service, youngerEmployees} = new Fixture()
 
-  # MOCK HERE
   @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
     q.orderBy ['age']
     [q, q.clone().addOrSetSortOrder(path: 'age', direction: 'DESC')]

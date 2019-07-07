@@ -2,12 +2,13 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 {bothTests} = require './lib/segregation'
-{setupMock} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 nock = require 'nock'
 path = require 'path'
 
 bothTests() && describe 'Query', ->
 
+  setupBundle '08-one-of-constraints.1.json'
   # This query was failing in the webapp.
   query =
     model: {"name":"testmodel"},
@@ -30,8 +31,6 @@ bothTests() && describe 'Query', ->
       expected = 36
 
       @beforeAll prepare ->
-        setupMock '/service/version?format=json', 'GET'
-        nock.load path.join __dirname, 'lib/bundledResponses/08-one-of-constraints.2.json'
         service.count query
 
       it "should find #{ expected } rows", eventually (c) ->
