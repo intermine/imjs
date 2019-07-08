@@ -2,17 +2,9 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always, report} = require './lib/utils'
 {invoke} = Fixture.funcutils
 should = require 'should'
-{bothTests} = require './lib/segregation'
-{setupRecorder, stopRecorder} = require './lib/mock'
-{setupBundle} = require './lib/mock'
+{integrationTests} = require './lib/segregation'
 
-bothTests() && describe 'Service', ->
-# bothTests() && describe '__current', ->
-
-  setupBundle 'userprefs.1.json'
-  # setupRecorder()
-  @afterAll ->
-    # stopRecorder 'dummy.json'
+integrationTests() && describe 'Service', ->
 
   {service} = new Fixture()
 
@@ -68,8 +60,7 @@ bothTests() && describe 'Service', ->
               done e
           return undefined
 
-# BOTH
-describe 'User: single preference management', ->
+integrationTests() && describe 'User: single preference management', ->
 
   {service} = new Fixture()
 
@@ -100,8 +91,7 @@ describe 'User: single preference management', ->
     it 'should have the right prefs set', eventually (prefs) ->
       prefs.should.not.have.property 'testpref'
 
-# BOTH
-describe 'User: preference management with callbacks', ->
+integrationTests() && describe 'User: preference management with callbacks', ->
 
   {service} = new Fixture()
 
@@ -148,8 +138,7 @@ describe 'User: preference management with callbacks', ->
           catch e
             done e
 
-# BOTH
-describe 'User: multiple preference management', ->
+integrationTests() && describe 'User: multiple preference management', ->
 
   {service} = new Fixture()
   set = 'setPreferences'

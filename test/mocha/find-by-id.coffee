@@ -1,8 +1,7 @@
 Fixture = require './lib/fixture'
 {report, eventually, prepare} = require './lib/utils'
 {defer, get} = Fixture.funcutils
-{unitTests, integrationTests} = require './lib/segregation'
-{setupBundle} = require './lib/mock'
+{integrationTests} = require './lib/segregation'
 
 caar = (xs) -> xs[0][0]
 
@@ -15,9 +14,8 @@ findFieldsOfEmployee = (service, q, fields) ->
 # We have to query each time as ids are volatile.
 DAVIDS_ID_Q = select: ['Employee.id'], where: {name: 'David Brent'}
 
-unitTests() && describe 'lookup', ->
+integrationTests() && describe 'lookup', ->
 
-  setupBundle 'find-by-id.1.json'
   {service} = new Fixture()
 
   describe 'Looking for David', ->
@@ -56,9 +54,7 @@ unitTests() && describe 'lookup', ->
             done new Error e
         return undefined
 
-unitTests() && describe 'find', ->
-
-  setupBundle 'find-by-id.2.json'
+integrationTests() && describe 'find', ->
 
   {service} = new Fixture()
 

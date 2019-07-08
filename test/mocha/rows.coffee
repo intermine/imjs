@@ -2,6 +2,8 @@ Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
 {invokeWith, invoke, defer, get, flatMap} = Fixture.funcutils
 should = require 'should'
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
@@ -40,7 +42,9 @@ test = (done) -> (rows) ->
     done e
 
 # BOTH
-describe 'Query', ->
+bothTests() && describe 'Query', ->
+
+  setupBundle 'rows.1.json'
 
   @slow SLOW
   {service, olderEmployees} = new Fixture()
@@ -89,7 +93,9 @@ describe 'Query', ->
       service.query(query).then(invoke 'eachRow').then attach, error
       return undefined
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
+  setupBundle 'rows.2.json'
+
   @slow SLOW
 
   describe '#rows()', ->

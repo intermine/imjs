@@ -8,6 +8,8 @@ else
 
 should = require 'should'
 {unitTests, integrationTests, bothTests} = require './lib/segregation'
+{setupRecorder, stopRecorder} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 {shouldFail, prepare, eventually} = require './lib/utils'
 Fixture = require './lib/fixture'
@@ -19,6 +21,10 @@ testmodel = new Model TESTMODEL.model
 testmodel.service = service
 
 bothTests() && describe 'PathInfo', ->
+  setupBundle '07-paths.1.json'
+  # setupRecorder()
+  @afterAll ->
+    # stopRecorder 'dummy.json'
 
   @afterEach PathInfo.flushCache
 

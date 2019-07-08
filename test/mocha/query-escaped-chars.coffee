@@ -15,7 +15,7 @@ integrationTests() && describe 'Control query for escaped chars', ->
   it 'should find some employees', eventually (count) ->
     count.should.eql 1
 
-describe 'Querying for escaped values', ->
+integrationTests() && describe 'Querying for escaped values', ->
 
   {service} = new Fixture()
 

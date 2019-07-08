@@ -14,7 +14,6 @@ constraints = [
 ]
 
 unitTests() && describe 'Query', ->
-# unitTests() && describe '__current', ->
 
   setupBundle 'remove-constraint.1.json'
 
