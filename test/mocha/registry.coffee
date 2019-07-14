@@ -72,3 +72,24 @@ describe 'Registry', ->
             should.exist mine
             mine.should.have.properties statusCode: 200
             mine.should.have.property 'instance'
+
+    describe 'fetchNamespace', ->
+      @timeout 15000
+      registry = new Registry
+      {fetchNamespace} = registry
+
+      it 'should not allow \'url\' to be null', (done) ->
+        (shouldBeRejected fetchNamespace null) done
+        return #To not return empty promise
+
+      it 'should not allow \'url\' to be an empty string', (done) ->
+        (shouldBeRejected fetchNamespace "   ") done
+        return #To not return empty promise
+
+
+      it 'should an fetch the namespace of the instance associated with the given url', ->
+        registry.fetchNamespace 'www.flymine.org'
+          .then (namespace) ->
+            should.exist namespace
+            namespace.should.have.properties statusCode: 200
+            namespace.should.have.property 'namespace'
