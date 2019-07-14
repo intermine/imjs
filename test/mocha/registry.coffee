@@ -51,3 +51,24 @@ describe 'Registry', ->
           should.exist mines
           mines.should.have.properties statusCode: 200
           mines.should.have.property 'instances'
+
+    describe 'fetchInstance', ->
+      @timeout 15000
+      registry = new Registry
+      {fetchInstance} = registry
+
+      it 'should not allow \'id\', \'name\' or \'namespace\' to be null', (done) ->
+        (shouldBeRejected fetchInstance null) done
+        return #To not return empty promise
+
+      it 'should not allow \'id\', \'name\' or \'namespace\' to be an empty string', (done) ->
+        (shouldBeRejected fetchInstance "   ") done
+        return #To not return empty promise
+
+
+      it 'should an fetch the information of an instance given its namespace', ->
+        registry.fetchInstance 'flymine'
+          .then (mine) ->
+            should.exist mine
+            mine.should.have.properties statusCode: 200
+            mine.should.have.property 'instance'

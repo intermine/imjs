@@ -51,7 +51,6 @@ class Registry
   #  service from where to make the request
   makePath: (path = '', params = {}) =>
     paramString = if @isEmpty params then '' else '?' + querystring.stringify params
-    console.log(ROOT + path + paramString)
     return ROOT + path + paramString
 
   # Helper function to make request, to be augmented further as need arises
@@ -112,18 +111,22 @@ class Registry
   fetchInstance: (id = "", cb = ->) ->
     trimmedId = id?.trim()
     if not trimmedId? or trimmedId is ""
-      return withCB cb, Promise.reject "Must provide an id, name or namespace. It should be a non-empty string"
+      return withCB cb, Promise.reject "Must provide an id, name or namespace. \
+        It should be a non-empty string"
     path = "#{INSTANCES_PATH}/#{id}"
     @makeRequest 'GET', path, {}, {}, cb
 
   # Return the namespace assigned to the instance with URL given in input
-  # @param [String] url URL to which the instance has been assigned whose namespace has to be fetched
+  # @param [String] url URL to which the instance has been assigned whose
+  #   namespace has to be fetched
   # @param [->] cb A function to be attatched to the returned Promise
-  # @return [Promise<Object>] A promise which gets the namespace (and possibly has cb attatched to it)
+  # @return [Promise<Object>] A promise which gets the namespace
+  #   (and possibly has cb attatched to it)
   fetchNamespace: (url = "", cb = ->) ->
     trimmedUrl = url?.trim()
     if not trimmedUrl? or trimmedUrl is ""
-      return withCB cb, Promise.reject "Must provide a URL of an instance. It should be a non-empty string"
+      return withCB cb, Promise.reject "Must provide a URL of an instance. \
+        It should be a non-empty string"
 
     @makeRequest 'GET', NAMESPACES_PATH, url: url, {}, cb
 
