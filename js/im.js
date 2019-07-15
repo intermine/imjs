@@ -1,4 +1,4 @@
-/*! imjs - v3.16.0 - 2019-05-20 */
+/*! imjs - v3.16.0 - 2019-07-14 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3011,7 +3011,7 @@
 
 },{"./util":16,"./xml":18,"backbone-events-standalone":21}],10:[function(_dereq_,module,exports){
 (function() {
-  var INSTANCES_PATH, ROOT, Registry, doReq, get, http, merge, querystring, utils, withCB,
+  var INSTANCES_PATH, NAMESPACES_PATH, ROOT, Registry, doReq, get, http, merge, querystring, utils, withCB,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   querystring = _dereq_('querystring');
@@ -3027,6 +3027,8 @@
   ROOT = "http://registry.intermine.org/service/";
 
   INSTANCES_PATH = "instances";
+
+  NAMESPACES_PATH = "namespace";
 
   Registry = (function() {
     function Registry() {
@@ -3117,9 +3119,7 @@
       if (!mines.every(function(mine) {
         return mine === "dev" || mine === "prod" || mine === "all";
       })) {
-        return withCB(cb, new Promise(function(resolve, reject) {
-          return reject("Mines field should only contain 'dev', 'prod' or 'all'");
-        }));
+        return withCB(cb, Promise.reject("Mines field should only contain 'dev', 'prod', or 'all'"));
       }
       params = {};
       if (q !== []) {
@@ -3129,6 +3129,39 @@
         params['mines'] = mines.join(' ');
       }
       return this.makeRequest('GET', INSTANCES_PATH, params, {}, cb);
+    };
+
+    Registry.prototype.fetchInstance = function(id, cb) {
+      var path, trimmedId;
+      if (id == null) {
+        id = "";
+      }
+      if (cb == null) {
+        cb = function() {};
+      }
+      trimmedId = id != null ? id.trim() : void 0;
+      if ((trimmedId == null) || trimmedId === "") {
+        return withCB(cb, Promise.reject("Must provide an id, name or namespace. It should be a non-empty string"));
+      }
+      path = INSTANCES_PATH + "/" + id;
+      return this.makeRequest('GET', path, {}, {}, cb);
+    };
+
+    Registry.prototype.fetchNamespace = function(url, cb) {
+      var trimmedUrl;
+      if (url == null) {
+        url = "";
+      }
+      if (cb == null) {
+        cb = function() {};
+      }
+      trimmedUrl = url != null ? url.trim() : void 0;
+      if ((trimmedUrl == null) || trimmedUrl === "") {
+        return withCB(cb, Promise.reject("Must provide a URL of an instance. It should be a non-empty string"));
+      }
+      return this.makeRequest('GET', NAMESPACES_PATH, {
+        url: url
+      }, {}, cb);
     };
 
     return Registry;

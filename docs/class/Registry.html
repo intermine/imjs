@@ -45,12 +45,24 @@
     <span class='signature'>
       <a href='#getFormat-dynamic'>
         #
-(void)
+(String)
 <b>getFormat</b><span>(intended = &#39;json&#39;)</span>
       </a>
     </span>
-    <span class='bound note title'>Bound</span>
     <span class='desc'>
+      Helper function to default to JSON format unless specified 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#isEmpty-dynamic'>
+        #
+(Boolean)
+<b>isEmpty</b><span>(obj)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Helper function to check if an object is empty or not 
     </span>
   </li>
   <li>
@@ -95,15 +107,39 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#fetchAllMines-dynamic'>
+      <a href='#fetchMines-dynamic'>
         #
 (Promise&lt;Array&lt;Object&gt;&gt;)
-<b>fetchAllMines</b><span>(q = [], mines = [], cb = function() {})</span>
+<b>fetchMines</b><span>(q = [], mines = [], cb = function() {})</span>
       </a>
     </span>
     <span class='bound note title'>Bound</span>
     <span class='desc'>
       Fetches instances of all known registry information 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#fetchInstance-dynamic'>
+        #
+(Promise&lt;Object&gt;)
+<b>fetchInstance</b><span>(id = &quot;&quot;, cb = function() {})</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Fetches all the information of an instance by its instance id, name or namespace 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#fetchNamespace-dynamic'>
+        #
+(Promise&lt;Object&gt;)
+<b>fetchNamespace</b><span>(url = &quot;&quot;, cb = function() {})</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Return the namespace assigned to the instance with URL given in input 
     </span>
   </li>
 </ul>
@@ -112,12 +148,76 @@
   <div class='method_details'>
     <p class='signature' id='getFormat-dynamic'>
       #
-(void)
+(String)
 <b>getFormat</b><span>(intended = &#39;json&#39;)</span>
-      <span class='bound note'>Bound</span>
       <br>
     </p>
-    
+    <div class='docstring'>
+  <p>Helper function to default to JSON format unless specified</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>intended</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>datatype to return if present </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>String</tt>
+      )
+      &mdash;
+      <span class='desc'>datatype if provided or fallbacks to json data </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='isEmpty-dynamic'>
+      #
+(Boolean)
+<b>isEmpty</b><span>(obj)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Helper function to check if an object is empty or not</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>obj</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>to test if empty or has some properties </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Boolean</tt>
+      )
+      &mdash;
+      <span class='desc'>true if object doesnot have own properties </span>
+    </li>
+  </ul>
+</div>
   </div>
   <div class='method_details'>
     <p class='signature' id='errorHandler-dynamic'>
@@ -263,10 +363,10 @@ or fallback to stdout</p>
 </div>
   </div>
   <div class='method_details'>
-    <p class='signature' id='fetchAllMines-dynamic'>
+    <p class='signature' id='fetchMines-dynamic'>
       #
 (Promise&lt;Array&lt;Object&gt;&gt;)
-<b>fetchAllMines</b><span>(q = [], mines = [], cb = function() {})</span>
+<b>fetchMines</b><span>(q = [], mines = [], cb = function() {})</span>
       <span class='bound note'>Bound</span>
       <br>
     </p>
@@ -316,6 +416,100 @@ or fallback to stdout</p>
       )
       &mdash;
       <span class='desc'>A promise which gets the results </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='fetchInstance-dynamic'>
+      #
+(Promise&lt;Object&gt;)
+<b>fetchInstance</b><span>(id = &quot;&quot;, cb = function() {})</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Fetches all the information of an instance by its instance id, name or namespace</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>id</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Instance ID, Name or Namespace whose information has to be fetched </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>-&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A function to be attatched to the returned Promise </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Object&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise which gets the results (and possibly has cb attatched to it) </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='fetchNamespace-dynamic'>
+      #
+(Promise&lt;Object&gt;)
+<b>fetchNamespace</b><span>(url = &quot;&quot;, cb = function() {})</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Return the namespace assigned to the instance with URL given in input</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>url</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>URL to which the instance has been assigned whose namespace has to be fetched </span>
+    </li>
+    <li>
+      <span class='name'>cb</span>
+      <span class='type'>
+        (
+          <tt>-&gt;</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>A function to be attatched to the returned Promise </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      (
+        <tt>Promise&lt;Object&gt;</tt>
+      )
+      &mdash;
+      <span class='desc'>A promise which gets the namespace (and possibly has cb attatched to it) </span>
     </li>
   </ul>
 </div>
