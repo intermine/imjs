@@ -3,7 +3,6 @@ Fixture = require './lib/fixture'
 {get, invoke} = Fixture.funcutils
 {bothTests} = require './lib/segregation'
 {setupBundle} = require './lib/mock'
-nock = require 'nock'
 path = require 'path'
 
 bothTests() && describe 'Query', ->
@@ -42,7 +41,7 @@ bothTests() && describe 'Query', ->
       allowed = query.where[0].values
 
       @beforeAll prepare ->
-        nock.load path.join __dirname, 'lib/bundledResponses/08-one-of-constraints.2.json'
+        setupBundle '08-one-of-constraints.2.json'
         service.records query
       
 
