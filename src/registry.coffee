@@ -37,6 +37,9 @@ class Registry
   isEmpty: (obj) ->
     return (Object.entries obj).length is 0 and obj.constructor is Object
 
+  isEmptyString: (str) ->
+    return not str?.trim()
+
   # Default error handler function to provide error stream if present
   # or fallback to stdout
   # @param [Any] e Logs the parameter provided under error stream if present
@@ -63,7 +66,7 @@ class Registry
   # @param [(data) ->] cb A function that will be called on the results when received.
   #
   # @return [Promise<Object>] A promise to yield a response object along
-  # with callback attatched if provided
+  # with callback attached if provided
   makeRequest: (method = 'GET', path = '', urlParams = {}, data = {}, cb = ->) ->
 
     if utils.isArray cb
@@ -92,7 +95,7 @@ class Registry
   # @param [Array<String>] mines Three possible values: 'dev’, 'prod’ or 'all'. Retrieves the
   #   InterMine instances that are ‘development’ mines, all the mines or ‘production’ mines
   #   respectively.
-  # @param [->] cb A function to be attatched to the returned promise
+  # @param [->] cb A function to be attached to the returned promise
   # @return [Promise<Array<Object>>] A promise which gets the results
   fetchMines: (q = [], mines = [], cb = ->) =>
     # Check if mines contain permissible value
@@ -106,28 +109,27 @@ class Registry
   
   # Fetches all the information of an instance by its instance id, name or namespace
   # @param [String] id Instance ID, Name or Namespace whose information has to be fetched
-  # @param [->] cb A function to be attatched to the returned Promise
-  # @return [Promise<Object>] A promise which gets the results (and possibly has cb attatched to it)
+  # @param [->] cb A function to be attached to the returned Promise
+  # @return [Promise<Object>] A promise which gets the results (and possibly has cb attached to it)
   fetchInstance: (id = "", cb = ->) ->
-    trimmedId = id?.trim()
-    if not trimmedId? or trimmedId is ""
+    if @isEmptyString id
       return withCB cb, Promise.reject "Must provide an id, name or namespace. \
         It should be a non-empty string"
-    path = "#{INSTANCES_PATH}/#{id}"
+    trimmedId = id?.trim()
+    path = "#{INSTANCES_PATH}/#{trimmedId}"
     @makeRequest 'GET', path, {}, {}, cb
 
   # Return the namespace assigned to the instance with URL given in input
   # @param [String] url URL to which the instance has been assigned whose
   #   namespace has to be fetched
-  # @param [->] cb A function to be attatched to the returned Promise
+  # @param [->] cb A function to be attached to the returned Promise
   # @return [Promise<Object>] A promise which gets the namespace
-  #   (and possibly has cb attatched to it)
+  #   (and possibly has cb attached to it)
   fetchNamespace: (url = "", cb = ->) ->
-    trimmedUrl = url?.trim()
-    if not trimmedUrl? or trimmedUrl is ""
+    if @isEmptyString url
       return withCB cb, Promise.reject "Must provide a URL of an instance. \
         It should be a non-empty string"
-
-    @makeRequest 'GET', NAMESPACES_PATH, url: url, {}, cb
+    trimmedUrl = url?.trim()
+    @makeRequest 'GET', NAMESPACES_PATH, url: trimmedUrl, {}, cb
 
 exports.Registry = Registry

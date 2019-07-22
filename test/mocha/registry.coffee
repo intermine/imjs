@@ -37,6 +37,21 @@ describe 'Registry', ->
         (isEmpty {}).should.be.true
         (isEmpty {a: 1}).should.be.false
 
+    describe 'isEmptyString', ->
+      {isEmptyString} = new Registry
+
+      it 'should return true if the string passed does not exist', ->
+        (isEmptyString null).should.be.true
+        (isEmptyString undefined).should.be.true
+
+      it 'should return true if the string passed is completely blank', ->
+        (isEmptyString "").should.be.true
+        (isEmptyString "   ").should.be.true
+
+      it 'should return false if the string is non empty', ->
+        (isEmptyString "filler").should.be.false
+        (isEmptyString "  filler  ").should.be.false
+
     describe 'fetchMines', ->
       @timeout 15000
       {fetchMines} = new Registry
@@ -55,14 +70,13 @@ describe 'Registry', ->
     describe 'fetchInstance', ->
       @timeout 15000
       registry = new Registry
-      {fetchInstance} = registry
 
       it 'should not allow \'id\', \'name\' or \'namespace\' to be null', (done) ->
-        (shouldBeRejected fetchInstance null) done
+        (shouldBeRejected registry.fetchInstance null) done
         return #To not return empty promise
 
       it 'should not allow \'id\', \'name\' or \'namespace\' to be an empty string', (done) ->
-        (shouldBeRejected fetchInstance "   ") done
+        (shouldBeRejected registry.fetchInstance "   ") done
         return #To not return empty promise
 
 
@@ -76,14 +90,13 @@ describe 'Registry', ->
     describe 'fetchNamespace', ->
       @timeout 15000
       registry = new Registry
-      {fetchNamespace} = registry
 
       it 'should not allow \'url\' to be null', (done) ->
-        (shouldBeRejected fetchNamespace null) done
+        (shouldBeRejected registry.fetchNamespace null) done
         return #To not return empty promise
 
       it 'should not allow \'url\' to be an empty string', (done) ->
-        (shouldBeRejected fetchNamespace "   ") done
+        (shouldBeRejected registry.fetchNamespace "   ") done
         return #To not return empty promise
 
 

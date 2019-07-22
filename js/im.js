@@ -1,4 +1,4 @@
-/*! imjs - v3.16.0 - 2019-07-14 */
+/*! imjs - v3.16.0 - 2019-07-22 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3047,6 +3047,10 @@
       return (Object.entries(obj)).length === 0 && obj.constructor === Object;
     };
 
+    Registry.prototype.isEmptyString = function(str) {
+      return !(str != null ? str.trim() : void 0);
+    };
+
     Registry.prototype.errorHandler = function(e) {
       var f, ref;
       f = (ref = console.error) != null ? ref : console.log;
@@ -3139,11 +3143,11 @@
       if (cb == null) {
         cb = function() {};
       }
-      trimmedId = id != null ? id.trim() : void 0;
-      if ((trimmedId == null) || trimmedId === "") {
+      if (this.isEmptyString(id)) {
         return withCB(cb, Promise.reject("Must provide an id, name or namespace. It should be a non-empty string"));
       }
-      path = INSTANCES_PATH + "/" + id;
+      trimmedId = id != null ? id.trim() : void 0;
+      path = INSTANCES_PATH + "/" + trimmedId;
       return this.makeRequest('GET', path, {}, {}, cb);
     };
 
@@ -3155,12 +3159,12 @@
       if (cb == null) {
         cb = function() {};
       }
-      trimmedUrl = url != null ? url.trim() : void 0;
-      if ((trimmedUrl == null) || trimmedUrl === "") {
+      if (this.isEmptyString(url)) {
         return withCB(cb, Promise.reject("Must provide a URL of an instance. It should be a non-empty string"));
       }
+      trimmedUrl = url != null ? url.trim() : void 0;
       return this.makeRequest('GET', NAMESPACES_PATH, {
-        url: url
+        url: trimmedUrl
       }, {}, cb);
     };
 
