@@ -2,7 +2,7 @@
   "name": "imjs",
   "version": "3.16.0",
   "description": "Client library for communication with InterMine web-services",
-  "main": "build/service",
+  "main": "dist/im.js",
   "browser": {
     "xmldom": "./build/shims/xmldom.js"
   },
