@@ -37,6 +37,21 @@ describe 'Registry', ->
         (isEmpty {}).should.be.true
         (isEmpty {a: 1}).should.be.false
 
+    describe 'isEmptyString', ->
+      {isEmptyString} = new Registry
+
+      it 'should return true if the string passed does not exist', ->
+        (isEmptyString null).should.be.true
+        (isEmptyString undefined).should.be.true
+
+      it 'should return true if the string passed is completely blank', ->
+        (isEmptyString "").should.be.true
+        (isEmptyString "   ").should.be.true
+
+      it 'should return false if the string is non empty', ->
+        (isEmptyString "filler").should.be.false
+        (isEmptyString "  filler  ").should.be.false
+
     describe 'fetchMines', ->
       @timeout 15000
       {fetchMines} = new Registry
@@ -51,3 +66,43 @@ describe 'Registry', ->
           should.exist mines
           mines.should.have.properties statusCode: 200
           mines.should.have.property 'instances'
+
+    describe 'fetchInstance', ->
+      @timeout 15000
+      registry = new Registry
+
+      it 'should not allow \'id\', \'name\' or \'namespace\' to be null', (done) ->
+        (shouldBeRejected registry.fetchInstance null) done
+        return #To not return empty promise
+
+      it 'should not allow \'id\', \'name\' or \'namespace\' to be an empty string', (done) ->
+        (shouldBeRejected registry.fetchInstance "   ") done
+        return #To not return empty promise
+
+
+      it 'should an fetch the information of an instance given its namespace', ->
+        registry.fetchInstance 'flymine'
+          .then (mine) ->
+            should.exist mine
+            mine.should.have.properties statusCode: 200
+            mine.should.have.property 'instance'
+
+    describe 'fetchNamespace', ->
+      @timeout 15000
+      registry = new Registry
+
+      it 'should not allow \'url\' to be null', (done) ->
+        (shouldBeRejected registry.fetchNamespace null) done
+        return #To not return empty promise
+
+      it 'should not allow \'url\' to be an empty string', (done) ->
+        (shouldBeRejected registry.fetchNamespace "   ") done
+        return #To not return empty promise
+
+
+      it 'should an fetch the namespace of the instance associated with the given url', ->
+        registry.fetchNamespace 'www.flymine.org'
+          .then (namespace) ->
+            should.exist namespace
+            namespace.should.have.properties statusCode: 200
+            namespace.should.have.property 'namespace'
