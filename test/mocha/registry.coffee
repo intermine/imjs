@@ -2,7 +2,6 @@ should = require 'should'
 {shouldBeRejected} = require './lib/utils'
 
 Fixture = require './lib/fixture'
-nock = require 'nock'
 
 {Registry} = Fixture
 
@@ -41,6 +40,21 @@ bothTests() && describe 'Registry', ->
         (isEmpty {}).should.be.true
         (isEmpty {a: 1}).should.be.false
 
+    unitTests() && describe 'isEmptyString', ->
+      {isEmptyString} = new Registry
+
+      it 'should return true if the string passed does not exist', ->
+        (isEmptyString null).should.be.true
+        (isEmptyString undefined).should.be.true
+
+      it 'should return true if the string passed is completely blank', ->
+        (isEmptyString "").should.be.true
+        (isEmptyString "   ").should.be.true
+
+      it 'should return false if the string is non empty', ->
+        (isEmptyString "filler").should.be.false
+        (isEmptyString "  filler  ").should.be.false
+
     bothTests() && describe 'fetchMines', ->
       @timeout 15000
       {fetchMines} = new Registry
@@ -52,10 +66,51 @@ bothTests() && describe 'Registry', ->
 
 
       integrationTests() && it 'should fetch all mines given nothing in the query parameter', ->
-        (fetchMines [], []).then (mines) ->
-          nock 'http://registry.intermine.org'
-            .get '/service/'
-            .reply 200, statusCode: 201, instances: {}
-          should.exist mines
-          mines.should.have.properties statusCode: 200
-          mines.should.have.property 'instances'
+        fetchMines [], []
+          .then (mines) ->
+            should.exist mines
+            mines.should.have.properties statusCode: 200
+            mines.should.have.property 'instances'
+
+    bothTests() && describe 'fetchInstance', ->
+      @timeout 15000
+      registry = new Registry
+
+      unitTests() && it 'should not allow \'id\', \'name\' or \'namespace\' to be null', (done) ->
+        (shouldBeRejected registry.fetchInstance null) done
+        return #To not return empty promise
+
+      unitTests() && it 'should not allow \'id\', \'name\' or \'namespace\' to be an \
+        empty string', (done) ->
+        (shouldBeRejected registry.fetchInstance "   ") done
+        return #To not return empty promise
+
+
+      integrationTests() && it 'should fetch the information of an instance given its \
+        namespace', ->
+        registry.fetchInstance 'flymine'
+          .then (mine) ->
+            should.exist mine
+            mine.should.have.properties statusCode: 200
+            mine.should.have.property 'instance'
+
+    bothTests() && describe 'fetchNamespace', ->
+      @timeout 15000
+      registry = new Registry
+
+      unitTests() && it 'should not allow \'url\' to be null', (done) ->
+        (shouldBeRejected registry.fetchNamespace null) done
+        return #To not return empty promise
+
+      unitTests() && it 'should not allow \'url\' to be an empty string', (done) ->
+        (shouldBeRejected registry.fetchNamespace "   ") done
+        return #To not return empty promise
+
+
+      integrationTests() && it 'should fetch the namespace of the instance associated \
+        with the given url', ->
+        registry.fetchNamespace 'www.flymine.org'
+          .then (namespace) ->
+            should.exist namespace
+            namespace.should.have.properties statusCode: 200
+            namespace.should.have.property 'namespace'

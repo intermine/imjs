@@ -3,7 +3,6 @@ Fixture = require './lib/fixture'
 {unitTests} = require './lib/segregation'
 {setupBundle} = require './lib/mock'
 
-nock = require 'nock'
 fs = require 'fs'
 
 # To expand the '*' is handled by `imjs` library, therefore unit test (expandStar)

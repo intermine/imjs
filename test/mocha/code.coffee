@@ -2,7 +2,6 @@ Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 {bothTests} = require './lib/segregation'
 {setupBundle} = require './lib/mock'
-nock = require 'nock'
 path = require 'path'
 
 # Tests both the query/code endpoint of the service, and the fetchCode function

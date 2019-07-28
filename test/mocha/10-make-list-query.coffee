@@ -2,7 +2,6 @@
 Fixture = require './lib/fixture'
 {unitTests} = require './lib/segregation'
 {setupBundle} = require './lib/mock'
-nock = require 'nock'
 fs = require 'fs'
 
 unitTests() && describe 'Query#selectPreservingImpliedConstraints', ->
