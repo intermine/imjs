@@ -3,7 +3,7 @@ covDir = '../../../build-cov'
 if process.env.IMJS_COV
   {Service, Query, Model, Registry, utils} = require covDir + '/service'
 else
-  {Service, Query, Model, Registry, utils} = require '../../../'
+  {Service, Query, Model, Registry, utils} = require '../../../build/service'
 
 args =
   root: process.env.TESTMODEL_URL ? 'localhost:8080/intermine-demo'
