@@ -115,7 +115,6 @@ bothTests() && describe 'PathInfo', ->
       # Even though mocks are required, the primary purpose of these tests is to
       # test if the promise and callback API is working as expected
       describe 'promise API', ->
-        # MOCK HERE
         @beforeAll prepare ->
           path.getDisplayName()
 
@@ -124,7 +123,6 @@ bothTests() && describe 'PathInfo', ->
           return undefined
 
       describe 'callback api', ->
-        # MOCK HERE
         it 'should yield the name', (done) ->
           path.getDisplayName (err, name) ->
             if err?

@@ -1,4 +1,4 @@
-/*! imjs - v3.16.0 - 2019-08-21 */
+/*! imjs - v3.16.0 - 2019-08-22 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is

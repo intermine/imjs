@@ -17,7 +17,6 @@ integrationTests() && describe 'Query', ->
 
   describe 'ID constraints', ->
 
-    # MOCK HERE
     @beforeAll prepare ->
       service.records(olderEmployees).then(toIds).then(toQ).then service.rows
 
