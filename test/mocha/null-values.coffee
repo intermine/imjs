@@ -2,11 +2,13 @@ Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 {invoke, success, error} = Fixture.funcutils
 should = require 'should'
+{integrationTests} = require './lib/segregation'
 
 serviceIs13 = (service) -> service.fetchVersion().then (v) ->
   if v >= 13 then success(service) else error('Service must be at version 13')
 
-describe 'Query', ->
+# Checks about summary for Null values, 'summary' (function) will itself be tested separately
+integrationTests() && describe 'Query', ->
 
   describe 'summary of a path with nulls', ->
 

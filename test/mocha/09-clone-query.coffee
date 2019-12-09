@@ -1,12 +1,17 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
+{unitTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'Query#clone', ->
+# Tests the clone() function of the Query class
+unitTests() && describe 'Query#clone', ->
 
   {service, youngerEmployees} = new Fixture()
 
-  @beforeAll prepare -> service.query(youngerEmployees).then (q) ->
-    [q, q.clone().addToSelect('end')]
+  setupBundle '09-clone-query.1.json'
+  @beforeAll prepare ->
+    service.query(youngerEmployees).then (q) ->
+      [q, q.clone().addToSelect('end')]
 
   it 'should have several views in q', eventually ([q, clone]) ->
     q.views.length.should.be.above 0
@@ -14,7 +19,8 @@ describe 'Query#clone', ->
   it 'should have more views in clone', eventually ([q, clone]) ->
     clone.views.length.should.be.above q.views.length
 
-describe 'Query#clone sortOrder', ->
+# Tests the clone() and sortOrder function of the Query class
+unitTests() && describe 'Query#clone sortOrder', ->
 
   {service, youngerEmployees} = new Fixture()
 

@@ -2,6 +2,7 @@ Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
 {invokeWith, invoke, defer, get, flatMap} = Fixture.funcutils
 should = require 'should'
+{integrationTests} = require './lib/segregation'
 
 ROWS = 87
 ROW = '"10","EmployeeA1"'
@@ -10,7 +11,8 @@ SLOW = 100
 
 toRows = (text) -> text.split /\n/
 
-describe 'CSV results', ->
+# Tests whether it gets back the results from the service in CSV format
+integrationTests() && describe 'CSV results', ->
 
   @slow SLOW
   {service, youngerEmployees} = new Fixture()

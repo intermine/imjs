@@ -1,8 +1,18 @@
 Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 should = require 'should'
+{bothTests} = require './lib/segregation'
+{setupRecorder, stopRecorder} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
+# bothTests() && describe '__current', ->
+
+  setupBundle 'who-am-i.1.json'
+  # setupRecorder()
+
+  @afterAll ->
+    # stopRecorder 'dummy.json'
 
   @slow 5000
 

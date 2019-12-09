@@ -1,11 +1,12 @@
 should     = require 'should'
 {Model}    = require './lib/fixture'
+{unitTests} = require './lib/segregation'
 
 {TESTMODEL} = require '../data/model'
 
 things = ["Thing","Employable","Contractor","Employee","Manager","CEO","Address"]
 
-describe 'Model', ->
+unitTests() && describe 'Model', ->
 
   describe 'new', ->
 

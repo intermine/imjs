@@ -1,8 +1,9 @@
 {Query, Model} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {TESTMODEL} = require '../data/model'
+{unitTests} = require './lib/segregation'
 
-describe 'Query#addConstraint', ->
+unitTests() && describe 'Query#addConstraint', ->
 
   describe 'one existing constraint', ->
     q = null

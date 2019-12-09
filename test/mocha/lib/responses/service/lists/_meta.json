@@ -1,0 +1,10 @@
+{
+    "?name=My-Favourite-Employees": {
+        "file": "1.json",
+        "method": "GET"
+    },
+    "?name=The%20great%20unknowns": {
+        "file": "2.json",
+        "method": "GET"
+    }
+}

@@ -1,0 +1,46 @@
+[
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/user/preferences",
+        "body": "testpref=TestPrefVal",
+        "status": 200,
+        "response": {
+            "preferences": {
+                "foo": "bar",
+                "testpref": "TestPrefVal",
+                "alias": "The Great Tester"
+            },
+            "executionTime": "2019.06.25 22:39::38",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Tue, 25 Jun 2019 17:09:38 GMT",
+            "Connection",
+            "close"
+        ]
+    }
+]

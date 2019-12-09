@@ -1,0 +1,40 @@
+{
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/lists/subtract",
+        "body": "name=Relative%20complement%20of%20%20in%20&description=Relative%20complement%20of%20%20in%20",
+        "status": 400,
+        "response": {
+            "listSize": null,
+            "executionTime": "2019.06.24 02:27::23",
+            "wasSuccessful": false,
+            "error": "Both 'lists' and 'subtract' are missing, at least one is required, Required parameter 'references' is missing. PARAMS:null",
+            "statusCode": 400
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Sun, 23 Jun 2019 20:57:22 GMT",
+            "Connection",
+            "close"
+        ]
+    }

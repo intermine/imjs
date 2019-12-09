@@ -2,12 +2,13 @@ Fixture              = require './lib/fixture'
 {needs, prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
 {invoke, parallel} = Fixture.funcutils
+{integrationTests}   = require './lib/segregation'
 
 once = parallel
 
 atV = needs 12
 
-describe 'Query', ->
+integrationTests() && describe 'Query', ->
 
   describe 'getExportURI', ->
 

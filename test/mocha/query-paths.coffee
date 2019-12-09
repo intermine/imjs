@@ -3,12 +3,13 @@ should = require 'should'
 
 {TESTMODEL} = require '../data/model'
 {Query, Model, utils: {any}} = Fixture
+{unitTests} = require './lib/segregation'
 
 containsPath = (paths, target) -> paths.some (p) -> p.toString() is target
 
 VERY_LONG = 'Company.departments.manager.department.employees.address.address'
 
-describe 'Query#getPossiblePaths', ->
+unitTests() && describe 'Query#getPossiblePaths', ->
 
   describe 'The possible paths of a query rooted at Company, default depth', ->
 
@@ -119,7 +120,7 @@ describe 'Query#getPossiblePaths', ->
     it 'should not include silly paths', ->
       (containsPath paths, 'Company.foo.bar.quux').should.not.be.true
 
-describe 'Query#canHaveMultipleValues', ->
+unitTests() && describe 'Query#canHaveMultipleValues', ->
 
   describe 'A path that cannot have multiple values', ->
 
@@ -141,7 +142,7 @@ describe 'Query#canHaveMultipleValues', ->
     it 'should be able to have multiple values', ->
       query.canHaveMultipleValues(path).should.be.true
 
-describe 'Query#getQueryNodes', ->
+unitTests() && describe 'Query#getQueryNodes', ->
 
   describe 'The nodes of a query', ->
 
@@ -176,7 +177,7 @@ describe 'Query#getQueryNodes', ->
     it 'should not include nodes not in the query', ->
       includesPath(queryNodes, 'Employee.department.company').should.not.be.true
 
-describe 'Query#isOuterJoin', ->
+unitTests() && describe 'Query#isOuterJoin', ->
 
   model = Model.load TESTMODEL.model
   root = 'Employee'
@@ -209,7 +210,7 @@ describe 'Query#isOuterJoin', ->
     it 'should however return false', ->
       attempt().should.not.be.true
 
-describe 'Query#getSortDirection', ->
+unitTests() && describe 'Query#getSortDirection', ->
 
   model = Model.load TESTMODEL.model
   root = 'Employee'
@@ -268,7 +269,7 @@ describe 'Query#getSortDirection', ->
     it 'should throw a helpful error', ->
       attempt.should.throwError /not in the query/
 
-describe 'Query#addOrSetSortOrder', ->
+unitTests() && describe 'Query#addOrSetSortOrder', ->
 
   model = Model.load TESTMODEL.model
   root = 'Employee'
@@ -302,7 +303,7 @@ describe 'Query#addOrSetSortOrder', ->
     it 'should have set the sort order', ->
       direction.should.equal 'DESC'
 
-describe 'Query#setJoinStyle', ->
+unitTests() && describe 'Query#setJoinStyle', ->
 
   model = Model.load TESTMODEL.model
   root = 'Employee'

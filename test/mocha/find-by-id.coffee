@@ -1,6 +1,7 @@
 Fixture = require './lib/fixture'
 {report, eventually, prepare} = require './lib/utils'
 {defer, get} = Fixture.funcutils
+{integrationTests} = require './lib/segregation'
 
 caar = (xs) -> xs[0][0]
 
@@ -13,7 +14,7 @@ findFieldsOfEmployee = (service, q, fields) ->
 # We have to query each time as ids are volatile.
 DAVIDS_ID_Q = select: ['Employee.id'], where: {name: 'David Brent'}
 
-describe 'lookup', ->
+integrationTests() && describe 'lookup', ->
 
   {service} = new Fixture()
 
@@ -21,7 +22,8 @@ describe 'lookup', ->
 
     describe 'using the promises API', ->
 
-      @beforeAll prepare -> service.lookup 'Employee', 'David Brent'
+      @beforeAll prepare ->
+        service.lookup 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually ([david]) ->
         david.name.should.equal 'David Brent'
@@ -52,7 +54,7 @@ describe 'lookup', ->
             done new Error e
         return undefined
 
-describe 'find', ->
+integrationTests() && describe 'find', ->
 
   {service} = new Fixture()
 
@@ -60,7 +62,8 @@ describe 'find', ->
 
     describe 'using the promises API', ->
 
-      @beforeAll prepare -> service.find 'Employee', 'David Brent'
+      @beforeAll prepare ->
+        service.find 'Employee', 'David Brent'
 
       it 'should find someone with the right name', eventually (david) ->
         david.name.should.equal 'David Brent'
@@ -90,7 +93,8 @@ describe 'find', ->
             done new Error e
         return undefined
 
-describe 'Service#findById', ->
+# Same function as above called, tests if the service finds by id correctly
+integrationTests() && describe 'Service#findById', ->
 
   {service} = new Fixture()
 

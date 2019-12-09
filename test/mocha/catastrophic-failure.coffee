@@ -1,10 +1,12 @@
 {Service} = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 should = require 'should'
+{unitTests} = require './lib/segregation'
 
 shouldHaveFailed = (done) -> (o) -> done new Error("Expected failure, got #{ o }")
 
-describe 'parse failure', ->
+# Even though they are unit tests, they would still require an internet connection to work?? Test
+unitTests() && describe 'parse failure', ->
 
   # An intentionally mis-configured service
   # Currently using mockable for some of this - may need changing in the future.
@@ -27,7 +29,7 @@ describe 'parse failure', ->
           done e
       return undefined
 
-describe 'not available failure', ->
+unitTests() && describe 'not available failure', ->
 
   # An intentionally mis-configured service
   service = Service.connect root: 'http://www.metabolicmine2.org/the/return/of/meta'

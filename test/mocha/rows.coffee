@@ -2,6 +2,8 @@ Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
 {invokeWith, invoke, defer, get, flatMap} = Fixture.funcutils
 should = require 'should'
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 # Helper class to incapsulate the logic for tests on iteration
 class Counter
@@ -39,7 +41,10 @@ test = (done) -> (rows) ->
   catch e
     done e
 
-describe 'Query', ->
+# BOTH
+bothTests() && describe 'Query', ->
+
+  setupBundle 'rows.1.json'
 
   @slow SLOW
   {service, olderEmployees} = new Fixture()
@@ -88,11 +93,14 @@ describe 'Query', ->
       service.query(query).then(invoke 'eachRow').then attach, error
       return undefined
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
+  setupBundle 'rows.2.json'
+
   @slow SLOW
 
   describe '#rows()', ->
 
+    # BOTH
     describe 'good requests', ->
 
       {service, olderEmployees} = new Fixture()
@@ -120,6 +128,7 @@ describe 'Service', ->
 
       it 'should fail', shouldFail -> service.rows olderEmployees, timeout: 1
 
+    # BOTH
     describe 'reasonable timeouts', ->
 
       {service, olderEmployees} = new Fixture()
@@ -141,12 +150,14 @@ describe 'Service', ->
 
       it 'should return a failed promise', shouldFail -> service.rows badQuery
 
+      # BOTH
       it 'should yield an error as the first parameter to the callback', (done) ->
         service.rows badQuery, (err, rows) ->
           return done new Error("Expected error, but got #{ rows } instead") unless err?
           done()
         return undefined
 
+  # BOTH
   describe '#eachRow()', ->
 
     describe 'good requests', ->
@@ -210,6 +221,7 @@ describe 'Service', ->
 
       it 'should return a failed promise', shouldFail request
 
+      # BOTH
       it 'should report the status code of a bad query', (done) ->
         failed = service.eachRow badQuery
         failed.then (res) ->
@@ -222,6 +234,7 @@ describe 'Service', ->
             done e
         return undefined
 
+      # BOTH
       it 'should trigger the error handler provided', (done) ->
         state = {}
         reportNoError =

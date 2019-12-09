@@ -1,5 +1,6 @@
 Fixture = require './lib/fixture'
 should = require 'should'
+{bothTests} = require './lib/segregation'
 
 # These tests are for the behaviour of the accessors
 # for the static properties of an intermine.
@@ -14,7 +15,7 @@ resolves = (promise) -> (done) ->
     true.should.be.ok
     done()
 
-describe 'Static service properties:', ->
+bothTests() && describe 'Static service properties:', ->
 
   {service} = new Fixture()
 

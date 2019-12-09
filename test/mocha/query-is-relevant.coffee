@@ -1,7 +1,12 @@
 {prepare, eventually, always, clear, report} = require './lib/utils'
 Fixture = require './lib/fixture'
+{unitTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'Query#isRelevant', ->
+# 'isRelevant' doesn't test any specific service by testmine
+unitTests() && describe 'Query#isRelevant', ->
+
+  setupBundle 'query-is-relevant.1.json'
 
   {service, youngerEmployees} = new Fixture()
 

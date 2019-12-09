@@ -1,0 +1,53 @@
+[
+    {
+        "scope": "http://localhost:8080",
+        "method": "GET",
+        "path": "/intermine-demo/service/lists?name=The%20great%20unknowns",
+        "body": "",
+        "status": 200,
+        "response": {
+            "lists": [
+                {
+                    "size": 3,
+                    "authorized": true,
+                    "name": "The great unknowns",
+                    "id": 1000007,
+                    "type": "Employee",
+                    "title": "The great unknowns",
+                    "status": "CURRENT",
+                    "tags": []
+                }
+            ],
+            "executionTime": "2019.06.24 02:27::22",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Sun, 23 Jun 2019 20:57:22 GMT",
+            "Connection",
+            "close"
+        ]
+    }
+]

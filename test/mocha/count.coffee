@@ -1,16 +1,17 @@
 Fixture = require './lib/fixture'
 {promising, prepare, eventually, shouldFail} = require './lib/utils'
 {invoke} = Fixture.utils
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
 
   {service, olderEmployees, allEmployees} = new Fixture()
 
-  describe '#count()', ->
+  unitTests() && describe '#count()', ->
 
     it 'should fail', shouldFail service.count
 
-  describe '#count(path)', ->
+  integrationTests() && describe '#count(path)', ->
 
     pathCountTest = (path, n, xs) ->
       describe path, ->
@@ -27,7 +28,7 @@ describe 'Service', ->
     pathCountTest 'Company.name',           7, 'names'
     pathCountTest 'Company',                7, 'companies'
 
-  describe '#count(query)', ->
+  integrationTests() && describe '#count(query)', ->
 
     describe 'promise API', ->
       describe 'the count of all employees', ->
@@ -57,7 +58,7 @@ describe 'Service', ->
             done e
         return undefined
 
-describe 'Query#count', ->
+integrationTests() && describe 'Query#count', ->
 
   {service, olderEmployees, allEmployees} = new Fixture()
   count = invoke 'count'

@@ -1,5 +1,7 @@
 {Query} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
+{unitTests, bothTests}  = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
 expected = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -88,7 +90,8 @@ constraintsTest = (input) -> () ->
     q.addConstraints input
     q.constraints.should.eql expected
 
-describe 'Defining Query constraints', ->
+
+unitTests() && describe 'Defining Query constraints', ->
 
   describe 'using the internal verbose format', constraintsTest expected
 
@@ -104,6 +107,7 @@ describe 'Defining Query constraints', ->
 
   describe 'including switched off constraints', constraintsTest someSwitchedOff
 
+# NOT WORKING???
 describe 'range constraints', ->
 
   {service} = new Fixture()
@@ -123,20 +127,23 @@ describe 'range constraints', ->
     it 'should have made a query with 6 constraints', eventually (q) ->
       q.constraints.length.should.eql 6
 
-describe 'Query', ->
+# Manages to check isConstrained method and also tests the Service for it's response
+bothTests() && describe 'Query', ->
 
   describe '#isConstrained', ->
 
     {service} = new Fixture()
 
-    @beforeAll prepare -> service.query
-      from: 'Employee'
-      select: 'name'
-      where:
-        age: 10
-        'department.manager': { isa: 'CEO' }
-        'address.address': 'IS NOT NULL'
-        'department.company': {lookup: '*Hogg'}
+    setupBundle '06-query-constraints.1.json'
+    @beforeAll prepare ->
+      service.query
+        from: 'Employee'
+        select: 'name'
+        where:
+          age: 10
+          'department.manager': { isa: 'CEO' }
+          'address.address': 'IS NOT NULL'
+          'department.company': {lookup: '*Hogg'}
 
     it 'should say that "Employee.age" is constrained', eventually (q) ->
       q.isConstrained('Employee.age').should.be.true

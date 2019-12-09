@@ -1,9 +1,12 @@
 {prepare, eventually} = require './lib/utils'
 should = require 'should'
 Fixture = require './lib/fixture'
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
 
+  setupBundle 'lists.1.json'
   {service} = new Fixture()
 
   describe '#fetchLists()', ->

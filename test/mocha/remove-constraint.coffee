@@ -1,6 +1,9 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {defer} = Fixture.utils
+{unitTests} = require './lib/segregation'
+{setupRecorder, stopRecorder} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 constraints = [
   {path: 'Employee.department.manager', type: 'CEO'},
@@ -10,7 +13,9 @@ constraints = [
   {path: 'Employee.department.name', op: 'ONE OF', values: ['Sales', 'Accounting']}
 ]
 
-describe 'Query', ->
+unitTests() && describe 'Query', ->
+
+  setupBundle 'remove-constraint.1.json'
 
   {service} = new Fixture
 

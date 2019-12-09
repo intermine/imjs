@@ -1,15 +1,22 @@
 Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
+{unitTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'Query', ->
+fs = require 'fs'
+
+# To expand the '*' is handled by `imjs` library, therefore unit test (expandStar)
+unitTests() && describe 'Query', ->
+
+  setupBundle '04-xml-expansion.1.json'
 
   describe 'expandStar', ->
 
     {service} = new Fixture()
 
     describe "#select(['*'])", ->
-
-      @beforeEach prepare -> service.query root: 'Employee'
+      @beforeEach prepare ->
+        service.query root: 'Employee'
 
       it 'should expand stars to the summary fields', eventually (q) ->
         expected_views = [
