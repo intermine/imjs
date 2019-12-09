@@ -55,6 +55,18 @@ integrationTests() && describe 'Service', ->
 
     it 'performs an enrichment calculation', eventually there_are_seven
 
+
+  integrationTests() && describe '#enrichment, using ids', ->
+
+    @beforeAll prepare -> service.enrichment
+      # ID contents of 'My-Favourite-Employees' list.
+      ids: [2000010, 2000019, 2000064, 2000067]
+      widget: 'contractor_enrichment'
+      maxp: 1
+      correction: 'Bonferroni'
+
+    it 'performs an enrichment calculation using ids', eventually there_are_seven
+
   integrationTests() && describe '#enrichment with callback', ->
 
     it 'performs an enrichment calculation with a callback', (done) ->
