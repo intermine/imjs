@@ -1,11 +1,14 @@
 Fixture = require './lib/fixture'
 {prepare, report, eventually, cleanSlate} = require './lib/utils'
 {get} = Fixture.funcutils
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'Service#fetchListsContaining', ->
+bothTests() && describe 'Service#fetchListsContaining', ->
 
   {service} = new Fixture()
 
+  setupBundle 'lists-with-object.1.json'
   @beforeAll cleanSlate service
 
   describe 'searching for public ids', ->

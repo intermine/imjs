@@ -1,6 +1,8 @@
 Fixture = require './lib/fixture'
 {prepare, always, clear, eventually} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
+{setupBundle} = require './lib/mock'
+{bothTests} = require './lib/segregation'
 
 testTags = ['js', 'testing', 'mocha', 'imjs', '__folder__:test']
 namePrefix = 'temp-testing-list-operations-'
@@ -59,7 +61,11 @@ listOpTest = ({method, expectedMember, lists, size}) ->
           catch e
             done e
         return undefined
-describe 'List Operations', ->
+
+# Tests the querying ability of the Service class also the service's response to it
+bothTests() && describe 'List Operations', ->
+
+  setupBundle 'list-operations.1.json'
 
   listOpTest
     method: 'intersect'

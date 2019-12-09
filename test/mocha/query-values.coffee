@@ -2,6 +2,8 @@ Fixture                = require './lib/fixture'
 {prepare, eventually}  = require './lib/utils'
 
 {get, invoke, defer}       = Fixture.funcutils
+{setupBundle} = require './lib/mock'
+{unitTests} = require './lib/segregation'
 
 sum = (xs) -> xs.reduce (a, b) -> a + b
 
@@ -28,11 +30,15 @@ ageQuery =
   from: 'Employee'
   where: olderEmployees.where
 
-describe 'Query', ->
+unitTests() && describe 'Query', ->
+
+  setupBundle 'query-values.1.json'
 
   test '#values', -> service.query(ageQuery).then invoke 'values'
 
-describe 'Service', ->
+unitTests() && describe 'Service', ->
+
+  setupBundle 'query-values.2.json'
 
   describe '#values', ->
 

@@ -7,6 +7,9 @@ else
   {PathInfo} = require "../../build/path"
 
 should = require 'should'
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
+{setupRecorder, stopRecorder} = require './lib/mock'
+{setupBundle} = require './lib/mock'
 
 {shouldFail, prepare, eventually} = require './lib/utils'
 Fixture = require './lib/fixture'
@@ -17,17 +20,21 @@ testmodel = new Model TESTMODEL.model
 {service} = new Fixture
 testmodel.service = service
 
-describe 'PathInfo', ->
+bothTests() && describe 'PathInfo', ->
+  setupBundle '07-paths.1.json'
+  # setupRecorder()
+  @afterAll ->
+    # stopRecorder 'dummy.json'
 
   @afterEach PathInfo.flushCache
 
-  describe 'Illegal paths', ->
+  unitTests() && describe 'Illegal paths', ->
 
     it 'should be detected upon creation', ->
       (-> testmodel.makePath 'Foo.bar').should.throw()
       (-> testmodel.makePath 'Department.employees.seniority').should.throw()
 
-  describe 'root', ->
+  unitTests() && describe 'root', ->
     path = null
     
     @beforeEach -> path = testmodel.makePath 'Employee'
@@ -91,7 +98,7 @@ describe 'PathInfo', ->
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
 
-  describe 'Simple attribute', ->
+  unitTests() && describe 'Simple attribute', ->
     path = testmodel.makePath 'Employee.age'
 
     it 'should stringify with toString()', ->
@@ -105,7 +112,8 @@ describe 'PathInfo', ->
       path.getType().should.equal('int')
 
     describe '#getDisplayName', ->
-
+      # Even though mocks are required, the primary purpose of these tests is to
+      # test if the promise and callback API is working as expected
       describe 'promise API', ->
         @beforeAll prepare ->
           path.getDisplayName()
@@ -115,7 +123,6 @@ describe 'PathInfo', ->
           return undefined
 
       describe 'callback api', ->
-        
         it 'should yield the name', (done) ->
           path.getDisplayName (err, name) ->
             if err?
@@ -163,7 +170,7 @@ describe 'PathInfo', ->
 
       it 'should say it is an int', -> path.isa('int').should.be.true
 
-  describe 'Simple reference', ->
+  unitTests() && describe 'Simple reference', ->
     path = testmodel.makePath 'Employee.address'
 
     it 'should stringify with toString()', ->
@@ -214,7 +221,7 @@ describe 'PathInfo', ->
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
 
-  describe 'Simple collection', ->
+  unitTests() && describe 'Simple collection', ->
     path = testmodel.makePath 'Department.employees'
 
     it 'should stringify with toString()', ->
@@ -265,7 +272,7 @@ describe 'PathInfo', ->
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
 
-  describe 'Subclassed path', ->
+  unitTests() && describe 'Subclassed path', ->
     path = testmodel.makePath 'Department.employees', {'Department.employees': 'CEO'}
 
     describe '#getType()', -> it 'should report the subclass', ->
@@ -361,7 +368,7 @@ describe 'PathInfo', ->
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
 
-  describe 'A path with a custom name', ->
+  unitTests() && describe 'A path with a custom name', ->
     path = testmodel.makePath 'Company.departments.manager.address'
     path.displayName = "FOO"
 
@@ -375,7 +382,7 @@ describe 'PathInfo', ->
         done()
         return undefined
 
-  describe 'Long reference with collection chain', ->
+  bothTests() && describe 'Long reference with collection chain', ->
 
     PathInfo.flushCache()
 
@@ -388,24 +395,23 @@ describe 'PathInfo', ->
     it 'should stringify with string concatenation', ->
       ('' + path).should.equal('Company.departments.manager.address')
 
-    describe '#getPathInfo', ->
-
+    integrationTests() && describe '#getPathInfo', ->
       @beforeAll prepare ->
         path.getDisplayName()
 
       it 'should promise to return a name', eventually (name) ->
         name.should.equal "Company > Departments > Manager > Address"
 
-    describe '#getType()', -> it 'should report an appropriate type', ->
+    unitTests() && describe '#getType()', -> it 'should report an appropriate type', ->
       path.getType().name.should.equal('Address')
 
-    describe '#containsCollection()', -> it 'should contain a collection', ->
+    unitTests() && describe '#containsCollection()', -> it 'should contain a collection', ->
       path.containsCollection().should.be.true
 
-    describe '#getParent()', -> it 'should have a parent of the right type', ->
+    unitTests() && describe '#getParent()', -> it 'should have a parent of the right type', ->
       path.getParent().getType().name.should.equal('Manager')
 
-    describe '#append(field)', ->
+    unitTests() && describe '#append(field)', ->
       
       it 'should return the appropriate child path', ->
         path.append('id').getType().should.equal('Integer')
@@ -413,22 +419,22 @@ describe 'PathInfo', ->
       it "should throw if the field doesn't exist", ->
         (-> path.append 'postCode').should.throw()
 
-    describe '#isRoot()', -> it 'should return false', ->
+    unitTests() && describe '#isRoot()', -> it 'should return false', ->
       path.isRoot().should.be.false
 
-    describe '#isAttribute()', -> it 'should return false', ->
+    unitTests() && describe '#isAttribute()', -> it 'should return false', ->
       path.isAttribute().should.be.false
 
-    describe '#isReference', -> it 'should return true', ->
+    unitTests() && describe '#isReference', -> it 'should return true', ->
       path.isReference().should.be.true
 
-    describe '#isCollection', -> it 'should return false', ->
+    unitTests() && describe '#isCollection', -> it 'should return false', ->
       path.isCollection().should.not.be.true
 
-    describe '#isClass', -> it 'should return true', ->
+    unitTests() && describe '#isClass', -> it 'should return true', ->
       path.isClass().should.be.true
 
-    describe '#isa(type)', ->
+    unitTests() && describe '#isa(type)', ->
       it 'should not say it is an Employee', -> path.isa('Employee').should.not.be.true
 
       it 'should say it is a Thing', -> path.isa('Thing').should.be.true
@@ -437,15 +443,15 @@ describe 'PathInfo', ->
 
       it 'should not say it is an int', -> path.isa('int').should.not.be.true
 
-describe 'Two similar paths', ->
+bothTests() && describe 'Two similar paths', ->
 
   pathA = testmodel.makePath 'Employee.name'
   pathB = testmodel.makePath 'Employee.name'
 
-  it 'should equal each other', ->
+  unitTests() && it 'should equal each other', ->
     pathA.equals(pathB).should.be.true
 
-  describe 'their names', ->
+  integrationTests() && describe 'their names', ->
 
     @beforeAll prepare ->
       Fixture.utils.parallel(p.getDisplayName() for p in [pathA, pathB])

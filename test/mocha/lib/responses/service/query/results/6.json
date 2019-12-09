@@ -1,0 +1,42 @@
+[
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/query/results",
+        "body": "query=%3Cquery%20model%3D%22testmodel%22%20view%3D%22Employee.name%20Employee.department.name%20Employee.department.manager.name%20Employee.department.company.name%20Employee.fullTime%20Employee.address.address%22%20%3E%3Cconstraint%20path%3D%22Employee.name%22%20op%3D%22%3D%3D%22%20value%3D%22brenda%22%20%2F%3E%3C%2Fquery%3E&format=jsoncount",
+        "status": 200,
+        "response": {
+            "count": 0,
+            "executionTime": "2019.06.26 19:01::34",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Wed, 26 Jun 2019 13:31:34 GMT",
+            "Connection",
+            "close"
+        ]
+    }
+]

@@ -1,6 +1,7 @@
 # Test that the two syntaxes of defining queries are equivalent.
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
+{integrationTests} = require './lib/segregation'
 
 trad =
   view: ["Employee.name", "Employee.age", "Employee.department.name"]
@@ -16,7 +17,9 @@ sqlish =
     'department.name': 'Sales*'
     'age': {gt: 50}
 
-describe 'The equivalence of syntaxes', ->
+# Integration test because the way of interpreting the query
+# is to be done by the service itself, `imjs` just sends the request
+integrationTests() && describe 'The equivalence of syntaxes', ->
 
   {service} = new Fixture()
 

@@ -1,8 +1,14 @@
 Fixture              = require './lib/fixture'
 {prepare, eventually, always} = require './lib/utils'
 should               = require 'should'
+{unitTests}          = require './lib/segregation'
+{setupBundle}        = require './lib/mock'
 
-describe 'Query', ->
+# Uses pre-existing methods of the Query class, and doesn't make any
+# new request to the testmine service
+unitTests() && describe 'Query', ->
+
+  setupBundle 'paging.1.json'
 
   expected = [
     "Tatjana Berkel",

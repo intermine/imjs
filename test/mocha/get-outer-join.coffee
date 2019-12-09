@@ -1,18 +1,23 @@
 Fixture = require './lib/fixture'
 {eventually, prepare, always} = require './lib/utils'
 should = require 'should'
+{unitTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'Query', ->
+unitTests() && describe 'Query', ->
+
+  setupBundle 'get-outer-join.1.json'
 
   describe '#getOuterJoin(path)', ->
 
     {service} = new Fixture()
 
-    @beforeAll prepare -> service.query
-      select: ['name'],
-      from: 'Employee'
-      joins: [ 'department', 'department.manager' ]
-
+    @beforeAll prepare ->
+      service.query
+        select: ['name'],
+        from: 'Employee'
+        joins: [ 'department', 'department.manager' ]
+      
     it 'should find the outer join of department', eventually (q) ->
       q.getOuterJoin('department').should.equal 'Employee.department'
 

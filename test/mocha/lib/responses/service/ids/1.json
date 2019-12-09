@@ -1,0 +1,42 @@
+[
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/ids",
+        "body": "",
+        "status": 400,
+        "response": {
+            "uid": null,
+            "executionTime": "2019.06.24 02:27::23",
+            "wasSuccessful": false,
+            "error": "Invalid JSON object",
+            "statusCode": 400
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Sun, 23 Jun 2019 20:57:22 GMT",
+            "Connection",
+            "close"
+        ]
+    }
+]

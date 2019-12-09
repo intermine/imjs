@@ -2,11 +2,15 @@ Fixture = require './lib/fixture'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
+{setupBundle} = require './lib/mock'
+{bothTests} = require './lib/segregation'
 
 tags = ['js', 'testing', 'mocha', 'imjs']
 namePrefix = 'temp-testing-list-operations-'
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
+
+  setupBundle 'list-complement.1.json'
 
   {service} = new Fixture()
   service.errorHandler = ->
@@ -80,6 +84,7 @@ describe 'Service', ->
       list.contents().then (members) ->
         (m.name for m in members).should.containEql expectedMember
 
+  # BOTH
   describe '#complement(opts) {Array of Lists}', ->
 
     from = ['some favs-some unknowns', 'Umlaut holders']
@@ -116,7 +121,6 @@ describe 'Service', ->
         (m.name for m in members).should.containEql expectedMember
 
   describe '#complement(opts, cb)', ->
-
     opts =
       from: ['some favs-some unknowns', 'Umlaut holders']
       exclude: ['My-Favourite-Employees', 'The great unknowns']

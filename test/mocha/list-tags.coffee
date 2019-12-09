@@ -1,9 +1,12 @@
 {always, prepare, eventually} = require './lib/utils'
 should = require 'should'
 Fixture = require './lib/fixture'
+{bothTests} = require './lib/segregation'
+{setupBundle} = require './lib/mock'
 
-describe 'List', ->
+bothTests() && describe 'List', ->
 
+  setupBundle 'list-tags.1.json'
   {service} = new Fixture()
 
   origList = 'My-Favourite-Employees'

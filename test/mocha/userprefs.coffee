@@ -2,8 +2,9 @@ Fixture = require './lib/fixture'
 {eventually, prepare, always, report} = require './lib/utils'
 {invoke} = Fixture.funcutils
 should = require 'should'
+{integrationTests} = require './lib/segregation'
 
-describe 'Service', ->
+integrationTests() && describe 'Service', ->
 
   {service} = new Fixture()
 
@@ -59,7 +60,7 @@ describe 'Service', ->
               done e
           return undefined
 
-describe 'User: single preference management', ->
+integrationTests() && describe 'User: single preference management', ->
 
   {service} = new Fixture()
 
@@ -90,7 +91,7 @@ describe 'User: single preference management', ->
     it 'should have the right prefs set', eventually (prefs) ->
       prefs.should.not.have.property 'testpref'
 
-describe 'User: preference management with callbacks', ->
+integrationTests() && describe 'User: preference management with callbacks', ->
 
   {service} = new Fixture()
 
@@ -137,7 +138,7 @@ describe 'User: preference management with callbacks', ->
           catch e
             done e
 
-describe 'User: multiple preference management', ->
+integrationTests() && describe 'User: multiple preference management', ->
 
   {service} = new Fixture()
   set = 'setPreferences'

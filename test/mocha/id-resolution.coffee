@@ -9,8 +9,9 @@ OLD_ID_RES_FORMAT = require '../data/old-id-resolution-format.json'
 {cleanSlate, prepare, always, clear, eventually, shouldFail} = require './lib/utils'
 {fold, get, invoke} = Fixture.funcutils
 should = require 'should'
+{unitTests, integrationTests, bothTests} = require './lib/segregation'
 
-describe 'IdResults', ->
+unitTests() && describe 'IdResults', ->
 
   data = OLD_ID_RES_FORMAT
   result = new idresolution.IdResults data
@@ -78,11 +79,11 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
   type = 'Employee'
 
-  describe '#resolveIds()', ->
+  unitTests() && describe '#resolveIds()', ->
 
     it 'should fail', shouldFail service.resolveIds
 
-  describe '#resolutionJob(id)', ->
+  integrationTests() && describe '#resolutionJob(id)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
     @afterAll cleanUp
@@ -94,7 +95,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     it 'should get resolved', eventually (job) -> job.wait()
 
-  describe '#resolveIds(job)', ->
+  integrationTests() && describe '#resolveIds(job)', ->
 
     identifiers = ['anne', 'brenda', 'carol', 'Foo Bar', 'fatou']
     @beforeAll prepare -> service.resolveIds({identifiers, type})
@@ -131,7 +132,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
 
     extraTests['#resolveIds(job)']?()
 
-  describe '#resolveIds(convertedTypes)', ->
+  integrationTests() && describe '#resolveIds(convertedTypes)', ->
 
     identifiers = ['Sales']
     @beforeAll prepare -> service.resolveIds({identifiers, type})
@@ -153,7 +154,7 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
         results.goodMatchIds().should.have.lengthOf 0
         results.getMatchIds('MATCH').should.have.lengthOf 0
 
-  describe '#resolveIds(caseSensitiveJob)', ->
+  integrationTests() && describe '#resolveIds(caseSensitiveJob)', ->
 
     identifiers = ['anne', 'Brenda', 'Carol', 'Foo Bar', 'Fatou']
     caseSensitive = true
@@ -173,7 +174,8 @@ testIDResolutionAgainst = (service, extraTests = {}) ->
         job.decay.should.be.above 50
       return undefined
 
-describe 'Service', ->
+# BOTH (uses above function, mock accordingly)
+bothTests() && describe 'Service', ->
 
   describe 'current', ->
     {service} = new Fixture()

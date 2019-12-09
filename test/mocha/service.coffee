@@ -3,10 +3,11 @@ Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
 
 {Service} = Fixture
+{unitTests, bothTests, integrationTests} = require './lib/segregation'
 
-describe 'Service', ->
+bothTests() && describe 'Service', ->
 
-  describe 'new Service', ->
+  unitTests() && describe 'new Service', ->
 
     it 'should make a new service', ->
       service = new Service root: 'foo'
@@ -28,7 +29,7 @@ describe 'Service', ->
       service = new Service root: 'localhost/intermine-test'
       service.root.should.equal 'http://localhost/intermine-test/service/'
 
-  describe 'customHeaders', ->
+  integrationTests() && describe 'customHeaders', ->
 
     {headers} = new Fixture
 
@@ -40,7 +41,7 @@ describe 'Service', ->
       , (err) ->
         err.message.trim().should.startWith 'Invalid request authentication.'
 
-  describe '.connect', ->
+  unitTests() && describe '.connect', ->
 
     it 'should serve as an alias for "new Service"', ->
       service = Service.connect root: 'localhost/intermine-test'
@@ -55,7 +56,8 @@ describe 'Service', ->
   # from data, each service instance gets its own copy, so we test with
   # the summary fields instead, which can provide us with a strict identity
   # check (unlike the version and the release, which are primitives).
-  describe 'caching', ->
+
+  integrationTests() && describe 'caching', ->
 
     describe 'useCache', ->
 

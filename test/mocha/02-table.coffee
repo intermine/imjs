@@ -1,10 +1,11 @@
 {shouldFail, prepare, eventually} = require './lib/utils'
 should     = require 'should'
 {Model}    = Fixture = require './lib/fixture'
+{unitTests} = require './lib/segregation'
 
 {TESTMODEL} = require '../data/model'
 
-describe 'Table', ->
+unitTests() && describe 'Table', ->
 
   testmodel = new Model TESTMODEL.model
 
@@ -24,7 +25,7 @@ describe 'Table', ->
   it 'should support the getDisplayName method', ->
     Employee.getDisplayName.should.not.throw()
 
-describe 'Table with live model', ->
+unitTests() && describe 'Table with live model', ->
 
   testmodel = new Model TESTMODEL.model
   {service} = new Fixture

@@ -1,9 +1,10 @@
 Fixture = require './lib/fixture'
 {prepare, eventually} = require './lib/utils'
+{integrationTests} = require './lib/segregation'
 
 normalise = (s) -> s.replace(/\s+/gm, ' ').replace(/>\s*</gm, '><')
 
-describe 'Relevance of joins', ->
+integrationTests() && describe 'Relevance of joins', ->
 
   {service} = new Fixture()
 

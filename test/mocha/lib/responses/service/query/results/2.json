@@ -1,0 +1,430 @@
+[
+    {
+        "scope": "http://localhost:8080",
+        "method": "POST",
+        "path": "/intermine-demo/service/query/results",
+        "body": "query=%3Cquery%20model%3D%22testmodel%22%20view%3D%22Employee.name%20Employee.department.name%20Employee.department.manager.name%20Employee.department.company.name%20Employee.fullTime%20Employee.address.address%22%20%3E%3Cconstraint%20path%3D%22Employee.age%22%20op%3D%22%26gt%3B%22%20value%3D%2250%22%20%2F%3E%3C%2Fquery%3E&format=json",
+        "status": 200,
+        "response": {
+            "modelName": "testmodel",
+            "columnHeaders": [
+                "Employee > Name",
+                "Employee > Works In",
+                "Employee > Works Under",
+                "Employee > Works For",
+                "Employee > Works Full Time?",
+                "Employee > Lives At"
+            ],
+            "rootClass": "Employee",
+            "start": 0,
+            "views": [
+                "Employee.name",
+                "Employee.department.name",
+                "Employee.department.manager.name",
+                "Employee.department.company.name",
+                "Employee.fullTime",
+                "Employee.address.address"
+            ],
+            "results": [
+                [
+                    "Andreas Hermann",
+                    "Schadensregulierung",
+                    "Timo Becker",
+                    "Capitol Versicherung AG",
+                    true,
+                    "Mitarbeiterstraße 22"
+                ],
+                [
+                    "Brenda",
+                    "Accounting",
+                    "Keith Bishop",
+                    "Wernham-Hogg",
+                    false,
+                    "98 Worker Av"
+                ],
+                [
+                    "Bwa'h Ha Ha",
+                    "Board of Directors",
+                    "Bwa'h Ha Ha",
+                    "Difficulties Я Us",
+                    false,
+                    "PO Box 629, Switzerland"
+                ],
+                [
+                    "Carol",
+                    "Human Resources",
+                    "Neil Godwin",
+                    "Wernham-Hogg",
+                    true,
+                    "37 Worker Av"
+                ],
+                [
+                    "Charles Miner",
+                    "Board of Directors",
+                    "Charles Miner",
+                    "Dunder-Mifflin",
+                    false,
+                    "PO Box 529, Switzerland"
+                ],
+                [
+                    "Double backwards slash \\",
+                    "Separators",
+                    "Separator Leader",
+                    "Difficulties Я Us",
+                    true,
+                    "Problem St. 44"
+                ],
+                [
+                    "Double Double Quote \"foo\"",
+                    "Quotes",
+                    "Quote Leader",
+                    "Difficulties Я Us",
+                    true,
+                    "Problem St. 61"
+                ],
+                [
+                    "Ed Truck",
+                    "Human Resources",
+                    "Meredith Palmer",
+                    "Dunder-Mifflin",
+                    false,
+                    "32 Worker Av."
+                ],
+                [
+                    "EmployeeB3",
+                    "DepartmentB2",
+                    "EmployeeB3",
+                    "CompanyB",
+                    true,
+                    "Employee Street, BVille"
+                ],
+                [
+                    "Fabienne de Dos",
+                    "Warehouse",
+                    "Didier Leguélec",
+                    "Gogirep",
+                    false,
+                    "Av. Fatigue 83"
+                ],
+                [
+                    "Forward Slash /",
+                    "Slashes",
+                    "Slash Leader",
+                    "Difficulties Я Us",
+                    true,
+                    "Problem St. 42"
+                ],
+                [
+                    "Frank Montenbruck",
+                    "Schadensregulierung M-Z",
+                    "Bernd Stromberg",
+                    "Capitol Versicherung AG",
+                    false,
+                    "Mitarbeiterstraße 71"
+                ],
+                [
+                    "Gareth Keenan",
+                    "Sales",
+                    "David Brent",
+                    "Wernham-Hogg",
+                    true,
+                    "23 Worker Av"
+                ],
+                [
+                    "Gilles Triquet",
+                    "Sales",
+                    "Gilles Triquet",
+                    "Gogirep",
+                    false,
+                    "Rue Représentant 16"
+                ],
+                [
+                    "Herr Fritsche",
+                    "Archiven",
+                    "Burkhardt Wutke",
+                    "Capitol Versicherung AG",
+                    true,
+                    "Mitarbeiterstraße 26"
+                ],
+                [
+                    "Herr Grahms",
+                    "Kantine",
+                    "Frank Möllers",
+                    "Capitol Versicherung AG",
+                    false,
+                    "Mitarbeiterstraße 96"
+                ],
+                [
+                    "Hidetoshi Takinawa",
+                    "Warehouse",
+                    "Lonnis Collins",
+                    "Dunder-Mifflin",
+                    true,
+                    "67 Worker Av."
+                ],
+                [
+                    "Jacques Plagnol Jacques",
+                    "Accounting",
+                    "Jacques Plagnol Jacques",
+                    "Gogirep",
+                    false,
+                    "Rue Représentant 57"
+                ],
+                [
+                    "Jean-Marc",
+                    "Human Resources",
+                    "Joel Liotard",
+                    "Gogirep",
+                    true,
+                    "Av. Fatigue 18"
+                ],
+                [
+                    "Jennifer Schirrmann",
+                    "Schadensregulierung A-L",
+                    "Sinan Turçulu",
+                    "Capitol Versicherung AG",
+                    false,
+                    "Mitarbeiterstraße 85"
+                ],
+                [
+                    "Jennifer Taylor-Clarke",
+                    "Board of Directors",
+                    "Jennifer Taylor-Clarke",
+                    "Wernham-Hogg",
+                    false,
+                    "PO Box 15, Switzerland"
+                ],
+                [
+                    "Jim Halpert",
+                    "Sales",
+                    "Michael Scott",
+                    "Dunder-Mifflin",
+                    true,
+                    "7 Worker Av."
+                ],
+                [
+                    "Jochen Schüler",
+                    "Kantine",
+                    "Frank Möllers",
+                    "Capitol Versicherung AG",
+                    true,
+                    "Mitarbeiterstraße 92"
+                ],
+                [
+                    "Josef Müller",
+                    "Schadensregulierung",
+                    "Timo Becker",
+                    "Capitol Versicherung AG",
+                    true,
+                    "Mitarbeiterstraße 47"
+                ],
+                [
+                    "Josh Porter",
+                    "Human Resources",
+                    "Meredith Palmer",
+                    "Dunder-Mifflin",
+                    true,
+                    "2 Worker Av."
+                ],
+                [
+                    "Juliette Lebrac",
+                    "Board of Directors",
+                    "Juliette Lebrac",
+                    "Gogirep",
+                    false,
+                    "PO Box 76, Switzerland"
+                ],
+                [
+                    "Keith Bishop",
+                    "Accounting",
+                    "Keith Bishop",
+                    "Wernham-Hogg",
+                    false,
+                    "87 Confusion Row"
+                ],
+                [
+                    "Kevin Malone",
+                    "Accounting",
+                    "Angela",
+                    "Dunder-Mifflin",
+                    false,
+                    "8 Worker Av."
+                ],
+                [
+                    "Lars Lehnhoff",
+                    "Schadensregulierung M-Z",
+                    "Bernd Stromberg",
+                    "Capitol Versicherung AG",
+                    false,
+                    "Mitarbeiterstraße 50"
+                ],
+                [
+                    "Malcolm",
+                    "Sales",
+                    "David Brent",
+                    "Wernham-Hogg",
+                    false,
+                    "22 Worker Av"
+                ],
+                [
+                    "Michael",
+                    "Warehouse",
+                    "Lonnis Collins",
+                    "Dunder-Mifflin",
+                    false,
+                    "21 Worker Av."
+                ],
+                [
+                    "Nadège",
+                    "Human Resources",
+                    "Joel Liotard",
+                    "Gogirep",
+                    false,
+                    "Av. Fatigue 73"
+                ],
+                [
+                    "Nathan",
+                    "Warehouse",
+                    "Glynn Williams",
+                    "Wernham-Hogg",
+                    true,
+                    "21 Worker Av"
+                ],
+                [
+                    "New line\nhere",
+                    "Separators",
+                    "Separator Leader",
+                    "Difficulties Я Us",
+                    true,
+                    "Problem St. 7"
+                ],
+                [
+                    "Nicole",
+                    "Sales",
+                    "Gilles Triquet",
+                    "Gogirep",
+                    true,
+                    "Av. Fatigue 96"
+                ],
+                [
+                    "Nyota N'ynagasongwa",
+                    "Kantine",
+                    "Frank Möllers",
+                    "Capitol Versicherung AG",
+                    false,
+                    "Mitarbeiterstraße 51"
+                ],
+                [
+                    "Olivier",
+                    "Accounting",
+                    "Jacques Plagnol Jacques",
+                    "Gogirep",
+                    true,
+                    "Av. Fatigue 72"
+                ],
+                [
+                    "Rachel",
+                    "Sales",
+                    "David Brent",
+                    "Wernham-Hogg",
+                    false,
+                    "18 Worker Av"
+                ],
+                [
+                    "Right angle bracket >",
+                    "XML Entities",
+                    "XML Leader",
+                    "Difficulties Я Us",
+                    false,
+                    "Problem St. 35"
+                ],
+                [
+                    "Single Double Quote \"",
+                    "Quotes",
+                    "Quote Leader",
+                    "Difficulties Я Us",
+                    true,
+                    "Problem St. 91"
+                ],
+                [
+                    "Single Single Quote '",
+                    "Quotes",
+                    "Quote Leader",
+                    "Difficulties Я Us",
+                    false,
+                    "Problem St. 16"
+                ],
+                [
+                    "Stéphane",
+                    "Accounting",
+                    "Jacques Plagnol Jacques",
+                    "Gogirep",
+                    false,
+                    "Av. Fatigue 16"
+                ],
+                [
+                    "Tatjana Berkel",
+                    "Board of Directors",
+                    "Tatjana Berkel",
+                    "Capitol Versicherung AG",
+                    false,
+                    "PO Box 834, Switzerland"
+                ],
+                [
+                    "Toby Flenderson",
+                    "Accounting",
+                    "Angela",
+                    "Dunder-Mifflin",
+                    true,
+                    "7 Worker Av."
+                ],
+                [
+                    "Trudy",
+                    "Accounting",
+                    "Keith Bishop",
+                    "Wernham-Hogg",
+                    true,
+                    "41 Worker Av"
+                ],
+                [
+                    "XML Leader",
+                    "XML Entities",
+                    "XML Leader",
+                    "Difficulties Я Us",
+                    false,
+                    " 67"
+                ]
+            ],
+            "executionTime": "2019.06.24 02:27::23",
+            "wasSuccessful": true,
+            "error": null,
+            "statusCode": 200
+        },
+        "rawHeaders": [
+            "Server",
+            "Apache-Coyote/1.1",
+            "Access-Control-Expose-Headers",
+            "Content-Encoding, Content-Type, Content-Length, Content-Range",
+            "Access-Control-Allow-Origin",
+            "*",
+            "Access-Control-Allow-Methods",
+            "DELETE, POST, GET, OPTIONS, PUT",
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Range, Authorization, Content-Length, Content-Range",
+            "Content-Disposition",
+            "attachment; filename=\"result.json\"",
+            "Pragma",
+            "no-cache",
+            "Cache-Control",
+            "must-revalidate, max-age=0",
+            "Content-Type",
+            "application/json;charset=UTF-8",
+            "Transfer-Encoding",
+            "chunked",
+            "Date",
+            "Sun, 23 Jun 2019 20:57:22 GMT",
+            "Connection",
+            "close"
+        ]
+    }
+]

@@ -2,6 +2,7 @@
 Fixture = require './lib/fixture'
 {Query, Model} = Fixture
 {get} = Fixture.funcutils
+{unitTests} = require './lib/segregation'
 
 options =
   intermine:
@@ -14,7 +15,7 @@ EXPECTED_XML = """<query model="testmodel" view="Employee.name" >""" +
   """<constraint path="Employee" op="LOOKUP" value="Bill" extraValue="Sales" />""" +
   """</query>"""
 
-describe 'Query', ->
+unitTests() && describe 'Query', ->
 
   describe 'lookup constraints with extra values', ->
 

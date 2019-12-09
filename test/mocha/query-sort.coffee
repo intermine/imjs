@@ -1,8 +1,9 @@
 {Query, Model} = Fixture = require './lib/fixture'
 {eventually, prepare} = require './lib/utils'
 {TESTMODEL} = require '../data/model'
+{unitTests} = require './lib/segregation'
 
-describe 'Query#select', ->
+unitTests() && describe 'Query#select', ->
 
   m = new Model TESTMODEL.model
   q = null
@@ -47,7 +48,7 @@ describe 'Query#select', ->
     direction.should.eql 'ASC'
     p.sortOrder.length.should.eql 1
 
-describe 'Query#orderBy events', ->
+unitTests() && describe 'Query#orderBy events', ->
 
   m = new Model TESTMODEL.model
   q = null
@@ -70,7 +71,7 @@ describe 'Query#orderBy events', ->
     evts.changeOrder.should.eql 1
     opts.events.should.have.lengthOf 0
 
-describe 'Query#orderBy silently', ->
+unitTests() && describe 'Query#orderBy silently', ->
 
   m = new Model TESTMODEL.model
   q = null

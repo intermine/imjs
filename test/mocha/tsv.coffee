@@ -2,6 +2,7 @@ Fixture                = require './lib/fixture'
 {prepare, eventually, shouldFail}  = require './lib/utils'
 {invokeWith, invoke, defer, get, flatMap} = Fixture.funcutils
 should = require 'should'
+{integrationTests} = require './lib/segregation'
 
 ROWS = 87
 ROW = "10\tEmployeeA1"
@@ -10,7 +11,7 @@ SLOW = 100
 
 toRows = (text) -> text.split /\n/
 
-describe 'TSV results', ->
+integrationTests() && describe 'TSV results', ->
 
   @slow SLOW
   {service, youngerEmployees} = new Fixture()

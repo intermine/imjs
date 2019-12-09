@@ -2,6 +2,7 @@
 Fixture = require './lib/fixture'
 {Query, Model} = Fixture
 {get} = Fixture.funcutils
+{unitTests} = require './lib/segregation'
 
 options =
   intermine:
@@ -17,7 +18,7 @@ options =
       'department.name': 'Sales*'
       'age': {gt: 50}
 
-describe 'Query', ->
+unitTests() && describe 'Query', ->
 
   testmodel = new Model TESTMODEL.model
 

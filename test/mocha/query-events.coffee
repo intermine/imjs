@@ -1,7 +1,8 @@
 {Query} = require './lib/fixture'
 should = require 'should'
+{unitTests} = require './lib/segregation'
 
-describe 'Query#on', ->
+unitTests() && describe 'Query#on', ->
 
   q = new Query
   events = 0
@@ -20,7 +21,7 @@ describe 'Query#on', ->
     it 'should also notify handlers with more specific interests', ->
       specific.should.equal 3
 
-describe 'Query#on', ->
+unitTests() && describe 'Query#on', ->
 
   q = new Query
   events = 0
@@ -33,7 +34,7 @@ describe 'Query#on', ->
     it 'should respond to events', ->
       events.should.equal 2
 
-describe 'Query#bind', ->
+unitTests() && describe 'Query#bind', ->
 
   q = new Query
   events = 0
@@ -46,7 +47,7 @@ describe 'Query#bind', ->
     it 'should respond to events', ->
       events.should.equal 2
 
-describe 'Query#off', ->
+unitTests() && describe 'Query#off', ->
 
   q = new Query
   events = 0
@@ -60,7 +61,7 @@ describe 'Query#off', ->
     it 'should respond to events', ->
       events.should.equal 1
 
-describe 'Query#off', ->
+unitTests() && describe 'Query#off', ->
 
   q = new Query
   foos = 0
@@ -79,7 +80,7 @@ describe 'Query#off', ->
       foos.should.equal 1
       bars.should.equal 2
 
-describe 'Query#unbind', ->
+unitTests() && describe 'Query#unbind', ->
 
   q = new Query
   events = 0

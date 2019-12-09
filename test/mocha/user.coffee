@@ -2,13 +2,14 @@ Fixture = require './lib/fixture'
 {parallel, eventually, always, prepare, after} = require './lib/utils'
 {get, invoke} = Fixture.funcutils
 should = require 'should'
+{integrationTests} = require './lib/segregation'
 
 MSG = 'some message'
 
 # Subtract a second because the remote time is floored to the nearest second.
 start = new Date().getTime() - 1000
 
-describe 'User#getToken', ->
+integrationTests() && describe 'User#getToken', ->
 
   {service} = new Fixture
 

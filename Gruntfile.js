@@ -172,6 +172,22 @@ module.exports = function (grunt) {
           flatten: true,
           dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>/'
         }]
+      },
+      mockResponses: {
+        files: [{
+          expand: true,
+          cwd: 'test/mocha/lib/responses/',
+          src: ['**'],
+          dest: 'test/compiled/lib/responses/'
+        }]
+      },
+      mockBundledResponses: {
+        files: [{
+          expand: true,
+          cwd: 'test/mocha/lib/bundledResponses/',
+          src: ['**'],
+          dest: 'test/compiled/lib/bundledResponses/'
+        }]
       }
     },
     browserify: {
@@ -410,6 +426,8 @@ module.exports = function (grunt) {
     '-inject-version',
     'browserify',
     'uglify',
+    'copy:mockResponses',
+    'copy:mockBundledResponses',
     'copy:dist',
     'copy:version'
   ])

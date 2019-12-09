@@ -1,5 +1,6 @@
-language: node_js
+language: java # node_js won't let you set jdk version
 sudo: false # use container based infrastructure
+services: postgresql
 env:
     global:
         - TESTMODEL_URL=http://localhost:8080/intermine-demo
