@@ -1,4 +1,4 @@
-/*! imjs - v3.16.0 - 2019-08-22 */
+/*! imjs - v3.17.0 - 2019-12-09 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -3541,11 +3541,18 @@
     Service.prototype.enrichment = function(opts, cb) {
       return REQUIRES_VERSION(this, 8, (function(_this) {
         return function() {
-          var req;
-          req = merge({
+          var defaults, req;
+          defaults = {
             maxp: 0.05,
             correction: 'Holm-Bonferroni'
-          }, opts);
+          };
+          if (utils.isArray(opts.ids)) {
+            req = merge(defaults, opts, {
+              ids: opts.ids.join(",")
+            });
+          } else {
+            req = merge(defaults, opts);
+          }
           return withCB(cb, _this.get(ENRICHMENT_PATH, req).then(get('results')));
         };
       })(this));
@@ -5071,7 +5078,7 @@
 
 },{"./promise":8}],17:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.16.0';
+  exports.VERSION = '3.17.0';
 
 }).call(this);
 

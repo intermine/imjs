@@ -297,6 +297,7 @@ class Service
   # of the items in this list.
   # @param [Object<String, String>] opts The parameters to pass to the calculation.
   # @option opts [String] list The name of the list to analyse.
+  # @option opts [Array<Number>] ids Array of InterMine object ID numbers to analyse.
   # @option opts [String] widget The name of the enrichment calculation to use.
   # @option opts [Number] maxp The maximum permissible p-value (optional, default = 0.05).
   # @option opts [String] correction The correction algorithm to use (default = Holm-Bonferroni).
@@ -306,7 +307,13 @@ class Service
   # @param [->] cb A function to call with the results when they have been received (optional).
   # @return [Promise<Array<Object>>] A promise to get results.
   enrichment: (opts, cb) => REQUIRES_VERSION @, 8, =>
-    req = merge {maxp: 0.05, correction: 'Holm-Bonferroni'}, opts
+    defaults = {maxp: 0.05, correction: 'Holm-Bonferroni'}
+
+    if utils.isArray opts.ids
+      req = merge defaults, opts, {ids: opts.ids.join(",")}
+    else
+      req = merge defaults, opts
+
     withCB cb, @get(ENRICHMENT_PATH, req).then(get 'results')
 
   # Search for items in the database by any term or facet.
