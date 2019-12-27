@@ -1,4 +1,4 @@
-/*! imjs - v3.17.0 - 2019-12-09 */
+/*! imjs - v3.17.0 - 2019-12-27 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -1210,7 +1210,7 @@
 
   BASIC_ATTRS = ['path', 'op', 'code'];
 
-  SIMPLE_ATTRS = BASIC_ATTRS.concat(['value', 'extraValue']);
+  SIMPLE_ATTRS = BASIC_ATTRS.concat(['value', 'extraValue', 'loopPath']);
 
   RESULTS_METHODS = ['rowByRow', 'eachRow', 'recordByRecord', 'eachRecord', 'records', 'rows', 'table', 'tableRows', 'values'];
 
@@ -1290,8 +1290,8 @@
   };
 
   copyCon = function(con) {
-    var code, editable, extraValue, ids, op, path, switchable, switched, type, value, values;
-    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, extraValue = con.extraValue, ids = con.ids, code = con.code, editable = con.editable, switched = con.switched, switchable = con.switchable;
+    var code, editable, extraValue, ids, loopPath, op, path, switchable, switched, type, value, values;
+    path = con.path, type = con.type, op = con.op, value = con.value, values = con.values, loopPath = con.loopPath, extraValue = con.extraValue, ids = con.ids, code = con.code, editable = con.editable, switched = con.switched, switchable = con.switchable;
     ids = ids != null ? ids.slice() : void 0;
     values = values != null ? values.slice() : void 0;
     return noUndefVals({
@@ -1305,7 +1305,8 @@
       code: code,
       editable: editable,
       switched: switched,
-      switchable: switchable
+      switchable: switchable,
+      loopPath: loopPath
     });
   };
 
@@ -1469,7 +1470,7 @@
   };
 
   Query = (function() {
-    var addPI, cAttrs, kids, parseSummary, qAttrs, scFold, toAttrPairs, toPathAndType, xmlAttr;
+    var addPI, constraintAttrs, kids, parseSummary, queryAttrs, scFold, toAttrPairs, toPathAndType, xmlAttr;
 
     Query.JOIN_STYLES = ['INNER', 'OUTER'];
 
@@ -1537,9 +1538,9 @@
       'isa': 'ISA'
     };
 
-    qAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment'];
+    queryAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment'];
 
-    cAttrs = ['path', 'type', 'op', 'code', 'value', 'ids'];
+    constraintAttrs = ['path', 'type', 'op', 'code', 'value', 'ids', 'loopPath'];
 
     toAttrPairs = function(el, attrs) {
       var l, len, results, x;
@@ -1579,7 +1580,7 @@
       }
       pathOf = xmlAttr('path');
       styleOf = xmlAttr('style');
-      q = utils.pairsToObj(toAttrPairs(query, qAttrs));
+      q = utils.pairsToObj(toAttrPairs(query, queryAttrs));
       q.view = q.view.split(/\s+/);
       q.sortOrder = stringToSortOrder(q.sortOrder);
       q.joins = (function() {
@@ -1602,7 +1603,7 @@
           con = ref1[l];
           results.push((function(con) {
             var c, tn, v, values, x;
-            c = utils.pairsToObj(toAttrPairs(con, cAttrs));
+            c = utils.pairsToObj(toAttrPairs(con, constraintAttrs));
             if (c.ids != null) {
               c.ids = (function() {
                 var len1, m, ref2, results1;

@@ -24,7 +24,7 @@ get_canonical_op = (orig) ->
   canonical
 
 BASIC_ATTRS  = [ 'path', 'op', 'code' ]
-SIMPLE_ATTRS = BASIC_ATTRS.concat [ 'value', 'extraValue' ]
+SIMPLE_ATTRS = BASIC_ATTRS.concat [ 'value', 'extraValue', 'loopPath' ]
 
 RESULTS_METHODS = [
   'rowByRow', 'eachRow', 'recordByRecord', 'eachRecord',
@@ -121,12 +121,13 @@ headLess = (path) -> path.replace /^[^\.]+\./, ''
 # @param [Constraint] con The constraint to copy.
 # @return [Constraint] An identical copy of the constraint.
 copyCon = (con) ->
-  {path, type, op, value, values, extraValue, ids, code, editable, switched, switchable} = con
+  {path, type, op, value, values, loopPath,
+  extraValue, ids, code, editable, switched, switchable} = con
   ids = ids?.slice()
   values = values?.slice()
   noUndefVals {
     path, type, op, value, values, extraValue, ids, code,
-    editable, switched, switchable
+    editable, switched, switchable, loopPath
   }
 
 # Produce the JSON representation of a constraint.
