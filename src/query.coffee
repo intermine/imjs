@@ -283,8 +283,8 @@ class Query
     'ISA': 'ISA'
     'isa': 'ISA'
 
-  qAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment']
-  cAttrs = ['path', 'type', 'op', 'code', 'value', 'ids']
+  queryAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment']
+  constraintAttrs = ['path', 'type', 'op', 'code', 'value', 'ids', 'loopPath']
   toAttrPairs = (el, attrs) -> ([x, el.getAttribute(x)] for x in attrs when el.hasAttribute(x))
   kids = (el, name) -> (kid for kid in el.getElementsByTagName(name))
   xmlAttr = (name) -> (el) -> el.getAttribute name
@@ -304,12 +304,12 @@ class Query
     pathOf = xmlAttr 'path'
     styleOf = xmlAttr 'style'
 
-    q = utils.pairsToObj toAttrPairs query, qAttrs
+    q = utils.pairsToObj toAttrPairs query, queryAttrs
     q.view = q.view.split /\s+/
     q.sortOrder = stringToSortOrder q.sortOrder
     q.joins = (pathOf j for j in kids(query, 'join') when styleOf(j) is 'OUTER')
     q.constraints = for con in kids(query, 'constraint') then do (con) ->
-      c = utils.pairsToObj toAttrPairs con, cAttrs
+      c = utils.pairsToObj toAttrPairs con, constraintAttrs
       c.ids = (parseInt(x, 10) for x in c.ids.split(',')) if c.ids?
       values = kids(con, 'value')
       if values.length
