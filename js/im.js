@@ -1,4 +1,4 @@
-/*! imjs - v3.17.0 - 2019-12-27 */
+/*! imjs - v3.17.0-beta - 2019-12-30 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -241,10 +241,7 @@
     if (opts.port != null) {
       parsed.port = opts.port;
     }
-    parsed.headers = {
-      'User-Agent': USER_AGENT,
-      'Accept': ACCEPT_HEADER[opts.dataType]
-    };
+    parsed.headers = {};
     if (((ref2 = parsed.method) === 'GET' || ref2 === 'DELETE') && (postdata != null ? postdata.length : void 0)) {
       sep = /\?/.test(parsed.path) ? '&' : '?';
       parsed.path += sep + postdata;
@@ -3480,6 +3477,7 @@
         delete opts.data.auth;
       }
       if (data.headers != null) {
+        console.log("HELLO");
         opts.headers = utils.copy(data.headers);
         delete opts.data.headers;
       }
@@ -5079,7 +5077,7 @@
 
 },{"./promise":8}],17:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.17.0';
+  exports.VERSION = '3.17.0-beta';
 
 }).call(this);
 
