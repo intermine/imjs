@@ -120,10 +120,11 @@ parseOptions = (opts) ->
   parsed = URL.parse(opts.url, true)
   parsed.withCredentials = false
   parsed.method = (opts.type || 'GET')
-
   if opts.port?
     parsed.port = opts.port
-  parsed.headers = {}
+  parsed.headers =
+    'User-Agent': USER_AGENT
+    'Accept': ACCEPT_HEADER[opts.dataType]
 
   if parsed.method in ['GET', 'DELETE'] and postdata?.length
     sep = if /\?/.test(parsed.path) then '&' else '?'
