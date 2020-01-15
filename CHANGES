@@ -68,4 +68,5 @@
 3.13.0 findById now accepts a list of fields to find.
 3.16.0 update params for paginating query and setting number of results returned. Thanks Aman!
 3.17.0 support specifying ids instead of list in service.enrichment options
+3.18.0 Implement loop query
 **/
