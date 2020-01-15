@@ -47,6 +47,8 @@
   },
   "scripts": {
     "test": "grunt test",
+    "test:unit": "grunt test:unit",
+    "test:integration": "grunt test:integration",
     "grunt": "grunt"
   },
   "devDependencies": {

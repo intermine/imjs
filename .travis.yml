@@ -11,7 +11,8 @@ before_install:
     - npm install -g codo
     - ./node_modules/.bin/bower install
 script:
-    - npm test
+    - npm run test:unit
+    - npm run test:integration
 node_js:
     - '10.15.2'
 jdk:
