@@ -1,4 +1,4 @@
-/*! imjs - v3.17.0-beta3 - 2019-12-30 */
+/*! imjs - v3.18.0 - 2020-01-15 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -5078,7 +5078,7 @@
 
 },{"./promise":8}],17:[function(_dereq_,module,exports){
 (function() {
-  exports.VERSION = '3.17.0-beta3';
+  exports.VERSION = '3.18.0';
 
 }).call(this);
 
