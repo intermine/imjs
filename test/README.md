@@ -4,14 +4,11 @@
 
 **Note: If you are unable to get tests running locally, try enabling [TravisCI] for your repository**
 
-The tests for this project are written for
-both node.js (in the mocha directory) and for
-the browser (the qunit) directory. Both test
-suites can be run with the following grunt
-command: 
+The tests for this project are segregated into unit tests and integration tests. You can run each test suite with the following commands (running both at the same time is currently not supported).
 
 ```
-grunt test
+grunt test:unit
+grunt test:integration
 ```
 
 The browser tests require phantomjs to be installed.
