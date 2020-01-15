@@ -109,7 +109,6 @@ module.exports = function (grunt) {
       }
     },
     clean: {
-      qunit: ['test/qunit/build'],
       build: ['build'],
       tests: ['test/compiled'],
       cdnlinks: {
@@ -118,7 +117,7 @@ module.exports = function (grunt) {
       }
     },
     mochaTest: {
-      unit: {
+      test: {
         src: ['test/compiled/*.js'],
         options: grunt.file.readJSON('mocha-opts.json')
       }
@@ -237,6 +236,14 @@ module.exports = function (grunt) {
         src: '<%= CDN %>/js/intermine/imjs/<%= pkg.version %>',
         dest: '<%= CDN %>/js/intermine/imjs/<%= pkg.version.replace(/\\d+$/, "x") %>'
       }
+    },
+    env: {
+      unit: {
+        IMJS_TESTS: 'UNIT'
+      },
+      integration: {
+        IMJS_TESTS: 'INTEGRATION'
+      }
     }
   })
 
@@ -274,6 +281,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-mocha-phantomjs')
   grunt.loadNpmTasks('grunt-contrib-symlink')
   grunt.loadNpmTasks('grunt-browserify')
+  grunt.loadNpmTasks('grunt-env')
   grunt.loadTasks('tasks')
 
   grunt.registerTask('-load-test-globals', function () {
@@ -378,7 +386,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('mocha-node', 'Run tests in the nodejs VM', function () {
     grunt.task.run('-set-test-files')
-    grunt.task.run('mochaTest:unit')
+    grunt.task.run('mochaTest:test')
   })
 
   grunt.registerTask('-checkcdn', 'Check that the CDN is initialised', function () {
@@ -407,13 +415,13 @@ module.exports = function (grunt) {
     var grep = grunt.option('grep')
     var reporter = grunt.option('reporter')
     if (grep) {
-      grunt.config('mochaTest.unit.options.grep', grep)
+      grunt.config('mochaTest.test.options.grep', grep)
       grunt.config('browserify.tests.files', {
         'test/browser/mocha-test.js': ['test/compiled/*' + grep + '*.js']
       })
     }
     if (reporter) {
-      grunt.config('mochaTest.unit.options.reporter', reporter)
+      grunt.config('mochaTest.test.options.reporter', reporter)
     }
   })
 
@@ -434,6 +442,8 @@ module.exports = function (grunt) {
   grunt.registerTask('demo', ['build', 'browser-indices'])
   grunt.registerTask('lint', ['jshint', 'coffeelint'])
   grunt.registerTask('test', ['lint', 'build', 'mocha-node'])
+  grunt.registerTask('test:unit', ['lint', 'build', 'env:unit', 'mocha-node'])
+  grunt.registerTask('test:integration', ['lint', 'build', 'env:integration', 'mocha-node'])
   grunt.registerTask('test:node', ['compile', 'mocha-node'])
   // grunt.registerTask('test:browser', ['-set-test-files', 'build', 'browser-indices', 'phantomjs'])
   grunt.registerTask('default', ['lint','build'])
