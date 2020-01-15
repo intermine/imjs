@@ -24,7 +24,7 @@ get_canonical_op = (orig) ->
   canonical
 
 BASIC_ATTRS  = [ 'path', 'op', 'code' ]
-SIMPLE_ATTRS = BASIC_ATTRS.concat [ 'value', 'extraValue' ]
+SIMPLE_ATTRS = BASIC_ATTRS.concat [ 'value', 'extraValue', 'loopPath' ]
 
 RESULTS_METHODS = [
   'rowByRow', 'eachRow', 'recordByRecord', 'eachRecord',
@@ -121,12 +121,13 @@ headLess = (path) -> path.replace /^[^\.]+\./, ''
 # @param [Constraint] con The constraint to copy.
 # @return [Constraint] An identical copy of the constraint.
 copyCon = (con) ->
-  {path, type, op, value, values, extraValue, ids, code, editable, switched, switchable} = con
+  {path, type, op, value, values, loopPath,
+  extraValue, ids, code, editable, switched, switchable} = con
   ids = ids?.slice()
   values = values?.slice()
   noUndefVals {
     path, type, op, value, values, extraValue, ids, code,
-    editable, switched, switchable
+    editable, switched, switchable, loopPath
   }
 
 # Produce the JSON representation of a constraint.
@@ -283,8 +284,8 @@ class Query
     'ISA': 'ISA'
     'isa': 'ISA'
 
-  qAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment']
-  cAttrs = ['path', 'type', 'op', 'code', 'value', 'ids']
+  queryAttrs = ['name', 'view', 'sortOrder', 'constraintLogic', 'title', 'description', 'comment']
+  constraintAttrs = ['path', 'type', 'op', 'code', 'value', 'ids', 'loopPath']
   toAttrPairs = (el, attrs) -> ([x, el.getAttribute(x)] for x in attrs when el.hasAttribute(x))
   kids = (el, name) -> (kid for kid in el.getElementsByTagName(name))
   xmlAttr = (name) -> (el) -> el.getAttribute name
@@ -304,12 +305,12 @@ class Query
     pathOf = xmlAttr 'path'
     styleOf = xmlAttr 'style'
 
-    q = utils.pairsToObj toAttrPairs query, qAttrs
+    q = utils.pairsToObj toAttrPairs query, queryAttrs
     q.view = q.view.split /\s+/
     q.sortOrder = stringToSortOrder q.sortOrder
     q.joins = (pathOf j for j in kids(query, 'join') when styleOf(j) is 'OUTER')
     q.constraints = for con in kids(query, 'constraint') then do (con) ->
-      c = utils.pairsToObj toAttrPairs con, cAttrs
+      c = utils.pairsToObj toAttrPairs con, constraintAttrs
       c.ids = (parseInt(x, 10) for x in c.ids.split(',')) if c.ids?
       values = kids(con, 'value')
       if values.length

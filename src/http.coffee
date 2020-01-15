@@ -123,7 +123,6 @@ parseOptions = (opts) ->
   if opts.port?
     parsed.port = opts.port
   parsed.headers =
-    'User-Agent': USER_AGENT
     'Accept': ACCEPT_HEADER[opts.dataType]
 
   if parsed.method in ['GET', 'DELETE'] and postdata?.length
