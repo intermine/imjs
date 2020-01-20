@@ -1,4 +1,4 @@
-/*! imjs - v3.18.0 - 2020-01-15 */
+/*! imjs - v3.18.0 - 2020-01-20 */
 
 // This library is open source software according to the definition of the
 // GNU Lesser General Public Licence, Version 3, (LGPLv3) a copy of which is
@@ -2353,15 +2353,10 @@
           direction: direction
         };
       } else if (input.path == null) {
-        ref1 = (function() {
-          var results;
-          results = [];
-          for (k in input) {
-            v = input[k];
-            results.push([k, v]);
-          }
-          return results;
-        })(), path = ref1[0], direction = ref1[1];
+        for (k in input) {
+          v = input[k];
+          ref1 = [k, v], path = ref1[0], direction = ref1[1];
+        }
         so = {
           path: path,
           direction: direction

@@ -794,7 +794,11 @@ class Query
       [path, direction] = input
       so = {path, direction}
     else if (not input.path?)
-      [path, direction] = ([k, v] for k, v of input)
+      # Note: The `ensure_comprehensions` coffeelint rule wants to add parens
+      # around the list comprehension below, which is crazy talk since that
+      # would assign path the whole array. Since this buggy linting could occur
+      # elsewhere, I have disabled the rule in `coffeelint.json`.
+      [path, direction] = [k, v] for k, v of input
       so = {path, direction}
     else
       {path, direction} = input
