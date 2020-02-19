@@ -135,7 +135,7 @@ module.exports = function (grunt) {
     },
     bump: {
       options: {
-        files: ['package.json', 'bower.json'],
+        files: ['package.json'],
         commitFiles: ['-a'],
         updateConfigs: ['pkg'],
         pushTo: 'origin'
@@ -297,14 +297,14 @@ module.exports = function (grunt) {
       },
       load: load,
       mocha: {
-        css: "../../bower_components/mocha/mocha.css",
-        js: "../../bower_components/mocha/mocha.js"
+        css: "../../node_modules/mocha/mocha.css",
+        js: "../../node_modules/mocha/mocha.js"
       },
       expect: {
-        js: "../../bower_components/expect/expect.js"
+        js: "../../node_modules/expect/expect.js"
       },
       promise: {
-        js: "../../bower_components/q/q.js"
+        js: "../../node_modules/q/q.js"
       }
     }
     var processed = grunt.template.process(templ.toString(), {data: obj})
