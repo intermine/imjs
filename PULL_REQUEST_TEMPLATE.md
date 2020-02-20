@@ -12,7 +12,6 @@
 
 - [ ] Update [CHANGES](CHANGES) to reflect the new updates.
 - [ ] Bump version in:
-    - [ ] bower.json <!--(do this manually by editing bower.json)-->
     - [ ] package.json <!--- do this by running `npm version newversion` - e.g. `npm version 3.17.0`. This will automatically tag and commit the version bump.-->
 
 <!---This is not an exhaustive list - if you spot something else strange please bring it up!
