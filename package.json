@@ -55,7 +55,9 @@
   },
   "scripts": {
     "test": "grunt test",
-    "grunt": "grunt"
+    "grunt": "grunt",
+    "repl": "node test/repl.js",
+    "serve": "serve ."
   },
   "devDependencies": {
     "codo": "^2.1.2",
@@ -82,6 +84,7 @@
     "nock": "^10.0.6",
     "oboe": "^2.1.5",
     "repl.history": "~0.1.1",
+    "serve": "^11.3.0",
     "should": "^13.2.3"
   }
 }

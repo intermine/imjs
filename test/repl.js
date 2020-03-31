@@ -2,6 +2,9 @@
 
 var imjs, repl, utils;
 
+console.log("This is a Node REPL with imjs preloaded. You can invoke imjs however you wish to test features.");
+console.log("There is also a FlyMine service assigned to `service`.");
+
 imjs  = require('../');
 utils = require('../build/util');
 repl  = require('repl').start({
@@ -13,8 +16,8 @@ repl.context.utils = utils;
 repl.context.get = utils.get;
 repl.context.invoke = utils.invoke;
 repl.context.imjs = imjs;
-repl.context.testmodel = imjs.Service.connect({
-  root: "localhost:8080/intermine-test",
+repl.context.service = imjs.Service.connect({
+  root: "https://www.flymine.org/flymine/service",
   token: "test-user-token"
 });
 

@@ -1,23 +1,28 @@
 <!doctype html>
 <html>
   <head>
-<meta name="description" content="Imjs search example">
+    <meta name="description" content="Imjs search example">
     <script src="js/im.js"></script>
   </head>
   <body>
+    <p>This page has imjs loaded and runs a simple query when opened.</p>
+    <p>Open your browser's console to check for errors.</p>
+    <p>You can also use the console to invoke calls with <code>service</code> (connected to FlyMine) and <code>imjs</code>.</p>
+
+    <pre id="result"></pre>
 
     <script>
       var service = new imjs.Service({
-         root: 'http://www.flymine.org/flymine/service'
-     });
-        var options = {
-          q: "gata",
-          size: 103,
-          start: 20
-        }
-        service.search(options).then((data) => {
-          console.log(data.results.length)
-        })
+        root: 'https://www.flymine.org/flymine/service'
+      });
+      var options = {
+        q: "gata",
+        size: 103,
+        start: 20
+      };
+      service.search(options).then(function(data) {
+        document.getElementById("result").innerHTML = JSON.stringify(data.results, null, 4);
+      });
     </script>
 
   </body>
