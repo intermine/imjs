@@ -30,6 +30,10 @@ If you need to regenerate [the API documentation](http://alexkalderimis.github.i
 
 Setting up tests to run on your local machine can be a bit tedious - it's usually easier to set up [TravisCI](https://travis-ci.org/) for your repo, and allow travis to test code you push to a branch on your repo. Read more about testing setup in [test/README.md](test/README.md)
 
+## Trying out imjs
+
+You can invoke imjs to test specific features manually by using `npm run repl` to test in a Node environment and `npm run serve` to test in a browser environment.
+
 ## Releasing imjs
 
 See [release procedures](release-procedure.md).
