@@ -21,4 +21,6 @@ repl.context.service = imjs.Service.connect({
   token: "test-user-token"
 });
 
-require('repl.history')(repl, __dirname + '/.repl-history');
+repl.setupHistory(__dirname + '/.repl-history', function(err, repl) {
+  if (err) throw err;
+});
