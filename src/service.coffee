@@ -152,7 +152,10 @@ class Service
 
   doReq: ->
     arguments[0] = @attachCustomHeaders arguments[0]
-    http.doReq.apply this, arguments
+    req = http.doReq.apply this, arguments
+    req.catch (error) ->
+      console.error error
+    req
 
   # Construct a new connection to a service.
   #

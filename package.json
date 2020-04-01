@@ -37,7 +37,15 @@
     "acorn": "^6.0.2",
     "backbone-events-standalone": "^0.2.4",
     "http-browserify": "^1.7.0",
-    "xmldom": "~0.1.16"
+    "xmldom": "~0.1.16",
+    "JSONStream": "^1.3.5",
+    "array.prototype.find": "^2.0.4",
+    "browser-request": "^0.3.3",
+    "es6-promise": "^4.2.6",
+    "q": "^1.5.1",
+    "stream-reduce": "^1.0.3",
+    "event-stream": "^4.0.1",
+    "underscore": "^1.9.1"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -47,21 +55,18 @@
   },
   "scripts": {
     "test": "grunt test",
+    "grunt": "grunt",
+    "repl": "node test/repl.js",
+    "serve": "serve .",
     "test:unit": "grunt test:unit",
-    "test:integration": "grunt test:integration",
-    "grunt": "grunt"
+    "test:integration": "grunt test:integration"
   },
   "devDependencies": {
-    "JSONStream": "^1.3.5",
-    "array.prototype.find": "^2.0.4",
-    "browser-request": "^0.3.3",
     "codo": "^2.1.2",
     "coffee-script": "^1.12.7",
     "derequire": "^2.0.6",
     "envify": "^4.1.0",
-    "es6-promise": "^4.2.6",
     "esprima": "^4.0.1",
-    "event-stream": "^4.0.1",
     "expect": "^24.8.0",
     "grunt": "^1.0.4",
     "grunt-browserify": "~3.2.1",
@@ -81,10 +86,7 @@
     "mocha": "^6.1.4",
     "nock": "^10.0.6",
     "oboe": "^2.1.5",
-    "q": "^1.5.1",
-    "repl.history": "~0.1.1",
-    "should": "^13.2.3",
-    "stream-reduce": "^1.0.3",
-    "underscore": "^1.9.1"
+    "serve": "^11.3.0",
+    "should": "^13.2.3"
   }
 }

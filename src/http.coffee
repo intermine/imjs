@@ -1,6 +1,7 @@
 URL                = require 'url'
 JSONStream         = require 'JSONStream'
 http               = require 'http'
+https              = require 'https'
 {ACCEPT_HEADER}    = require './constants'
 {VERSION}          = require './version'
 {error, defer, merge, invoke} = utils = require('./util')
@@ -148,8 +149,16 @@ exports.doReq = (opts, iter) ->
     [url, postdata] = parseOptions opts
     handler = (if iter then streaming else blocking) opts, resolve, reject
 
+    # Use the correct request client based on protocol
+    request = switch url.protocol
+      when 'https:' then https.request
+      when 'http:' then http.request
+
+    unless request?
+      throw new Error("Unsupported protocol: #{ url.protocol }")
+
     # We construct the request here.
-    req = http.request url, handler
+    req = request url, handler
 
     req.on 'error', (err) -> reject new Error "Error: #{ url.method } #{ opts.url }: #{ err }"
 
