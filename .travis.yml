@@ -7,9 +7,7 @@ env:
         - TESTMODEL_PATH=intermine-demo
 before_install:
     - ./config/travis/init.sh
-    - npm install bower
     - npm install -g codo
-    - ./node_modules/.bin/bower install
 script:
     - npm run test:unit
     - npm run test:integration
