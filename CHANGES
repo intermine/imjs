@@ -70,4 +70,7 @@
 3.17.0 support specifying ids instead of list in service.enrichment options
 3.18.0 Implement loop query
 3.18.1 Fix {path: direction} orderBy broken by buggy linting rule
+4.0.0  Support https services, fix npm package missing required dependencies
+       due to them being incorrectly listed under devDependencies, catch and log
+       promise rejections.
 **/
