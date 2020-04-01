@@ -9,7 +9,8 @@ before_install:
     - ./config/travis/init.sh
     - npm install -g codo
 script:
-    - npm test
+    - npm run test:unit
+    - npm run test:integration
 node_js:
     - '10.15.2'
 jdk:
