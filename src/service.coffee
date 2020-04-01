@@ -155,6 +155,7 @@ class Service
     req = http.doReq.apply this, arguments
     req.catch (error) ->
       console.error error
+    req
 
   # Construct a new connection to a service.
   #
