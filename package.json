@@ -47,6 +47,8 @@
   },
   "scripts": {
     "test": "grunt test",
+    "test:unit": "grunt test:unit",
+    "test:integration": "grunt test:integration",
     "grunt": "grunt"
   },
   "devDependencies": {
@@ -72,6 +74,7 @@
     "grunt-contrib-jshint": "^2.1.0",
     "grunt-contrib-symlink": "^1.0.0",
     "grunt-contrib-uglify": "^4.0.1",
+    "grunt-env": "^1.0.1",
     "grunt-jscoverage": "^0.1.3",
     "grunt-mocha-test": "^0.13.3",
     "insert-module-globals": "^7.2.0",
