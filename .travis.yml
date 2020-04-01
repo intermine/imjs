@@ -7,7 +7,7 @@ env:
         - TESTMODEL_PATH=intermine-demo
 before_install:
     - ./config/travis/init.sh
-    - npm install -g codo
+    - npm install
 script:
     - npm run test:unit
     - npm run test:integration
