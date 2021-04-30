@@ -15,7 +15,7 @@ SYNOPSIS
 // If running in node.js, the following line will be necessary:
 var intermine = require('imjs');
 
-var flymine   = new intermine.Service({root: 'www.flymine.org/query'});
+var flymine   = new intermine.Service({root: 'https://www.flymine.org/flymine/service'});
 var query     = {
   from: 'Gene',
   select: [
