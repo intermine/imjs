@@ -29,7 +29,7 @@ sed -i -e $SED_SCRIPT $TESTMODEL_PROPS
 
 # Initialise solr
 echo '#---> Setting up solr search'
-./server/config/travis/init-solr.sh
+./server/config/ci/init-solr.sh
 
 # We will need a fully operational web-application
 echo '#---> Building and releasing web application to test against'
